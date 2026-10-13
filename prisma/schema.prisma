@@ -1,0 +1,134 @@
+// Redline Shipping Company - Prisma Schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      String   @default("admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Governorate {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  nameAr    String
+  zone      String   @default("A")
+  basePrice Float    @default(30)
+  etaHours  Int      @default(48)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model Service {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  nameAr      String
+  description String
+  icon        String  @default("truck")
+  multiplier  Float   @default(1.0)
+  active      Boolean @default(true)
+  createdAt   DateTime @default(now())
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String
+  email     String?
+  address   String?
+  city      String?
+  governorate String?
+  createdAt DateTime @default(now())
+  shipments Shipment[]
+}
+
+model Shipment {
+  id            String   @id @default(cuid())
+  trackingNo    String   @unique
+  senderName    String
+  senderPhone   String
+  senderAddress String
+  receiverName  String
+  receiverPhone String
+  receiverAddress String
+  governorate   String
+  service       String
+  weight        Float
+  notes         String?
+  price         Float
+  status        String   @default("pending")
+  history       String   @default("")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  customerId    String?
+  customer     Customer? @relation(fields: [customerId], references: [id])
+}
+
+model Video {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  url         String
+  thumbnail   String?
+  category    String   @default("promo")
+  active      Boolean  @default(true)
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  name      String
+  role      String
+  company   String?
+  content   String
+  rating    Int      @default(5)
+  avatar    String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String
+  message   String
+  status    String   @default("new")
+  createdAt DateTime @default(now())
+}
+
+model Order {
+  id          String   @id @default(cuid())
+  customerName String
+  phone       String
+  governorate String
+  service     String
+  weight      Float
+  price       Float
+  status      String   @default("pending")
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SiteStat {
+  id        String   @id @default(cuid())
+  label     String
+  value     String
+  icon      String   @default("package")
+  createdAt DateTime @default(now())
+}
