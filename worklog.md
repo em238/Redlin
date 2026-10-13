@@ -306,3 +306,35 @@ Stage Summary:
 - الخريطة بقت فخمة: texture topographic داخل شكل مصر + نيل متوهج ومتحرك + حدود متوهجة + شبكة خطوط متحركة من القاهرة لكل المحافظات + 54 radar pulse ring + markers متعددة الطبقات (glow + dot + core) + خلفية aurora
 - كل التفاعل لسه شغّال (click → side panel بتفاصيل المحافظة)
 - 0 errors
+
+---
+Task ID: 10
+Agent: Orchestrator (main)
+Task: شيل الأسعار من الخريطة + ترقية الـ markers (city-light breathing)
+
+Work Log:
+- فهمت الطلب: "مش عوز اسعار عوز البلاد فقط" = شيل الأسعار، اعرض البلاد/المحافظات فقط. "عوز تحسينات في الخريطة تكون احسن" = الـ markers أحسن.
+- أضفت animations CSS في globals.css:
+  * breathe keyframes (opacity 0.3↔0.7) + city-light + city-light-2 classes (breathing glow بدون radar متسع)
+- أعدت بناء الـ markers (interactive-map.tsx):
+  * شيلت radar-ring (الحلقات المتسعة المزعجة)
+  * بدلها بـ "city-light" style: توهج radial gradient ناعم بـ breathing + halo ملون + dot متوهج + core أبيض — شكل أضواء مدن ليلية أنيق
+  * Cairo hub: أكبر (double breathing glow)
+  * floating card premium عند hover/click: rect rounded + pointer triangle + softGlow filter + اسم المحافظة بخط bold
+- شيلت الأسعار من الـ side panel:
+  * بدلت "السعر من X ج.م" → "المنطقة" (اسم المنطقة)
+  * بقت "زمن التوصيل" + "المنطقة" + رسالة "نقطة توصيل نشطة في X"
+  * مفيش أي ج.م أو سعر في القسم كله
+- شيلت استيراد Truck (مش مستخدم)
+- ESLint: 0 errors
+- تحقق Agent Browser:
+  * city-light markers: 54 (27 × 2 classes)
+  * قبل click: السعر false, ج.م false (مفيش أسعار أصلاً)
+  * بعد click على marker: زمن التوصيل true, المنطقة true, السعر من false, ج.م false, نقطة توصيل نشطة true
+  * لا أخطa
+
+Stage Summary:
+- الأسعار اتمسحت بالكامل من قسم الخريطة (مفيش ج.م ولا سعر)
+- الـ markers بقت "city-light" متوهجة بـ breathing ناعم بدل radar rings المتسعة
+- الـ side panel بتعبر عن البلاد بس: اسم المحافظة + المنطقة + زمن التوصيل + نقطة نشطة
+- 0 errors

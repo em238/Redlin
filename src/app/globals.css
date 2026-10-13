@@ -278,6 +278,14 @@
 .radar-ring { animation: radar 2.8s cubic-bezier(0, 0, 0.2, 1) infinite; }
 .radar-ring-2 { animation: radar 2.8s cubic-bezier(0, 0, 0.2, 1) infinite 1.4s; }
 
+/* City-light breathing glow for markers */
+@keyframes breathe {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
+.city-light { animation: breathe 3.2s ease-in-out infinite; }
+.city-light-2 { animation: breathe 3.2s ease-in-out infinite 1.6s; }
+
 /* Nile flowing shimmer */
 @keyframes nile-flow {
   to { stroke-dashoffset: -40; }

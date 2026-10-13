@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Clock, Truck, Building2, Navigation, Layers, Sparkles, Zap } from "lucide-react";
+import { MapPin, Clock, Building2, Navigation, Layers, Sparkles } from "lucide-react";
 import { apiGet } from "@/lib/api";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { EGYPT_BORDER, NILE_MAIN, NILE_DAMIETTA, NILE_ROSETTA, GOV_COORDS, project, pathFromCoords } from "@/lib/egypt-coords";
@@ -230,15 +230,26 @@ export function InteractiveMap() {
                 {/* Cairo hub marker (special, larger) */}
                 {hub && (
                   <g transform={`translate(${hub.x} ${hub.y})`} className="cursor-pointer" onMouseEnter={() => setHovered(hub.name)} onMouseLeave={() => setHovered(null)} onClick={() => setSelected(hub.name)}>
-                    <circle r="26" fill="#dc2626" fillOpacity="0.08" className="radar-ring" />
-                    <circle r="26" fill="#dc2626" fillOpacity="0.08" className="radar-ring-2" />
-                    <circle r="16" fill="url(#markerGlowA)" opacity="0.6" />
-                    <circle r="8" fill="#dc2626" stroke="#fff" strokeWidth="2" filter="url(#softGlow)" />
+                    {/* soft breathing glow (city light) */}
+                    <circle r="28" fill="url(#markerGlowA)" className="city-light" />
+                    <circle r="20" fill="#dc2626" fillOpacity="0.25" className="city-light-2" filter="url(#softGlow)" />
+                    {/* medium ring */}
+                    <circle r="11" fill="#dc2626" fillOpacity="0.5" filter="url(#softGlow)" />
+                    {/* main dot */}
+                    <circle r="8" fill="#dc2626" stroke="#fff" strokeWidth="2.2" filter="url(#softGlow)" />
+                    {/* bright core */}
                     <circle r="3" fill="#fff" />
+                    {(hovered === hub.name || selected === hub.name) && (
+                      <g transform="translate(0 -24)">
+                        <path d="M -3 8 L 3 8 L 0 13 Z" fill="#0a0a0a" stroke="#dc2626" strokeWidth="1.5" />
+                        <rect x="-42" y="-16" width="84" height="24" rx="7" fill="#0a0a0a" stroke="#dc2626" strokeWidth="1.5" filter="url(#softGlow)" />
+                        <text y="-1" textAnchor="middle" fill="#fff" fontSize="12" className="font-bold">{hub.nameAr}</text>
+                      </g>
+                    )}
                   </g>
                 )}
 
-                {/* All governorate markers */}
+                {/* All governorate markers — city-light style */}
                 {markers.filter((m) => m.name !== HUB).map((m) => {
                   const z = ZONE_STYLE[m.zone] || ZONE_STYLE.A;
                   const glowId = `markerGlow${m.zone}`;
@@ -254,20 +265,22 @@ export function InteractiveMap() {
                       onMouseLeave={() => setHovered(null)}
                       onClick={() => setSelected(m.name)}
                     >
-                      {/* radar pulse rings */}
-                      <circle r="4" fill="none" stroke={z.color} strokeWidth="1.5" className="radar-ring" style={{ filter: "drop-shadow(0 0 3px " + z.color + ")" }} />
-                      <circle r="4" fill="none" stroke={z.color} strokeWidth="1" className="radar-ring-2" opacity="0.5" />
-                      {/* outer glow */}
-                      <circle r="14" fill={`url(#${glowId})`} opacity={active ? 0.9 : 0.5} />
-                      {/* main dot */}
-                      <circle r={active ? 6 : 4.5} fill={z.color} stroke="#fff" strokeWidth="1.5" filter="url(#softGlow)" />
-                      {/* white core */}
-                      <circle r="1.8" fill="#fff" />
-                      {/* hover label */}
+                      {/* soft city-light glow (breathing) */}
+                      <circle r={active ? 24 : 20} fill={`url(#${glowId})`} className="city-light" opacity={active ? 0.85 : 0.55} />
+                      {/* colored halo */}
+                      <circle r="10" fill={z.color} fillOpacity={active ? 0.45 : 0.28} filter="url(#softGlow)" className="city-light-2" />
+                      {/* main solid dot */}
+                      <circle r={active ? 7 : 5} fill={z.color} stroke="#fff" strokeWidth="1.8" filter="url(#softGlow)" />
+                      {/* bright white core */}
+                      <circle r="2" fill="#fff" />
+                      {/* floating premium card on hover/selected */}
                       {active && (
-                        <g transform="translate(0 -16)">
-                          <rect x="-34" y="-13" width="68" height="18" rx="5" fill="#0a0a0a" stroke={z.color} strokeWidth="1" />
-                          <text y="0" textAnchor="middle" fill="#fff" fontSize="11" className="font-bold">{m.nameAr}</text>
+                        <g transform="translate(0 -22)">
+                          {/* pointer triangle */}
+                          <path d="M -3 7 L 3 7 L 0 12 Z" fill="#0a0a0a" stroke={z.color} strokeWidth="1.4" />
+                          {/* card */}
+                          <rect x="-38" y="-15" width="76" height="22" rx="7" fill="#0a0a0a" stroke={z.color} strokeWidth="1.4" filter="url(#softGlow)" />
+                          <text y="-1" textAnchor="middle" fill="#fff" fontSize="11" className="font-bold">{m.nameAr}</text>
                         </g>
                       )}
                     </g>
@@ -334,21 +347,21 @@ export function InteractiveMap() {
                     <div className="mt-5 grid grid-cols-2 gap-3">
                       <div className="rounded-xl bg-white/5 border border-white/10 p-3">
                         <div className="flex items-center gap-1.5 text-xs text-zinc-400 mb-1">
-                          <Truck className="w-3.5 h-3.5 text-primary" /> السعر من
+                          <Clock className="w-3.5 h-3.5 text-primary" /> زمن التوصيل
                         </div>
-                        <div className="text-xl font-black text-gradient-red">{sel.basePrice} <span className="text-sm">ج.م</span></div>
+                        <div className="text-xl font-black text-white">{Math.ceil(sel.etaHours / 24)} <span className="text-sm">يوم</span></div>
                       </div>
                       <div className="rounded-xl bg-white/5 border border-white/10 p-3">
                         <div className="flex items-center gap-1.5 text-xs text-zinc-400 mb-1">
-                          <Clock className="w-3.5 h-3.5 text-primary" /> التوصيل
+                          <MapPin className="w-3.5 h-3.5 text-primary" /> المنطقة
                         </div>
-                        <div className="text-xl font-black text-white">{Math.ceil(sel.etaHours / 24)} <span className="text-sm">يوم</span></div>
+                        <div className="text-xl font-black text-white">{ZONE_STYLE[sel.zone]?.label}</div>
                       </div>
                     </div>
 
                     <div className="mt-3 flex items-center gap-2 text-xs text-amber-400">
                       <Sparkles className="w-3.5 h-3.5" />
-                      توصيل سريع وآمن لكل محافظات {sel.nameAr}
+                      نقطة توصيل نشطة في {sel.nameAr}
                     </div>
                   </div>
                 </motion.div>
