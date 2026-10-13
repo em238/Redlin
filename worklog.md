@@ -49,3 +49,44 @@ Stage Summary:
 - Public site: premium hero, interactive pricing, live tracking, video gallery, contact form, sticky footer.
 - Responsive, RTL Arabic, light/dark themes, 5 AI-generated professional images.
 - No runtime errors. Lint clean (0 errors).
+
+---
+Task ID: 3
+Agent: Orchestrator (main)
+Task: ريفاكتور قوي وشامل لكل تفصيلة في الموقع (public + dashboard)
+
+Work Log:
+- بناء مكتبة مشتركة: hooks (use-count-up, use-scroll-spy, use-media-query بـ useSyncExternalStore) + مكونات (ScrollProgress, SectionReveal + StaggerGroup/Item, SectionHeading, MagneticButton, AnimatedCounter, Skeletons/EmptyState)
+- إضافة أدوات CSS احترافية: 3D perspective, mesh-bg, aurora animation, tabular-nums, glow-border, conic-ring, no-scrollbar
+- ريفاكتور Navbar: شريط تقدم القراءة (ScrollProgress أعلى الصفحة) + تمييز القسم النشط (scroll-spy مع layoutId animated pill) + تحسينات انتقال
+- ريفاكتور Hero: بارالاكس للخلفية (useScroll + useTransform) + 3 بطاقات إحصائية عائمة متحركة (99.2%, 82,540, 26 ساعة) + خلفية aurora متدرجة + مؤشر تمرير "اكتشف" متحرك
+- ريفاكتور StatsBar: عدادات متحركة (count-up easeOutExpo) + StaggerGroup + hover -translate-y
+- ريفاكتور Services: بطاقات 3D tilt (mouse-tracking perspective) + translateZ للأيقونة + shine effect
+- ريفاكتور Coverage: تبويبات فلترة بالمنطقة (ALL/A/B/C/D) مع عدّاد + AnimatePresence popLayout + شريط متدرج عند hover
+- ريفاكتور PricingCalculator: presets للوزن (0.5/1/3/5/10/20) + تحقق فوري inline (هاتف مصري 01x) + أنميشن spring للسعر + إعادة حساب تلقائية عند تغيير المدخلات
+- ريفاكتور Track: حاوية بحث محسّنة + timeline بـ ping animation للحالة الحالية + خط متدرج للـ timeline + stagger للبيانات
+- ريفاكتور VideoSection: فلترة بالتصنيف (ترويجي/لوجستيات/شرح/...) + AnimatePresence popLayout للمعرض + ring pulse على زر التشغيل
+- ريفاكتور Testimonials: carousel احترافي (auto-rotate 5s، pause on hover، dots، أسهم، AnimatePresence slide)
+- ريفاكتور About: بارالاكس للصور الثانوية + StaggerGroup للميزات
+- ريفاكتور Contact: تحقق فوري inline للاسم/البريد/الرسالة + رسائل خطأ تحت كل حقل
+- ريفاكتور Dashboard Overview: area chart SVG متدرج (gradient fill) + donut chart (conic-gradient) للمركز + 4 KPIs بـ sparklines (12 bar لكل واحد) + skeleton loading + أنميشن hover
+- ريفاكتور Dashboard Shipments: pagination كامل (8/12/20/50 لكل صفحة + أزرار أول/سابق/تالي/أخير) + bulk select (checkbox لكل صف + select all + حذف جماعي) + detail drawer جانبي مع timeline كامل + CSV export (BOM + تنزيل) + بحث وفلترة محسّنة
+- ريفاكتور Dashboard Videos: منطقة drag-drop لسحب رابط الفيديو + قوالب جاهزة سريعة + تحويل روابط YouTube (watch/shorts/youtu.be/embed) + معاينة iframe مباشرة + hover effects على البطاقات
+- إصلاح أخطاء lint: useMediaQuery بـ useSyncExternalStore, donut useMemo بدون mutability, rename useTemplate->applyTemplate
+- ESLint: 0 errors
+- تحقق Agent Browser:
+  * ScrollProgress bar موجود
+  * Active nav highlight يعمل عند scroll (خدماتنا مميزة)
+  * Floating stats في hero (99.2%, 82,540, 26 ساعة) موجودة
+  * Dashboard: SVG area chart + donut conic-gradient + 4 sparklines all rendered
+  * Shipments: pagination "صفحة 1 من 3" + detail drawer مع timeline + CSV export toast "تم تصدير"
+  * Videos: drag-drop field + قوالب جاهزة + thumbnail picker + preview all present
+  * Testimonials: 5 carousel dots + 2 arrows
+  * Dark mode toggle يعمل (html.dark class)
+  * لا أخطاء بعد reload
+
+Stage Summary:
+- ريفاكتور شامل لكل تفصيلة: 12 ملف موقع عام + 3 ملفات dashboard + 6 hooks/components مشتركة
+- تحسينات بصرية: بارالاكس، 3D tilt، aurora، عدادات متحركة، area/donut charts، sparklines
+- تحسينات وظيفية: pagination، bulk select، detail drawer، CSV export، drag-drop upload، inline validation، carousel، active nav، scroll progress
+- 0 lint errors، لا runtime errors، كل التفاعلات تعمل ومتحققة

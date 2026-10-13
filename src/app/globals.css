@@ -204,3 +204,59 @@
 .shine:hover::after {
   transform: translateX(100%);
 }
+
+/* 3D card tilt perspective */
+.perspective {
+  perspective: 1200px;
+}
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+/* Gradient mesh background */
+.mesh-bg {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(at 20% 20%, oklch(0.52 0.22 27 / 0.12) 0px, transparent 50%),
+    radial-gradient(at 80% 10%, oklch(0.7 0.18 60 / 0.08) 0px, transparent 50%),
+    radial-gradient(at 50% 80%, oklch(0.52 0.22 27 / 0.08) 0px, transparent 50%);
+}
+
+/* Aurora animated background */
+@keyframes aurora {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -30px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.95); }
+}
+.animate-aurora {
+  animation: aurora 12s ease-in-out infinite;
+}
+
+/* Tabular numbers for counters */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Glow border on hover */
+.glow-border {
+  position: relative;
+  transition: box-shadow 0.3s;
+}
+.glow-border:hover {
+  box-shadow: 0 0 0 1px oklch(0.52 0.22 27 / 0.4), 0 8px 30px -8px oklch(0.52 0.22 27 / 0.25);
+}
+
+/* Conic gradient ring (for donut charts) */
+.conic-ring {
+  background: conic-gradient(var(--ring-color, oklch(0.52 0.22 27)) var(--ring-deg, 0deg), var(--muted) 0deg);
+}
+
+/* Smooth focus ring */
+*:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

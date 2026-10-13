@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { MapPin, Phone, Mail, Clock, Send, Loader2, Truck, MessageSquare } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Send, Loader2, Truck, MessageSquare, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { apiPost } from "@/lib/api";
 import { toast } from "sonner";
+import { SectionHeading } from "@/components/shared/section-heading";
 
 const CONTACT_INFO = [
   { icon: MapPin, title: "العنوان", value: "التجمع الخامس، القاهرة الجديدة، القاهرة، مصر" },
@@ -20,12 +21,21 @@ const CONTACT_INFO = [
 export function Contact() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validate = () => {
+    const e: Record<string, string> = {};
+    if (!form.name.trim()) e.name = "الاسم مطلوب";
+    if (!form.email.trim()) e.email = "البريد مطلوب";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "بريد غير صحيح";
+    if (!form.message.trim()) e.message = "الرسالة مطلوبة";
+    else if (form.message.trim().length < 10) e.message = "الرسالة قصيرة جداً";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
 
   const submit = async () => {
-    if (!form.name || !form.email || !form.message) {
-      toast.error("أكمل الحقول المطلوبة");
-      return;
-    }
+    if (!validate()) { toast.error("راجع البيانات"); return; }
     setLoading(true);
     try {
       await apiPost("/api/contact", form);
@@ -41,17 +51,11 @@ export function Contact() {
   return (
     <section id="contact" className="py-20 sm:py-28">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <span className="inline-block px-4 py-1 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-3">
-            تواصل معنا
-          </span>
-          <h2 className="text-3xl sm:text-5xl font-black tracking-tight">
-            جاهزون لخدمتك <span className="text-gradient-red">دائماً</span>
-          </h2>
-          <p className="mt-4 text-muted-foreground text-lg">
-            لديك استفسار أو طلب خاص؟ فريقنا بانتظارك على مدار الساعة
-          </p>
-        </div>
+        <SectionHeading
+          eyebrow="تواصل معنا"
+          title={<>جاهزون لخدمتك <span className="text-gradient-red">دائماً</span></>}
+          subtitle="لديك استفسار أو طلب خاص؟ فريقنا بانتظارك على مدار الساعة"
+        />
 
         <div className="max-w-6xl mx-auto grid lg:grid-cols-5 gap-6">
           {/* Info side */}
@@ -61,7 +65,8 @@ export function Contact() {
             viewport={{ once: true }}
             className="lg:col-span-2 rounded-3xl bg-gradient-to-br from-primary to-red-800 p-8 text-white relative overflow-hidden"
           >
-            <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl" />
+            <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl animate-aurora" />
+            <div className="absolute bottom-0 left-0 w-40 h-40 bg-amber-500/20 rounded-full blur-3xl" />
             <div className="relative">
               <div className="flex items-center gap-2 mb-6">
                 <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
@@ -75,15 +80,22 @@ export function Contact() {
               </p>
               <div className="space-y-5">
                 {CONTACT_INFO.map((c, i) => (
-                  <div key={i} className="flex gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: 15 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                    className="flex gap-3 group"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-white/15 group-hover:bg-white/25 flex items-center justify-center shrink-0 transition-colors">
                       <c.icon className="w-5 h-5" />
                     </div>
                     <div>
                       <div className="text-xs text-white/70">{c.title}</div>
                       <div className="font-semibold text-sm mt-0.5">{c.value}</div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </div>
@@ -103,31 +115,53 @@ export function Contact() {
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label className="text-sm">الاسم *</Label>
-                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="اسمك الكامل" className="h-11" />
+                <Input
+                  value={form.name}
+                  onChange={(e) => { setForm({ ...form, name: e.target.value }); setErrors({ ...errors, name: "" }); }}
+                  placeholder="اسمك الكامل" className={`h-11 ${errors.name ? "border-destructive" : ""}`}
+                />
+                {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
               </div>
               <div className="space-y-1.5">
                 <Label className="text-sm">البريد الإلكتروني *</Label>
-                <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="email@example.com" className="h-11" />
+                <Input
+                  type="email" dir="ltr" value={form.email}
+                  onChange={(e) => { setForm({ ...form, email: e.target.value }); setErrors({ ...errors, email: "" }); }}
+                  placeholder="email@example.com" className={`h-11 text-right ${errors.email ? "border-destructive" : ""}`}
+                />
+                {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
               </div>
               <div className="space-y-1.5">
                 <Label className="text-sm">الهاتف</Label>
-                <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="01XXXXXXXXX" className="h-11" />
+                <Input
+                  value={form.phone} dir="ltr"
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  placeholder="01XXXXXXXXX" className="h-11 text-right"
+                />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-sm">الموضوع</Label>
-                <Input value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} placeholder="موضوع الرسالة" className="h-11" />
+                <Input
+                  value={form.subject}
+                  onChange={(e) => setForm({ ...form, subject: e.target.value })}
+                  placeholder="موضوع الرسالة" className="h-11"
+                />
               </div>
               <div className="space-y-1.5 sm:col-span-2">
                 <Label className="text-sm">الرسالة *</Label>
-                <Textarea value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} placeholder="اكتب رسالتك هنا..." rows={5} />
+                <Textarea
+                  value={form.message}
+                  onChange={(e) => { setForm({ ...form, message: e.target.value }); setErrors({ ...errors, message: "" }); }}
+                  placeholder="اكتب رسالتك هنا..." rows={5} className={errors.message ? "border-destructive" : ""}
+                />
+                {errors.message && <p className="text-xs text-destructive">{errors.message}</p>}
               </div>
             </div>
             <Button
-              onClick={submit}
-              disabled={loading}
-              className="mt-5 w-full h-12 bg-gradient-to-r from-primary to-red-700 hover:from-red-600 hover:to-red-800 text-white gap-2 text-base"
+              onClick={submit} disabled={loading}
+              className="mt-5 w-full h-12 bg-gradient-to-r from-primary to-red-700 hover:from-red-600 hover:to-red-800 text-white gap-2 text-base group"
             >
-              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
               إرسال الرسالة
             </Button>
           </motion.div>

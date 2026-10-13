@@ -1,9 +1,11 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "framer-motion";
-import { Star, Quote } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Star, Quote, ChevronLeft, ChevronRight } from "lucide-react";
 import { apiGet } from "@/lib/api";
+import { SectionHeading } from "@/components/shared/section-heading";
 
 const FALLBACK = [
   { name: "Ahmed Mansour", role: "صاحب متجر", company: "TechStore", content: "خدمة ممتازة وسريعة!", rating: 5 },
@@ -17,52 +19,92 @@ export function Testimonials() {
     queryFn: () => apiGet<{ testimonials: typeof FALLBACK }>("/api/site"),
   });
   const items = data?.testimonials ?? FALLBACK;
+  const [index, setIndex] = useState(0);
+  const [auto, setAuto] = useState(true);
+
+  const next = useCallback(() => setIndex((i) => (i + 1) % Math.max(items.length, 1)), [items.length]);
+  const prev = () => setIndex((i) => (i - 1 + items.length) % Math.max(items.length, 1));
+
+  useEffect(() => {
+    if (!auto || items.length <= 1) return;
+    const t = setInterval(next, 5000);
+    return () => clearInterval(t);
+  }, [auto, items.length, next]);
+
+  if (items.length === 0) return null;
+
+  const current = items[index % items.length];
 
   return (
     <section className="py-20 sm:py-28 bg-gradient-to-b from-background to-muted/40">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <span className="inline-block px-4 py-1 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-3">
-            آراء العملاء
-          </span>
-          <h2 className="text-3xl sm:text-5xl font-black tracking-tight">
-            عملاؤنا هم <span className="text-gradient-red">قوتنا</span>
-          </h2>
-          <p className="mt-4 text-muted-foreground text-lg">
-            أكثر من 12,000 عميل يثقون في Redline لشحناتهم يومياً
-          </p>
-        </div>
+        <SectionHeading
+          eyebrow="آراء العملاء"
+          title={<>عملاؤنا هم <span className="text-gradient-red">قوتنا</span></>}
+          subtitle="أكثر من 12,000 عميل يثقون في Redline لشحناتهم يومياً"
+        />
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {items.map((t, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: (i % 3) * 0.1 }}
-              className="relative rounded-2xl border border-border bg-card p-6 hover:shadow-xl hover:border-primary/30 transition-all"
-            >
-              <Quote className="absolute top-5 left-5 w-10 h-10 text-primary/15" />
-              <div className="relative">
-                <div className="flex gap-0.5 mb-3">
-                  {Array.from({ length: t.rating }).map((_, j) => (
-                    <Star key={j} className="w-4 h-4 fill-amber-400 text-amber-400" />
+        <div className="max-w-4xl mx-auto" onMouseEnter={() => setAuto(false)} onMouseLeave={() => setAuto(true)}>
+          {/* Main featured testimonial */}
+          <div className="relative">
+            <Quote className="absolute -top-4 right-6 w-16 h-16 text-primary/10" />
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={current.id || index}
+                initial={{ opacity: 0, x: 40 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -40 }}
+                transition={{ duration: 0.4 }}
+                className="relative rounded-3xl border border-border bg-card p-8 sm:p-12 shadow-sm"
+              >
+                <div className="flex gap-0.5 mb-4">
+                  {Array.from({ length: current.rating }).map((_, j) => (
+                    <Star key={j} className="w-5 h-5 fill-amber-400 text-amber-400" />
                   ))}
                 </div>
-                <p className="text-foreground/85 leading-relaxed text-sm">"{t.content}"</p>
-                <div className="mt-5 flex items-center gap-3 pt-4 border-t border-border">
-                  <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary to-red-700 flex items-center justify-center text-white font-bold">
-                    {t.name.charAt(0)}
+                <p className="text-lg sm:text-2xl leading-relaxed font-medium text-foreground/90">
+                  "{current.content}"
+                </p>
+                <div className="mt-6 flex items-center gap-4 pt-6 border-t border-border">
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-red-700 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-primary/20">
+                    {current.name.charAt(0)}
                   </div>
                   <div>
-                    <div className="font-bold text-sm">{t.name}</div>
-                    <div className="text-xs text-muted-foreground">{t.role}{t.company ? ` · ${t.company}` : ""}</div>
+                    <div className="font-bold text-lg">{current.name}</div>
+                    <div className="text-sm text-muted-foreground">{current.role}{current.company ? ` · ${current.company}` : ""}</div>
                   </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Controls + dots */}
+          <div className="mt-6 flex items-center justify-center gap-4">
+            <button
+              onClick={prev}
+              className="w-10 h-10 rounded-full border border-border bg-card hover:border-primary/40 hover:bg-primary/5 flex items-center justify-center transition-colors"
+              aria-label="السابق"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+            <div className="flex gap-2">
+              {items.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setIndex(i)}
+                  className={`h-2 rounded-full transition-all ${i === index ? "w-8 bg-primary" : "w-2 bg-border hover:bg-muted-foreground"}`}
+                  aria-label={`الانتقال للرأي ${i + 1}`}
+                />
+              ))}
+            </div>
+            <button
+              onClick={next}
+              className="w-10 h-10 rounded-full border border-border bg-card hover:border-primary/40 hover:bg-primary/5 flex items-center justify-center transition-colors"
+              aria-label="التالي"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
     </section>

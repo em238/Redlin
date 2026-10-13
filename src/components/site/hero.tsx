@@ -1,8 +1,8 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
-import { ArrowLeft, Truck, ShieldCheck, Zap, MapPin } from "lucide-react";
+import { ArrowLeft, Truck, ShieldCheck, Zap, MapPin, PackageCheck, Gauge } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/store";
 
@@ -12,8 +12,18 @@ const GOV_MARQUEE = [
   "دمياط", "الفيوم", "الزقازيق", "الاسماعيليه", "شرم الشيخ", "الغردقه",
 ];
 
+const FLOATING_STATS = [
+  { icon: Gauge, label: "نسبة التسليم في الوقت", value: "99.2%", color: "from-emerald-500 to-emerald-700", pos: "top-[18%] left-[4%]" },
+  { icon: PackageCheck, label: "شحنة هذا الشهر", value: "82,540", color: "from-primary to-red-700", pos: "bottom-[28%] left-[6%]" },
+  { icon: Zap, label: "متوسط زمن التوصيل", value: "26 ساعة", color: "from-amber-500 to-amber-700", pos: "top-[24%] right-[4%]" },
+];
+
 export function Hero() {
   const { setView } = useAppStore();
+  const { scrollY } = useScroll();
+  const yBg = useTransform(scrollY, [0, 600], [0, 120]);
+  const yContent = useTransform(scrollY, [0, 600], [0, 60]);
+  const opacity = useTransform(scrollY, [0, 400], [1, 0]);
 
   const scrollTo = (id: string) => {
     document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });
@@ -21,8 +31,8 @@ export function Hero() {
 
   return (
     <section id="home" className="relative min-h-[100svh] flex items-center overflow-hidden pt-20">
-      {/* Background image */}
-      <div className="absolute inset-0 -z-10">
+      {/* Background image with parallax */}
+      <motion.div className="absolute inset-0 -z-10" style={{ y: yBg }}>
         <Image
           src="/images/hero-truck.png"
           alt="شاحنة Redline على الطريق السريع"
@@ -31,14 +41,15 @@ export function Hero() {
           sizes="100vw"
           className="object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-l from-black/90 via-black/65 to-black/40" />
+        <div className="absolute inset-0 bg-gradient-to-l from-black/92 via-black/65 to-black/35" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/30" />
-      </div>
+      </motion.div>
 
-      {/* Decorative glow */}
-      <div className="absolute top-1/3 left-0 w-96 h-96 bg-primary/30 rounded-full blur-[120px] -z-0 animate-slow-pulse" />
+      {/* Aurora glows */}
+      <div className="absolute top-1/3 left-0 w-96 h-96 bg-primary/30 rounded-full blur-[120px] -z-0 animate-aurora" />
+      <div className="absolute bottom-1/4 right-10 w-80 h-80 bg-amber-500/20 rounded-full blur-[100px] -z-0 animate-aurora" style={{ animationDelay: "4s" }} />
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
+      <motion.div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20 relative" style={{ y: yContent, opacity }}>
         <div className="max-w-3xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -83,9 +94,9 @@ export function Hero() {
             <Button
               size="lg"
               onClick={() => scrollTo("#pricing")}
-              className="bg-gradient-to-r from-primary to-red-700 hover:from-red-600 hover:to-red-800 text-white shadow-xl shadow-primary/30 gap-2 text-base h-12 px-7"
+              className="bg-gradient-to-r from-primary to-red-700 hover:from-red-600 hover:to-red-800 text-white shadow-xl shadow-primary/30 gap-2 text-base h-12 px-7 group"
             >
-              <Zap className="w-5 h-5" />
+              <Zap className="w-5 h-5 group-hover:scale-110 transition-transform" />
               احسب سعر شحنتك
             </Button>
             <Button
@@ -96,7 +107,7 @@ export function Hero() {
             >
               <Truck className="w-5 h-5" />
               تتبع شحنتك
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
             </Button>
           </motion.div>
 
@@ -119,6 +130,31 @@ export function Hero() {
             ))}
           </motion.div>
         </div>
+      </motion.div>
+
+      {/* Floating stat cards (desktop only) */}
+      <div className="hidden xl:block absolute inset-0 pointer-events-none">
+        {FLOATING_STATS.map((s, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ delay: 0.6 + i * 0.15, duration: 0.6 }}
+            className={`absolute ${s.pos}`}
+          >
+            <motion.div
+              animate={{ y: [0, -10, 0] }}
+              transition={{ duration: 4 + i, repeat: Infinity, ease: "easeInOut" }}
+              className="glass rounded-2xl border border-white/15 p-4 shadow-2xl pointer-events-auto w-44"
+            >
+              <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${s.color} flex items-center justify-center mb-2`}>
+                <s.icon className="w-4 h-4 text-white" />
+              </div>
+              <div className="text-xl font-black text-white">{s.value}</div>
+              <div className="text-[11px] text-white/70">{s.label}</div>
+            </motion.div>
+          </motion.div>
+        ))}
       </div>
 
       {/* Marquee */}
@@ -132,6 +168,24 @@ export function Hero() {
           ))}
         </div>
       </div>
+
+      {/* Scroll indicator */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.2 }}
+        className="absolute bottom-16 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-1 text-white/60"
+        style={{ opacity }}
+      >
+        <span className="text-[10px] uppercase tracking-widest">اكتشف</span>
+        <motion.div
+          animate={{ y: [0, 6, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+          className="w-5 h-8 rounded-full border-2 border-white/30 flex items-start justify-center pt-1.5"
+        >
+          <div className="w-1 h-1.5 rounded-full bg-white/70" />
+        </motion.div>
+      </motion.div>
     </section>
   );
 }
