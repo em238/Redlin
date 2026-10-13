@@ -228,3 +228,42 @@ Stage Summary:
 - شلت كل العناصر الزايدة (دوائر، pause، progress bar، dots)
 - التنقل والـ auto-rotate لسه بيشتغلوا
 - مظبوط على desktop و mobile
+
+---
+Task ID: 8
+Agent: Orchestrator (main)
+Task: قسم خريطة مصر احترافي تفاعلي مع markers للمحافظات
+
+Work Log:
+- أنشأت src/lib/egypt-coords.ts:
+  * GOV_COORDS: إحداثيات (lat/lng) لـ 27 محافظة عاصمة
+  * EGYPT_BORDER: حدود مصر (16 نقطة) لرسم الـ outline
+  * NILE_MAIN + NILE_DAMIETTA + NILE_ROSETTA: مسار نهر النيل وفروعه
+  * project(lat,lng): دالة تحويل الإحداثيات الجغرافية لإحداثيات SVG (viewBox 600x720)
+  * pathFromCoords: يحول نقاط لـ SVG path d
+- أنشأت src/components/site/interactive-map.tsx — قسم احترافي فخم:
+  * SVG خريطة مصر: outline + Nile river متدرج (gradient) + تسميات البحار (المتوسط/الأحمر/الصحراء الغربية)
+  * 27 marker positioned بالظبط على إحداثيات كل محافظة، ملونة حسب المنطقة (A=emerald, B=blue, C=amber, D=rose)
+  * markers بـ pulse ring + outer glow (filter) + main dot + center dot — تأثير احترافي
+  * hover/click على marker: label بيق pops up + الـ side panel بيتحدّث بتفاصيل المحافظة
+  * خطوط اتصال (dashed) من المحافظة المختارة لباقي المحافظات (decorative)
+  * side panel: بطاقة المحافظة المختارة (اسم عربي + إنجليزي + المنطقة + السعر + ETA) + placeholder "اختر محافظة"
+  * stats: 27 محافظة مغطاة + 99.2% نسبة التسليم
+  * quick list قابلة للنقر (14 محافظة) + scroll
+  * zone legend بـ counts لكل منطقة
+  * خلفية: gradient dark + grid + glow، مع header فيه عدّاد "X محافظة نشطة" بـ pulse
+- أضفت القسم لـ public-page.tsx (بين Coverage و VideoSection)
+- أضفت رابط "الخريطة" لـ Navbar NAV_LINKS
+- ESLint: 0 errors
+- تحقق Agent Browser:
+  * map section: true, svg: true, circles: 81 (markers + nested), paths: 15 (border + nile + connections)
+  * marker groups: 27 (كل المحافظات مغطاة بالظبط)
+  * قبل click: placeholder "اختر محافظة" ظاهر
+  * بعد click على marker: الـ side panel بيظهر بتفاصيل المحافظة (ج.م + التوصيل، والـ placeholder اتمسح)
+  * nav "الخريطة" موجود وبيطير للقسم (map section visible: true بعد click)
+  * لا أخطa
+
+Stage Summary:
+- قسم خريطة مصر تفاعلي احترافي: 27 marker بالظبط على إحداثيات المحافظات الحقيقية، Nile river متدرج، interaction كامل (hover/click + side panel + connection lines)
+- مربوط بـ /api/governorates (بيانات حقيقية من DB)
+- 0 errors، 27 marker كلها بتظهر

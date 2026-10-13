@@ -5,6 +5,7 @@ import { Hero } from "./hero";
 import { StatsBar } from "./stats-bar";
 import { Services } from "./services";
 import { Coverage } from "./coverage";
+import { InteractiveMap } from "./interactive-map";
 import { VideoSection } from "./video-section";
 import { About } from "./about";
 import { Partners } from "./partners";
@@ -22,6 +23,7 @@ export function PublicPage() {
         <StatsBar />
         <Services />
         <Coverage />
+        <InteractiveMap />
         <VideoSection />
         <About />
         <Partners />
