@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
-import { ArrowLeft, Truck, ShieldCheck, Zap, MapPin, ChevronRight, ChevronLeft, Pause, Play } from "lucide-react";
+import { ArrowLeft, Truck, ShieldCheck, Zap, MapPin, ChevronRight, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/store";
 import { apiGet } from "@/lib/api";
@@ -205,67 +205,30 @@ export function Hero() {
         ))}
       </div>
 
-      {/* Image carousel controls — at bottom center above marquee (like reference) */}
+      {/* Image carousel controls — minimal centered bar (matching reference: thin arrows + dividers + counter) */}
       {total > 1 && (
-        <div className="absolute bottom-14 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3">
-          <button
-            onClick={prev}
-            className="w-10 h-10 rounded-full border border-white/30 bg-white/10 backdrop-blur-md hover:bg-white/20 text-white flex items-center justify-center transition-colors"
-            aria-label="السابق"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-
-          {/* Slide counter + progress */}
-          <div className="flex items-center gap-2.5">
-            <span className="text-white font-bold text-lg tabular-nums">
-              {String(idx + 1).padStart(2, "0")}
-            </span>
-            <span className="text-white/40">/</span>
-            <span className="text-white/60 font-medium tabular-nums">
-              {String(total).padStart(2, "0")}
-            </span>
-            {/* progress bar of current slide */}
-            <div className="w-24 h-0.5 bg-white/20 rounded-full overflow-hidden ms-1">
-              <motion.div
-                key={idx + (paused ? "p" : "r")}
-                initial={{ width: paused ? "var(--w)" : "0%" }}
-                animate={{ width: paused ? "100%" : "100%" }}
-                transition={{ duration: paused ? 0 : 5, ease: "linear" }}
-                className="h-full bg-white rounded-full"
-              />
-            </div>
-          </div>
-
-          <button
-            onClick={next}
-            className="w-10 h-10 rounded-full border border-white/30 bg-white/10 backdrop-blur-md hover:bg-white/20 text-white flex items-center justify-center transition-colors"
-            aria-label="التالي"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-
-          <button
-            onClick={() => setPaused((p) => !p)}
-            className="w-9 h-9 rounded-full border border-white/30 bg-white/10 backdrop-blur-md hover:bg-white/20 text-white flex items-center justify-center transition-colors ms-1"
-            aria-label={paused ? "تشغيل" : "إيقاف"}
-          >
-            {paused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
-          </button>
-        </div>
-      )}
-
-      {/* Dot indicators */}
-      {total > 1 && (
-        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20 hidden sm:flex gap-1.5">
-          {images.map((img, i) => (
+        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20" dir="ltr">
+          <div className="border-t border-white/15 pt-3 flex items-center text-white">
             <button
-              key={img.id}
-              onClick={() => setCurrent(i)}
-              aria-label={`الشريحة ${i + 1}`}
-              className={`h-1.5 rounded-full transition-all ${i === idx ? "w-8 bg-white" : "w-1.5 bg-white/40 hover:bg-white/70"}`}
-            />
-          ))}
+              onClick={prev}
+              aria-label="السابق"
+              className="px-5 py-1.5 hover:text-amber-300 transition-colors"
+            >
+              <ChevronLeft className="w-5 h-5" strokeWidth={1.5} />
+            </button>
+            <span className="w-px h-6 bg-white/20" />
+            <span className="px-6 text-sm font-bold tabular-nums tracking-widest">
+              {String(idx + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+            </span>
+            <span className="w-px h-6 bg-white/20" />
+            <button
+              onClick={next}
+              aria-label="التالي"
+              className="px-5 py-1.5 hover:text-amber-300 transition-colors"
+            >
+              <ChevronRight className="w-5 h-5" strokeWidth={1.5} />
+            </button>
+          </div>
         </div>
       )}
 

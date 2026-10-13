@@ -189,3 +189,42 @@ Stage Summary:
 - البطاقات الإحصائية بقت تحت الهيدر مباشرة بمسافة نظيفة بدل ما كانت بتدخل جوّه الـ marquee والـ carousel controls
 - خلفية البطاقات بقت صلبة (bg-card) بدل الشفافية (glass) عشان وضوح أفضل
 - المسافات الداخلية والخارجية كلها مظبوطة
+
+---
+Task ID: 7
+Agent: Orchestrator (main)
+Task: تظبيط أسهم الـ carousel في الهيدر زي المرجع بالظبط (minimal design)
+
+Work Log:
+- حللت الصورة المرجعية بـ VLM: المطلوب هو شريط تحكم minimal فيه:
+  * سهمين نحيفين بدون دوائر (outline icons)
+  * فواصل عمودية رفيعة بين العناصر
+  * عدّاد في النص
+  * خط فاصل أفقي رفيع فوق الشريط
+  * خلفية داكنة، تباين عالي، تناظر حول العداد
+- المشكلة في التصميم القديم: كان مزدحم (دوائر حول الأسهم + زر pause/play + شريط تقدم + صف نقاط)
+- أصلحت hero.tsx:
+  * شلت الدوائر (rounded-full + border + bg) حول الأسهم → أسهم نحيفة plain (ChevronLeft/ChevronRight بـ strokeWidth 1.5)
+  * ضفت فواصل عمودية: `<span className="w-px h-6 bg-white/20" />` بين كل عنصرين
+  * شلت زر pause/play والـ progress bar وصف الـ dots
+  * ضفت خط فاصل أفقي رفيع فوق الشريط: `border-t border-white/15 pt-3`
+  * العدّاد في النص: `01 / 06` بخط bold + tracking-widest + tabular-nums
+  * استخدمت dir="ltr" عشان الترتيب البصري يكون `< | counter | >` زي المرجع (سهم شمال = سابق، سهم يمين = تالي)
+  * التنسيق: `px-5 py-1.5` للأسهم، `px-6` للعداد، hover بيلوّن amber
+  * الموضع: `absolute bottom-16 left-1/2 -translate-x-1/2` (فوق الـ marquee)
+  * شلت استيراد Pause/Play من lucide (مش محتاجهم)
+  * auto-rotate لسه شغّال (pause on hover عبر onMouseEnter/onMouseLeave)
+- ESLint: 0 errors
+- تحقق Agent Browser:
+  * Desktop (1440): controls found, arrows: 2, vertical dividers: 2, counter "01 / 06"
+  * بعد click على "التالي": counter اتنقل لـ "06 / 06" (التنقل شغّال)
+  * thin top line: true (الخط الفاصل موجود)
+  * circular buttons: 0 (مفيش دوائر زي المرجع)
+  * Mobile (390x844): top 707px, bottom 780px, viewport 844 → visible: true, centered: true
+  * لا أخطاء
+
+Stage Summary:
+- أسهم الـ carousel بقت minimal بالظبط زي المرجع: [ < | 01/06 | > ] بخلفية داكنة وفواصل عمودية رفيعة وخط أفقي فوق
+- شلت كل العناصر الزايدة (دوائر، pause، progress bar، dots)
+- التنقل والـ auto-rotate لسه بيشتغلوا
+- مظبوط على desktop و mobile
