@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Clock, Truck, Building2, Navigation, Layers, Sparkles } from "lucide-react";
+import { MapPin, Clock, Truck, Building2, Navigation, Layers, Sparkles, Zap } from "lucide-react";
 import { apiGet } from "@/lib/api";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { EGYPT_BORDER, NILE_MAIN, NILE_DAMIETTA, NILE_ROSETTA, GOV_COORDS, project, pathFromCoords } from "@/lib/egypt-coords";
@@ -21,12 +21,14 @@ const FALLBACK: Gov[] = [
   { id: "5", name: "Luxor", nameAr: "الاقصر", zone: "D", basePrice: 80, etaHours: 96, active: true },
 ];
 
-const ZONE_STYLE: Record<string, { label: string; color: string; ring: string; bg: string }> = {
-  A: { label: "القاهرة الكبرى", color: "#10b981", ring: "stroke-emerald-500", bg: "fill-emerald-500/10" },
-  B: { label: "الوجه البحري", color: "#3b82f6", ring: "stroke-blue-500", bg: "fill-blue-500/10" },
-  C: { label: "الصعيد", color: "#f59e0b", ring: "stroke-amber-500", bg: "fill-amber-500/10" },
-  D: { label: "الحدود", color: "#f43f5e", ring: "stroke-rose-500", bg: "fill-rose-500/10" },
+const ZONE_STYLE: Record<string, { label: string; color: string }> = {
+  A: { label: "القاهرة الكبرى", color: "#34d399" },
+  B: { label: "الوجه البحري", color: "#60a5fa" },
+  C: { label: "الصعيد", color: "#fbbf24" },
+  D: { label: "الحدود", color: "#fb7185" },
 };
+
+const HUB = "Cairo";
 
 export function InteractiveMap() {
   const { data } = useQuery({
@@ -37,7 +39,6 @@ export function InteractiveMap() {
   const [selected, setSelected] = useState<string | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
 
-  // Build marker data: governorate + projected coordinates
   const markers = useMemo(
     () =>
       govs
@@ -50,6 +51,7 @@ export function InteractiveMap() {
     [govs]
   );
 
+  const hub = markers.find((m) => m.name === HUB) || markers[0];
   const sel = markers.find((m) => m.name === selected);
 
   const zoneCounts = useMemo(() => {
@@ -59,33 +61,57 @@ export function InteractiveMap() {
   }, [markers]);
 
   return (
-    <section id="map" className="py-20 sm:py-28 bg-gradient-to-b from-background via-muted/30 to-background relative overflow-hidden">
-      {/* Decorative grid */}
-      <div className="absolute inset-0 grid-bg opacity-30" />
-      <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px]" />
+    <section id="map" className="py-20 sm:py-28 bg-zinc-950 relative overflow-hidden">
+      {/* Atmospheric background */}
+      <div className="absolute inset-0 grid-bg opacity-20" />
+      <div className="absolute top-10 right-10 w-[500px] h-[500px] bg-primary/20 rounded-full blur-[140px] animate-aurora" />
+      <div className="absolute bottom-10 left-10 w-[400px] h-[400px] bg-amber-500/10 rounded-full blur-[120px] animate-aurora" style={{ animationDelay: "5s" }} />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <SectionHeading
-          eyebrow={<span className="flex items-center gap-1.5"><Layers className="w-4 h-4" /> الشبكة على الخريطة</span>}
-          title={<>شبكة <span className="text-gradient-red">Redline</span> على خريطة مصر</>}
-          subtitle="27 محافظة بنقاط توصيل نشطة — تصفّح الخريطة وشوف تفاصيل كل محافظة وأسعارها وأزمنة التوصيل"
-        />
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <motion.span
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-primary/20 text-primary text-sm font-bold mb-4 border border-primary/30"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-slow-pulse" />
+            <Layers className="w-4 h-4" /> الشبكة على الخريطة
+          </motion.span>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-[1.15] text-white"
+          >
+            شبكة <span className="text-gradient-red">Redline</span> على خريطة مصر
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="mt-4 text-zinc-400 text-lg"
+          >
+            27 محافظة بنقاط توصيل نشطة — جرّب الضغط على أي محافظة وشوف تفاصيلها
+          </motion.p>
+        </div>
 
         <div className="max-w-6xl mx-auto grid lg:grid-cols-5 gap-6">
-          {/* Map */}
+          {/* Map card */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="lg:col-span-3 relative rounded-3xl border border-border bg-gradient-to-br from-zinc-950 to-zinc-900 p-4 sm:p-6 overflow-hidden shadow-2xl"
+            className="lg:col-span-3 relative rounded-3xl border border-white/10 bg-gradient-to-br from-zinc-900 to-black p-4 sm:p-6 overflow-hidden shadow-2xl shadow-primary/10"
           >
-            {/* Map header */}
+            {/* Header */}
             <div className="flex items-center justify-between mb-2 px-2">
-              <div className="flex items-center gap-2 text-white/80 text-sm">
+              <div className="flex items-center gap-2 text-white/90 text-sm">
                 <Navigation className="w-4 h-4 text-primary" />
-                <span className="font-semibold">خريطة التغطية</span>
+                <span className="font-bold">خريطة التغطية الحية</span>
               </div>
-              <div className="flex items-center gap-1.5 text-xs text-white/50">
+              <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-semibold">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
@@ -98,57 +124,127 @@ export function InteractiveMap() {
             <div className="relative aspect-[5/6] w-full">
               <svg viewBox="0 0 600 720" className="w-full h-full" style={{ touchAction: "none" }}>
                 <defs>
-                  <radialGradient id="mapGlow" cx="50%" cy="40%" r="60%">
-                    <stop offset="0%" stopColor="#dc2626" stopOpacity="0.15" />
-                    <stop offset="100%" stopColor="#dc2626" stopOpacity="0" />
+                  {/* Egypt clip for texture fill */}
+                  <clipPath id="egypt-clip">
+                    <path d={pathFromCoords(EGYPT_BORDER) + " Z"} />
+                  </clipPath>
+
+                  {/* radial glow for markers */}
+                  <radialGradient id="markerGlowA" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="#34d399" stopOpacity="0.9" />
+                    <stop offset="100%" stopColor="#34d399" stopOpacity="0" />
                   </radialGradient>
+                  <radialGradient id="markerGlowB" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.9" />
+                    <stop offset="100%" stopColor="#60a5fa" stopOpacity="0" />
+                  </radialGradient>
+                  <radialGradient id="markerGlowC" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.9" />
+                    <stop offset="100%" stopColor="#fbbf24" stopOpacity="0" />
+                  </radialGradient>
+                  <radialGradient id="markerGlowD" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="#fb7185" stopOpacity="0.9" />
+                    <stop offset="100%" stopColor="#fb7185" stopOpacity="0" />
+                  </radialGradient>
+
+                  {/* Nile gradient */}
                   <linearGradient id="nileGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.9" />
-                    <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0.4" />
+                    <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.95" />
+                    <stop offset="50%" stopColor="#0ea5e9" stopOpacity="0.7" />
+                    <stop offset="100%" stopColor="#0369a1" stopOpacity="0.5" />
                   </linearGradient>
-                  <filter id="markerGlow" x="-50%" y="-50%" width="200%" height="200%">
-                    <feGaussianBlur stdDeviation="3" result="b" />
+
+                  {/* Egypt land gradient overlay */}
+                  <linearGradient id="landGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#0a0a0a" stopOpacity="0.4" />
+                    <stop offset="100%" stopColor="#000" stopOpacity="0.7" />
+                  </linearGradient>
+
+                  {/* glow filter */}
+                  <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="4" result="b" />
                     <feMerge>
                       <feMergeNode in="b" />
                       <feMergeNode in="SourceGraphic" />
                     </feMerge>
                   </filter>
+                  <filter id="bigGlow" x="-100%" y="-100%" width="300%" height="300%">
+                    <feGaussianBlur stdDeviation="8" />
+                  </filter>
                 </defs>
 
-                {/* Background glow */}
-                <rect width="600" height="720" fill="url(#mapGlow)" />
+                {/* Egypt landmass: outer glow halo */}
+                <path d={pathFromCoords(EGYPT_BORDER) + " Z"} fill="none" stroke="#dc2626" strokeWidth="6" strokeOpacity="0.15" filter="url(#bigGlow)" />
 
-                {/* Egypt landmass */}
-                <motion.path
+                {/* Egypt with topographic texture fill (clipped) */}
+                <g clipPath="url(#egypt-clip)">
+                  {/* image texture */}
+                  <image href="/images/topo-texture.png" x="0" y="0" width="600" height="720" preserveAspectRatio="xMidYMid slice" opacity="0.5" />
+                  {/* mood gradient overlay */}
+                  <rect width="600" height="720" fill="url(#landGrad)" />
+                  {/* subtle inner glow from top */}
+                  <ellipse cx="330" cy="150" rx="220" ry="120" fill="#dc2626" fillOpacity="0.08" />
+                </g>
+
+                {/* Egypt glowing animated border */}
+                <path
                   d={pathFromCoords(EGYPT_BORDER) + " Z"}
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 1 }}
-                  fill="#18181b"
+                  fill="none"
                   stroke="#dc2626"
                   strokeWidth="1.5"
-                  strokeOpacity="0.5"
+                  strokeOpacity="0.6"
+                  strokeDasharray="6 4"
+                  className="border-shimmer"
                 />
-                {/* Inner subtle fill */}
-                <path d={pathFromCoords(EGYPT_BORDER) + " Z"} fill="#27272a" fillOpacity="0.6" />
+                <path d={pathFromCoords(EGYPT_BORDER) + " Z"} fill="none" stroke="#dc2626" strokeWidth="0.8" strokeOpacity="0.3" filter="url(#softGlow)" />
 
-                {/* Nile river */}
-                <path d={pathFromCoords(NILE_MAIN)} fill="none" stroke="url(#nileGrad)" strokeWidth="3" strokeLinecap="round" />
-                <path d={pathFromCoords(NILE_DAMIETTA)} fill="none" stroke="url(#nileGrad)" strokeWidth="2" strokeLinecap="round" strokeOpacity="0.7" />
-                <path d={pathFromCoords(NILE_ROSETTA)} fill="none" stroke="url(#nileGrad)" strokeWidth="2" strokeLinecap="round" strokeOpacity="0.7" />
+                {/* Network flow lines from Cairo hub to all governorates */}
+                {hub && markers.filter((m) => m.name !== hub.name).map((m, i) => {
+                  const zc = ZONE_STYLE[m.zone]?.color || "#dc2626";
+                  const isActive = selected === m.name || hovered === m.name;
+                  return (
+                    <line
+                      key={m.id}
+                      x1={hub.x} y1={hub.y} x2={m.x} y2={m.y}
+                      stroke={zc}
+                      strokeWidth={isActive ? 1.4 : 0.6}
+                      strokeOpacity={isActive ? 0.6 : 0.18}
+                      strokeDasharray="4 4"
+                      className="flow-line"
+                      style={{ animationDelay: `${(i % 6) * 0.2}s` }}
+                    />
+                  );
+                })}
 
-                {/* Mediterranean + Red Sea labels */}
-                <text x="300" y="28" fill="#71717a" fontSize="13" textAnchor="middle" className="font-medium">البحر المتوسط</text>
-                <text x="540" y="400" fill="#71717a" fontSize="11" textAnchor="middle" transform="rotate(-90 540 400)">البحر الأحمر</text>
-                <text x="200" y="690" fill="#71717a" fontSize="11" textAnchor="middle">الصحراء الغربية</text>
+                {/* Nile river — thick glowing base + flowing shimmer */}
+                <path d={pathFromCoords(NILE_MAIN)} fill="none" stroke="url(#nileGrad)" strokeWidth="4" strokeLinecap="round" filter="url(#softGlow)" />
+                <path d={pathFromCoords(NILE_DAMIETTA)} fill="none" stroke="url(#nileGrad)" strokeWidth="2.5" strokeLinecap="round" strokeOpacity="0.7" />
+                <path d={pathFromCoords(NILE_ROSETTA)} fill="none" stroke="url(#nileGrad)" strokeWidth="2.5" strokeLinecap="round" strokeOpacity="0.7" />
+                {/* Nile flowing shimmer on top */}
+                <path d={pathFromCoords(NILE_MAIN)} fill="none" stroke="#7dd3fc" strokeWidth="1.5" strokeLinecap="round" strokeOpacity="0.8" strokeDasharray="2 8" className="nile-flow" />
 
-                {/* Markers */}
-                {markers.map((m) => {
+                {/* Sea labels */}
+                <text x="300" y="26" fill="#52525b" fontSize="12" textAnchor="middle" className="font-medium">البحر المتوسط</text>
+                <text x="545" y="380" fill="#52525b" fontSize="10" textAnchor="middle" transform="rotate(-90 545 380)">البحر الأحمر</text>
+
+                {/* Cairo hub marker (special, larger) */}
+                {hub && (
+                  <g transform={`translate(${hub.x} ${hub.y})`} className="cursor-pointer" onMouseEnter={() => setHovered(hub.name)} onMouseLeave={() => setHovered(null)} onClick={() => setSelected(hub.name)}>
+                    <circle r="26" fill="#dc2626" fillOpacity="0.08" className="radar-ring" />
+                    <circle r="26" fill="#dc2626" fillOpacity="0.08" className="radar-ring-2" />
+                    <circle r="16" fill="url(#markerGlowA)" opacity="0.6" />
+                    <circle r="8" fill="#dc2626" stroke="#fff" strokeWidth="2" filter="url(#softGlow)" />
+                    <circle r="3" fill="#fff" />
+                  </g>
+                )}
+
+                {/* All governorate markers */}
+                {markers.filter((m) => m.name !== HUB).map((m) => {
                   const z = ZONE_STYLE[m.zone] || ZONE_STYLE.A;
+                  const glowId = `markerGlow${m.zone}`;
                   const isSel = selected === m.name;
                   const isHov = hovered === m.name;
-                  const r = isSel ? 7 : isHov ? 6 : 4;
+                  const active = isSel || isHov;
                   return (
                     <g
                       key={m.id}
@@ -158,51 +254,51 @@ export function InteractiveMap() {
                       onMouseLeave={() => setHovered(null)}
                       onClick={() => setSelected(m.name)}
                     >
-                      {/* pulse ring for active/selected */}
-                      {(isSel || isHov) && (
-                        <circle r="14" fill={z.color} fillOpacity="0.15" className="animate-slow-pulse" />
-                      )}
+                      {/* radar pulse rings */}
+                      <circle r="4" fill="none" stroke={z.color} strokeWidth="1.5" className="radar-ring" style={{ filter: "drop-shadow(0 0 3px " + z.color + ")" }} />
+                      <circle r="4" fill="none" stroke={z.color} strokeWidth="1" className="radar-ring-2" opacity="0.5" />
                       {/* outer glow */}
-                      <circle r={r + 3} fill={z.color} fillOpacity="0.25" filter="url(#markerGlow)" />
+                      <circle r="14" fill={`url(#${glowId})`} opacity={active ? 0.9 : 0.5} />
                       {/* main dot */}
-                      <circle r={r} fill={z.color} stroke="#fff" strokeWidth="1.5" />
-                      {/* center dot */}
-                      <circle r="1.5" fill="#fff" />
-                      {/* label on hover/selected */}
-                      {(isHov || isSel) && (
-                        <g transform="translate(0 -14)">
-                          <rect x="-30" y="-12" width="60" height="16" rx="4" fill="#0a0a0a" stroke={z.color} strokeWidth="1" />
-                          <text y="0" textAnchor="middle" fill="#fff" fontSize="10" className="font-bold">{m.nameAr}</text>
+                      <circle r={active ? 6 : 4.5} fill={z.color} stroke="#fff" strokeWidth="1.5" filter="url(#softGlow)" />
+                      {/* white core */}
+                      <circle r="1.8" fill="#fff" />
+                      {/* hover label */}
+                      {active && (
+                        <g transform="translate(0 -16)">
+                          <rect x="-34" y="-13" width="68" height="18" rx="5" fill="#0a0a0a" stroke={z.color} strokeWidth="1" />
+                          <text y="0" textAnchor="middle" fill="#fff" fontSize="11" className="font-bold">{m.nameAr}</text>
                         </g>
                       )}
                     </g>
                   );
                 })}
 
-                {/* connection lines from selected to others (decorative) */}
-                {sel && markers.filter((m) => m.name !== sel.name).slice(0, 8).map((m, i) => (
+                {/* Connection lines from selected to nearby (premium highlight) */}
+                {sel && markers.filter((m) => m.name !== sel.name).slice(0, 6).map((m, i) => (
                   <motion.line
-                    key={m.id}
+                    key={"sel-" + m.id}
                     x1={sel.x} y1={sel.y} x2={m.x} y2={m.y}
                     stroke={ZONE_STYLE[m.zone]?.color || "#dc2626"}
-                    strokeWidth="0.6"
-                    strokeOpacity="0.25"
+                    strokeWidth="1.2"
+                    strokeOpacity="0.5"
                     strokeDasharray="3 3"
                     initial={{ pathLength: 0, opacity: 0 }}
-                    animate={{ pathLength: 1, opacity: 0.25 }}
-                    transition={{ duration: 0.6, delay: i * 0.04 }}
+                    animate={{ pathLength: 1, opacity: 0.5 }}
+                    transition={{ duration: 0.5, delay: i * 0.06 }}
+                    className="flow-line"
                   />
                 ))}
               </svg>
             </div>
 
             {/* Zone legend */}
-            <div className="mt-3 flex flex-wrap items-center justify-center gap-2 pt-3 border-t border-white/10">
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-3 pt-3 border-t border-white/10">
               {Object.entries(ZONE_STYLE).map(([k, v]) => (
-                <div key={k} className="flex items-center gap-1.5 text-xs text-white/70">
-                  <span className="w-2.5 h-2.5 rounded-full" style={{ background: v.color }} />
+                <div key={k} className="flex items-center gap-1.5 text-xs text-zinc-400">
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ background: v.color, boxShadow: "0 0 8px " + v.color }} />
                   {v.label}
-                  <span className="text-white/40">({zoneCounts[k] || 0})</span>
+                  <span className="text-zinc-600">({zoneCounts[k] || 0})</span>
                 </div>
               ))}
             </div>
@@ -210,49 +306,48 @@ export function InteractiveMap() {
 
           {/* Side panel */}
           <div className="lg:col-span-2 flex flex-col gap-4">
-            {/* Selected governorate card */}
             <AnimatePresence mode="wait">
               {sel ? (
                 <motion.div
                   key={sel.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, y: 20, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/5 to-red-700/5 p-6 relative overflow-hidden"
+                  className="rounded-3xl border border-primary/40 bg-gradient-to-br from-primary/15 via-zinc-900 to-black p-6 relative overflow-hidden"
                 >
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-3xl" />
                   <div className="relative">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-2 text-sm text-zinc-400">
                           <MapPin className="w-4 h-4" style={{ color: ZONE_STYLE[sel.zone]?.color }} />
                           {ZONE_STYLE[sel.zone]?.label}
                         </div>
-                        <h3 className="text-2xl font-black mt-1">{sel.nameAr}</h3>
-                        <div className="text-xs text-muted-foreground font-mono mt-0.5" dir="ltr">{sel.name}</div>
+                        <h3 className="text-2xl font-black mt-1 text-white">{sel.nameAr}</h3>
+                        <div className="text-xs text-zinc-500 font-mono mt-0.5" dir="ltr">{sel.name}</div>
                       </div>
-                      <span className="px-2.5 py-1 rounded-full text-xs font-bold text-white" style={{ background: ZONE_STYLE[sel.zone]?.color }}>
+                      <span className="px-2.5 py-1 rounded-full text-xs font-bold text-white" style={{ background: ZONE_STYLE[sel.zone]?.color, boxShadow: "0 0 12px " + ZONE_STYLE[sel.zone]?.color }}>
                         {sel.zone}
                       </span>
                     </div>
 
                     <div className="mt-5 grid grid-cols-2 gap-3">
-                      <div className="rounded-xl bg-card p-3 border border-border">
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
+                      <div className="rounded-xl bg-white/5 border border-white/10 p-3">
+                        <div className="flex items-center gap-1.5 text-xs text-zinc-400 mb-1">
                           <Truck className="w-3.5 h-3.5 text-primary" /> السعر من
                         </div>
                         <div className="text-xl font-black text-gradient-red">{sel.basePrice} <span className="text-sm">ج.م</span></div>
                       </div>
-                      <div className="rounded-xl bg-card p-3 border border-border">
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
+                      <div className="rounded-xl bg-white/5 border border-white/10 p-3">
+                        <div className="flex items-center gap-1.5 text-xs text-zinc-400 mb-1">
                           <Clock className="w-3.5 h-3.5 text-primary" /> التوصيل
                         </div>
-                        <div className="text-xl font-black">{Math.ceil(sel.etaHours / 24)} <span className="text-sm">يوم</span></div>
+                        <div className="text-xl font-black text-white">{Math.ceil(sel.etaHours / 24)} <span className="text-sm">يوم</span></div>
                       </div>
                     </div>
 
-                    <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-                      <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                    <div className="mt-3 flex items-center gap-2 text-xs text-amber-400">
+                      <Sparkles className="w-3.5 h-3.5" />
                       توصيل سريع وآمن لكل محافظات {sel.nameAr}
                     </div>
                   </div>
@@ -262,14 +357,15 @@ export function InteractiveMap() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="rounded-3xl border border-border bg-card p-8 text-center"
+                  className="rounded-3xl border border-white/10 bg-gradient-to-br from-zinc-900 to-black p-8 text-center"
                 >
-                  <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                  <div className="w-16 h-16 rounded-2xl bg-primary/15 flex items-center justify-center mx-auto mb-3 relative">
                     <Navigation className="w-8 h-8 text-primary" />
+                    <div className="absolute inset-0 rounded-2xl border-2 border-primary/30 animate-slow-pulse" />
                   </div>
-                  <h3 className="font-bold">اختر محافظة</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    اضغط على أي نقطة في الخريطة لعرض تفاصيل المحافظة
+                  <h3 className="font-bold text-white">اختر محافظة</h3>
+                  <p className="text-sm text-zinc-500 mt-1">
+                    اضغط على أي نقطة في الخريطة لعرض تفاصيلها
                   </p>
                 </motion.div>
               )}
@@ -277,21 +373,21 @@ export function InteractiveMap() {
 
             {/* Stats */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-2xl border border-border bg-card p-4 text-center">
+              <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-zinc-900 to-black p-4 text-center">
                 <div className="text-3xl font-black text-gradient-red">{markers.length}</div>
-                <div className="text-xs text-muted-foreground mt-1">محافظة مغطاة</div>
+                <div className="text-xs text-zinc-500 mt-1">محافظة مغطاة</div>
               </div>
-              <div className="rounded-2xl border border-border bg-card p-4 text-center">
-                <div className="text-3xl font-black text-emerald-600">99.2%</div>
-                <div className="text-xs text-muted-foreground mt-1">نسبة التسليم في الوقت</div>
+              <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-zinc-900 to-black p-4 text-center">
+                <div className="text-3xl font-black text-emerald-400">99.2%</div>
+                <div className="text-xs text-zinc-500 mt-1">نسبة التسليم في الوقت</div>
               </div>
             </div>
 
-            {/* Governorate quick list */}
-            <div className="rounded-2xl border border-border bg-card p-4">
+            {/* Quick list */}
+            <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-zinc-900 to-black p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Building2 className="w-4 h-4 text-primary" />
-                <h4 className="font-bold text-sm">قائمة سريعة</h4>
+                <h4 className="font-bold text-sm text-white">قائمة سريعة</h4>
               </div>
               <div className="grid grid-cols-2 gap-1.5 max-h-48 overflow-y-auto no-scrollbar">
                 {markers.slice(0, 14).map((m) => (
@@ -301,11 +397,11 @@ export function InteractiveMap() {
                     onMouseEnter={() => setHovered(m.name)}
                     onMouseLeave={() => setHovered(null)}
                     className={`flex items-center justify-between gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-colors text-right ${
-                      selected === m.name ? "bg-primary/10 text-primary" : "hover:bg-muted"
+                      selected === m.name ? "bg-primary/15 text-primary" : "text-zinc-300 hover:bg-white/5"
                     }`}
                   >
                     <span className="truncate">{m.nameAr}</span>
-                    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: ZONE_STYLE[m.zone]?.color }} />
+                    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: ZONE_STYLE[m.zone]?.color, boxShadow: "0 0 6px " + ZONE_STYLE[m.zone]?.color }} />
                   </button>
                 ))}
               </div>

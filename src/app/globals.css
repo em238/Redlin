@@ -260,3 +260,32 @@
 /* Hide scrollbar utility */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Flowing dashes for network lines (logistics flow effect) */
+@keyframes flow {
+  to { stroke-dashoffset: -24; }
+}
+.flow-line {
+  stroke-dashoffset: 0;
+  animation: flow 1.2s linear infinite;
+}
+
+/* Radar pulse rings on markers */
+@keyframes radar {
+  0% { r: 4; opacity: 0.7; }
+  100% { r: 22; opacity: 0; }
+}
+.radar-ring { animation: radar 2.8s cubic-bezier(0, 0, 0.2, 1) infinite; }
+.radar-ring-2 { animation: radar 2.8s cubic-bezier(0, 0, 0.2, 1) infinite 1.4s; }
+
+/* Nile flowing shimmer */
+@keyframes nile-flow {
+  to { stroke-dashoffset: -40; }
+}
+.nile-flow { animation: nile-flow 3s linear infinite; }
+
+/* Slow border shimmer */
+@keyframes border-shimmer {
+  to { stroke-dashoffset: -100; }
+}
+.border-shimmer { animation: border-shimmer 8s linear infinite; }
