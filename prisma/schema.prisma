@@ -132,3 +132,24 @@ model SiteStat {
   icon      String   @default("package")
   createdAt DateTime @default(now())
 }
+
+model HeroImage {
+  id        String   @id @default(cuid())
+  url       String
+  title     String?
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model Partner {
+  id        String   @id @default(cuid())
+  name      String
+  logo      String?
+  icon      String   @default("building")
+  color     String   @default("#dc2626")
+  website   String?
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}

@@ -90,3 +90,49 @@ Stage Summary:
 - تحسينات بصرية: بارالاكس، 3D tilt، aurora، عدادات متحركة، area/donut charts، sparklines
 - تحسينات وظيفية: pagination، bulk select، detail drawer، CSV export، drag-drop upload، inline validation، carousel، active nav، scroll progress
 - 0 lint errors، لا runtime errors، كل التفاعلات تعمل ومتحققة
+
+---
+Task ID: 4
+Agent: Orchestrator (main)
+Task: إضافة هيدر carousel صور متحركة + قسم الشركاء (قابل للإدارة من لوحة التحكم)
+
+Work Log:
+- حللت الصورتين المرفوعتين بـ VLM:
+  * صورة 1: هيدر بـ image slider/carousel — صور متعددة تتبدّل بأسهم (‹ ›) وعدّاد شرائح (01/05)
+  * صورة 2: قسم "شركاء النجاح والتميز المؤسسي" — شبكة بطاقات بيضاء بحواف دائرية وظل ناعم، كل بطاقة فيها شعار شركة
+- DB: أضفت HeroImage + Partner models لـ prisma/schema.prisma + db:push
+- أنشأت 8 شعارات شركاء احترافية بـ z-ai image (partner-1..8.png) بألوان وأيقونات متنوعة
+- Seed (prisma/seed-content.ts): 5 صور هيدر (hero-truck, fleet, warehouse, operations, courier) + 8 شركاء (TechStore, FashionHub, Adel Trading, Nour Crafts, Ibrahim Group, MegaMart, QuickShip, GlobalTech)
+- API routes: /api/hero-images (GET/POST) + /api/hero-images/[id] (PATCH/DELETE) + /api/partners (GET/POST) + /api/partners/[id] (PATCH/DELETE) + تحديث /api/site ليرجع heroImages + partners
+- ريفاكتور Hero (src/components/site/hero.tsx): 
+  * carousel صور متعددة بـ crossfade (AnimatePresence + motion scale 1.08→1)
+  * تبديل تلقائي كل 5s (pause on hover)
+  * أسهم تنقل ‹ › + عدّاد شرائح (01/05) + شريط تقدم + زر pause/play (مطابق للمرجع)
+  * نقاط (dots) مؤشرات للشرائح
+  * يقرأ الصور من /api/hero-images (DB) مع fallback
+- قسم Public جديد (src/components/site/partners.tsx):
+  * شبكة بطاقات بيضاء بحواف دائرية وظل ناعم + shine sweep عند hover
+  * يعرض شعار (img) أو أيقونة ملونة fallback
+  * يقرأ من /api/partners (DB)
+  * أضفته بين About و Testimonials + رابط "الشركاء" في Navbar
+- Dashboard: 
+  * DashboardHeroImages (src/components/dashboard/hero-images.tsx): إدارة صور الهيدر — رفع/حذف/إعادة ترتيب (up/down)/تفعيل-إخفاء، modal مع drag-drop URL + معاينة + اختيار من معرض + عنوان + ترتيب
+  * DashboardPartners (src/components/dashboard/partners.tsx): إدارة الشركاء — إضافة/تعديل/حذف/تفعيل، modal مع اسم + شعار (8 خيارات أو رابط مخصص) + أيقونة fallback + لون (8 خيارات) + موقع + ترتيب
+  * أضفت زرّين للتنقل في sidebar (صور الهيدر، الشركاء) + topbar titles + store types (DashboardSection)
+- إصلاحات: إعادة توليد Prisma client + إعادة تشغيل dev server (لتحميل النماذج الجديدة من الـ singleton)، setState-in-effect → clamp inline بـ idx
+- ESLint: 0 errors
+- تحقق Agent Browser:
+  * Hero carousel: 6 شرائح dots + 4 أسهم + عدّاد "01/06" — التنقل بـ next يغيّر العدّاد (03/06)
+  * Partners: 8 شعارات + 8 أسماء كلها ظاهرة (TechStore..GlobalTech)
+  * Dashboard Hero Images: "صور الهيدر (Carousel)" + الإحصائيات + 5 صور seeded ظاهرة (شاحنة، أسطول، مستودع...) + زر "إضافة صورة"
+  * أضفت صورة جديدة "صورة تجريبية جديدة من اللوحة" → ظهرت فوراً في carousel الموقع (من 5 → 6 شرائح)
+  * Dashboard Partners: "قسم الشركاء والعملاء" + 8 شركاء + modal إضافة كامل (اسم/شعار/أيقونة/لون/موقع/ترتيب)
+  * أضفت شريك جديد "RedSeaMart" → ظهر فوراً في قسم الشركاء بالموقع (من 8 → 9 شركاء)
+  * لا أخطاء بعد reload
+
+Stage Summary:
+- الميزتان المطلوبتان اشتغلتا بالكامل end-to-end:
+  1. هيدر carousel صور متحركة — الأدمن يضيف/يحذف/يرتب/يفعّل الصور من لوحة التحكم وتظهر فوراً في الـ slider بأعلى الموقع (crossfade + أسهم + عدّاد + dots)
+  2. قسم الشركاء — شبكة بطاقات بيضاء احترافية بالشعارات، الأدمن يضيف/يحرر الشركاء (شعار/أيقونة/لون/موقع) وتظهر فوراً في الموقع
+- 8 شعارات + 5 صور هيدر AI-generated، 2 API routes + 2 مكونات public + 2 مكونات dashboard
+- 0 lint errors، لا runtime errors

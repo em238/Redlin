@@ -15,6 +15,7 @@ const NAV_LINKS = [
   { href: "#pricing", label: "الأسعار" },
   { href: "#track", label: "تتبع" },
   { href: "#videos", label: "المعرض" },
+  { href: "#partners", label: "الشركاء" },
   { href: "#contact", label: "تواصل" },
 ];
 

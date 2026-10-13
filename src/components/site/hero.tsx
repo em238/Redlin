@@ -1,10 +1,19 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { useState, useEffect, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
-import { ArrowLeft, Truck, ShieldCheck, Zap, MapPin, PackageCheck, Gauge } from "lucide-react";
+import { ArrowLeft, Truck, ShieldCheck, Zap, MapPin, ChevronRight, ChevronLeft, Pause, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/store";
+import { apiGet } from "@/lib/api";
+
+const FALLBACK_IMAGES = [
+  { id: "1", url: "/images/hero-truck.png", title: "شاحنة Redline على الطريق السريع", order: 0, active: true },
+  { id: "2", url: "/images/fleet.png", title: "أسطول Redline عند الفجر", order: 1, active: true },
+  { id: "3", url: "/images/warehouse.png", title: "مستودعات Redline", order: 2, active: true },
+];
 
 const GOV_MARQUEE = [
   "القاهره", "الجيزه", "الاسكندريه", "المنيا", "اسيوط", "سوهاج",
@@ -13,37 +22,76 @@ const GOV_MARQUEE = [
 ];
 
 const FLOATING_STATS = [
-  { icon: Gauge, label: "نسبة التسليم في الوقت", value: "99.2%", color: "from-emerald-500 to-emerald-700", pos: "top-[18%] left-[4%]" },
-  { icon: PackageCheck, label: "شحنة هذا الشهر", value: "82,540", color: "from-primary to-red-700", pos: "bottom-[28%] left-[6%]" },
   { icon: Zap, label: "متوسط زمن التوصيل", value: "26 ساعة", color: "from-amber-500 to-amber-700", pos: "top-[24%] right-[4%]" },
 ];
 
 export function Hero() {
   const { setView } = useAppStore();
+  const { data } = useQuery({
+    queryKey: ["hero-images"],
+    queryFn: () => apiGet<{ images: typeof FALLBACK_IMAGES }>("/api/hero-images"),
+  });
+  const images = data?.images ?? FALLBACK_IMAGES;
+
+  const [current, setCurrent] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const total = images.length;
+
+  const next = useCallback(() => setCurrent((c) => (c + 1) % Math.max(total, 1)), [total]);
+  const prev = () => setCurrent((c) => (c - 1 + total) % Math.max(total, 1));
+
+  // auto-rotate
+  useEffect(() => {
+    if (paused || total <= 1) return;
+    const t = setInterval(next, 5000);
+    return () => clearInterval(t);
+  }, [paused, total, next]);
+
+  // safe index clamped to range
+  const idx = total > 0 ? current % total : 0;
+
   const { scrollY } = useScroll();
   const yBg = useTransform(scrollY, [0, 600], [0, 120]);
   const yContent = useTransform(scrollY, [0, 600], [0, 60]);
   const opacity = useTransform(scrollY, [0, 400], [1, 0]);
 
-  const scrollTo = (id: string) => {
-    document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });
-  };
+  const scrollTo = (id: string) => document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });
+
+  const active = images[idx] || images[0] || FALLBACK_IMAGES[0];
 
   return (
-    <section id="home" className="relative min-h-[100svh] flex items-center overflow-hidden pt-20">
-      {/* Background image with parallax */}
-      <motion.div className="absolute inset-0 -z-10" style={{ y: yBg }}>
-        <Image
-          src="/images/hero-truck.png"
-          alt="شاحنة Redline على الطريق السريع"
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-l from-black/92 via-black/65 to-black/35" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/30" />
-      </motion.div>
+    <section
+      id="home"
+      className="relative min-h-[100svh] flex items-center overflow-hidden pt-20"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      {/* Background image carousel with crossfade */}
+      <div className="absolute inset-0 -z-10">
+        <motion.div style={{ y: yBg }} className="absolute inset-0">
+          <AnimatePresence mode="sync">
+            <motion.div
+              key={active.id}
+              initial={{ opacity: 0, scale: 1.08 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ opacity: { duration: 1.2 }, scale: { duration: 6, ease: "easeOut" } }}
+              className="absolute inset-0"
+            >
+              <Image
+                src={active.url}
+                alt={active.title || "Redline"}
+                fill
+                priority={idx === 0}
+                sizes="100vw"
+                className="object-cover"
+              />
+            </motion.div>
+          </AnimatePresence>
+          <div className="absolute inset-0 bg-gradient-to-l from-black/92 via-black/65 to-black/35" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/30" />
+        </motion.div>
+      </div>
 
       {/* Aurora glows */}
       <div className="absolute top-1/3 left-0 w-96 h-96 bg-primary/30 rounded-full blur-[120px] -z-0 animate-aurora" />
@@ -107,7 +155,7 @@ export function Hero() {
             >
               <Truck className="w-5 h-5" />
               تتبع شحنتك
-              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+              <ArrowLeft className="w-4 h-4" />
             </Button>
           </motion.div>
 
@@ -157,6 +205,70 @@ export function Hero() {
         ))}
       </div>
 
+      {/* Image carousel controls — at bottom center above marquee (like reference) */}
+      {total > 1 && (
+        <div className="absolute bottom-14 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3">
+          <button
+            onClick={prev}
+            className="w-10 h-10 rounded-full border border-white/30 bg-white/10 backdrop-blur-md hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+            aria-label="السابق"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+
+          {/* Slide counter + progress */}
+          <div className="flex items-center gap-2.5">
+            <span className="text-white font-bold text-lg tabular-nums">
+              {String(idx + 1).padStart(2, "0")}
+            </span>
+            <span className="text-white/40">/</span>
+            <span className="text-white/60 font-medium tabular-nums">
+              {String(total).padStart(2, "0")}
+            </span>
+            {/* progress bar of current slide */}
+            <div className="w-24 h-0.5 bg-white/20 rounded-full overflow-hidden ms-1">
+              <motion.div
+                key={idx + (paused ? "p" : "r")}
+                initial={{ width: paused ? "var(--w)" : "0%" }}
+                animate={{ width: paused ? "100%" : "100%" }}
+                transition={{ duration: paused ? 0 : 5, ease: "linear" }}
+                className="h-full bg-white rounded-full"
+              />
+            </div>
+          </div>
+
+          <button
+            onClick={next}
+            className="w-10 h-10 rounded-full border border-white/30 bg-white/10 backdrop-blur-md hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+            aria-label="التالي"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+
+          <button
+            onClick={() => setPaused((p) => !p)}
+            className="w-9 h-9 rounded-full border border-white/30 bg-white/10 backdrop-blur-md hover:bg-white/20 text-white flex items-center justify-center transition-colors ms-1"
+            aria-label={paused ? "تشغيل" : "إيقاف"}
+          >
+            {paused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+          </button>
+        </div>
+      )}
+
+      {/* Dot indicators */}
+      {total > 1 && (
+        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20 hidden sm:flex gap-1.5">
+          {images.map((img, i) => (
+            <button
+              key={img.id}
+              onClick={() => setCurrent(i)}
+              aria-label={`الشريحة ${i + 1}`}
+              className={`h-1.5 rounded-full transition-all ${i === idx ? "w-8 bg-white" : "w-1.5 bg-white/40 hover:bg-white/70"}`}
+            />
+          ))}
+        </div>
+      )}
+
       {/* Marquee */}
       <div className="absolute bottom-0 inset-x-0 border-t border-white/10 bg-black/40 backdrop-blur-md py-3 overflow-hidden">
         <div className="flex animate-marquee whitespace-nowrap">
@@ -168,24 +280,6 @@ export function Hero() {
           ))}
         </div>
       </div>
-
-      {/* Scroll indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2 }}
-        className="absolute bottom-16 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-1 text-white/60"
-        style={{ opacity }}
-      >
-        <span className="text-[10px] uppercase tracking-widest">اكتشف</span>
-        <motion.div
-          animate={{ y: [0, 6, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-          className="w-5 h-8 rounded-full border-2 border-white/30 flex items-start justify-center pt-1.5"
-        >
-          <div className="w-1 h-1.5 rounded-full bg-white/70" />
-        </motion.div>
-      </motion.div>
     </section>
   );
 }

@@ -12,6 +12,8 @@ import { DashboardShipments } from "./shipments";
 import { DashboardOrders } from "./orders";
 import { DashboardCustomers } from "./customers";
 import { DashboardVideos } from "./videos";
+import { DashboardHeroImages } from "./hero-images";
+import { DashboardPartners } from "./partners";
 import { DashboardPricing } from "./pricing";
 import { DashboardMessages } from "./messages";
 import { DashboardSettings } from "./settings";
@@ -60,6 +62,8 @@ export function DashboardApp() {
     orders: <DashboardOrders />,
     customers: <DashboardCustomers />,
     videos: <DashboardVideos />,
+    "hero-images": <DashboardHeroImages />,
+    partners: <DashboardPartners />,
     pricing: <DashboardPricing />,
     messages: <DashboardMessages />,
     settings: <DashboardSettings />,

@@ -11,6 +11,8 @@ const TITLES: Record<DashboardSection, { title: string; subtitle: string }> = {
   orders: { title: "الطلبات الجديدة", subtitle: "طلبات العملاء من الموقع" },
   customers: { title: "العملاء", subtitle: "قاعدة عملاء Redline" },
   videos: { title: "إدارة الفيديوهات", subtitle: "ارفع وأدر الفيديوهات المعروضة بالموقع" },
+  "hero-images": { title: "صور الهيدر", subtitle: "أدر صور الـ carousel الظاهرة في أعلى الموقع" },
+  partners: { title: "الشركاء", subtitle: "أدر شعارات الشركات الظاهرة بقسم الشركاء" },
   pricing: { title: "الأسعار والتغطية", subtitle: "أسعار المحافظات وخدمات الشحن" },
   messages: { title: "الرسائل", subtitle: "رسائل التواصل من العملاء" },
   settings: { title: "الإعدادات", subtitle: "إعدادات الحساب والنظام" },

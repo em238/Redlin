@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Truck, LayoutDashboard, Package, ShoppingCart, Users, Video, DollarSign,
-  MessageSquare, Settings, LogOut, X, Globe, ChevronLeft
+  MessageSquare, Settings, LogOut, X, Globe, ChevronLeft, ImageIcon, Handshake
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAppStore, DashboardSection } from "@/lib/store";
@@ -16,6 +16,8 @@ const NAV: { id: DashboardSection; label: string; icon: any }[] = [
   { id: "orders", label: "الطلبات", icon: ShoppingCart },
   { id: "customers", label: "العملاء", icon: Users },
   { id: "videos", label: "الفيديوهات", icon: Video },
+  { id: "hero-images", label: "صور الهيدر", icon: ImageIcon },
+  { id: "partners", label: "الشركاء", icon: Handshake },
   { id: "pricing", label: "الأسعار والتغطية", icon: DollarSign },
   { id: "messages", label: "الرسائل", icon: MessageSquare },
   { id: "settings", label: "الإعدادات", icon: Settings },

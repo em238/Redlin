@@ -9,6 +9,7 @@ import { PricingCalculator } from "./pricing-calculator";
 import { TrackShipment } from "./track";
 import { VideoSection } from "./video-section";
 import { About } from "./about";
+import { Partners } from "./partners";
 import { Testimonials } from "./testimonials";
 import { CtaBanner } from "./cta-banner";
 import { Contact } from "./contact";
@@ -27,6 +28,7 @@ export function PublicPage() {
         <TrackShipment />
         <VideoSection />
         <About />
+        <Partners />
         <Testimonials />
         <CtaBanner />
         <Contact />

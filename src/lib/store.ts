@@ -7,6 +7,8 @@ export type DashboardSection =
   | "orders"
   | "customers"
   | "videos"
+  | "hero-images"
+  | "partners"
   | "pricing"
   | "messages"
   | "settings";
