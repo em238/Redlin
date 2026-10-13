@@ -84,10 +84,10 @@ export function Services() {
                       <h3 className="mt-5 text-xl font-bold">{s.nameAr}</h3>
                       <p className="mt-2 text-muted-foreground text-sm leading-relaxed">{s.description}</p>
                       <button
-                        onClick={() => scrollTo("#pricing")}
+                        onClick={() => scrollTo("#contact")}
                         className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:gap-2 transition-all"
                       >
-                        احسب السعر
+                        اطلب الخدمة
                         <ArrowLeft className="w-4 h-4" />
                       </button>
                     </div>

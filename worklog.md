@@ -136,3 +136,30 @@ Stage Summary:
   2. قسم الشركاء — شبكة بطاقات بيضاء احترافية بالشعارات، الأدمن يضيف/يحرر الشركاء (شعار/أيقونة/لون/موقع) وتظهر فوراً في الموقع
 - 8 شعارات + 5 صور هيدر AI-generated، 2 API routes + 2 مكونات public + 2 مكونات dashboard
 - 0 lint errors، لا runtime errors
+
+---
+Task ID: 5
+Agent: Orchestrator (main)
+Task: إزالة قسمي "تتبع الشحنة" و"حاسبة الأسعار" من الموقع العام
+
+Work Log:
+- أزلت استيراد واستخدام PricingCalculator و TrackShipment من public-page.tsx
+- أزلت روابط #pricing و #track من Navbar NAV_LINKS (بقي: الرئيسية، خدماتنا، التغطية، المعرض، الشركاء، تواصل)
+- حدّثت أزرار Hero: "احسب سعر شحنتك" → "اطلب شحن الآن" (يؤشر لـ #contact)، "تتبع شحنتك" → "خدماتنا" (يؤشر لـ #services)
+- حدّثت زر الخدمات "احسب السعر" → "اطلب الخدمة" (يؤشر لـ #contact)
+- حدّثت CTA banner: النص "تواصل معنا الآن..." + الزر "اطلب عرض سعر" (يؤشر لـ #contact)
+- حدّثت رابط "تتبع الشحنة" في Footer ليؤشر لـ #contact بدلاً من #track
+- ملفات track.tsx و pricing-calculator.tsx بقيت موجودة لكن غير مستخدمة (الـ API routes أيضاً بقيت)
+- ESLint: 0 errors
+- تحقق Agent Browser:
+  * pricing section: REMOVED, track section: REMOVED
+  * nav has تتبع: false, nav has الأسعار: false
+  * زر "اطلب شحن الآن" يطير لـ #contact (top: 0px في viewport)
+  * زر "خدماتنا" يطير لـ #services
+  * الأقسام المتبقية: home, services, coverage, videos, about, partners, contact
+  * لا أخطاء
+
+Stage Summary:
+- تم إزالة القسمين المطلوبين من الموقع العام وكل الإشارات إليهما في الـ Navbar وHero وFooter وCTA banner
+- الأزرار الآن تشاور لأقسام موجودة (services و contact)
+- لا أخطاء، الموقع يعرض بشكل سليم

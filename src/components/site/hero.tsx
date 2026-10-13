@@ -141,20 +141,20 @@ export function Hero() {
           >
             <Button
               size="lg"
-              onClick={() => scrollTo("#pricing")}
+              onClick={() => scrollTo("#contact")}
               className="bg-gradient-to-r from-primary to-red-700 hover:from-red-600 hover:to-red-800 text-white shadow-xl shadow-primary/30 gap-2 text-base h-12 px-7 group"
             >
               <Zap className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              احسب سعر شحنتك
+              اطلب شحن الآن
             </Button>
             <Button
               size="lg"
               variant="outline"
-              onClick={() => scrollTo("#track")}
+              onClick={() => scrollTo("#services")}
               className="bg-white/10 backdrop-blur-md border-white/25 text-white hover:bg-white/20 hover:text-white gap-2 text-base h-12 px-7"
             >
               <Truck className="w-5 h-5" />
-              تتبع شحنتك
+              خدماتنا
               <ArrowLeft className="w-4 h-4" />
             </Button>
           </motion.div>

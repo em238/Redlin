@@ -94,7 +94,7 @@ export function Footer() {
             <ul className="space-y-2.5 text-sm">
               {LINKS.help.items.map((l, i) => (
                 <li key={i}>
-                  <button onClick={() => l === "تتبع الشحنة" ? go("#track") : undefined} className="text-zinc-400 hover:text-primary transition-colors">{l}</button>
+                  <button onClick={() => l === "تتبع الشحنة" ? go("#contact") : undefined} className="text-zinc-400 hover:text-primary transition-colors">{l}</button>
                 </li>
               ))}
             </ul>

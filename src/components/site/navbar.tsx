@@ -12,8 +12,6 @@ const NAV_LINKS = [
   { href: "#home", label: "الرئيسية" },
   { href: "#services", label: "خدماتنا" },
   { href: "#coverage", label: "التغطية" },
-  { href: "#pricing", label: "الأسعار" },
-  { href: "#track", label: "تتبع" },
   { href: "#videos", label: "المعرض" },
   { href: "#partners", label: "الشركاء" },
   { href: "#contact", label: "تواصل" },

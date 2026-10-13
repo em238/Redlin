@@ -25,16 +25,16 @@ export function CtaBanner() {
               جاهز تبدأ شحن مع <span className="text-amber-300">Redline؟</span>
             </h2>
             <p className="mt-4 text-white/85 text-lg max-w-2xl mx-auto">
-              انضم لأكثر من 12,000 عميل يثقون بنا يومياً. احسب سعر شحنتك الآن أو تواصل معنا لخدمة مخصصة.
+              انضم لأكثر من 12,000 عميل يثقون بنا يومياً. تواصل معنا الآن واحصل على عرض سعر مخصص لشحناتك.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Button
                 size="lg"
-                onClick={() => scrollTo("#pricing")}
+                onClick={() => scrollTo("#contact")}
                 className="bg-white text-primary hover:bg-white/90 gap-2 h-12 px-7 text-base shadow-xl"
               >
                 <Zap className="w-5 h-5" />
-                احسب سعر شحنتك
+                اطلب عرض سعر
                 <ArrowLeft className="w-4 h-4" />
               </Button>
               <a href="tel:19999">
