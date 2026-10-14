@@ -88,14 +88,16 @@ export function Hero() {
               />
             </motion.div>
           </AnimatePresence>
-          <div className="absolute inset-0 bg-gradient-to-l from-black/92 via-black/65 to-black/35" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/30" />
+          <div className="absolute inset-0 bg-gradient-to-l from-black/92 via-black/70 to-black/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-black/10 to-transparent" />
+          {/* Rich red ambient tint */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-amber-900/10 mix-blend-overlay" />
         </motion.div>
       </div>
 
       {/* Aurora glows */}
-      <div className="absolute top-1/3 left-0 w-96 h-96 bg-primary/30 rounded-full blur-[120px] -z-0 animate-aurora" />
-      <div className="absolute bottom-1/4 right-10 w-80 h-80 bg-amber-500/20 rounded-full blur-[100px] -z-0 animate-aurora" style={{ animationDelay: "4s" }} />
+      <div className="absolute top-1/3 left-0 w-[28rem] h-[28rem] bg-primary/25 rounded-full blur-[140px] -z-0 animate-aurora" />
+      <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-amber-500/15 rounded-full blur-[120px] -z-0 animate-aurora" style={{ animationDelay: "4s" }} />
 
       <motion.div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20 relative" style={{ y: yContent, opacity }}>
         <div className="max-w-3xl">
@@ -139,7 +141,7 @@ export function Hero() {
             <Button
               size="lg"
               onClick={() => scrollTo("#contact")}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 text-base h-12 px-6 font-semibold"
+              className="bg-gradient-to-r from-primary to-red-700 hover:from-red-600 hover:to-red-800 text-primary-foreground gap-2 text-base h-12 px-6 font-semibold shadow-lg shadow-primary/30 hover:shadow-primary/40 transition-shadow"
             >
               <Zap className="w-4.5 h-4.5" />
               اطلب شحن الآن
@@ -192,10 +194,10 @@ export function Hero() {
               transition={{ duration: 4 + i, repeat: Infinity, ease: "easeInOut" }}
               className="glass rounded-2xl border border-white/15 p-4 shadow-2xl pointer-events-auto w-44"
             >
-              <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${s.color} flex items-center justify-center mb-2`}>
+              <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${s.color} flex items-center justify-center mb-2 shadow-lg`}>
                 <s.icon className="w-4 h-4 text-white" />
               </div>
-              <div className="text-xl font-black text-white">{s.value}</div>
+              <div className="text-xl font-bold text-white">{s.value}</div>
               <div className="text-[11px] text-white/70">{s.label}</div>
             </motion.div>
           </motion.div>

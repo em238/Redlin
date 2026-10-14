@@ -15,10 +15,15 @@ export function CtaBanner() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="relative overflow-hidden rounded-3xl bg-primary p-8 sm:p-14 text-center"
+          className="relative overflow-hidden rounded-3xl p-8 sm:p-14 text-center"
+          style={{
+            background: "linear-gradient(135deg, oklch(0.45 0.22 28), oklch(0.38 0.18 18))",
+          }}
         >
-          <div className="absolute -top-16 -right-16 w-72 h-72 bg-white/10 rounded-full blur-3xl" />
-          <div className="absolute -bottom-16 -left-16 w-72 h-72 bg-black/10 rounded-full blur-3xl" />
+          <div className="absolute inset-0" style={{ background: "radial-gradient(at 20% 20%, oklch(0.55 0.2 40 / 0.4), transparent 50%), radial-gradient(at 80% 80%, oklch(0.6 0.18 350 / 0.3), transparent 50%)" }} />
+          <div className="absolute -top-20 -right-20 w-80 h-80 bg-amber-400/20 rounded-full blur-3xl" />
+          <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-red-900/30 rounded-full blur-3xl" />
+          <div className="absolute inset-0 noise" />
           <div className="relative">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight">
               جاهز تبدأ شحن مع <span className="text-amber-300">Redline؟</span>

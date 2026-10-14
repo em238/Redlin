@@ -30,7 +30,7 @@ export function Partners() {
   if (partners.length === 0) return null;
 
   return (
-    <section id="partners" className="py-20 sm:py-28 bg-muted/30">
+    <section id="partners" className="py-20 sm:py-28 mesh-tint">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
           eyebrow={<span className="flex items-center gap-1.5"><Star className="w-3.5 h-3.5" /> شركاء النجاح</span>}
@@ -47,7 +47,7 @@ export function Partners() {
                   href={p.website || "#"}
                   target={p.website ? "_blank" : undefined}
                   rel={p.website ? "noopener noreferrer" : undefined}
-                  className="group block rounded-2xl bg-card border border-border/60 shadow-soft p-6 h-28 flex flex-col items-center justify-center gap-2 hover:shadow-card hover:border-primary/30 transition-all"
+                  className="card-premium relative group block rounded-2xl bg-card border border-border/60 shadow-soft p-6 h-28 flex flex-col items-center justify-center gap-2"
                 >
                   {p.logo ? (
                     <div className="w-14 h-14 flex items-center justify-center">

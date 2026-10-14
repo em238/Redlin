@@ -184,6 +184,82 @@
   -webkit-text-fill-color: transparent;
 }
 
+/* === Premium spices === */
+/* Subtle noise texture overlay (breaks flat white) */
+.noise {
+  position: relative;
+}
+.noise::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Soft mesh gradient background (premium tint) */
+.mesh-tint {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(at 15% 15%, oklch(0.55 0.2 28 / 0.05) 0px, transparent 50%),
+    radial-gradient(at 85% 20%, oklch(0.7 0.16 45 / 0.04) 0px, transparent 50%),
+    radial-gradient(at 50% 90%, oklch(0.55 0.2 28 / 0.03) 0px, transparent 50%);
+}
+
+/* Premium card: gradient top accent on hover + colored lift */
+.card-premium {
+  position: relative;
+  transition: box-shadow 0.3s, transform 0.3s, border-color 0.3s;
+}
+.card-premium::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  top: 0;
+  height: 2px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.card-premium:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in oklch, var(--primary) 35%, var(--border));
+  box-shadow:
+    0 4px 6px -4px oklch(0.55 0.2 28 / 0.15),
+    0 12px 28px -8px oklch(0.55 0.2 28 / 0.2);
+}
+.card-premium:hover::before {
+  opacity: 1;
+}
+
+/* Refined primary glow */
+.glow-primary {
+  box-shadow: 0 0 40px -12px oklch(0.55 0.2 28 / 0.5);
+}
+
+/* Gradient border (for emphasis cards) */
+.gradient-border {
+  position: relative;
+  background: var(--card);
+  background-clip: padding-box;
+  border: 1px solid transparent;
+}
+.gradient-border::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, oklch(0.55 0.2 28 / 0.5), transparent 50%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
 /* Glow effect for hero */
 .glow-red {
   box-shadow: 0 0 80px -20px oklch(0.52 0.22 27 / 0.5);

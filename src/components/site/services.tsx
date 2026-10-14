@@ -43,8 +43,8 @@ export function Services() {
             const Icon = ICONS[s.icon] || Package;
             return (
               <StaggerItem key={s.name}>
-                <div className="group rounded-2xl border border-border/60 bg-card shadow-soft p-6 sm:p-7 hover:shadow-card hover:border-primary/30 transition-all duration-300 h-full">
-                  <div className="w-12 h-12 rounded-xl bg-primary/8 flex items-center justify-center mb-5 group-hover:scale-105 transition-transform">
+                <div className="card-premium rounded-2xl border border-border/60 bg-card shadow-soft p-6 sm:p-7 h-full group">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                     <Icon className="w-6 h-6 text-primary" strokeWidth={2} />
                   </div>
                   <h3 className="text-lg font-bold">{s.nameAr}</h3>

@@ -42,7 +42,7 @@ export function Navbar() {
       <ScrollProgress />
       <header
         className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
-          scrolled ? "bg-background/80 backdrop-blur-xl border-b border-border/60" : "bg-transparent"
+          scrolled ? "bg-background/75 backdrop-blur-xl border-b border-border/60 shadow-soft" : "bg-transparent"
         }`}
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
