@@ -43,7 +43,7 @@ export function Testimonials() {
           subtitle="أكثر من 12,000 عميل يثقون في Redline لشحناتهم يومياً"
         />
 
-        <div className="max-w-3xl mx-auto" onMouseEnter={() => setAuto(false)} onMouseLeave={() => setAuto(true)}>
+        <div className="max-w-4xl mx-auto" onMouseEnter={() => setAuto(false)} onMouseLeave={() => setAuto(true)}>
           <div className="relative">
             <AnimatePresence mode="wait">
               <motion.div
@@ -52,26 +52,34 @@ export function Testimonials() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -16 }}
                 transition={{ duration: 0.35 }}
-                className="relative rounded-2xl border border-border/60 bg-card shadow-card p-8 sm:p-12"
+                className="relative rounded-3xl border border-border/60 bg-gradient-to-br from-card to-muted/20 shadow-card p-8 sm:p-12 overflow-hidden"
               >
-                <Quote className="absolute top-4 left-4 w-20 h-20 text-primary/[0.06]" />
-                <div className="flex gap-0.5 mb-4 relative">
-                  {Array.from({ length: current.rating }).map((_, j) => (
-                    <Star key={j} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                  ))}
-                </div>
-                <p className="text-lg sm:text-xl leading-relaxed font-medium text-foreground/90">
-                  "{current.content}"
-                </p>
-                <div className="mt-6 flex items-center gap-3 pt-6 border-t border-border/60">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-amber-600 p-[2px] shadow-soft shrink-0">
-                    <div className="w-full h-full rounded-full bg-card flex items-center justify-center text-primary font-bold text-lg">
-                      {current.name.charAt(0)}
+                {/* Big watermark quote */}
+                <Quote className="absolute -top-4 -left-2 w-32 h-32 text-primary/[0.05] rotate-180" />
+                {/* Horizontal layout: quote on right, author card on left */}
+                <div className="relative flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-10">
+                  {/* Author side */}
+                  <div className="flex sm:flex-col items-center gap-4 sm:gap-3 sm:min-w-[180px] sm:border-l-2 sm:border-primary/30 sm:pr-8 sm:order-2">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-amber-600 p-[2px] shadow-soft shrink-0">
+                      <div className="w-full h-full rounded-full bg-card flex items-center justify-center text-primary font-bold text-xl">
+                        {current.name.charAt(0)}
+                      </div>
+                    </div>
+                    <div className="text-center sm:text-left">
+                      <div className="font-bold">{current.name}</div>
+                      <div className="text-sm text-muted-foreground">{current.role}{current.company ? ` · ${current.company}` : ""}</div>
                     </div>
                   </div>
-                  <div>
-                    <div className="font-bold">{current.name}</div>
-                    <div className="text-sm text-muted-foreground">{current.role}{current.company ? ` · ${current.company}` : ""}</div>
+                  {/* Quote side */}
+                  <div className="flex-1 sm:order-1">
+                    <div className="flex gap-0.5 mb-4">
+                      {Array.from({ length: current.rating }).map((_, j) => (
+                        <Star key={j} className="w-5 h-5 fill-amber-400 text-amber-400" />
+                      ))}
+                    </div>
+                    <p className="text-lg sm:text-2xl leading-relaxed font-medium text-foreground/90">
+                      "{current.content}"
+                    </p>
                   </div>
                 </div>
               </motion.div>

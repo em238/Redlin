@@ -50,24 +50,24 @@ export function Partners() {
                   className="card-premium shine relative group block rounded-2xl bg-card border border-border/60 shadow-soft p-6 h-28 flex flex-col items-center justify-center gap-2 overflow-hidden"
                 >
                   {p.logo ? (
-                    <div className="w-14 h-14 flex items-center justify-center">
+                    <div className="w-16 h-16 flex items-center justify-center">
                       <Image
                         src={p.logo}
                         alt={p.name}
-                        width={56}
-                        height={56}
-                        className="object-contain max-h-14 max-w-14 group-hover:scale-105 transition-transform duration-300"
+                        width={64}
+                        height={64}
+                        className="object-contain max-h-16 max-w-16 grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300"
                       />
                     </div>
                   ) : (
                     <div
-                      className="w-11 h-11 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform"
+                      className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform"
                       style={{ background: `${p.color}15` }}
                     >
-                      <Icon className="w-5 h-5" style={{ color: p.color }} />
+                      <Icon className="w-6 h-6" style={{ color: p.color }} />
                     </div>
                   )}
-                  <div className="text-sm font-semibold text-foreground/80 text-center">{p.name}</div>
+                  <div className="text-sm font-semibold text-foreground/70 group-hover:text-foreground text-center transition-colors">{p.name}</div>
                   {p.website && (
                     <ExternalLink className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity absolute top-3 left-3" />
                   )}
