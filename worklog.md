@@ -338,3 +338,36 @@ Stage Summary:
 - الـ markers بقت "city-light" متوهجة بـ breathing ناعم بدل radar rings المتسعة
 - الـ side panel بتعبر عن البلاد بس: اسم المحافظة + المنطقة + زمن التوصيل + نقطة نشطة
 - 0 errors
+
+---
+Task ID: 11
+Agent: Orchestrator (main)
+Task: إعادة تصميم الخريطة بستايل political map احترافي (مطابقة الصورة المرجعية)
+
+Work Log:
+- حللت الصورة المرجعية بـ VLM: خريطة سياسية احترافية بألوان pastel فاتحة، بحر أزرق فاتح، dots سوداء صغيرة للمدن، أسماء bold inline، نيل أزرق رفيع، حدود بيضاء رفيعة، بدون sidebar منفصل
+- أعدت بناء interactive-map.tsx بستايل political map نظيف:
+  * palette: SEA (#e0f2fe), EGYPT_FILL (#fde2e4 salmon), EGYPT_STROKE (#ffffff), NILE (#38bdf8), TEXT_SEA (#0284c7)
+  * البحر: gradient (seaGrad) من #bae6fd لـ #e0f2fe + grid خطوط lat/long خفيفة (#7dd3fc)
+  * مصر: gradient fill (salmon) + حدود بيضاء strokeWidth=2 + inner shading رفيع
+  * النيل: خط أزرق (#38bdf8) للفرع الرئيسي + فروع دمياط ورشيد (أرفع)
+  * تسميات البحار: italic blue (المتوسط، الأحمر، الصحراء الغربية)
+  * تسمية "مصر": bold كبيرة شبه شفافة في وسط مصر
+  * compass rose (N) + scale bar (0—300 كم) = لمسة احترافية
+  * Cairo hub: dot أحمر + نجمة ذهبية (عاصمة مميزة)
+  * 26 marker للمحافظات: dots نظيفة (zone colors) بحدود بيضاء + halo عند hover + inline label (bold) floating card
+  * connection lines من المختار لباقي المحافظات (dashed subtle)
+  * header: "خريطة التغطية — جمهورية مصر العربية" + عدّاد محافظات بـ pulse
+  * zone legend في الأسفل
+  * side panel نظيف: اسم + منطقة + zone badge + زمن التوصيل + حالة (نقطة نشطة) + رسالة تغطية
+- أصلحت خطأ: EGYPT_BORDER كان متعرف مرتين (import + local) → غيرت الـ local لـ EGYPT_STROKE
+- ESLint: 0 errors
+- تحقق Agent Browser:
+  * البحر المتوسط: true, البحر الأحمر: true, مصر: true, كم scale: true, dots: 54
+  * بعد click على marker: زمن التوصيل true, نقطة نشطة true, placeholder اتشال
+  * لا أخطاء
+
+Stage Summary:
+- الخريطة بقت political map احترافي نظيف: بحر أزرق فاتح، مصر salmon pastel، dots ملونة بحدود بيضاء، أسماء inline bold، نيل أزرق، compass + scale bar
+- مطابقة للصورة المرجعية بألوان pastel هادئة وستايل سياسي احترافي
+- 0 errors، التفاعل شغّال
