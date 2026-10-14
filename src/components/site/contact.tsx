@@ -106,7 +106,7 @@ export function Contact() {
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="lg:col-span-3 rounded-3xl border border-border bg-card p-8 shadow-sm"
+            className="lg:col-span-3 rounded-3xl border border-border bg-card p-8 shadow-card"
           >
             <div className="flex items-center gap-2 mb-6">
               <MessageSquare className="w-5 h-5 text-primary" />
@@ -159,7 +159,7 @@ export function Contact() {
             </div>
             <Button
               onClick={submit} disabled={loading}
-              className="mt-5 w-full h-12 bg-gradient-to-r from-primary to-red-700 hover:from-red-600 hover:to-red-800 text-white gap-2 text-base group"
+              className="btn-glow mt-5 w-full h-12 bg-gradient-to-r from-primary to-red-700 hover:from-red-600 hover:to-red-800 text-white gap-2 text-base font-semibold"
             >
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
               إرسال الرسالة

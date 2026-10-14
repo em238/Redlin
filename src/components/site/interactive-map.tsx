@@ -111,7 +111,7 @@ export function InteractiveMap() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="mt-4 text-zinc-400 text-lg"
+            className="mt-4 text-zinc-300 text-lg"
           >
             {markers.length} محافظة مصرية + {regional.length} مركز إقليمي — جرّب الضغط على أي نقطة
           </motion.p>
@@ -357,7 +357,7 @@ export function InteractiveMap() {
                       className="rounded-2xl bg-zinc-950/90 backdrop-blur-md border border-primary/30 shadow-2xl p-4">
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
-                          <div className="flex items-center gap-1.5 text-[11px] text-zinc-400">
+                          <div className="flex items-center gap-1.5 text-[11px] text-zinc-300">
                             <MapPin className="w-3 h-3" style={{ color: ZONE[sel.zone]?.color }} />
                             {ZONE[sel.zone]?.label}
                           </div>
@@ -375,7 +375,7 @@ export function InteractiveMap() {
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                       className="rounded-2xl bg-zinc-950/85 backdrop-blur-md border border-white/10 shadow-lg p-3 flex items-center gap-2">
                       <Radio className="w-4 h-4 text-primary animate-slow-pulse shrink-0" />
-                      <span className="text-xs text-zinc-400">اضغط على أي محافظة</span>
+                      <span className="text-xs text-zinc-300">اضغط على أي محافظة</span>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -385,7 +385,7 @@ export function InteractiveMap() {
             {/* Zone legend */}
             <div className="flex flex-wrap items-center justify-center gap-3 px-4 py-3 border-t border-white/10 bg-zinc-950/80">
               {Object.entries(ZONE).map(([k, v]) => (
-                <div key={k} className="flex items-center gap-1.5 text-xs text-zinc-400">
+                <div key={k} className="flex items-center gap-1.5 text-xs text-zinc-300">
                   <span className="w-2.5 h-2.5 rounded-full" style={{ background: v.color, boxShadow: "0 0 8px " + v.color }} />
                   <span className="font-medium">{v.label}</span>
                   <span className="text-zinc-600">({zoneCounts[k] || 0})</span>

@@ -38,7 +38,7 @@ export function Footer() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="grid gap-10 lg:grid-cols-12">
           {/* Brand */}
-          <div className="lg:col-span-4">
+          <div className="lg:col-span-3">
             <div className="flex items-center gap-2.5 mb-5">
               <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
                 <Truck className="w-4.5 h-4.5 text-white" strokeWidth={2.4} />
@@ -101,7 +101,7 @@ export function Footer() {
           </div>
 
           {/* Newsletter */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-3">
             <h4 className="font-bold text-white text-sm mb-4">النشرة البريدية</h4>
             <p className="text-xs text-zinc-400 mb-3">اشترك لتصلك آخر العروض والأخبار</p>
             <div className="flex gap-2">
