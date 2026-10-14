@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Clock, Building2, Navigation, Layers, CheckCircle2 } from "lucide-react";
+import { MapPin, Clock, Building2, Navigation, Layers, CheckCircle2, Radio } from "lucide-react";
 import { apiGet } from "@/lib/api";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { EGYPT_BORDER, NILE_MAIN, NILE_DAMIETTA, NILE_ROSETTA, GOV_COORDS, project, pathFromCoords } from "@/lib/egypt-coords";
@@ -14,31 +14,35 @@ interface Gov {
 }
 
 const FALLBACK: Gov[] = [
-  { id: "1", name: "Cairo", nameAr: "القاهره", zone: "A", basePrice: 30, etaHours: 24, active: true },
-  { id: "2", name: "Giza", nameAr: "الجيزه", zone: "A", basePrice: 30, etaHours: 24, active: true },
-  { id: "3", name: "Alexandria", nameAr: "الاسكندريه", zone: "A", basePrice: 40, etaHours: 36, active: true },
+  { id: "1", name: "Cairo", nameAr: "القاهرة", zone: "A", basePrice: 30, etaHours: 24, active: true },
+  { id: "2", name: "Giza", nameAr: "الجيزة", zone: "A", basePrice: 30, etaHours: 24, active: true },
+  { id: "3", name: "Alexandria", nameAr: "الاسكندرية", zone: "A", basePrice: 40, etaHours: 36, active: true },
   { id: "4", name: "Aswan", nameAr: "اسوان", zone: "D", basePrice: 90, etaHours: 96, active: true },
   { id: "5", name: "Luxor", nameAr: "الاقصر", zone: "D", basePrice: 80, etaHours: 96, active: true },
 ];
 
-const ZONE: Record<string, { label: string; color: string; soft: string }> = {
-  A: { label: "القاهرة الكبرى", color: "#059669", soft: "#a7f3d0" },
-  B: { label: "الوجه البحري", color: "#2563eb", soft: "#bfdbfe" },
-  C: { label: "الصعيد", color: "#d97706", soft: "#fde68a" },
-  D: { label: "الحدود", color: "#e11d48", soft: "#fecdd3" },
+const ZONE: Record<string, { label: string; color: string }> = {
+  A: { label: "القاهرة الكبرى", color: "#34d399" },
+  B: { label: "الوجه البحري", color: "#60a5fa" },
+  C: { label: "الصعيد", color: "#fbbf24" },
+  D: { label: "الحدود", color: "#fb7185" },
 };
 
 const HUB = "Cairo";
+const HUB_COLOR = "#ef4444";
 
-// Political-map palette
-const SEA = "#e0f2fe";
-const SEA_DEEP = "#bae6fd";
-const EGYPT_FILL = "#fde2e4";
-const EGYPT_FILL2 = "#fcc5cc";
-const EGYPT_STROKE = "#ffffff";
-const NILE_COLOR = "#38bdf8";
-const TEXT_DARK = "#1e293b";
-const TEXT_SEA = "#0284c7";
+// Stars + particles (stable random positions)
+const STARS = Array.from({ length: 70 }).map((_, i) => ({
+  x: (i * 137.5) % 600,
+  y: (i * 89.3) % 720,
+  r: (i % 3) * 0.4 + 0.4,
+  delay: (i % 7) * 0.6,
+}));
+const PARTICLES = Array.from({ length: 18 }).map((_, i) => ({
+  x: 40 + ((i * 53) % 520),
+  y: 60 + ((i * 91) % 600),
+  delay: (i % 6) * 0.8,
+}));
 
 export function InteractiveMap() {
   const { data } = useQuery({
@@ -71,150 +75,230 @@ export function InteractiveMap() {
   }, [markers]);
 
   return (
-    <section id="map" className="py-20 sm:py-28 bg-gradient-to-b from-background to-muted/30 relative overflow-hidden">
+    <section id="map" className="py-20 sm:py-28 bg-zinc-950 relative overflow-hidden">
+      {/* Atmospheric background */}
+      <div className="absolute inset-0 grid-bg opacity-15" />
+      <div className="absolute top-10 right-20 w-[500px] h-[500px] bg-primary/15 rounded-full blur-[140px] animate-aurora" />
+      <div className="absolute bottom-10 left-20 w-[400px] h-[400px] bg-cyan-500/10 rounded-full blur-[120px] animate-aurora" style={{ animationDelay: "5s" }} />
+
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <SectionHeading
-          eyebrow={<span className="flex items-center gap-1.5"><Layers className="w-4 h-4" /> شبكة التغطية</span>}
-          title={<>خريطة <span className="text-gradient-red">مصر</span> الكاملة</>}
-          subtitle="27 محافظة بنقاط توصيل نشطة — استكشف الخريطة واضغط على أي محافظة لعرض تفاصيلها"
-        />
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <motion.span
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-primary/20 text-primary text-sm font-bold mb-4 border border-primary/40"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-slow-pulse" />
+            <Radio className="w-4 h-4" /> مركز القيادة اللوجستي
+          </motion.span>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-[1.15] text-white"
+          >
+            شبكة <span className="text-gradient-red">Redline</span> الحية على خريطة مصر
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="mt-4 text-zinc-400 text-lg"
+          >
+            27 نقطة توصيل نشطة — كل عمود ضوء يمثل محافظة. جرّب الضغط على أي نقطة
+          </motion.p>
+        </div>
 
         <div className="max-w-7xl mx-auto space-y-4">
-          {/* Map card — full width, clean political map style */}
+          {/* Map card — holographic command center */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="relative rounded-3xl bg-white border border-border shadow-2xl shadow-black/10 overflow-hidden"
+            className="relative rounded-3xl bg-black border border-primary/20 shadow-2xl shadow-primary/10 overflow-hidden"
           >
-            {/* Map header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
-              <div className="flex items-center gap-2 text-sm">
-                <Navigation className="w-4 h-4 text-primary" />
-                <span className="font-bold">خريطة التغطية — جمهورية مصر العربية</span>
+            {/* HUD header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-zinc-950/80">
+              <div className="flex items-center gap-2 text-sm text-white">
+                <Radio className="w-4 h-4 text-primary animate-slow-pulse" />
+                <span className="font-bold">LIVE LOGISTICS GRID — ARAB REPUBLIC OF EGYPT</span>
               </div>
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                 </span>
-                {markers.length} محافظة
+                {markers.length} NODES ACTIVE
               </div>
             </div>
 
-            {/* SVG political map — wide full-width */}
-            <div className="relative w-full aspect-[16/11] sm:aspect-[16/9] bg-[#e0f2fe]">
+            {/* SVG holographic map — wide */}
+            <div className="relative w-full aspect-[16/11] sm:aspect-[16/9] bg-gradient-to-b from-black via-zinc-950 to-black">
               <svg viewBox="0 0 600 720" preserveAspectRatio="xMidYMid meet" className="w-full h-full" style={{ touchAction: "none" }}>
                 <defs>
-                  <linearGradient id="seaGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={SEA_DEEP} />
-                    <stop offset="100%" stopColor={SEA} />
+                  {/* beam gradients (vertical: transparent top → bright base) */}
+                  {Object.entries(ZONE).map(([k, v]) => (
+                    <linearGradient key={"beam" + k} id={"beam" + k} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={v.color} stopOpacity="0" />
+                      <stop offset="70%" stopColor={v.color} stopOpacity="0.5" />
+                      <stop offset="100%" stopColor={v.color} stopOpacity="0.95" />
+                    </linearGradient>
+                  ))}
+                  <linearGradient id="beamHub" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={HUB_COLOR} stopOpacity="0" />
+                    <stop offset="70%" stopColor={HUB_COLOR} stopOpacity="0.5" />
+                    <stop offset="100%" stopColor={HUB_COLOR} stopOpacity="1" />
                   </linearGradient>
-                  <linearGradient id="egyptGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={EGYPT_FILL} />
-                    <stop offset="100%" stopColor={EGYPT_FILL2} />
+
+                  {/* dot glow (radial) */}
+                  {Object.entries(ZONE).map(([k, v]) => (
+                    <radialGradient key={"dg" + k} id={"dg" + k} cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stopColor={v.color} stopOpacity="0.9" />
+                      <stop offset="100%" stopColor={v.color} stopOpacity="0" />
+                    </radialGradient>
+                  ))}
+                  <radialGradient id="dgHub" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor={HUB_COLOR} stopOpacity="1" />
+                    <stop offset="100%" stopColor={HUB_COLOR} stopOpacity="0" />
+                  </radialGradient>
+
+                  {/* radar sweep fade */}
+                  <linearGradient id="radarGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor={HUB_COLOR} stopOpacity="0.5" />
+                    <stop offset="100%" stopColor={HUB_COLOR} stopOpacity="0" />
                   </linearGradient>
-                  <linearGradient id="nileGradP" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={NILE_COLOR} />
-                    <stop offset="100%" stopColor="#0ea5e9" />
+
+                  {/* nile neon */}
+                  <linearGradient id="nileNeon" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#67e8f9" stopOpacity="0.95" />
+                    <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.6" />
                   </linearGradient>
-                  <filter id="dotShadow" x="-50%" y="-50%" width="200%" height="200%">
-                    <feDropShadow dx="0" dy="1" stdDeviation="1" floodOpacity="0.3" />
+
+                  {/* egypt wireframe glow */}
+                  <linearGradient id="egyptWire" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#dc2626" stopOpacity="0.12" />
+                    <stop offset="100%" stopColor="#dc2626" stopOpacity="0.04" />
+                  </linearGradient>
+
+                  <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="3" result="b" />
+                    <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+                  </filter>
+                  <filter id="bigGlow" x="-100%" y="-100%" width="300%" height="300%">
+                    <feGaussianBlur stdDeviation="6" />
                   </filter>
                 </defs>
 
-                {/* Sea background */}
-                <rect width="600" height="720" fill="url(#seaGrad)" />
+                {/* Stars background */}
+                {STARS.map((s, i) => (
+                  <circle key={"star" + i} cx={s.x} cy={s.y} r={s.r} fill="#fff" opacity="0.4" className="particle" style={{ animationDelay: s.delay + "s" }} />
+                ))}
 
-                {/* Subtle sea grid (lat/long lines) for professional map feel */}
-                <g stroke="#7dd3fc" strokeWidth="0.4" strokeOpacity="0.4">
-                  {[100, 200, 300, 400, 500].map((x) => (
-                    <line key={"v" + x} x1={x} y1="0" x2={x} y2="720" />
+                {/* Lat/long grid (subtle cyan) */}
+                <g stroke="#0ea5e9" strokeWidth="0.3" strokeOpacity="0.12">
+                  {[60, 120, 180, 240, 300, 360, 420, 480, 540].map((x) => (
+                    <line key={"gv" + x} x1={x} y1="0" x2={x} y2="720" />
                   ))}
-                  {[100, 200, 300, 400, 500, 600].map((y) => (
-                    <line key={"h" + y} x1="0" y1={y} x2="600" y2={y} />
+                  {[60, 120, 180, 240, 300, 360, 420, 480, 540, 600, 660].map((y) => (
+                    <line key={"gh" + y} x1="0" y1={y} x2="600" y2={y} />
                   ))}
                 </g>
 
-                {/* Egypt landmass */}
-                <path d={pathFromCoords(EGYPT_BORDER) + " Z"} fill="url(#egyptGrad)" stroke={EGYPT_STROKE} strokeWidth="2" strokeLinejoin="round" />
-                {/* subtle inner shading */}
-                <path d={pathFromCoords(EGYPT_BORDER) + " Z"} fill="none" stroke="#f9a8b0" strokeWidth="0.6" strokeOpacity="0.5" transform="translate(1 1)" />
+                {/* Egypt wireframe landmass */}
+                <path d={pathFromCoords(EGYPT_BORDER) + " Z"} fill="url(#egyptWire)" />
+                <path d={pathFromCoords(EGYPT_BORDER) + " Z"} fill="none" stroke="#dc2626" strokeWidth="1.2" strokeOpacity="0.6" filter="url(#softGlow)" />
+                <path d={pathFromCoords(EGYPT_BORDER) + " Z"} fill="none" stroke="#fca5a5" strokeWidth="0.5" strokeOpacity="0.4" strokeDasharray="3 2" />
 
-                {/* Nile river */}
-                <path d={pathFromCoords(NILE_MAIN)} fill="none" stroke={NILE_COLOR} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                <path d={pathFromCoords(NILE_DAMIETTA)} fill="none" stroke={NILE_COLOR} strokeWidth="1.8" strokeLinecap="round" strokeOpacity="0.85" />
-                <path d={pathFromCoords(NILE_ROSETTA)} fill="none" stroke={NILE_COLOR} strokeWidth="1.8" strokeLinecap="round" strokeOpacity="0.85" />
+                {/* Nile neon */}
+                <path d={pathFromCoords(NILE_MAIN)} fill="none" stroke="url(#nileNeon)" strokeWidth="3" strokeLinecap="round" filter="url(#softGlow)" />
+                <path d={pathFromCoords(NILE_DAMIETTA)} fill="none" stroke="url(#nileNeon)" strokeWidth="2" strokeLinecap="round" strokeOpacity="0.7" />
+                <path d={pathFromCoords(NILE_ROSETTA)} fill="none" stroke="url(#nileNeon)" strokeWidth="2" strokeLinecap="round" strokeOpacity="0.7" />
+                <path d={pathFromCoords(NILE_MAIN)} fill="none" stroke="#a5f3fc" strokeWidth="1" strokeLinecap="round" strokeOpacity="0.7" strokeDasharray="2 8" className="nile-flow" />
 
-                {/* Sea labels (italic blue, like political maps) */}
-                <text x="300" y="30" fill={TEXT_SEA} fontSize="13" fontStyle="italic" textAnchor="middle" className="font-semibold">البحر المتوسط</text>
-                <text x="555" y="380" fill={TEXT_SEA} fontSize="11" fontStyle="italic" textAnchor="middle" transform="rotate(-90 555 380)">البحر الأحمر</text>
-                <text x="120" y="690" fill={TEXT_SEA} fontSize="10" fontStyle="italic" textAnchor="middle">الصحراء الغربية</text>
+                {/* Network lines from Cairo hub to all nodes */}
+                {hub && markers.filter((m) => m.name !== hub.name).map((m, i) => {
+                  const zc = ZONE[m.zone]?.color || HUB_COLOR;
+                  const isActive = selected === m.name || hovered === m.name;
+                  return (
+                    <line key={"net" + m.id} x1={hub.x} y1={hub.y} x2={m.x} y2={m.y}
+                      stroke={zc} strokeWidth={isActive ? 1.4 : 0.6} strokeOpacity={isActive ? 0.6 : 0.16}
+                      strokeDasharray="4 4" className="flow-line" style={{ animationDelay: (i % 6) * 0.2 + "s" }} />
+                  );
+                })}
 
-                {/* Egypt country label (bold, centered) */}
-                <text x="300" y="430" fill="#9f1239" fontSize="22" textAnchor="middle" className="font-black tracking-widest opacity-30">مصر</text>
-
-                {/* Connection lines from selected to others (subtle dashed) */}
-                {sel && markers.filter((m) => m.name !== sel.name).slice(0, 8).map((m, i) => (
-                  <motion.line
-                    key={"sel" + m.id}
-                    x1={sel.x} y1={sel.y} x2={m.x} y2={m.y}
-                    stroke={ZONE[m.zone]?.color || "#dc2626"}
-                    strokeWidth="1"
-                    strokeOpacity="0.35"
-                    strokeDasharray="3 3"
-                    initial={{ pathLength: 0, opacity: 0 }}
-                    animate={{ pathLength: 1, opacity: 0.35 }}
-                    transition={{ duration: 0.5, delay: i * 0.05 }}
-                  />
+                {/* Floating particles */}
+                {PARTICLES.map((p, i) => (
+                  <circle key={"p" + i} cx={p.x} cy={p.y} r="1.5" fill={HUB_COLOR} opacity="0.4" className="particle" style={{ animationDelay: p.delay + "s" }} />
                 ))}
 
-                {/* Cairo hub marker (capital — star/special) */}
+                {/* Sea labels (subtle) */}
+                <text x="300" y="28" fill="#334155" fontSize="12" textAnchor="middle" className="font-medium">MEDITERRANEAN</text>
+                <text x="555" y="380" fill="#334155" fontSize="10" textAnchor="middle" transform="rotate(-90 555 380)">RED SEA</text>
+                <text x="300" y="420" fill="#7f1d1d" fontSize="26" textAnchor="middle" className="font-black tracking-widest opacity-20">EGYPT</text>
+
+                {/* Cairo hub: radar sweep + beam */}
                 {hub && (
                   <g transform={`translate(${hub.x} ${hub.y})`} className="cursor-pointer" onMouseEnter={() => setHovered(hub.name)} onMouseLeave={() => setHovered(null)} onClick={() => setSelected(hub.name)}>
+                    {/* radar sweep (rotating sector) */}
+                    <g>
+                      <path d="M 0 0 L 95 0 A 95 95 0 0 0 67 -67 Z" fill="url(#radarGrad)" opacity="0.45">
+                        <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="4s" repeatCount="indefinite" />
+                      </path>
+                    </g>
+                    {/* radar rings */}
+                    <circle r="30" fill="none" stroke={HUB_COLOR} strokeWidth="0.8" strokeOpacity="0.3" />
+                    <circle r="55" fill="none" stroke={HUB_COLOR} strokeWidth="0.6" strokeOpacity="0.2" />
+                    <circle r="80" fill="none" stroke={HUB_COLOR} strokeWidth="0.4" strokeOpacity="0.1" />
+                    {/* vertical beam */}
+                    <rect x="-2" y="-72" width="4" height="72" fill="url(#beamHub)" className="beam-pulse" />
+                    {/* base glow */}
+                    <circle r="20" fill="url(#dgHub)" opacity="0.7" />
+                    {/* main dot */}
+                    <circle r="7" fill={HUB_COLOR} stroke="#fff" strokeWidth="2" filter="url(#softGlow)" />
+                    <circle r="2.5" fill="#fff" />
+                    {/* top orb */}
+                    <circle cx="0" cy="-72" r="3.5" fill="#fff" filter="url(#softGlow)" />
+                    <circle cx="0" cy="-72" r="6" fill={HUB_COLOR} fillOpacity="0.4" filter="url(#bigGlow)" />
+                    {/* label */}
                     {(hovered === hub.name || selected === hub.name) && (
-                      <circle r="14" fill="none" stroke="#dc2626" strokeWidth="1.5" strokeOpacity="0.5" />
-                    )}
-                    <circle r="6" fill="#dc2626" stroke="#fff" strokeWidth="2" filter="url(#dotShadow)" />
-                    <path d="M 0 -8 L 1.8 -3 L 6 -3 L 2.5 0 L 3.6 4.5 L 0 2 L -3.6 4.5 L -2.5 0 L -6 -3 L -1.8 -3 Z" fill="#fbbf24" stroke="#fff" strokeWidth="0.8" transform="translate(0 -7) scale(0.6)" />
-                    {(hovered === hub.name || selected === hub.name) && (
-                      <g transform="translate(0 -20)">
-                        <path d="M -3 8 L 3 8 L 0 13 Z" fill="#1e293b" />
-                        <rect x="-44" y="-16" width="88" height="24" rx="6" fill="#1e293b" />
-                        <text y="-1" textAnchor="middle" fill="#fff" fontSize="12" className="font-bold">★ {hub.nameAr} (العاصمة)</text>
+                      <g transform="translate(0 -90)">
+                        <path d="M -3 8 L 3 8 L 0 13 Z" fill="#dc2626" />
+                        <rect x="-46" y="-16" width="92" height="24" rx="6" fill="#0a0a0a" stroke={HUB_COLOR} strokeWidth="1.5" filter="url(#softGlow)" />
+                        <text y="-1" textAnchor="middle" fill="#fff" fontSize="12" className="font-bold">★ {hub.nameAr} HQ</text>
                       </g>
                     )}
                   </g>
                 )}
 
-                {/* Governorate markers — clean political-map dots */}
+                {/* Governorate markers — beacons (light beams) */}
                 {markers.filter((m) => m.name !== HUB).map((m) => {
                   const z = ZONE[m.zone] || ZONE.A;
                   const isSel = selected === m.name;
                   const isHov = hovered === m.name;
                   const active = isSel || isHov;
+                  const beamH = active ? 60 : 48;
                   return (
-                    <g
-                      key={m.id}
-                      transform={`translate(${m.x} ${m.y})`}
-                      className="cursor-pointer"
-                      onMouseEnter={() => setHovered(m.name)}
-                      onMouseLeave={() => setHovered(null)}
-                      onClick={() => setSelected(m.name)}
-                    >
-                      {/* selection ring */}
-                      {active && <circle r="12" fill="none" stroke={z.color} strokeWidth="1.5" strokeOpacity="0.45" />}
-                      {/* soft halo */}
-                      {active && <circle r="10" fill={z.color} fillOpacity="0.18" />}
-                      {/* main dot */}
-                      <circle r={active ? 5.5 : 4} fill={z.color} stroke="#fff" strokeWidth="1.8" filter="url(#dotShadow)" />
-                      {/* center dot */}
-                      <circle r="1.4" fill="#fff" />
-                      {/* inline label (political map style) */}
+                    <g key={m.id} transform={`translate(${m.x} ${m.y})`} className="cursor-pointer" onMouseEnter={() => setHovered(m.name)} onMouseLeave={() => setHovered(null)} onClick={() => setSelected(m.name)}>
+                      {/* vertical light beam */}
+                      <rect x="-1.5" y={-beamH} width="3" height={beamH} fill={`url(#beam${m.zone})`} className={active ? "beam-pulse" : "beam-pulse-2"} opacity={active ? 1 : 0.75} />
+                      {/* top orb glow */}
+                      <circle cx="0" cy={-beamH} r="7" fill={z.color} fillOpacity="0.35" filter="url(#bigGlow)" />
+                      {/* top orb */}
+                      <circle cx="0" cy={-beamH} r="2.8" fill="#fff" filter="url(#softGlow)" />
+                      {/* base glow */}
+                      <circle r="14" fill={`url(#dg${m.zone})`} opacity={active ? 0.9 : 0.5} className="city-light" />
+                      {/* base dot */}
+                      <circle r={active ? 5.5 : 4} fill={z.color} stroke="#fff" strokeWidth="1.6" filter="url(#softGlow)" />
+                      <circle r="1.5" fill="#fff" />
+                      {/* pulse ring */}
+                      {active && <circle r="4" fill="none" stroke={z.color} strokeWidth="1.5" className="radar-ring" style={{ filter: "drop-shadow(0 0 4px " + z.color + ")" }} />}
+                      {/* label */}
                       {active && (
-                        <g transform="translate(0 -16)">
-                          <path d="M -3 7 L 3 7 L 0 11 Z" fill="#1e293b" />
-                          <rect x="-34" y="-15" width="68" height="22" rx="5" fill="#1e293b" filter="url(#dotShadow)" />
+                        <g transform={`translate(0 ${-beamH - 18})`}>
+                          <path d="M -3 8 L 3 8 L 0 13 Z" fill="#0a0a0a" stroke={z.color} strokeWidth="1.4" />
+                          <rect x="-36" y="-15" width="72" height="23" rx="6" fill="#0a0a0a" stroke={z.color} strokeWidth="1.4" filter="url(#softGlow)" />
                           <text y="-1" textAnchor="middle" fill="#fff" fontSize="11" className="font-bold">{m.nameAr}</text>
                         </g>
                       )}
@@ -222,65 +306,52 @@ export function InteractiveMap() {
                   );
                 })}
 
-                {/* Compass rose (decorative, professional map touch) */}
-                <g transform="translate(545 60)">
-                  <circle r="16" fill="#fff" stroke="#cbd5e1" strokeWidth="1" fillOpacity="0.9" />
-                  <path d="M 0 -12 L 3 0 L 0 12 L -3 0 Z" fill="#dc2626" />
-                  <path d="M -12 0 L 0 3 L 12 0 L 0 -3 Z" fill="#94a3b8" />
-                  <text y="-20" textAnchor="middle" fill="#475569" fontSize="9" className="font-bold">N</text>
-                </g>
+                {/* connection highlight from selected */}
+                {sel && markers.filter((m) => m.name !== sel.name).slice(0, 7).map((m, i) => (
+                  <motion.line key={"s" + m.id} x1={sel.x} y1={sel.y} x2={m.x} y2={m.y}
+                    stroke={ZONE[m.zone]?.color || HUB_COLOR} strokeWidth="1.2" strokeOpacity="0.5" strokeDasharray="3 3"
+                    initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 0.5 }}
+                    transition={{ duration: 0.5, delay: i * 0.05 }} className="flow-line" />
+                ))}
 
-                {/* Scale bar (decorative) */}
-                <g transform="translate(40 680)">
-                  <rect x="0" y="0" width="30" height="6" fill="#1e293b" />
-                  <rect x="30" y="0" width="30" height="6" fill="#fff" stroke="#1e293b" strokeWidth="0.5" />
-                  <rect x="60" y="0" width="30" height="6" fill="#1e293b" />
-                  <text x="45" y="-4" textAnchor="middle" fill="#475569" fontSize="9">0 — 300 كم</text>
+                {/* Compass */}
+                <g transform="translate(548 56)">
+                  <circle r="15" fill="none" stroke="#1e3a5f" strokeWidth="0.8" />
+                  <path d="M 0 -10 L 2.5 0 L 0 10 L -2.5 0 Z" fill={HUB_COLOR} />
+                  <text y="-18" textAnchor="middle" fill="#475569" fontSize="8" className="font-bold">N</text>
                 </g>
               </svg>
 
-              {/* Floating selected-governorate overlay (top-left, no prices) */}
-              <div className="absolute top-3 right-3 sm:top-4 sm:right-4 w-[200px] sm:w-[220px]">
+              {/* Floating selected overlay (top-right) */}
+              <div className="absolute top-3 right-3 sm:top-4 sm:right-4 w-[210px]">
                 <AnimatePresence mode="wait">
                   {sel ? (
-                    <motion.div
-                      key={sel.id}
-                      initial={{ opacity: 0, y: -10, scale: 0.96 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -10, scale: 0.96 }}
-                      className="rounded-2xl bg-white/95 backdrop-blur-md border border-border shadow-xl p-4"
-                    >
+                    <motion.div key={sel.id} initial={{ opacity: 0, y: -10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      className="rounded-2xl bg-zinc-950/90 backdrop-blur-md border border-primary/30 shadow-2xl p-4">
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
-                          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                          <div className="flex items-center gap-1.5 text-[11px] text-zinc-400">
                             <MapPin className="w-3 h-3" style={{ color: ZONE[sel.zone]?.color }} />
                             {ZONE[sel.zone]?.label}
                           </div>
-                          <h4 className="font-black text-lg mt-0.5 truncate">{sel.nameAr}</h4>
+                          <h4 className="font-black text-lg mt-0.5 text-white truncate">{sel.nameAr}</h4>
                         </div>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white shrink-0" style={{ background: ZONE[sel.zone]?.color }}>
-                          {sel.zone}
-                        </span>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white shrink-0" style={{ background: ZONE[sel.zone]?.color, boxShadow: "0 0 10px " + ZONE[sel.zone]?.color }}>{sel.zone}</span>
                       </div>
                       <div className="mt-3 flex items-center gap-3 text-xs">
-                        <span className="flex items-center gap-1 text-foreground">
-                          <Clock className="w-3.5 h-3.5 text-primary" />
-                          {Math.ceil(sel.etaHours / 24)} يوم
+                        <span className="flex items-center gap-1 text-zinc-200">
+                          <Clock className="w-3.5 h-3.5 text-primary" /> {Math.ceil(sel.etaHours / 24)} يوم
                         </span>
-                        <span className="flex items-center gap-1 text-emerald-600 font-semibold">
+                        <span className="flex items-center gap-1 text-emerald-400 font-semibold">
                           <CheckCircle2 className="w-3.5 h-3.5" /> نشطة
                         </span>
                       </div>
                     </motion.div>
                   ) : (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="rounded-2xl bg-white/90 backdrop-blur-md border border-border shadow-lg p-3 flex items-center gap-2"
-                    >
-                      <Navigation className="w-4 h-4 text-primary shrink-0" />
-                      <span className="text-xs text-muted-foreground">اضغط على أي محافظة</span>
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                      className="rounded-2xl bg-zinc-950/85 backdrop-blur-md border border-white/10 shadow-lg p-3 flex items-center gap-2">
+                      <Radio className="w-4 h-4 text-primary animate-slow-pulse shrink-0" />
+                      <span className="text-xs text-zinc-400">اضغط على أي محافظة</span>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -288,50 +359,42 @@ export function InteractiveMap() {
             </div>
 
             {/* Zone legend */}
-            <div className="flex flex-wrap items-center justify-center gap-3 px-4 py-3 border-t border-border bg-muted/30">
+            <div className="flex flex-wrap items-center justify-center gap-3 px-4 py-3 border-t border-white/10 bg-zinc-950/80">
               {Object.entries(ZONE).map(([k, v]) => (
-                <div key={k} className="flex items-center gap-1.5 text-xs text-foreground/70">
-                  <span className="w-2.5 h-2.5 rounded-full border border-white shadow-sm" style={{ background: v.color }} />
+                <div key={k} className="flex items-center gap-1.5 text-xs text-zinc-400">
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ background: v.color, boxShadow: "0 0 8px " + v.color }} />
                   <span className="font-medium">{v.label}</span>
-                  <span className="text-muted-foreground">({zoneCounts[k] || 0})</span>
+                  <span className="text-zinc-600">({zoneCounts[k] || 0})</span>
                 </div>
               ))}
             </div>
           </motion.div>
 
-          {/* Bottom row: stats + quick list (no prices anywhere) */}
+          {/* Bottom row */}
           <div className="grid sm:grid-cols-3 gap-4">
-            {/* Stats card */}
-            <div className="rounded-2xl border border-border bg-card p-5 flex items-center justify-around">
+            <div className="rounded-2xl border border-white/10 bg-zinc-950 p-5 flex items-center justify-around">
               <div className="text-center">
                 <div className="text-3xl font-black text-gradient-red">{markers.length}</div>
-                <div className="text-xs text-muted-foreground mt-1">محافظة مغطاة</div>
+                <div className="text-xs text-zinc-500 mt-1">محافظة مغطاة</div>
               </div>
-              <div className="w-px h-12 bg-border" />
+              <div className="w-px h-12 bg-white/10" />
               <div className="text-center">
-                <div className="text-3xl font-black text-emerald-600">99.2%</div>
-                <div className="text-xs text-muted-foreground mt-1">تسليم في الوقت</div>
+                <div className="text-3xl font-black text-emerald-400">99.2%</div>
+                <div className="text-xs text-zinc-500 mt-1">تسليم في الوقت</div>
               </div>
             </div>
-
-            {/* Quick list — horizontal scroll */}
-            <div className="sm:col-span-2 rounded-2xl border border-border bg-card p-4">
+            <div className="sm:col-span-2 rounded-2xl border border-white/10 bg-zinc-950 p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Building2 className="w-4 h-4 text-primary" />
-                <h4 className="font-bold text-sm">قائمة المحافظات</h4>
+                <h4 className="font-bold text-sm text-white">قائمة المحافظات</h4>
               </div>
               <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
                 {markers.map((m) => (
-                  <button
-                    key={m.id}
-                    onClick={() => setSelected(m.name)}
-                    onMouseEnter={() => setHovered(m.name)}
-                    onMouseLeave={() => setHovered(null)}
+                  <button key={m.id} onClick={() => setSelected(m.name)} onMouseEnter={() => setHovered(m.name)} onMouseLeave={() => setHovered(null)}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-colors ${
-                      selected === m.name ? "bg-primary/10 text-primary border border-primary/30" : "hover:bg-muted border border-transparent"
-                    }`}
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: ZONE[m.zone]?.color }} />
+                      selected === m.name ? "bg-primary/15 text-primary border border-primary/40" : "text-zinc-300 hover:bg-white/5 border border-transparent"
+                    }`}>
+                    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: ZONE[m.zone]?.color, boxShadow: "0 0 6px " + ZONE[m.zone]?.color }} />
                     {m.nameAr}
                   </button>
                 ))}

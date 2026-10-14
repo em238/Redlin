@@ -406,3 +406,37 @@ Stage Summary:
 - كل الأسعار اتمسحت من القسم
 - قسم التغطية اتمسح بالكامل من الموقع والناف بار
 - 0 errors
+
+---
+Task ID: 13
+Agent: Orchestrator (main)
+Task: إعادة تصميم الخريطة بالكامل — holographic command center (كريتف ملفت يجنن)
+
+Work Log:
+- أضفت CSS animations في globals.css: beam-pulse (لأعمدة الضوء), particle-float (للجسيمات)
+- أعدت بناء interactive-map.tsx بتصميم خالص جديد (مش سياسي pastel):
+  * خلفية كونية سوداء (black → zinc-950) + 70 نجمة + grid خطوط lat/long سينما
+  * Egypt wireframe: outline متوهج بـ softGlow filter + dashed inner stroke + fill شفاف أحمر
+  * النيل: neon cyan متوهج + softGlow + flow shimmer متحرك
+  * شبكة خطوط neon flowing من القاهرة لكل المحافظات (26 line بـ flow-line animation)
+  * 18 جسيم متحرك (particle-float) بلون أحمر
+  * Cairo HQ: radar sweep دوّار (SMIL animateTransform rotation 4s) + 3 radar rings + عمود ضوء طويل (72px) + top orb + HQ label على hover
+  * 27 محافظة = 27 BEACON (عمود ضوء عمودي متدرج شفاف→زاهي) + top orb متوهج + base glow متنفس (city-light) + base dot + pulse ring على hover + floating label
+  * connection highlight من المختار لباقي المحافظات
+  * HUD header: "LIVE LOGISTICS GRID — ARAB REPUBLIC OF EGYPT" + "NODES ACTIVE" بـ pulse
+  * sea labels (MEDITERRANEAN/RED SEA/EGYPT) خافتة
+  * compass + floating overlay (top-right) + bottom row (stats + quick list) بـ dark theme
+- ESLint: 0 errors
+- تحقق Agent Browser:
+  * beams: 27 (عمود ضوء لكل محافظة) ✅
+  * stars/particles: 88 (70 نجمة + 18 جسيم) ✅
+  * radar sweep anim: true (دوّار من القاهرة) ✅
+  * full-width: true ✅
+  * بعد click: نشطة true, يوم true, ج.م false (مفيش أسعار) ✅
+  * لا أخطا
+
+Stage Summary:
+- الخريطة بقت holographic command center كريتف: خلفية كونية بنجوم، مصر wireframe متوهج، نيل neon متحرك، 27 عمود ضوء (beacons) بيرفعوا فوق، radar sweep دوّار من القاهرة، شبكة خطوط neon flowing، جسيمات متحركة
+- شكل خالص مختلف عن كل اللي قبله — ملفت وجذاب جداً
+- full-width، بدون أسعار، interaction شغّال
+- 0 errors

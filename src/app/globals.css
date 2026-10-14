@@ -286,6 +286,22 @@
 .city-light { animation: breathe 3.2s ease-in-out infinite; }
 .city-light-2 { animation: breathe 3.2s ease-in-out infinite 1.6s; }
 
+/* Vertical light-beam pulse (holographic command center) */
+@keyframes beam-pulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 0.9; }
+}
+.beam-pulse { animation: beam-pulse 2.8s ease-in-out infinite; }
+.beam-pulse-2 { animation: beam-pulse 2.8s ease-in-out infinite 1.4s; }
+
+/* Floating particles */
+@keyframes particle-float {
+  0% { transform: translateY(0); opacity: 0.2; }
+  50% { transform: translateY(-10px); opacity: 0.7; }
+  100% { transform: translateY(0); opacity: 0.2; }
+}
+.particle { animation: particle-float 5s ease-in-out infinite; transform-box: fill-box; }
+
 /* Nile flowing shimmer */
 @keyframes nile-flow {
   to { stroke-dashoffset: -40; }
