@@ -188,8 +188,8 @@ export function Hero() {
       {/* Image carousel controls — full-width progress bar on top + arrows with play/pause in the middle */}
       {total > 1 && (
         <>
-          {/* Full-width loading progress bar at the very bottom of the hero (above marquee) */}
-          <div className="absolute bottom-[52px] inset-x-0 h-[3px] bg-white/10 z-20">
+          {/* Full-width loading progress bar just ABOVE the controls */}
+          <div className="absolute bottom-[104px] inset-x-0 h-[3px] bg-white/10 z-20">
             <motion.div
               key={idx + (paused ? "-p" : "-r")}
               initial={{ width: paused ? "100%" : "0%" }}
