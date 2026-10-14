@@ -371,3 +371,38 @@ Stage Summary:
 - الخريطة بقت political map احترافي نظيف: بحر أزرق فاتح، مصر salmon pastel، dots ملونة بحدود بيضاء، أسماء inline bold، نيل أزرق، compass + scale bar
 - مطابقة للصورة المرجعية بألوان pastel هادئة وستايل سياسي احترافي
 - 0 errors، التفاعل شغّال
+
+---
+Task ID: 12
+Agent: Orchestrator (main)
+Task: خريطة بعرض الصفحة + شيل الأسعار + شيل قسم التغطية
+
+Work Log:
+1) شيل قسم التغطية بالكامل:
+   - public-page.tsx: شيلت استيراد واستخدام <Coverage />
+   - navbar.tsx: شيلت رابط "#coverage" / "التغطية" من NAV_LINKS
+2) خريطة بعرض الصفحة (full-width):
+   - interactive-map.tsx: غيّرت الـ container من `grid lg:grid-cols-5` (map 3/5) لـ `max-w-7xl space-y-4` (map full width)
+   - بطاقة الخريطة بقيت full-width (مش lg:col-span-3)
+   - الـ SVG container بقى `aspect-[16/11] sm:aspect-[16/9]` بـ preserveAspectRatio="xMidYMid meet" (خريطة سينمائية واسعة، البحر يملا الجوانب ومصر في النص)
+   - ضفت floating overlay (absolute top-right) لتفاصيل المحافظة المختارة: اسم + zone badge + زمن التوصيل + حالة (نشطة) — بدون أسعار
+   - لما مفيش محافظة مختارة: overlay صغير "اضغط على أي محافظة"
+   - حوّلت الـ side panel لـ bottom row: stats card (محافظة مغطاة + تسليم في الوقت) + quick list (horizontal scrollable strip بكل الـ 27 محافظة)
+3) شيل الأسعار نهائياً:
+   - الـ floating overlay مفيهوش أسعار (زمن + حالة بس)
+   - الـ bottom row مفيهوش أسعار (stats + قائمة محافظات)
+   - تأكدت: ج.م false, السعر false, basePrice false في القسم كله
+- شيلت استيراد Sparkles (مش مستخدم)
+- ESLint: 0 errors
+- تحقق Agent Browser:
+  * coverage section: REMOVED, nav has التغطية: false
+  * map card width: 1216px من 1440px viewport = 84% (full container width)
+  * مفيش ج.م ولا السعر في القسم
+  * بعد click على marker: floating overlay بيظهر (نشطة + يوم)، بدون أسعار
+  * لا أخطا، لا errors في dev log
+
+Stage Summary:
+- الخريطة بقت بعرض الصفحة كاملة (full-width سينمائي) بـ floating overlay للتفاصيل
+- كل الأسعار اتمسحت من القسم
+- قسم التغطية اتمسح بالكامل من الموقع والناف بار
+- 0 errors

@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Clock, Building2, Navigation, Layers, Sparkles, CheckCircle2 } from "lucide-react";
+import { MapPin, Clock, Building2, Navigation, Layers, CheckCircle2 } from "lucide-react";
 import { apiGet } from "@/lib/api";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { EGYPT_BORDER, NILE_MAIN, NILE_DAMIETTA, NILE_ROSETTA, GOV_COORDS, project, pathFromCoords } from "@/lib/egypt-coords";
@@ -79,13 +79,13 @@ export function InteractiveMap() {
           subtitle="27 محافظة بنقاط توصيل نشطة — استكشف الخريطة واضغط على أي محافظة لعرض تفاصيلها"
         />
 
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-5 gap-6">
-          {/* Map card — clean political map style */}
+        <div className="max-w-7xl mx-auto space-y-4">
+          {/* Map card — full width, clean political map style */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="lg:col-span-3 relative rounded-3xl bg-white border border-border shadow-2xl shadow-black/10 overflow-hidden"
+            className="relative rounded-3xl bg-white border border-border shadow-2xl shadow-black/10 overflow-hidden"
           >
             {/* Map header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
@@ -102,9 +102,9 @@ export function InteractiveMap() {
               </div>
             </div>
 
-            {/* SVG political map */}
-            <div className="relative aspect-[5/6] w-full bg-[#e0f2fe]">
-              <svg viewBox="0 0 600 720" className="w-full h-full" style={{ touchAction: "none" }}>
+            {/* SVG political map — wide full-width */}
+            <div className="relative w-full aspect-[16/11] sm:aspect-[16/9] bg-[#e0f2fe]">
+              <svg viewBox="0 0 600 720" preserveAspectRatio="xMidYMid meet" className="w-full h-full" style={{ touchAction: "none" }}>
                 <defs>
                   <linearGradient id="seaGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor={SEA_DEEP} />
@@ -238,6 +238,53 @@ export function InteractiveMap() {
                   <text x="45" y="-4" textAnchor="middle" fill="#475569" fontSize="9">0 — 300 كم</text>
                 </g>
               </svg>
+
+              {/* Floating selected-governorate overlay (top-left, no prices) */}
+              <div className="absolute top-3 right-3 sm:top-4 sm:right-4 w-[200px] sm:w-[220px]">
+                <AnimatePresence mode="wait">
+                  {sel ? (
+                    <motion.div
+                      key={sel.id}
+                      initial={{ opacity: 0, y: -10, scale: 0.96 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.96 }}
+                      className="rounded-2xl bg-white/95 backdrop-blur-md border border-border shadow-xl p-4"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                            <MapPin className="w-3 h-3" style={{ color: ZONE[sel.zone]?.color }} />
+                            {ZONE[sel.zone]?.label}
+                          </div>
+                          <h4 className="font-black text-lg mt-0.5 truncate">{sel.nameAr}</h4>
+                        </div>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white shrink-0" style={{ background: ZONE[sel.zone]?.color }}>
+                          {sel.zone}
+                        </span>
+                      </div>
+                      <div className="mt-3 flex items-center gap-3 text-xs">
+                        <span className="flex items-center gap-1 text-foreground">
+                          <Clock className="w-3.5 h-3.5 text-primary" />
+                          {Math.ceil(sel.etaHours / 24)} يوم
+                        </span>
+                        <span className="flex items-center gap-1 text-emerald-600 font-semibold">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> نشطة
+                        </span>
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="rounded-2xl bg-white/90 backdrop-blur-md border border-border shadow-lg p-3 flex items-center gap-2"
+                    >
+                      <Navigation className="w-4 h-4 text-primary shrink-0" />
+                      <span className="text-xs text-muted-foreground">اضغط على أي محافظة</span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
 
             {/* Zone legend */}
@@ -252,103 +299,40 @@ export function InteractiveMap() {
             </div>
           </motion.div>
 
-          {/* Side panel */}
-          <div className="lg:col-span-2 flex flex-col gap-4">
-            <AnimatePresence mode="wait">
-              {sel ? (
-                <motion.div
-                  key={sel.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/5 to-card p-6 relative overflow-hidden"
-                >
-                  <div className="absolute top-0 right-0 w-28 h-28 bg-primary/10 rounded-full blur-3xl" />
-                  <div className="relative">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <MapPin className="w-4 h-4" style={{ color: ZONE[sel.zone]?.color }} />
-                          {ZONE[sel.zone]?.label}
-                        </div>
-                        <h3 className="text-2xl font-black mt-1">{sel.nameAr}</h3>
-                        <div className="text-xs text-muted-foreground font-mono mt-0.5" dir="ltr">{sel.name}</div>
-                      </div>
-                      <span className="px-2.5 py-1 rounded-full text-xs font-bold text-white" style={{ background: ZONE[sel.zone]?.color }}>
-                        {sel.zone}
-                      </span>
-                    </div>
-
-                    <div className="mt-5 grid grid-cols-2 gap-3">
-                      <div className="rounded-xl bg-card border border-border p-3">
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
-                          <Clock className="w-3.5 h-3.5 text-primary" /> زمن التوصيل
-                        </div>
-                        <div className="text-xl font-black">{Math.ceil(sel.etaHours / 24)} <span className="text-sm">يوم</span></div>
-                      </div>
-                      <div className="rounded-xl bg-card border border-border p-3">
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> الحالة
-                        </div>
-                        <div className="text-sm font-black text-emerald-600">نقطة نشطة</div>
-                      </div>
-                    </div>
-
-                    <div className="mt-3 flex items-center gap-2 text-xs text-amber-600">
-                      <Sparkles className="w-3.5 h-3.5" />
-                      تغطية كاملة في {sel.nameAr} — {ZONE[sel.zone]?.label}
-                    </div>
-                  </div>
-                </motion.div>
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="rounded-3xl border border-border bg-card p-8 text-center"
-                >
-                  <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                    <Navigation className="w-8 h-8 text-primary" />
-                  </div>
-                  <h3 className="font-bold">اختر محافظة</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    اضغط على أي نقطة في الخريطة لعرض تفاصيل المحافظة
-                  </p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Stats */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-2xl border border-border bg-card p-4 text-center">
+          {/* Bottom row: stats + quick list (no prices anywhere) */}
+          <div className="grid sm:grid-cols-3 gap-4">
+            {/* Stats card */}
+            <div className="rounded-2xl border border-border bg-card p-5 flex items-center justify-around">
+              <div className="text-center">
                 <div className="text-3xl font-black text-gradient-red">{markers.length}</div>
                 <div className="text-xs text-muted-foreground mt-1">محافظة مغطاة</div>
               </div>
-              <div className="rounded-2xl border border-border bg-card p-4 text-center">
+              <div className="w-px h-12 bg-border" />
+              <div className="text-center">
                 <div className="text-3xl font-black text-emerald-600">99.2%</div>
-                <div className="text-xs text-muted-foreground mt-1">نسبة التسليم في الوقت</div>
+                <div className="text-xs text-muted-foreground mt-1">تسليم في الوقت</div>
               </div>
             </div>
 
-            {/* Quick list */}
-            <div className="rounded-2xl border border-border bg-card p-4">
+            {/* Quick list — horizontal scroll */}
+            <div className="sm:col-span-2 rounded-2xl border border-border bg-card p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Building2 className="w-4 h-4 text-primary" />
                 <h4 className="font-bold text-sm">قائمة المحافظات</h4>
               </div>
-              <div className="grid grid-cols-2 gap-1.5 max-h-48 overflow-y-auto no-scrollbar">
-                {markers.slice(0, 14).map((m) => (
+              <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+                {markers.map((m) => (
                   <button
                     key={m.id}
                     onClick={() => setSelected(m.name)}
                     onMouseEnter={() => setHovered(m.name)}
                     onMouseLeave={() => setHovered(null)}
-                    className={`flex items-center justify-between gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-colors text-right ${
-                      selected === m.name ? "bg-primary/10 text-primary" : "hover:bg-muted"
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-colors ${
+                      selected === m.name ? "bg-primary/10 text-primary border border-primary/30" : "hover:bg-muted border border-transparent"
                     }`}
                   >
-                    <span className="truncate">{m.nameAr}</span>
                     <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: ZONE[m.zone]?.color }} />
+                    {m.nameAr}
                   </button>
                 ))}
               </div>

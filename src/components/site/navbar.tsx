@@ -11,7 +11,6 @@ import { ScrollProgress } from "@/components/shared/scroll-progress";
 const NAV_LINKS = [
   { href: "#home", label: "الرئيسية" },
   { href: "#services", label: "خدماتنا" },
-  { href: "#coverage", label: "التغطية" },
   { href: "#map", label: "الخريطة" },
   { href: "#videos", label: "المعرض" },
   { href: "#partners", label: "الشركاء" },
