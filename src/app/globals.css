@@ -117,16 +117,53 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "ss01", "cv11";
+    line-height: 1.6;
+    letter-spacing: -0.011em;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: -0.02em;
+    line-height: 1.15;
   }
 }
 
-/* Custom scrollbar */
+/* === Refined shadow system (soft, layered, premium) === */
+.shadow-soft {
+  box-shadow:
+    0 1px 2px -1px oklch(0.16 0.02 15 / 0.06),
+    0 1px 3px -2px oklch(0.16 0.02 15 / 0.05);
+}
+.shadow-card {
+  box-shadow:
+    0 1px 3px -2px oklch(0.16 0.02 15 / 0.08),
+    0 4px 12px -6px oklch(0.16 0.02 15 / 0.08);
+}
+.shadow-elevated {
+  box-shadow:
+    0 2px 4px -2px oklch(0.16 0.02 15 / 0.08),
+    0 8px 24px -8px oklch(0.16 0.02 15 / 0.12);
+}
+.dark .shadow-soft {
+  box-shadow: 0 1px 3px oklch(0 0 0 / 0.2);
+}
+.dark .shadow-card {
+  box-shadow: 0 4px 12px -6px oklch(0 0 0 / 0.4);
+}
+.dark .shadow-elevated {
+  box-shadow: 0 8px 28px -8px oklch(0 0 0 / 0.5);
+}
+
+/* Custom scrollbar (narrower, cleaner) */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
@@ -134,17 +171,14 @@
 ::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 9999px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--muted-foreground);
-  background-clip: padding-box;
 }
 
-/* Premium gradient text */
+/* Subtle gradient text (more refined, less saturated) */
 .text-gradient-red {
-  background: linear-gradient(135deg, oklch(0.6 0.24 27), oklch(0.7 0.18 45));
+  background: linear-gradient(135deg, oklch(0.55 0.2 28), oklch(0.62 0.16 38));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;

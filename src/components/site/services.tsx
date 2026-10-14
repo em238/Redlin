@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useRef, useState, type MouseEvent } from "react";
 import { motion } from "framer-motion";
 import { Truck, Zap, Rocket, Package, Banknote, RotateCcw, ArrowLeft } from "lucide-react";
 import { apiGet } from "@/lib/api";
@@ -21,36 +20,6 @@ const FALLBACK = [
   { name: "Returns", nameAr: "مرتجعات", description: "استرجاع الشحنات المرتجعة من العملاء", icon: "rotate-ccw" },
 ];
 
-function TiltCard({ children }: { children: React.ReactNode }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [tilt, setTilt] = useState({ rx: 0, ry: 0 });
-
-  const handleMove = (e: MouseEvent<HTMLDivElement>) => {
-    const el = ref.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    setTilt({ rx: -y * 8, ry: x * 8 });
-  };
-  const reset = () => setTilt({ rx: 0, ry: 0 });
-
-  return (
-    <motion.div
-      ref={ref}
-      onMouseMove={handleMove}
-      onMouseLeave={reset}
-      style={{
-        transform: `perspective(1000px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)`,
-        transformStyle: "preserve-3d",
-      }}
-      className="transition-transform duration-200 ease-out"
-    >
-      {children}
-    </motion.div>
-  );
-}
-
 export function Services() {
   const { data } = useQuery({
     queryKey: ["services"],
@@ -69,30 +38,25 @@ export function Services() {
           subtitle="من الشحن العادي إلى التوصيل في نفس اليوم، نوفّر لك خيارات تناسب سرعتك وميزانيتك"
         />
 
-        <StaggerGroup className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5" stagger={0.08}>
+        <StaggerGroup className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5" stagger={0.07}>
           {services.map((s) => {
             const Icon = ICONS[s.icon] || Package;
             return (
               <StaggerItem key={s.name}>
-                <TiltCard>
-                  <div className="group relative shine rounded-2xl border border-border bg-card p-6 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 h-full">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <div className="relative" style={{ transform: "translateZ(40px)" }}>
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-red-700 flex items-center justify-center shadow-lg shadow-primary/25 group-hover:scale-110 group-hover:rotate-6 transition-transform">
-                        <Icon className="w-7 h-7 text-white" strokeWidth={2.2} />
-                      </div>
-                      <h3 className="mt-5 text-xl font-bold">{s.nameAr}</h3>
-                      <p className="mt-2 text-muted-foreground text-sm leading-relaxed">{s.description}</p>
-                      <button
-                        onClick={() => scrollTo("#contact")}
-                        className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:gap-2 transition-all"
-                      >
-                        اطلب الخدمة
-                        <ArrowLeft className="w-4 h-4" />
-                      </button>
-                    </div>
+                <div className="group rounded-2xl border border-border/60 bg-card shadow-soft p-6 sm:p-7 hover:shadow-card hover:border-primary/30 transition-all duration-300 h-full">
+                  <div className="w-12 h-12 rounded-xl bg-primary/8 flex items-center justify-center mb-5 group-hover:scale-105 transition-transform">
+                    <Icon className="w-6 h-6 text-primary" strokeWidth={2} />
                   </div>
-                </TiltCard>
+                  <h3 className="text-lg font-bold">{s.nameAr}</h3>
+                  <p className="mt-2 text-muted-foreground text-sm leading-relaxed">{s.description}</p>
+                  <button
+                    onClick={() => scrollTo("#contact")}
+                    className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:gap-2 transition-all"
+                  >
+                    اطلب الخدمة
+                    <ArrowLeft className="w-4 h-4" />
+                  </button>
+                </div>
               </StaggerItem>
             );
           })}

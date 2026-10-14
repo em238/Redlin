@@ -33,19 +33,19 @@ export function Footer() {
   const go = (id: string) => document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });
 
   return (
-    <footer className="mt-auto bg-zinc-950 text-zinc-300 relative overflow-hidden">
+    <footer className="mt-auto bg-zinc-950 text-zinc-300">
       <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent" />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="grid gap-10 lg:grid-cols-12">
           {/* Brand */}
           <div className="lg:col-span-4">
             <div className="flex items-center gap-2.5 mb-5">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-red-700 flex items-center justify-center shadow-lg shadow-primary/30">
-                <Truck className="w-5 h-5 text-white" strokeWidth={2.5} />
+              <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
+                <Truck className="w-4.5 h-4.5 text-white" strokeWidth={2.4} />
               </div>
               <div>
-                <div className="text-xl font-extrabold text-white">Red<span className="text-primary">line</span></div>
-                <div className="text-[10px] text-zinc-500">شحن سريع وآمن</div>
+                <div className="text-lg font-bold text-white">Red<span className="text-primary">line</span></div>
+                <div className="text-[10px] text-zinc-500 mt-0.5">شحن سريع وآمن</div>
               </div>
             </div>
             <p className="text-sm text-zinc-400 leading-relaxed max-w-sm">

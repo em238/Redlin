@@ -27,16 +27,15 @@ export function Testimonials() {
 
   useEffect(() => {
     if (!auto || items.length <= 1) return;
-    const t = setInterval(next, 5000);
+    const t = setInterval(next, 6000);
     return () => clearInterval(t);
   }, [auto, items.length, next]);
 
   if (items.length === 0) return null;
-
   const current = items[index % items.length];
 
   return (
-    <section className="py-20 sm:py-28 bg-gradient-to-b from-background to-muted/40">
+    <section className="py-20 sm:py-28">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
           eyebrow="آراء العملاء"
@@ -44,33 +43,32 @@ export function Testimonials() {
           subtitle="أكثر من 12,000 عميل يثقون في Redline لشحناتهم يومياً"
         />
 
-        <div className="max-w-4xl mx-auto" onMouseEnter={() => setAuto(false)} onMouseLeave={() => setAuto(true)}>
-          {/* Main featured testimonial */}
+        <div className="max-w-3xl mx-auto" onMouseEnter={() => setAuto(false)} onMouseLeave={() => setAuto(true)}>
           <div className="relative">
-            <Quote className="absolute -top-4 right-6 w-16 h-16 text-primary/10" />
             <AnimatePresence mode="wait">
               <motion.div
                 key={current.id || index}
-                initial={{ opacity: 0, x: 40 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -40 }}
-                transition={{ duration: 0.4 }}
-                className="relative rounded-3xl border border-border bg-card p-8 sm:p-12 shadow-sm"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -16 }}
+                transition={{ duration: 0.35 }}
+                className="relative rounded-2xl border border-border/60 bg-card shadow-card p-8 sm:p-12"
               >
+                <Quote className="absolute top-6 left-6 w-10 h-10 text-primary/10" />
                 <div className="flex gap-0.5 mb-4">
                   {Array.from({ length: current.rating }).map((_, j) => (
-                    <Star key={j} className="w-5 h-5 fill-amber-400 text-amber-400" />
+                    <Star key={j} className="w-4 h-4 fill-amber-400 text-amber-400" />
                   ))}
                 </div>
-                <p className="text-lg sm:text-2xl leading-relaxed font-medium text-foreground/90">
+                <p className="text-lg sm:text-xl leading-relaxed font-medium text-foreground/90">
                   "{current.content}"
                 </p>
-                <div className="mt-6 flex items-center gap-4 pt-6 border-t border-border">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-red-700 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-primary/20">
+                <div className="mt-6 flex items-center gap-3 pt-6 border-t border-border/60">
+                  <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white font-bold text-lg shadow-soft">
                     {current.name.charAt(0)}
                   </div>
                   <div>
-                    <div className="font-bold text-lg">{current.name}</div>
+                    <div className="font-bold">{current.name}</div>
                     <div className="text-sm text-muted-foreground">{current.role}{current.company ? ` · ${current.company}` : ""}</div>
                   </div>
                 </div>
@@ -78,31 +76,17 @@ export function Testimonials() {
             </AnimatePresence>
           </div>
 
-          {/* Controls + dots */}
           <div className="mt-6 flex items-center justify-center gap-4">
-            <button
-              onClick={prev}
-              className="w-10 h-10 rounded-full border border-border bg-card hover:border-primary/40 hover:bg-primary/5 flex items-center justify-center transition-colors"
-              aria-label="السابق"
-            >
-              <ChevronRight className="w-5 h-5" />
+            <button onClick={prev} className="w-9 h-9 rounded-full border border-border bg-card hover:border-primary/40 hover:bg-muted flex items-center justify-center transition-colors" aria-label="السابق">
+              <ChevronRight className="w-4 h-4" />
             </button>
-            <div className="flex gap-2">
+            <div className="flex gap-1.5">
               {items.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setIndex(i)}
-                  className={`h-2 rounded-full transition-all ${i === index ? "w-8 bg-primary" : "w-2 bg-border hover:bg-muted-foreground"}`}
-                  aria-label={`الانتقال للرأي ${i + 1}`}
-                />
+                <button key={i} onClick={() => setIndex(i)} aria-label={`الرأي ${i + 1}`} className={`h-1.5 rounded-full transition-all ${i === index ? "w-6 bg-primary" : "w-1.5 bg-border hover:bg-muted-foreground"}`} />
               ))}
             </div>
-            <button
-              onClick={next}
-              className="w-10 h-10 rounded-full border border-border bg-card hover:border-primary/40 hover:bg-primary/5 flex items-center justify-center transition-colors"
-              aria-label="التالي"
-            >
-              <ChevronLeft className="w-5 h-5" />
+            <button onClick={next} className="w-9 h-9 rounded-full border border-border bg-card hover:border-primary/40 hover:bg-muted flex items-center justify-center transition-colors" aria-label="التالي">
+              <ChevronLeft className="w-4 h-4" />
             </button>
           </div>
         </div>

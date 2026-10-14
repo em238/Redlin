@@ -100,23 +100,20 @@ export function Hero() {
       <motion.div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20 relative" style={{ y: yContent, opacity }}>
         <div className="max-w-3xl">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/90 text-sm font-medium mb-6"
+            transition={{ duration: 0.5 }}
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-white/90 text-xs font-medium mb-6"
           >
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
-            </span>
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
             نشحن لكل محافظات مصر — 27 محافظة بنفس السرعة
           </motion.div>
 
           <motion.h1
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            className="text-4xl sm:text-5xl lg:text-7xl font-black leading-[1.1] text-white"
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] text-white tracking-tight"
           >
             شحن يصل لكل مصر
             <br />
@@ -124,36 +121,36 @@ export function Hero() {
           </motion.h1>
 
           <motion.p
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="mt-6 text-lg sm:text-xl text-white/80 max-w-2xl leading-relaxed"
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="mt-6 text-base sm:text-lg text-white/75 max-w-2xl leading-relaxed"
           >
             شركة شحن احترافية تغطي جميع محافظات مصر بخدمات متنوعة — عادي، ممتاز،
             نفس اليوم، وشحن ثقيل — مع تتبع مباشر وأسعار منافسة وضمان التسليم.
           </motion.p>
 
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
-            className="mt-9 flex flex-wrap items-center gap-3"
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="mt-8 flex flex-wrap items-center gap-3"
           >
             <Button
               size="lg"
               onClick={() => scrollTo("#contact")}
-              className="bg-gradient-to-r from-primary to-red-700 hover:from-red-600 hover:to-red-800 text-white shadow-xl shadow-primary/30 gap-2 text-base h-12 px-7 group"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 text-base h-12 px-6 font-semibold"
             >
-              <Zap className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              <Zap className="w-4.5 h-4.5" />
               اطلب شحن الآن
             </Button>
             <Button
               size="lg"
               variant="outline"
               onClick={() => scrollTo("#services")}
-              className="bg-white/10 backdrop-blur-md border-white/25 text-white hover:bg-white/20 hover:text-white gap-2 text-base h-12 px-7"
+              className="bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/15 hover:text-white gap-2 text-base h-12 px-6"
             >
-              <Truck className="w-5 h-5" />
+              <Truck className="w-4.5 h-4.5" />
               خدماتنا
               <ArrowLeft className="w-4 h-4" />
             </Button>
@@ -161,17 +158,17 @@ export function Hero() {
 
           {/* Mini features */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.4 }}
-            className="mt-10 flex flex-wrap gap-6 text-white/85"
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="mt-9 flex flex-wrap gap-x-6 gap-y-2 text-white/70"
           >
             {[
               { icon: Zap, text: "توصيل نفس اليوم في القاهرة الكبرى" },
               { icon: ShieldCheck, text: "ضمان كامل على كل شحنة" },
               { icon: MapPin, text: "27 محافظة بتغطية كاملة" },
             ].map((f, i) => (
-              <div key={i} className="flex items-center gap-2 text-sm">
+              <div key={i} className="flex items-center gap-1.5 text-sm">
                 <f.icon className="w-4 h-4 text-amber-400" />
                 {f.text}
               </div>
