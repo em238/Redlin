@@ -185,10 +185,20 @@ export function Hero() {
         </div>
       </motion.div>
 
-      {/* Image carousel controls — minimal centered bar (matching reference: thin arrows + dividers + counter) */}
+      {/* Image carousel controls — progress bar on top + arrows with play/pause in the middle */}
       {total > 1 && (
         <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20" dir="ltr">
-          <div className="border-t border-white/15 pt-3 flex items-center text-white">
+          {/* Loading progress bar (fills during each slide, resets on slide change, pauses when paused) */}
+          <div className="w-40 h-[2px] bg-white/15 rounded-full overflow-hidden mb-3">
+            <motion.div
+              key={idx + (paused ? "-p" : "-r")}
+              initial={{ width: paused ? "100%" : "0%" }}
+              animate={{ width: paused ? "100%" : "100%" }}
+              transition={{ duration: paused ? 0 : 5, ease: "linear" }}
+              className="h-full bg-white rounded-full"
+            />
+          </div>
+          <div className="flex items-center justify-center text-white">
             <button
               onClick={prev}
               aria-label="السابق"
@@ -197,9 +207,13 @@ export function Hero() {
               <ChevronLeft className="w-5 h-5" strokeWidth={1.5} />
             </button>
             <span className="w-px h-6 bg-white/20" />
-            <span className="px-6 text-sm font-bold tabular-nums tracking-widest">
-              {String(idx + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
-            </span>
+            <button
+              onClick={() => setManualPause((p) => !p)}
+              aria-label={manualPause ? "تشغيل" : "إيقاف"}
+              className="px-5 py-1.5 hover:text-amber-300 transition-colors"
+            >
+              {manualPause ? <Play className="w-4 h-4" strokeWidth={1.5} /> : <Pause className="w-4 h-4" strokeWidth={1.5} />}
+            </button>
             <span className="w-px h-6 bg-white/20" />
             <button
               onClick={next}
@@ -207,14 +221,6 @@ export function Hero() {
               className="px-5 py-1.5 hover:text-amber-300 transition-colors"
             >
               <ChevronRight className="w-5 h-5" strokeWidth={1.5} />
-            </button>
-            <span className="w-px h-6 bg-white/20" />
-            <button
-              onClick={() => setManualPause((p) => !p)}
-              aria-label={manualPause ? "تشغيل" : "إيقاف"}
-              className="px-4 py-1.5 hover:text-amber-300 transition-colors"
-            >
-              {manualPause ? <Play className="w-4 h-4" strokeWidth={1.5} /> : <Pause className="w-4 h-4" strokeWidth={1.5} />}
             </button>
           </div>
         </div>

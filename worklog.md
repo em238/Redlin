@@ -786,3 +786,30 @@ Stage Summary:
 - شريط تحكم الهيدر بقى مطابق للمرجع + أيقونة تشغيل/إيقاف: [‹] | [01/06] | [›] | [⏸/▶]
 - فصل clean بين hover-pause و manual-pause (لا تعارض)
 - 0 errors، التفاعل شغّال
+
+---
+Task ID: 25
+Agent: Orchestrator (main)
+Task: شريط تحكم الهيدر — شيل الأرقام + play/pause في النص + شريط تحميل فوق
+
+Work Log:
+- شيلت عدّاد الأرقام (01 / 06) بالكامل من الـ control bar
+- حطيت زرار الـ play/pause في **النص** بين السهمين (بدل مكانه في الآخر):
+  * [‹] | [⏸/▶] | [›] — الـ play/pause بقى في الوسط
+- ضفت **شريط تحميل (progress bar)** فوق الـ control bar:
+  * w-40 h-[2px] bg-white/15 track + bg-white fill
+  * بيحمل من 0% لـ 100% على مدة 5 ثواني (مدة عرض الشريحة)
+  * key={idx + (paused ? "-p" : "-r")} → بيعيد التحميل مع كل صورة جديدة + بيقف لو paused
+  * transition linear 5s (يبدأ من جديد مع كل شريحة)
+- ESLint: 0 errors
+- تحقق Agent Browser + VLM:
+  * counter 01/06 present: false ✅ (اتمسح)
+  * progress bar present: true ✅
+  * play/pause button: true ✅
+  * VLM: "شريط تحميل بسيط في الأعلى + سهمين يمين ويسار + أيقونة إيقاف مؤقت في المنتصف + لا يوجد أرقام 01/06"
+  * لا أخطا
+
+Stage Summary:
+- شريط التحكم بقى: شريط تحميل فوق (بيمشي مع مدة كل صورة) + [‹] | [⏸/▶] | [›] بدون أرقام
+- الـ progress bar بيرست مع كل صورة وبيقف لو الـ content متوقف
+- 0 errors
