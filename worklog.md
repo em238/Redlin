@@ -755,3 +755,34 @@ Stage Summary:
 - تحسينات احترافية جبارة: footer متوازن (grid 3/2/2/2/3) + تباين نصوص أحسن (zinc-300 في القسم الداكن) + مسافات متناسقة + Contact form shadow-card + btn-glow
 - VLM: 8.5/10 احترافية (فوتر متوازن، تباين أحسن، مسافات متناسقة، مكتمل)
 - 0 errors
+
+---
+Task ID: 24
+Agent: Orchestrator (main)
+Task: شريط تحكم الهيدر — سهمين + عدّاد + فواصل + أيقونة تشغيل/إيقاف
+
+Work Log:
+- حللت الصورة المرجعية بـ VLM: شريط minimal بخلفية داكنة شبه شفافة، خط فاصل علوي رفيع، أسهم line icons بلا خلفية، فواصل عمودية رفيعة، عدّاد في النص
+- المستخدم طلب: سهم يمين + سهم شمال + أيقونة تشغيل/إيقاف للمحتوى
+- أضفت Play/Pause للاستيراد من lucide-react
+- فصلت state الإيقاف اليدوي عن hover-pause:
+  * manualPause (للزرار) + hoverPaused (للـ hover)
+  * paused = manualPause || hoverPaused (الأوتو-روتيب يقف لو أي واحد فيهم true)
+  * كده مفيش تعارض بين hover و الزرار اليدوي
+- أضفت زرار play/pause للـ control bar بعد السهم التالي، مفصول بخط عمودي رفيع:
+  * لما المحتوى شغّال → أيقونة Pause (زرار "إيقاف")
+  * لما متوقف → أيقونة Play (زرار "تشغيل")
+  * onClick بيقلب manualPause
+- الـ control bar بقى: [سهم شمال] | [عدّاد 01/06] | [سهم يمين] | [play/pause] — كله بخط فاصل عمودي رفيع + خط فاصل علوي + خلفية داكنة شبه شفافة + أيقونات line بيضاء بلا خلفية (مطابق للمرجع)
+- ESLint: 0 errors
+- تحقق Agent Browser:
+  * arrows: 3 (سهمين + play/pause) ✅
+  * vertical dividers: 3 ✅
+  * counter: "01 / 06" ✅
+  * play/pause toggle: قبل click "إيقاف" → بعد click "تشغيل" ✅
+  * لا أخطا
+
+Stage Summary:
+- شريط تحكم الهيدر بقى مطابق للمرجع + أيقونة تشغيل/إيقاف: [‹] | [01/06] | [›] | [⏸/▶]
+- فصل clean بين hover-pause و manual-pause (لا تعارض)
+- 0 errors، التفاعل شغّال

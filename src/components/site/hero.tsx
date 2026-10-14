@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
-import { ArrowLeft, Truck, ShieldCheck, Zap, MapPin, ChevronRight, ChevronLeft } from "lucide-react";
+import { ArrowLeft, Truck, ShieldCheck, Zap, MapPin, ChevronRight, ChevronLeft, Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/store";
 import { apiGet } from "@/lib/api";
@@ -30,13 +30,15 @@ export function Hero() {
   const images = data?.images ?? FALLBACK_IMAGES;
 
   const [current, setCurrent] = useState(0);
-  const [paused, setPaused] = useState(false);
+  const [manualPause, setManualPause] = useState(false);
+  const [hoverPaused, setHoverPaused] = useState(false);
+  const paused = manualPause || hoverPaused;
   const total = images.length;
 
   const next = useCallback(() => setCurrent((c) => (c + 1) % Math.max(total, 1)), [total]);
   const prev = () => setCurrent((c) => (c - 1 + total) % Math.max(total, 1));
 
-  // auto-rotate
+  // auto-rotate (pause on hover OR manual)
   useEffect(() => {
     if (paused || total <= 1) return;
     const t = setInterval(next, 5000);
@@ -59,8 +61,8 @@ export function Hero() {
     <section
       id="home"
       className="relative min-h-[100svh] flex items-center overflow-hidden pt-20"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
+      onMouseEnter={() => setHoverPaused(true)}
+      onMouseLeave={() => setHoverPaused(false)}
     >
       {/* Background image carousel with crossfade */}
       <div className="absolute inset-0 -z-10">
@@ -205,6 +207,14 @@ export function Hero() {
               className="px-5 py-1.5 hover:text-amber-300 transition-colors"
             >
               <ChevronRight className="w-5 h-5" strokeWidth={1.5} />
+            </button>
+            <span className="w-px h-6 bg-white/20" />
+            <button
+              onClick={() => setManualPause((p) => !p)}
+              aria-label={manualPause ? "تشغيل" : "إيقاف"}
+              className="px-4 py-1.5 hover:text-amber-300 transition-colors"
+            >
+              {manualPause ? <Play className="w-4 h-4" strokeWidth={1.5} /> : <Pause className="w-4 h-4" strokeWidth={1.5} />}
             </button>
           </div>
         </div>
