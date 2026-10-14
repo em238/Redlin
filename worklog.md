@@ -512,3 +512,31 @@ Stage Summary:
 - Cairo HQ أدراماتيك أكتر (radar 130, beam 95px, orb 3 طبقات)
 - regional dots أكبر وألمع
 - 0 errors، التفاعل شغّال
+
+---
+Task ID: 16
+Agent: Orchestrator (main)
+Task: حل مشكلة التكتل — شيل الأعمدة الطويلة واستبدالها بنقاط مسطحة متوهجة
+
+Work Log:
+- حللت الصورة المرفوعة بـ VLM: المشكلة الأساسية كانت الأعمدة الضوئية الطويلة (beams) بتتداخل فوق بعضها في ركن مصر الصغير على خريطة أفريقيا الواسعة → "بقعة عمياء" فوضوية + تكدس شديد
+- الحل: شيلت كل الأعمدة الطويلة تماماً (لا wide glow columns ولا bright core beams) واستبدلتها بنقاط مسطمة متوهجة:
+  * Governorate markers (26): نقاط مسطحة — soft glow halo (r=11/15 breathing) + colored ring (r=5/6.5, softGlow) + main dot (r=3.4/4.2, white border) + white core (r=1.4) + pulse ring عند الـ hover
+  * Cairo HQ: شيلت الـ beam الطويل (95px) → بقى flat luminous dot (r=8) + radar sweep (radius 95) + 2 radar rings + base glow (r=24) + selection ring على hover
+  * Regional dots (15): flat gold dots (r=4.8/6) + glow halos (r=16/8) + bigGlow filter
+- ضفت SERVICE AREA AMBIENT GLOW تحت مصر (circle r=55, opacity=0.07, bigGlow, breathing) — بيقرأ كـ "منطقة نشاط" مقصودة بدل فوضى
+- النتيجة: مفيش أعمدة بتتداخل → لا تكتل/overlap، النقاط بقت glowing constellation أنيقة
+- ESLint: 0 errors
+- تحقق Agent Browser:
+  * tall beams: 0 ✅ (اتمسحوا)
+  * wide glow columns: 0 ✅
+  * service area glows: 1 ✅ (هالة مصر)
+  * flat gov dots: 26 ✅ (نقاط مسطحة)
+  * بعد click على اسوان: overlay "اسوان D نقطة توصيل نشطة" — نشطة true, توصيل نشطة true (مفيش أيام توصيل)
+  * لا أخطa
+
+Stage Summary:
+- حل مشكلة التكتل: الأعمدة الطويلة اتمسحت تماماً (سبب الـ overlap) واستُبدلت بنقاط مسطمة متوهجة
+- هالة ambient glow تحت مصر بقرأ المنطقة كـ "hub نشط" مقصود
+- التصميم بقى أنظف وأفخم — glowing constellation بدل بقعة فوضوية
+- 0 errors، التفاعل شغّال

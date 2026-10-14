@@ -255,55 +255,51 @@ export function InteractiveMap() {
                 <text x="160" y="470" fill="#7f1d1d" fontSize="24" textAnchor="middle" className="font-black tracking-widest opacity-15">AFRICA</text>
                 <text x="560" y="280" fill="#7f1d1d" fontSize="16" textAnchor="middle" className="font-black tracking-widest opacity-15">ARABIA</text>
 
-                {/* Regional city nodes (Gulf + Africa) — gold network dots (bigger, luminous) */}
+                {/* Service area ambient glow under Egypt (shows active region) */}
+                {hub && <circle cx={hub.x} cy={hub.y} r="55" fill={HUB_COLOR} fillOpacity="0.07" filter="url(#bigGlow)" className="city-light" />}
+
+                {/* Regional city nodes — flat luminous gold dots */}
                 {regional.map((r) => {
                   const isHov = hovered === r.name;
                   return (
                     <g key={r.name} transform={`translate(${r.x} ${r.y})`} className="cursor-pointer" onMouseEnter={() => setHovered(r.name)} onMouseLeave={() => setHovered(null)}>
-                      <circle r="20" fill="#fbbf24" fillOpacity="0.1" className="city-light" filter="url(#bigGlow)" />
-                      <circle r="10" fill="#fbbf24" fillOpacity="0.25" filter="url(#softGlow)" />
-                      <circle r="5.5" fill="#fbbf24" stroke="#fff" strokeWidth="2" filter="url(#softGlow)" />
-                      <circle r="2.2" fill="#fff" />
+                      <circle r="16" fill="#fbbf24" fillOpacity="0.12" className="city-light" filter="url(#bigGlow)" />
+                      <circle r="8" fill="#fbbf24" fillOpacity="0.28" filter="url(#softGlow)" />
+                      <circle r={isHov ? 6 : 4.8} fill="#fbbf24" stroke="#fff" strokeWidth="1.8" filter="url(#softGlow)" />
+                      <circle r="1.8" fill="#fff" />
                       {isHov && (
-                        <g transform="translate(0 -20)">
-                          <path d="M -3 8 L 3 8 L 0 13 Z" fill="#0a0a0a" stroke="#fbbf24" strokeWidth="1.4" />
+                        <g transform="translate(0 -18)">
+                          <path d="M -3 8 L 3 8 L 0 12 Z" fill="#0a0a0a" stroke="#fbbf24" strokeWidth="1.4" />
                           <rect x="-54" y="-16" width="108" height="24" rx="6" fill="#0a0a0a" stroke="#fbbf24" strokeWidth="1.4" filter="url(#softGlow)" />
-                          <text y="-1" textAnchor="middle" fill="#fde68a" fontSize="11" className="font-bold">{r.nameAr} · مركز إقليمي</text>
+                          <text y="0" textAnchor="middle" fill="#fde68a" fontSize="11" className="font-bold">{r.nameAr} · مركز إقليمي</text>
                         </g>
                       )}
                     </g>
                   );
                 })}
 
-                {/* Cairo hub: radar sweep + beam */}
+                {/* Cairo HQ — radar sweep + flat luminous dot (no tall beam) */}
                 {hub && (
                   <g transform={`translate(${hub.x} ${hub.y})`} className="cursor-pointer" onMouseEnter={() => setHovered(hub.name)} onMouseLeave={() => setHovered(null)} onClick={() => setSelected(hub.name)}>
                     {/* radar sweep (rotating sector) */}
                     <g>
-                      <path d="M 0 0 L 130 0 A 130 130 0 0 0 92 -92 Z" fill="url(#radarGrad)" opacity="0.45">
+                      <path d="M 0 0 L 95 0 A 95 95 0 0 0 67 -67 Z" fill="url(#radarGrad)" opacity="0.4">
                         <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="4s" repeatCount="indefinite" />
                       </path>
                     </g>
                     {/* radar rings */}
-                    <circle r="40" fill="none" stroke={HUB_COLOR} strokeWidth="1" strokeOpacity="0.35" />
-                    <circle r="70" fill="none" stroke={HUB_COLOR} strokeWidth="0.8" strokeOpacity="0.22" />
-                    <circle r="105" fill="none" stroke={HUB_COLOR} strokeWidth="0.6" strokeOpacity="0.13" />
-                    {/* wide outer glow column */}
-                    <rect x="-11" y="-95" width="22" height="95" fill={HUB_COLOR} fillOpacity="0.1" filter="url(#bigGlow)" className="beam-pulse" />
-                    {/* vertical bright beam */}
-                    <rect x="-3.5" y="-95" width="7" height="95" fill="url(#beamHub)" className="beam-pulse" />
+                    <circle r="34" fill="none" stroke={HUB_COLOR} strokeWidth="0.9" strokeOpacity="0.32" />
+                    <circle r="60" fill="none" stroke={HUB_COLOR} strokeWidth="0.6" strokeOpacity="0.18" />
                     {/* base glow */}
-                    <circle r="28" fill="url(#dgHub)" opacity="0.8" />
+                    <circle r="24" fill="url(#dgHub)" opacity="0.85" />
                     {/* main dot */}
-                    <circle r="9" fill={HUB_COLOR} stroke="#fff" strokeWidth="2.5" filter="url(#softGlow)" />
-                    <circle r="3.5" fill="#fff" />
-                    {/* top orb — multi-layer glow */}
-                    <circle cx="0" cy="-95" r="14" fill={HUB_COLOR} fillOpacity="0.28" filter="url(#bigGlow)" />
-                    <circle cx="0" cy="-95" r="8" fill={HUB_COLOR} fillOpacity="0.5" filter="url(#softGlow)" />
-                    <circle cx="0" cy="-95" r="4.5" fill="#fff" filter="url(#softGlow)" />
+                    <circle r="8" fill={HUB_COLOR} stroke="#fff" strokeWidth="2.5" filter="url(#softGlow)" />
+                    <circle r="3" fill="#fff" />
+                    {/* selection ring */}
+                    {(hovered === hub.name || selected === hub.name) && <circle r="16" fill="none" stroke={HUB_COLOR} strokeWidth="1.5" strokeOpacity="0.6" />}
                     {/* label */}
                     {(hovered === hub.name || selected === hub.name) && (
-                      <g transform="translate(0 -118)">
+                      <g transform="translate(0 -28)">
                         <path d="M -3 8 L 3 8 L 0 13 Z" fill="#dc2626" />
                         <rect x="-50" y="-16" width="100" height="26" rx="6" fill="#0a0a0a" stroke={HUB_COLOR} strokeWidth="1.5" filter="url(#softGlow)" />
                         <text y="0" textAnchor="middle" fill="#fff" fontSize="12" className="font-bold">★ {hub.nameAr} HQ</text>
@@ -312,34 +308,28 @@ export function InteractiveMap() {
                   </g>
                 )}
 
-                {/* Governorate markers — luminous pillars (wide, tall, multi-layer) */}
+                {/* Governorate markers — flat luminous dots (no beams = no clutter) */}
                 {markers.filter((m) => m.name !== HUB).map((m) => {
                   const z = ZONE[m.zone] || ZONE.A;
                   const isSel = selected === m.name;
                   const isHov = hovered === m.name;
                   const active = isSel || isHov;
-                  const beamH = active ? 88 : 70;
                   return (
                     <g key={m.id} transform={`translate(${m.x} ${m.y})`} className="cursor-pointer" onMouseEnter={() => setHovered(m.name)} onMouseLeave={() => setHovered(null)} onClick={() => setSelected(m.name)}>
-                      {/* wide outer glow column */}
-                      <rect x="-10" y={-beamH} width="20" height={beamH} fill={z.color} fillOpacity="0.11" filter="url(#bigGlow)" className={active ? "beam-pulse" : "beam-pulse-2"} />
-                      {/* bright core beam */}
-                      <rect x="-3" y={-beamH} width="6" height={beamH} fill={`url(#beam${m.zone})`} className={active ? "beam-pulse" : "beam-pulse-2"} opacity={active ? 1 : 0.85} />
-                      {/* top orb — multi-layer glow */}
-                      <circle cx="0" cy={-beamH} r="13" fill={z.color} fillOpacity="0.28" filter="url(#bigGlow)" />
-                      <circle cx="0" cy={-beamH} r="7" fill={z.color} fillOpacity="0.5" filter="url(#softGlow)" />
-                      <circle cx="0" cy={-beamH} r="3.5" fill="#fff" filter="url(#softGlow)" />
-                      {/* base glow */}
-                      <circle r="20" fill={`url(#dg${m.zone})`} opacity={active ? 0.95 : 0.6} className="city-light" />
-                      {/* base dot */}
-                      <circle r={active ? 7 : 5.5} fill={z.color} stroke="#fff" strokeWidth="1.8" filter="url(#softGlow)" />
-                      <circle r="2" fill="#fff" />
-                      {/* pulse ring */}
-                      {active && <circle r="5" fill="none" stroke={z.color} strokeWidth="2" className="radar-ring" style={{ filter: "drop-shadow(0 0 5px " + z.color + ")" }} />}
+                      {/* soft glow halo */}
+                      <circle r={active ? 15 : 11} fill={`url(#dg${m.zone})`} opacity={active ? 0.95 : 0.55} className="city-light" />
+                      {/* colored ring */}
+                      <circle r={active ? 6.5 : 5} fill={z.color} fillOpacity="0.35" filter="url(#softGlow)" />
+                      {/* main dot */}
+                      <circle r={active ? 4.2 : 3.4} fill={z.color} stroke="#fff" strokeWidth="1.5" filter="url(#softGlow)" />
+                      {/* white core */}
+                      <circle r="1.4" fill="#fff" />
+                      {/* pulse ring on active */}
+                      {active && <circle r="5" fill="none" stroke={z.color} strokeWidth="1.8" className="radar-ring" style={{ filter: "drop-shadow(0 0 4px " + z.color + ")" }} />}
                       {/* label */}
                       {active && (
-                        <g transform={`translate(0 ${-beamH - 20})`}>
-                          <path d="M -3 8 L 3 8 L 0 13 Z" fill="#0a0a0a" stroke={z.color} strokeWidth="1.4" />
+                        <g transform="translate(0 -20)">
+                          <path d="M -3 8 L 3 8 L 0 12 Z" fill="#0a0a0a" stroke={z.color} strokeWidth="1.4" />
                           <rect x="-40" y="-16" width="80" height="24" rx="6" fill="#0a0a0a" stroke={z.color} strokeWidth="1.4" filter="url(#softGlow)" />
                           <text y="0" textAnchor="middle" fill="#fff" fontSize="11" className="font-bold">{m.nameAr}</text>
                         </g>
