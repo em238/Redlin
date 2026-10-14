@@ -36,7 +36,7 @@ export function Footer() {
     <footer className="mt-auto bg-zinc-950 text-zinc-300">
       <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent" />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="grid gap-10 lg:grid-cols-12">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-12">
           {/* Brand */}
           <div className="lg:col-span-3">
             <div className="flex items-center gap-2.5 mb-5">

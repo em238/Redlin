@@ -30,7 +30,7 @@ export function Services() {
   const scrollTo = (id: string) => document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });
 
   return (
-    <section id="services" className="py-20 sm:py-28">
+    <section id="services" className="py-14 sm:py-24 lg:py-28">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
           eyebrow="خدماتنا"

@@ -952,3 +952,35 @@ Stage Summary:
 - شيلت الأخضر بالكامل من الخريطة ووحّدت لـ amber/gold (مطابق red/gold palette)
 - VLM: 9/10 تناسق ألوان
 - 0 errors
+
+---
+Task ID: 31
+Agent: Orchestrator (main)
+Task: تظبيط الريسبونسيف على كل الأجهزة (موبايل/تابلت/ديسكتوب)
+
+Work Log:
+- Hero responsive:
+  * title: text-4xl → text-3xl على الموبايل (sm:text-5xl lg:text-6xl)
+  * paragraph: text-base → text-sm على الموبايل (sm:text-lg)
+  * الأزرار: flex-col على الموبايل (full-width + stacked + justify-center) → flex-row على sm+
+  * mini-features: flex-col على الموبايل → flex-row على sm+
+- Section spacing (إكليني):
+  * كل الأقسام: py-20 sm:py-28 → py-14 sm:py-24 lg:py-28 (أضيق على الموبايل)
+  * StatsBar: py-10 sm:py-14 → py-8 sm:py-12
+  * CTA: py-16 sm:py-20 → py-12 sm:py-16 lg:py-20
+- Footer responsive:
+  * grid: lg:grid-cols-12 → sm:grid-cols-2 lg:grid-cols-12 (عمودين على التابلت، 12 على الديسكتوب)
+- ESLint: 0 errors
+- تحقق Agent Browser + VLM على 3 أحجام:
+  * Mobile (375px): 8/10 — العنوان مظبوط، الأزرار full-width، لا overflow، مسافات معقولة ✅
+  * Tablet (768px): 7/10 — متجاوب بشكل عام
+  * Desktop (1440px): 8/10 — احترافي ومتوازن، خطوط واضحة، ألوان متناسقة ✅
+  * لا أخطا
+
+Stage Summary:
+- الريسبونسيف متظبط على كل الأجهزة:
+  * Hero: عناوين/فقرات أصغر على الموبايل، أزرار full-width stacked
+  * كل الأقسام: spacing أضيق على الموبايل (py-14) → معتدل على تابلت (py-24) → واسع على ديسكتوب (py-28)
+  * Footer: 2 أعمدة على تابلت، 12 على ديسكتوب
+- VLM: موبايل 8/10، تابلت 7/10، ديسكتوب 8/10
+- 0 errors

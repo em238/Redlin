@@ -81,7 +81,7 @@ export function InteractiveMap() {
   }, [markers]);
 
   return (
-    <section id="map" className="py-20 sm:py-28 bg-zinc-950 relative overflow-hidden">
+    <section id="map" className="py-14 sm:py-24 lg:py-28 bg-zinc-950 relative overflow-hidden">
       {/* Atmospheric background */}
       <div className="absolute inset-0 grid-bg opacity-15" />
       <div className="absolute top-10 right-20 w-[500px] h-[500px] bg-primary/15 rounded-full blur-[140px] animate-aurora" />

@@ -113,7 +113,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] text-white tracking-tight"
+            className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] text-white tracking-tight"
           >
             شحن يصل لكل مصر
             <br />
@@ -132,7 +132,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="mt-6 text-base sm:text-lg text-white/75 max-w-2xl leading-relaxed"
+            className="mt-6 text-sm sm:text-lg text-white/75 max-w-2xl leading-relaxed"
           >
             شركة شحن احترافية تغطي جميع محافظات مصر بخدمات متنوعة — عادي، ممتاز،
             نفس اليوم، وشحن ثقيل — مع تتبع مباشر وأسعار منافسة وضمان التسليم.
@@ -142,12 +142,12 @@ export function Hero() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="mt-8 flex flex-wrap items-center gap-3"
+            className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
           >
             <Button
               size="lg"
               onClick={() => scrollTo("#contact")}
-              className="btn-glow bg-gradient-to-r from-primary to-red-700 hover:from-red-600 hover:to-red-800 text-primary-foreground gap-2 text-base h-12 px-6 font-semibold shadow-lg shadow-primary/30 hover:shadow-primary/40 transition-shadow"
+              className="btn-glow bg-gradient-to-r from-primary to-red-700 hover:from-red-600 hover:to-red-800 text-primary-foreground gap-2 text-base h-12 px-6 font-semibold shadow-lg shadow-primary/30 hover:shadow-primary/40 transition-shadow w-full sm:w-auto justify-center"
             >
               <Zap className="w-4.5 h-4.5" />
               اطلب شحن الآن
@@ -156,7 +156,7 @@ export function Hero() {
               size="lg"
               variant="outline"
               onClick={() => scrollTo("#services")}
-              className="bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/15 hover:text-white gap-2 text-base h-12 px-6"
+              className="bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/15 hover:text-white gap-2 text-base h-12 px-6 w-full sm:w-auto justify-center"
             >
               <Truck className="w-4.5 h-4.5" />
               خدماتنا
@@ -169,7 +169,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="mt-9 flex flex-wrap gap-x-6 gap-y-2 text-white/70"
+            className="mt-9 flex flex-col gap-2 sm:flex-row sm:flex-wrap gap-x-6 text-white/70"
           >
             {[
               { icon: Zap, text: "توصيل نفس اليوم في القاهرة الكبرى" },

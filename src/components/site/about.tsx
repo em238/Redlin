@@ -23,7 +23,7 @@ export function About() {
   const y2 = useTransform(scrollYProgress, [0, 1], [-30, 30]);
 
   return (
-    <section id="about" className="py-20 sm:py-28">
+    <section id="about" className="py-14 sm:py-24 lg:py-28">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Images with parallax */}

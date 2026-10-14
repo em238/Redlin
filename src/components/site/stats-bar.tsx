@@ -24,7 +24,7 @@ export function StatsBar() {
   const stats = data?.stats ?? FALLBACK;
 
   return (
-    <section className="py-10 sm:py-14">
+    <section className="py-8 sm:py-12">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <StaggerGroup className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5" stagger={0.08}>
           {stats.map((s, i) => {

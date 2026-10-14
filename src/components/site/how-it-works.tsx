@@ -27,7 +27,7 @@ export function HowItWorks() {
   const scrollTo = (id: string) => document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });
 
   return (
-    <section id="how" className="py-20 sm:py-28 bg-muted/30">
+    <section id="how" className="py-14 sm:py-24 lg:py-28 bg-muted/30">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
           eyebrow="إزاي بنشتغل"
