@@ -64,8 +64,10 @@ export function Testimonials() {
                   "{current.content}"
                 </p>
                 <div className="mt-6 flex items-center gap-3 pt-6 border-t border-border/60">
-                  <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white font-bold text-lg shadow-soft">
-                    {current.name.charAt(0)}
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-amber-600 p-[2px] shadow-soft shrink-0">
+                    <div className="w-full h-full rounded-full bg-card flex items-center justify-center text-primary font-bold text-lg">
+                      {current.name.charAt(0)}
+                    </div>
                   </div>
                   <div>
                     <div className="font-bold">{current.name}</div>

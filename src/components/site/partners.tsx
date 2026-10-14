@@ -47,7 +47,7 @@ export function Partners() {
                   href={p.website || "#"}
                   target={p.website ? "_blank" : undefined}
                   rel={p.website ? "noopener noreferrer" : undefined}
-                  className="card-premium relative group block rounded-2xl bg-card border border-border/60 shadow-soft p-6 h-28 flex flex-col items-center justify-center gap-2"
+                  className="card-premium shine relative group block rounded-2xl bg-card border border-border/60 shadow-soft p-6 h-28 flex flex-col items-center justify-center gap-2 overflow-hidden"
                 >
                   {p.logo ? (
                     <div className="w-14 h-14 flex items-center justify-center">

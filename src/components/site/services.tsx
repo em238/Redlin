@@ -39,19 +39,23 @@ export function Services() {
         />
 
         <StaggerGroup className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5" stagger={0.07}>
-          {services.map((s) => {
+          {services.map((s, idx) => {
             const Icon = ICONS[s.icon] || Package;
             return (
               <StaggerItem key={s.name}>
-                <div className="card-premium rounded-2xl border border-border/60 bg-card shadow-soft p-6 sm:p-7 h-full group">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/15 via-primary/8 to-amber-500/10 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform icon-gold-ring">
+                <div className="card-premium shine rounded-2xl border border-border/60 bg-card shadow-soft p-6 sm:p-7 h-full group relative overflow-hidden">
+                  {/* Big faded number watermark */}
+                  <span className="absolute top-4 left-5 text-6xl font-black text-primary/[0.06] leading-none select-none pointer-events-none">
+                    {String(idx + 1).padStart(2, "0")}
+                  </span>
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/15 via-primary/8 to-amber-500/10 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform icon-gold-ring relative">
                     <Icon className="w-6 h-6 text-primary" strokeWidth={2} />
                   </div>
-                  <h3 className="text-lg font-bold">{s.nameAr}</h3>
-                  <p className="mt-2 text-muted-foreground text-sm leading-relaxed">{s.description}</p>
+                  <h3 className="text-lg font-bold relative">{s.nameAr}</h3>
+                  <p className="mt-2 text-muted-foreground text-sm leading-relaxed relative">{s.description}</p>
                   <button
                     onClick={() => scrollTo("#contact")}
-                    className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:gap-2 transition-all"
+                    className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:gap-2 transition-all relative"
                   >
                     اطلب الخدمة
                     <ArrowLeft className="w-4 h-4" />
