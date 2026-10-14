@@ -43,7 +43,7 @@ export function VideoSection() {
   const others = filtered.filter((v) => v.id !== featured?.id).slice(0, 6);
 
   return (
-    <section id="videos" className="py-20 sm:py-28 bg-gradient-to-b from-muted/40 to-background relative overflow-hidden">
+    <section id="videos" className="py-20 sm:py-28 bg-muted/30">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px]" />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
         <SectionHeading

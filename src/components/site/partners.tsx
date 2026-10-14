@@ -30,7 +30,7 @@ export function Partners() {
   if (partners.length === 0) return null;
 
   return (
-    <section id="partners" className="py-20 sm:py-28 mesh-tint">
+    <section id="partners" className="py-20 sm:py-28 bg-muted/30">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
           eyebrow={<span className="flex items-center gap-1.5"><Star className="w-3.5 h-3.5" /> شركاء النجاح</span>}

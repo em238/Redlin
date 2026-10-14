@@ -131,10 +131,10 @@ export function InteractiveMap() {
                 <Radio className="w-4 h-4 text-primary animate-slow-pulse" />
                 <span className="font-bold">LIVE LOGISTICS GRID — AFRICA & MIDDLE EAST</span>
               </div>
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-400">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
                 </span>
                 {markers.length + regional.length} NODES ACTIVE
               </div>
@@ -366,7 +366,7 @@ export function InteractiveMap() {
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white shrink-0" style={{ background: ZONE[sel.zone]?.color, boxShadow: "0 0 10px " + ZONE[sel.zone]?.color }}>{sel.zone}</span>
                       </div>
                       <div className="mt-3 flex items-center gap-2 text-xs">
-                        <span className="flex items-center gap-1 text-emerald-400 font-semibold">
+                        <span className="flex items-center gap-1 text-amber-400 font-semibold">
                           <CheckCircle2 className="w-3.5 h-3.5" /> نقطة توصيل نشطة
                         </span>
                       </div>
@@ -403,7 +403,7 @@ export function InteractiveMap() {
               </div>
               <div className="w-px h-12 bg-white/10" />
               <div className="text-center">
-                <div className="text-3xl font-black text-emerald-400">99.2%</div>
+                <div className="text-3xl font-black text-amber-400">99.2%</div>
                 <div className="text-xs text-zinc-500 mt-1">تسليم في الوقت</div>
               </div>
             </div>
