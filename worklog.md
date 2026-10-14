@@ -440,3 +440,40 @@ Stage Summary:
 - شكل خالص مختلف عن كل اللي قبله — ملفت وجذاب جداً
 - full-width، بدون أسعار، interaction شغّال
 - 0 errors
+
+---
+Task ID: 14
+Agent: Orchestrator (main)
+Task: توسيع الخريطة لتغطي القارة الأفريقية + دول الخليج + شيل عدد أيام التوصيل
+
+Work Log:
+- وسّعت MAP_BOUNDS في egypt-coords.ts لتغطي أفريقيا + الشرق الأوسط (lat -35 إلى 38, lng -17 إلى 61) + MAP_DIMS (760x700)
+- أضفت AFRICA_BORDER (38 نقطة) — outline القارة الأفريقية من المغرب لكيب تاون للقرن الأفريقي
+- أضفت MIDEAST_BORDER (25 نقطة) — outline الجزيرة العربية + الشام + العراق
+- أضفت REGIONAL_CITIES (15 مدينة): الخليج (الرياض، دبي، الدوحة، الكويت، مسقط، المنامة) + كبرى مدن أفريقيا (الخرطوم، أديس أبابا، نيروبي، لاغوس، الدار البيضاء، جوهانسبرغ، الجزائر، تونس، طرابلس)
+- حدّثت interactive-map.tsx:
+  * title: "شبكة Redline على خريطة أفريقيا والخليج"
+  * subtitle: "X محافظة مصرية + Y مركز إقليمي"
+  * HUD: "LIVE LOGISTICS GRID — AFRICA & MIDDLE EAST" + "NODES ACTIVE" = markers+regional
+  * viewBox: 760x700، grid خطوط متظبطة على العرض الجديد
+  * landmass: AFRICA_BORDER + MIDEAST_BORDER wireframe متوهج (بدل EGYPT_BORDER)
+  * sea labels: MEDITERRANEAN SEA / RED SEA-GULF / ATLANTIC OCEAN / INDIAN OCEAN + AFRICA/ARABIA bold شفاف
+  * regional markers (gold dots): 15 مركز إقليمي بـ glow + hover label "X · مركز إقليمي"
+  * regional network lines (amber dashed flowing) من القاهرة لكل المدن الإقليمية
+  * compass اتظبط للموضع الجديد (712,52)
+  * stars/particles اتظبطوا للـ bounds الجديد (80 نجمة + 22 جسيم)
+  * شيلت ETA بالكامل من الـ floating overlay: بقى "نقطة توصيل نشطة" فقط (مش "X يوم")
+  * شيلت استيراد Clock و Globe2 (مش مستخدمين)
+- ESLint: 0 errors
+- تحقق Agent Browser:
+  * AFRICA: true, ARABIA: true, ATLANTIC: true, INDIAN: true, MEDITERRANEAN: true
+  * AFRICA & MIDDLE EAST HUD: true
+  * بعد click على اسوان: overlay "اسوان D نقطة توصيل نشطة" — نشطة true, توصيل نشطة true (مفيش يوم/أيام توصيل)
+  * لا أخطa
+
+Stage Summary:
+- الخريطة بقت بتغطي القارة الأفريقية + دول الخليج (مش مصر بس)
+- 15 مركز إقليمي (الخليج + أفريقيا) كـ gold dots + خطوط شبكة إقليمية من القاهرة
+- 27 محافظة مصرية لسه بـ beacons
+- عدد أيام التوصيل اتمسح بالكامل من الـ overlay
+- 0 errors

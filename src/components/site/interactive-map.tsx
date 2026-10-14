@@ -3,10 +3,10 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Clock, Building2, Navigation, Layers, CheckCircle2, Radio } from "lucide-react";
+import { MapPin, Building2, Navigation, Layers, CheckCircle2, Radio } from "lucide-react";
 import { apiGet } from "@/lib/api";
 import { SectionHeading } from "@/components/shared/section-heading";
-import { EGYPT_BORDER, NILE_MAIN, NILE_DAMIETTA, NILE_ROSETTA, GOV_COORDS, project, pathFromCoords } from "@/lib/egypt-coords";
+import { AFRICA_BORDER, MIDEAST_BORDER, REGIONAL_CITIES, NILE_MAIN, NILE_DAMIETTA, NILE_ROSETTA, GOV_COORDS, project, pathFromCoords } from "@/lib/egypt-coords";
 
 interface Gov {
   id: string; name: string; nameAr: string; zone: string;
@@ -32,15 +32,15 @@ const HUB = "Cairo";
 const HUB_COLOR = "#ef4444";
 
 // Stars + particles (stable random positions)
-const STARS = Array.from({ length: 70 }).map((_, i) => ({
-  x: (i * 137.5) % 600,
-  y: (i * 89.3) % 720,
+const STARS = Array.from({ length: 80 }).map((_, i) => ({
+  x: (i * 137.5) % 760,
+  y: (i * 89.3) % 700,
   r: (i % 3) * 0.4 + 0.4,
   delay: (i % 7) * 0.6,
 }));
-const PARTICLES = Array.from({ length: 18 }).map((_, i) => ({
-  x: 40 + ((i * 53) % 520),
-  y: 60 + ((i * 91) % 600),
+const PARTICLES = Array.from({ length: 22 }).map((_, i) => ({
+  x: 40 + ((i * 53) % 680),
+  y: 50 + ((i * 91) % 600),
   delay: (i % 6) * 0.8,
 }));
 
@@ -63,6 +63,12 @@ export function InteractiveMap() {
           return { ...g, ...p };
         }),
     [govs]
+  );
+
+  // Regional city nodes (Gulf + Africa) projected
+  const regional = useMemo(
+    () => REGIONAL_CITIES.map((c) => ({ ...c, ...project(c.lat, c.lng) })),
+    []
   );
 
   const hub = markers.find((m) => m.name === HUB) || markers[0];
@@ -90,7 +96,7 @@ export function InteractiveMap() {
             className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-primary/20 text-primary text-sm font-bold mb-4 border border-primary/40"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-slow-pulse" />
-            <Radio className="w-4 h-4" /> مركز القيادة اللوجستي
+            <Radio className="w-4 h-4" /> الشبكة الإقليمية — أفريقيا والخليج
           </motion.span>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -98,7 +104,7 @@ export function InteractiveMap() {
             viewport={{ once: true }}
             className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-[1.15] text-white"
           >
-            شبكة <span className="text-gradient-red">Redline</span> الحية على خريطة مصر
+            شبكة <span className="text-gradient-red">Redline</span> على خريطة أفريقيا والخليج
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -107,7 +113,7 @@ export function InteractiveMap() {
             transition={{ delay: 0.1 }}
             className="mt-4 text-zinc-400 text-lg"
           >
-            27 نقطة توصيل نشطة — كل عمود ضوء يمثل محافظة. جرّب الضغط على أي نقطة
+            {markers.length} محافظة مصرية + {regional.length} مركز إقليمي — جرّب الضغط على أي نقطة
           </motion.p>
         </div>
 
@@ -123,20 +129,20 @@ export function InteractiveMap() {
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-zinc-950/80">
               <div className="flex items-center gap-2 text-sm text-white">
                 <Radio className="w-4 h-4 text-primary animate-slow-pulse" />
-                <span className="font-bold">LIVE LOGISTICS GRID — ARAB REPUBLIC OF EGYPT</span>
+                <span className="font-bold">LIVE LOGISTICS GRID — AFRICA & MIDDLE EAST</span>
               </div>
               <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                 </span>
-                {markers.length} NODES ACTIVE
+                {markers.length + regional.length} NODES ACTIVE
               </div>
             </div>
 
             {/* SVG holographic map — wide */}
             <div className="relative w-full aspect-[16/11] sm:aspect-[16/9] bg-gradient-to-b from-black via-zinc-950 to-black">
-              <svg viewBox="0 0 600 720" preserveAspectRatio="xMidYMid meet" className="w-full h-full" style={{ touchAction: "none" }}>
+              <svg viewBox="0 0 760 700" preserveAspectRatio="xMidYMid meet" className="w-full h-full" style={{ touchAction: "none" }}>
                 <defs>
                   {/* beam gradients (vertical: transparent top → bright base) */}
                   {Object.entries(ZONE).map(([k, v]) => (
@@ -197,19 +203,20 @@ export function InteractiveMap() {
                 ))}
 
                 {/* Lat/long grid (subtle cyan) */}
-                <g stroke="#0ea5e9" strokeWidth="0.3" strokeOpacity="0.12">
-                  {[60, 120, 180, 240, 300, 360, 420, 480, 540].map((x) => (
-                    <line key={"gv" + x} x1={x} y1="0" x2={x} y2="720" />
+                <g stroke="#0ea5e9" strokeWidth="0.3" strokeOpacity="0.1">
+                  {[60, 130, 200, 270, 340, 410, 480, 550, 620, 690].map((x) => (
+                    <line key={"gv" + x} x1={x} y1="0" x2={x} y2="700" />
                   ))}
-                  {[60, 120, 180, 240, 300, 360, 420, 480, 540, 600, 660].map((y) => (
-                    <line key={"gh" + y} x1="0" y1={y} x2="600" y2={y} />
+                  {[60, 130, 200, 270, 340, 410, 480, 550, 620].map((y) => (
+                    <line key={"gh" + y} x1="0" y1={y} x2="760" y2={y} />
                   ))}
                 </g>
 
-                {/* Egypt wireframe landmass */}
-                <path d={pathFromCoords(EGYPT_BORDER) + " Z"} fill="url(#egyptWire)" />
-                <path d={pathFromCoords(EGYPT_BORDER) + " Z"} fill="none" stroke="#dc2626" strokeWidth="1.2" strokeOpacity="0.6" filter="url(#softGlow)" />
-                <path d={pathFromCoords(EGYPT_BORDER) + " Z"} fill="none" stroke="#fca5a5" strokeWidth="0.5" strokeOpacity="0.4" strokeDasharray="3 2" />
+                {/* Africa + Middle East landmass wireframe */}
+                <path d={pathFromCoords(AFRICA_BORDER) + " Z"} fill="url(#egyptWire)" />
+                <path d={pathFromCoords(AFRICA_BORDER) + " Z"} fill="none" stroke="#dc2626" strokeWidth="1" strokeOpacity="0.5" filter="url(#softGlow)" />
+                <path d={pathFromCoords(MIDEAST_BORDER) + " Z"} fill="url(#egyptWire)" />
+                <path d={pathFromCoords(MIDEAST_BORDER) + " Z"} fill="none" stroke="#dc2626" strokeWidth="1" strokeOpacity="0.5" filter="url(#softGlow)" />
 
                 {/* Nile neon */}
                 <path d={pathFromCoords(NILE_MAIN)} fill="none" stroke="url(#nileNeon)" strokeWidth="3" strokeLinecap="round" filter="url(#softGlow)" />
@@ -217,7 +224,7 @@ export function InteractiveMap() {
                 <path d={pathFromCoords(NILE_ROSETTA)} fill="none" stroke="url(#nileNeon)" strokeWidth="2" strokeLinecap="round" strokeOpacity="0.7" />
                 <path d={pathFromCoords(NILE_MAIN)} fill="none" stroke="#a5f3fc" strokeWidth="1" strokeLinecap="round" strokeOpacity="0.7" strokeDasharray="2 8" className="nile-flow" />
 
-                {/* Network lines from Cairo hub to all nodes */}
+                {/* Network lines from Cairo hub to Egypt governorates */}
                 {hub && markers.filter((m) => m.name !== hub.name).map((m, i) => {
                   const zc = ZONE[m.zone]?.color || HUB_COLOR;
                   const isActive = selected === m.name || hovered === m.name;
@@ -228,15 +235,45 @@ export function InteractiveMap() {
                   );
                 })}
 
+                {/* Regional network lines from Cairo to Gulf + African cities (amber) */}
+                {hub && regional.map((r, i) => (
+                  <line key={"reg" + i} x1={hub.x} y1={hub.y} x2={r.x} y2={r.y}
+                    stroke="#fbbf24" strokeWidth="0.5" strokeOpacity="0.18"
+                    strokeDasharray="3 5" className="flow-line" style={{ animationDelay: (i % 5) * 0.25 + "s" }} />
+                ))}
+
                 {/* Floating particles */}
                 {PARTICLES.map((p, i) => (
                   <circle key={"p" + i} cx={p.x} cy={p.y} r="1.5" fill={HUB_COLOR} opacity="0.4" className="particle" style={{ animationDelay: p.delay + "s" }} />
                 ))}
 
                 {/* Sea labels (subtle) */}
-                <text x="300" y="28" fill="#334155" fontSize="12" textAnchor="middle" className="font-medium">MEDITERRANEAN</text>
-                <text x="555" y="380" fill="#334155" fontSize="10" textAnchor="middle" transform="rotate(-90 555 380)">RED SEA</text>
-                <text x="300" y="420" fill="#7f1d1d" fontSize="26" textAnchor="middle" className="font-black tracking-widest opacity-20">EGYPT</text>
+                <text x="380" y="22" fill="#334155" fontSize="12" textAnchor="middle" className="font-medium">MEDITERRANEAN SEA</text>
+                <text x="560" y="360" fill="#334155" fontSize="10" textAnchor="middle" transform="rotate(-90 560 360)">RED SEA / GULF</text>
+                <text x="120" y="380" fill="#334155" fontSize="11" textAnchor="middle" transform="rotate(-90 120 380)">ATLANTIC OCEAN</text>
+                <text x="400" y="640" fill="#334155" fontSize="11" textAnchor="middle">INDIAN OCEAN</text>
+                <text x="160" y="470" fill="#7f1d1d" fontSize="24" textAnchor="middle" className="font-black tracking-widest opacity-15">AFRICA</text>
+                <text x="560" y="280" fill="#7f1d1d" fontSize="16" textAnchor="middle" className="font-black tracking-widest opacity-15">ARABIA</text>
+
+                {/* Regional city nodes (Gulf + Africa) — gold network dots */}
+                {regional.map((r) => {
+                  const isHov = hovered === r.name;
+                  return (
+                    <g key={r.name} transform={`translate(${r.x} ${r.y})`} className="cursor-pointer" onMouseEnter={() => setHovered(r.name)} onMouseLeave={() => setHovered(null)}>
+                      <circle r="12" fill="#fbbf24" fillOpacity="0.12" className="city-light" />
+                      <circle r="5" fill="#fbbf24" fillOpacity="0.25" filter="url(#softGlow)" />
+                      <circle r="3.2" fill="#fbbf24" stroke="#fff" strokeWidth="1.4" filter="url(#softGlow)" />
+                      <circle r="1.2" fill="#fff" />
+                      {isHov && (
+                        <g transform="translate(0 -16)">
+                          <path d="M -3 7 L 3 7 L 0 11 Z" fill="#0a0a0a" stroke="#fbbf24" strokeWidth="1.3" />
+                          <rect x="-50" y="-15" width="100" height="22" rx="5" fill="#0a0a0a" stroke="#fbbf24" strokeWidth="1.3" filter="url(#softGlow)" />
+                          <text y="-1" textAnchor="middle" fill="#fde68a" fontSize="10" className="font-bold">{r.nameAr} · مركز إقليمي</text>
+                        </g>
+                      )}
+                    </g>
+                  );
+                })}
 
                 {/* Cairo hub: radar sweep + beam */}
                 {hub && (
@@ -315,7 +352,7 @@ export function InteractiveMap() {
                 ))}
 
                 {/* Compass */}
-                <g transform="translate(548 56)">
+                <g transform="translate(712 52)">
                   <circle r="15" fill="none" stroke="#1e3a5f" strokeWidth="0.8" />
                   <path d="M 0 -10 L 2.5 0 L 0 10 L -2.5 0 Z" fill={HUB_COLOR} />
                   <text y="-18" textAnchor="middle" fill="#475569" fontSize="8" className="font-bold">N</text>
@@ -338,12 +375,9 @@ export function InteractiveMap() {
                         </div>
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white shrink-0" style={{ background: ZONE[sel.zone]?.color, boxShadow: "0 0 10px " + ZONE[sel.zone]?.color }}>{sel.zone}</span>
                       </div>
-                      <div className="mt-3 flex items-center gap-3 text-xs">
-                        <span className="flex items-center gap-1 text-zinc-200">
-                          <Clock className="w-3.5 h-3.5 text-primary" /> {Math.ceil(sel.etaHours / 24)} يوم
-                        </span>
+                      <div className="mt-3 flex items-center gap-2 text-xs">
                         <span className="flex items-center gap-1 text-emerald-400 font-semibold">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> نشطة
+                          <CheckCircle2 className="w-3.5 h-3.5" /> نقطة توصيل نشطة
                         </span>
                       </div>
                     </motion.div>
