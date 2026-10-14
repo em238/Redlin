@@ -836,3 +836,39 @@ Stage Summary:
 - شريط التحميل بقى full-width بعرض الصفحة مع الصورة (gradient أحمر→ذهبي)، فوق الـ marquee
 - الـ controls (سهمين + play/pause) لسه centered تحته
 - 0 errors
+
+---
+Task ID: 27
+Agent: Orchestrator (main)
+Task: ريفاكتور قوي لقسم "إزاي بنشتغل" (3 خطوات)
+
+Work Log:
+- VLM لقى مشاكل: ترتيب معكوس (step 1 على اليسار بدل اليمين)، أرقام بتطفو غلط على حافة الدوائر، الخط الرابط مش واضح، إحساس amateur
+- ريفاكتور كامل لـ how-it-works.tsx:
+  * RTL: ضفت dir="rtl" على الـ container → الخطوة 1 على اليمين، 3 على اليسار (تدفق قراءة عربي صحيح)
+  * الدائرة الكبيرة (w-28 h-28): gradient ring border (p-[2px] bg-gradient from-primary/40 via-primary/15 to-amber-500/30) + inner bg-card + shadow-card→elevated على hover
+  * أيقونة داخلية: دائرة صغيرة (w-14 h-14) بـ gradient bg (from-primary/15 to-amber-500/10) + icon-gold-ring + scale-110 على hover
+  * رقم الخطوة: badge دائري (w-9 h-9) متركز فوق الدائرة (top-center) — gradient bg + ring-4 ring-muted/30 (بيندمج مع الخلفية) + shadow-soft = مظبوط مش بيطفو
+  * الخط الرابط: gradient واضح (from-transparent via-primary/40 to-transparent) خلف الدوائر + نقطة متوهجة متحركة بتنيج على الخط (motion x 0→100%)
+  * أسهم بين الخطوات: دائرة صغيرة (w-7 h-7) bg-card + border + shadow + ArrowLeft (يشير لليسار = اتجاه الخطوة التالية في RTL)
+  * زرار CTA في الآخر: "ابدأ شحنتك الآن" بـ btn-glow + gradient + arrow
+- ESLint: 0 errors
+- تحقق Agent Browser + VLM:
+  * الترتيب: step 1 على اليمين ✅ (RTL صحيح)
+  * الخط الرابط: واضح ويصل بين الدوائر ✅
+  * الأرقام: متمركزة ومظبوطة على الدوائر ✅
+  * الأسهم: موجودة وتشير لليسار (الاتجاه الصحيح) ✅
+  * VLM: "تصميم احترافي، نظيف، ومكتمل"
+  * التقييم: 9/10
+  * لا أخطا
+
+Stage Summary:
+- قسم "إزاي بنشتغل" بقى احترافي ومكتمل:
+  * ترتيب RTL صحيح (1 على اليمين → 3 على اليسار)
+  * دوائر بـ gradient ring + أيقونات داخلية بـ gold ring
+  * أرقام متمركزة فوق الدوائر (مش بتطفو)
+  * خط رابط gradient واضح + نقطة متوهجة متحركة
+  * أسهم بين الخطوات (الاتجاه الصحيح)
+  * زرار CTA في الآخر
+- VLM: 9/10 احترافي ومكتمل
+- 0 errors
