@@ -60,7 +60,7 @@ export function Hero() {
   return (
     <section
       id="home"
-      className="relative min-h-[100svh] flex items-center overflow-hidden pt-20"
+      className="relative min-h-[100svh] flex items-center overflow-hidden pt-20 bg-zinc-950"
       onMouseEnter={() => setHoverPaused(true)}
       onMouseLeave={() => setHoverPaused(false)}
     >
@@ -87,7 +87,7 @@ export function Hero() {
             </motion.div>
           </AnimatePresence>
           <div className="absolute inset-0 bg-gradient-to-l from-black/92 via-black/70 to-black/40" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-black/10 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
           {/* Rich red ambient tint */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-amber-900/10 mix-blend-overlay" />
         </motion.div>
