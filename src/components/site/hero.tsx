@@ -65,7 +65,7 @@ export function Hero() {
       onMouseLeave={() => setHoverPaused(false)}
     >
       {/* Background image carousel with crossfade */}
-      <div className="absolute inset-0 -z-10">
+      <div className="absolute inset-0 z-0">
         <motion.div style={{ y: yBg }} className="absolute inset-0">
           <AnimatePresence mode="sync">
             <motion.div
@@ -86,10 +86,10 @@ export function Hero() {
               />
             </motion.div>
           </AnimatePresence>
-          <div className="absolute inset-0 bg-gradient-to-l from-black/92 via-black/70 to-black/40" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-l from-black/80 via-black/35 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
           {/* Rich red ambient tint */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-amber-900/10 mix-blend-overlay" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-transparent to-amber-900/10 mix-blend-overlay" />
         </motion.div>
       </div>
 
