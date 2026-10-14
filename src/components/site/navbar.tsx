@@ -54,10 +54,10 @@ export function Navbar() {
                 <Truck className="w-4.5 h-4.5 text-primary-foreground" strokeWidth={2.4} />
               </div>
               <div className="flex flex-col leading-none">
-                <span className="text-lg font-bold tracking-tight">
+                <span className={`text-lg font-bold tracking-tight transition-colors ${scrolled ? "text-foreground" : "text-white"}`}>
                   Red<span className="text-primary">line</span>
                 </span>
-                <span className="text-[10px] text-muted-foreground font-medium mt-0.5">شحن سريع وآمن</span>
+                <span className={`text-[10px] font-medium mt-0.5 transition-colors ${scrolled ? "text-muted-foreground" : "text-white/60"}`}>شحن سريع وآمن</span>
               </div>
             </button>
 
@@ -70,7 +70,9 @@ export function Navbar() {
                     key={link.href}
                     onClick={() => go(link.href)}
                     className={`relative px-3.5 py-2 text-sm font-medium rounded-md transition-colors ${
-                      isActive ? "text-primary" : "text-foreground/70 hover:text-foreground"
+                      isActive
+                        ? (scrolled ? "text-primary" : "text-white")
+                        : (scrolled ? "text-foreground/70 hover:text-foreground" : "text-white/80 hover:text-white")
                     }`}
                   >
                     {link.label}
@@ -92,7 +94,7 @@ export function Navbar() {
                 variant="ghost"
                 size="icon"
                 onClick={toggleTheme}
-                className="rounded-lg"
+                className={`rounded-lg transition-colors ${scrolled ? "text-foreground hover:bg-muted" : "text-white hover:bg-white/10"}`}
                 aria-label="تبديل السمة"
               >
                 {theme === "light" ? <Moon className="w-[18px] h-[18px]" /> : <Sun className="w-[18px] h-[18px]" />}
@@ -108,7 +110,7 @@ export function Navbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="lg:hidden rounded-lg"
+                className={`lg:hidden rounded-lg transition-colors ${scrolled ? "text-foreground hover:bg-muted" : "text-white hover:bg-white/10"}`}
                 onClick={() => setMobileOpen((v) => !v)}
                 aria-label="القائمة"
               >

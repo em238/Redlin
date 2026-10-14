@@ -872,3 +872,27 @@ Stage Summary:
   * زرار CTA في الآخر
 - VLM: 9/10 احترافي ومكتمل
 - 0 errors
+
+---
+Task ID: 28
+Agent: Orchestrator (main)
+Task: ظبط وضوح روابط الناف بار فوق الهيدر الداكن
+
+Work Log:
+- المشكلة: روابط الناف بار (خدماتنا، كيف نعمل، الخريطة، المعرض، الشركاء، تواصل) كانت بلون غامق (text-foreground) فوق الهيدر الداكن → مبانش
+- الحل: عملت conditional colors حسب scrolled state:
+  * !scrolled (فوق الهيدر الداكن): روابط text-white/80 hover:text-white، active text-white
+  * scrolled (خلفية بيضاء): روابط text-foreground/70 hover:text-foreground، active text-primary
+  * كله بـ transition-colors (تحول ناعم)
+- Logo: "Redline" بقى text-white لما !scrolled، text-foreground لما scrolled + subtitle text-white/60 / text-muted-foreground
+- زرار theme toggle + menu button: text-white hover:bg-white/10 لما !scrolled، text-foreground hover:bg-muted لما scrolled
+- ESLint: 0 errors
+- تحقق Agent Browser + VLM:
+  * VLM: "الروابط واضحة ومقروءة تماماً، اللون الأبيض/الفاتح مناسب جداً للخلفية الداكنة، تباين عالٍ يسهل القراءة ويبرز النص بوضوح"
+  * لا أخطa
+
+Stage Summary:
+- روابط الناف بار بقت بيضاء وواضحة فوق الهيدر الداكن (تباين عالٍ)
+- بتتحول ناعمة لغامقة لما الناف بار يعمل scroll (خلفية بيضاء)
+- Logo + theme toggle + menu button كلهم بيتكيفوا مع الـ scrolled state
+- 0 errors
