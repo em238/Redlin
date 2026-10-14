@@ -477,3 +477,38 @@ Stage Summary:
 - 27 محافظة مصرية لسه بـ beacons
 - عدد أيام التوصيل اتمسح بالكامل من الـ overlay
 - 0 errors
+
+---
+Task ID: 15
+Agent: Orchestrator (main)
+Task: ترقية الخريطة لتكون أفخم + تكبير النقاط (مش ضيقة)
+
+Work Log:
+- رقّيت الـ markers كلها عشان تبقى أكبر وأفخم (مش ضيقة):
+  * Governorate beacons (الـ 26): 
+    - beam ارتفع من 48→70px (و88 عند hover)
+    - beam اعرض من 3px→6px width
+    - ضفت WIDE OUTER GLOW COLUMN (width=20, opacity=0.11, bigGlow filter) خلف كل beam = عمود ضوئي عريض متوهج
+    - top orb بقا 3 طبقات متوهجة (r=13 bigGlow + r=7 softGlow + r=3.5 white core) بدل طبقة واحدة
+    - base glow اكبر (r=14→20)
+    - base dot اكبر (r=4/5.5 → r=5.5/7)
+    - pulse ring اكبر (r=4→5, strokeWidth 1.5→2)
+  * Cairo HQ: beam ارتفع 72→95px + اعرض (4→7px) + wide glow column (width=22)
+    - radar sweep اكبر (radius 95→130)
+    - radar rings اكبر (30/55/80 → 40/70/105)
+    - top orb 3 طبقات (r=14 bigGlow + r=8 softGlow + r=4.5 white)
+    - base glow اكبر (20→28) + dot اكبر (7→9)
+  * Regional city dots: dot اكبر (3.2→5.5) + glow halos اكبر (12→20 outer, 5→10 mid) + filter bigGlow
+  * beam gradients اتقوت (stop 70% opacity 0.5→0.7)
+- أصلحت bug: duplicate filter attribute على top orb circle
+- ESLint: 0 errors
+- تحقق Agent Browser:
+  * core beams: 26, wide glow columns: 26, big top orbs (r=13): 26, big base dots: 67 — كلها بتظهر
+  * بعد click على اسوان: overlay "اسوان D نقطة توصيل نشطة" — نشطة true, توصيل نشطة true (مفيش أيام توصيل)
+  * لا أخطا
+
+Stage Summary:
+- النقاط بقت أكبر وأفخم: أعمدة ضوئية عريضة (width 6px + glow column 20px) طويلة (70-88px)، orbs متوهجة 3 طبقات، هالات أكبر
+- Cairo HQ أدراماتيك أكتر (radar 130, beam 95px, orb 3 طبقات)
+- regional dots أكبر وألمع
+- 0 errors، التفاعل شغّال
