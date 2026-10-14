@@ -75,7 +75,7 @@ export function Footer() {
           {/* Links */}
           <div className="lg:col-span-2">
             <h4 className="font-bold text-white text-sm mb-4">{LINKS.company.title}</h4>
-            <ul className="space-y-2.5 text-sm">
+            <ul className="space-y-2 text-sm">
               {LINKS.company.items.map((l, i) => (
                 <li key={i}><a href="#" className="text-zinc-400 hover:text-primary transition-colors">{l}</a></li>
               ))}
@@ -83,7 +83,7 @@ export function Footer() {
           </div>
           <div className="lg:col-span-2">
             <h4 className="font-bold text-white text-sm mb-4">{LINKS.services.title}</h4>
-            <ul className="space-y-2.5 text-sm">
+            <ul className="space-y-2 text-sm">
               {LINKS.services.items.map((l, i) => (
                 <li key={i}><button onClick={() => go("#services")} className="text-zinc-400 hover:text-primary transition-colors">{l}</button></li>
               ))}
@@ -91,7 +91,7 @@ export function Footer() {
           </div>
           <div className="lg:col-span-2">
             <h4 className="font-bold text-white text-sm mb-4">{LINKS.help.title}</h4>
-            <ul className="space-y-2.5 text-sm">
+            <ul className="space-y-2 text-sm">
               {LINKS.help.items.map((l, i) => (
                 <li key={i}>
                   <button onClick={() => l === "تتبع الشحنة" ? go("#contact") : undefined} className="text-zinc-400 hover:text-primary transition-colors">{l}</button>

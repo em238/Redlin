@@ -54,8 +54,8 @@ export function Testimonials() {
                 transition={{ duration: 0.35 }}
                 className="relative rounded-2xl border border-border/60 bg-card shadow-card p-8 sm:p-12"
               >
-                <Quote className="absolute top-6 left-6 w-10 h-10 text-primary/10" />
-                <div className="flex gap-0.5 mb-4">
+                <Quote className="absolute top-4 left-4 w-20 h-20 text-primary/[0.06]" />
+                <div className="flex gap-0.5 mb-4 relative">
                   {Array.from({ length: current.rating }).map((_, j) => (
                     <Star key={j} className="w-4 h-4 fill-amber-400 text-amber-400" />
                   ))}

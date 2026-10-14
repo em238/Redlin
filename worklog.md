@@ -637,3 +637,34 @@ Stage Summary:
 - الموقع بقى جذاب واحترافي: gradients (أحمر داكن + mesh) + noise texture + card-premium hover (gradient accent + colored lift) + glassmorphism navbar + CTA mesh gradient + hero ambient tint
 - كل الـ "توابل" اللي طلبها VLM اتضافت بدون كسر البساطة (لا ازدحام)
 - 0 errors، VLM: 8.5/10 جذاب جداً
+
+---
+Task ID: 20
+Agent: Orchestrator (main)
+Task: ريفاكتور أبسط + كريتف + احترافي
+
+Work Log:
+- أنشأت قسم "كيف نعمل" (how-it-works.tsx) جديد — 3 خطوات بسيطة:
+  1. احجز شحنتك (ClipboardList) — احجز أونلاين أو بالهاتف 19999
+  2. نستلم ونشحن (Truck) — مندوبنا يستلم ونشحن لوجهتها
+  3. توصّل للمستلم (Home) — توصّل لأي محافظة بأمان وضمان
+  * كل خطوة: دائرة 96px بـ icon + badge رقم متدرج (gradient from-primary to-red-700) + خط رابط dashed متدرج خفيف بين الخطوات
+  * بسيط + كريتف + احترافي + بيعبّي الفراغ الكبير في وسط الصفحة
+  * أضفته بين Services و InteractiveMap + رابط "كيف نعمل" في Navbar
+- Testimonials: ضخّمت علامة الاقتباس (Quote) لـ w-20 h-20 كـ watermark شفاف (text-primary/[0.06]) = لمسة كريتف بصرية
+- Footer: بسّطت المسافات بين الروابط (space-y-2.5 → space-y-2) + whitespace أكتر + أنظف
+- أصلحت خطأ: HomeCheck مش موجود في lucide → استبدلته بـ Home
+- ESLint: 0 errors
+- تحقق Agent Browser + VLM:
+  * how section: true ✅, احجز شحنتك: true ✅, 3 خطوات: true ✅, nav كيف نعمل: true ✅
+  * VLM: "أبسط وأكثر احترافية، قسم كيف نعمل مظبوط ومحسّن الفراغ، علامة الاقتباس الكبيرة كريتف جداً، footer أبسط ومنظم"
+  * التقييم: 9/10 (ارتفاع من 8.5/10) — تصميم متقن، عصري، توازن بين الجمال والوظيفة
+  * لا أخطا
+
+Stage Summary:
+- الموقع بقى أبسط + كريتف + احترافي:
+  * قسم "كيف نعمل" جديد (3 خطوات بسيطة بأيقونات + خط رابط) — كريتف واحترافي ويعبّي الفراغ
+  * علامة اقتباس كبيرة كـ watermark في آراء العملاء (لمسة كريتف)
+  * footer أبسط وأكثر whitespace
+- VLM: 9/10 (ارتفاع من 8.5) — متقن، عصري، متوازن
+- 0 errors
