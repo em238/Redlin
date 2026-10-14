@@ -21,10 +21,6 @@ const GOV_MARQUEE = [
   "دمياط", "الفيوم", "الزقازيق", "الاسماعيليه", "شرم الشيخ", "الغردقه",
 ];
 
-const FLOATING_STATS = [
-  { icon: Zap, label: "متوسط زمن التوصيل", value: "26 ساعة", color: "from-amber-500 to-amber-700", pos: "top-[24%] right-[4%]" },
-];
-
 export function Hero() {
   const { setView } = useAppStore();
   const { data } = useQuery({
@@ -186,31 +182,6 @@ export function Hero() {
           </motion.div>
         </div>
       </motion.div>
-
-      {/* Floating stat cards (desktop only) */}
-      <div className="hidden xl:block absolute inset-0 pointer-events-none">
-        {FLOATING_STATS.map((s, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, scale: 0.8, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ delay: 0.6 + i * 0.15, duration: 0.6 }}
-            className={`absolute ${s.pos}`}
-          >
-            <motion.div
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 4 + i, repeat: Infinity, ease: "easeInOut" }}
-              className="glass rounded-2xl border border-white/15 p-4 shadow-2xl pointer-events-auto w-44"
-            >
-              <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${s.color} flex items-center justify-center mb-2 shadow-lg`}>
-                <s.icon className="w-4 h-4 text-white" />
-              </div>
-              <div className="text-xl font-bold text-white">{s.value}</div>
-              <div className="text-[11px] text-white/70">{s.label}</div>
-            </motion.div>
-          </motion.div>
-        ))}
-      </div>
 
       {/* Image carousel controls — minimal centered bar (matching reference: thin arrows + dividers + counter) */}
       {total > 1 && (
