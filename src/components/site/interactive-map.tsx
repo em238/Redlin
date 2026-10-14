@@ -278,73 +278,68 @@ export function InteractiveMap() {
                   );
                 })}
 
-                {/* Cairo HQ — radar sweep + flat luminous dot (no tall beam) */}
+                {/* Cairo HQ — Egypt service cluster (27 governorates represented) */}
                 {hub && (
                   <g transform={`translate(${hub.x} ${hub.y})`} className="cursor-pointer" onMouseEnter={() => setHovered(hub.name)} onMouseLeave={() => setHovered(null)} onClick={() => setSelected(hub.name)}>
-                    {/* radar sweep (rotating sector) */}
+                    {/* radar sweep */}
                     <g>
-                      <path d="M 0 0 L 95 0 A 95 95 0 0 0 67 -67 Z" fill="url(#radarGrad)" opacity="0.4">
+                      <path d="M 0 0 L 110 0 A 110 110 0 0 0 78 -78 Z" fill="url(#radarGrad)" opacity="0.4">
                         <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="4s" repeatCount="indefinite" />
                       </path>
                     </g>
                     {/* radar rings */}
-                    <circle r="34" fill="none" stroke={HUB_COLOR} strokeWidth="0.9" strokeOpacity="0.32" />
-                    <circle r="60" fill="none" stroke={HUB_COLOR} strokeWidth="0.6" strokeOpacity="0.18" />
+                    <circle r="38" fill="none" stroke={HUB_COLOR} strokeWidth="1" strokeOpacity="0.32" />
+                    <circle r="66" fill="none" stroke={HUB_COLOR} strokeWidth="0.7" strokeOpacity="0.18" />
+                    <circle r="95" fill="none" stroke={HUB_COLOR} strokeWidth="0.5" strokeOpacity="0.1" />
                     {/* base glow */}
-                    <circle r="24" fill="url(#dgHub)" opacity="0.85" />
+                    <circle r="26" fill="url(#dgHub)" opacity="0.9" />
                     {/* main dot */}
-                    <circle r="8" fill={HUB_COLOR} stroke="#fff" strokeWidth="2.5" filter="url(#softGlow)" />
-                    <circle r="3" fill="#fff" />
-                    {/* selection ring */}
-                    {(hovered === hub.name || selected === hub.name) && <circle r="16" fill="none" stroke={HUB_COLOR} strokeWidth="1.5" strokeOpacity="0.6" />}
+                    <circle r="9" fill={HUB_COLOR} stroke="#fff" strokeWidth="2.5" filter="url(#softGlow)" />
+                    <circle r="3.5" fill="#fff" />
+                    {/* "27" count badge */}
+                    <g transform="translate(14 -14)">
+                      <circle r="11" fill="#fbbf24" stroke="#0a0a0a" strokeWidth="1.5" filter="url(#softGlow)" />
+                      <text y="3" textAnchor="middle" fill="#0a0a0a" fontSize="10" className="font-black">27</text>
+                    </g>
                     {/* label */}
                     {(hovered === hub.name || selected === hub.name) && (
-                      <g transform="translate(0 -28)">
+                      <g transform="translate(0 -34)">
                         <path d="M -3 8 L 3 8 L 0 13 Z" fill="#dc2626" />
-                        <rect x="-50" y="-16" width="100" height="26" rx="6" fill="#0a0a0a" stroke={HUB_COLOR} strokeWidth="1.5" filter="url(#softGlow)" />
-                        <text y="0" textAnchor="middle" fill="#fff" fontSize="12" className="font-bold">★ {hub.nameAr} HQ</text>
+                        <rect x="-62" y="-16" width="124" height="26" rx="6" fill="#0a0a0a" stroke={HUB_COLOR} strokeWidth="1.5" filter="url(#softGlow)" />
+                        <text y="0" textAnchor="middle" fill="#fff" fontSize="12" className="font-bold">★ {hub.nameAr} — مصر (27 محافظة)</text>
                       </g>
                     )}
                   </g>
                 )}
 
-                {/* Governorate markers — flat luminous dots (no beams = no clutter) */}
-                {markers.filter((m) => m.name !== HUB).map((m) => {
-                  const z = ZONE[m.zone] || ZONE.A;
-                  const isSel = selected === m.name;
-                  const isHov = hovered === m.name;
-                  const active = isSel || isHov;
-                  return (
-                    <g key={m.id} transform={`translate(${m.x} ${m.y})`} className="cursor-pointer" onMouseEnter={() => setHovered(m.name)} onMouseLeave={() => setHovered(null)} onClick={() => setSelected(m.name)}>
-                      {/* soft glow halo */}
-                      <circle r={active ? 15 : 11} fill={`url(#dg${m.zone})`} opacity={active ? 0.95 : 0.55} className="city-light" />
-                      {/* colored ring */}
-                      <circle r={active ? 6.5 : 5} fill={z.color} fillOpacity="0.35" filter="url(#softGlow)" />
-                      {/* main dot */}
-                      <circle r={active ? 4.2 : 3.4} fill={z.color} stroke="#fff" strokeWidth="1.5" filter="url(#softGlow)" />
-                      {/* white core */}
-                      <circle r="1.4" fill="#fff" />
-                      {/* pulse ring on active */}
-                      {active && <circle r="5" fill="none" stroke={z.color} strokeWidth="1.8" className="radar-ring" style={{ filter: "drop-shadow(0 0 4px " + z.color + ")" }} />}
-                      {/* label */}
-                      {active && (
-                        <g transform="translate(0 -20)">
-                          <path d="M -3 8 L 3 8 L 0 12 Z" fill="#0a0a0a" stroke={z.color} strokeWidth="1.4" />
-                          <rect x="-40" y="-16" width="80" height="24" rx="6" fill="#0a0a0a" stroke={z.color} strokeWidth="1.4" filter="url(#softGlow)" />
-                          <text y="0" textAnchor="middle" fill="#fff" fontSize="11" className="font-bold">{m.nameAr}</text>
-                        </g>
-                      )}
-                    </g>
-                  );
-                })}
-
-                {/* connection highlight from selected */}
-                {sel && markers.filter((m) => m.name !== sel.name).slice(0, 7).map((m, i) => (
-                  <motion.line key={"s" + m.id} x1={sel.x} y1={sel.y} x2={m.x} y2={m.y}
-                    stroke={ZONE[m.zone]?.color || HUB_COLOR} strokeWidth="1.2" strokeOpacity="0.5" strokeDasharray="3 3"
-                    initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 0.5 }}
-                    transition={{ duration: 0.5, delay: i * 0.05 }} className="flow-line" />
-                ))}
+                {/* Selected governorate marker — appears ON-DEMAND only (no permanent clutter) */}
+                <AnimatePresence>
+                  {sel && sel.name !== HUB && (
+                    <motion.g
+                      key={sel.id}
+                      initial={{ opacity: 0, scale: 0.4 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.4 }}
+                      transition={{ type: "spring", stiffness: 200, damping: 18 }}
+                      transform={`translate(${sel.x} ${sel.y})`}
+                      className="cursor-pointer"
+                      onMouseEnter={() => setHovered(sel.name)}
+                      onMouseLeave={() => setHovered(null)}
+                      onClick={() => setSelected(null)}
+                    >
+                      <circle r="18" fill="none" stroke={ZONE[sel.zone]?.color} strokeWidth="1.8" className="radar-ring" style={{ filter: "drop-shadow(0 0 6px " + ZONE[sel.zone]?.color + ")" }} />
+                      <circle r="14" fill={`url(#dg${sel.zone})`} opacity="0.95" className="city-light" />
+                      <circle r="6.5" fill={ZONE[sel.zone]?.color} fillOpacity="0.4" filter="url(#softGlow)" />
+                      <circle r="4.5" fill={ZONE[sel.zone]?.color} stroke="#fff" strokeWidth="2" filter="url(#softGlow)" />
+                      <circle r="1.8" fill="#fff" />
+                      <g transform="translate(0 -24)">
+                        <path d="M -3 8 L 3 8 L 0 13 Z" fill="#0a0a0a" stroke={ZONE[sel.zone]?.color} strokeWidth="1.4" />
+                        <rect x="-46" y="-16" width="92" height="24" rx="6" fill="#0a0a0a" stroke={ZONE[sel.zone]?.color} strokeWidth="1.4" filter="url(#softGlow)" />
+                        <text y="0" textAnchor="middle" fill="#fff" fontSize="11" className="font-bold">{sel.nameAr}</text>
+                      </g>
+                    </motion.g>
+                  )}
+                </AnimatePresence>
 
                 {/* Compass */}
                 <g transform="translate(712 52)">

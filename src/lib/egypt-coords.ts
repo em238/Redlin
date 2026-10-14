@@ -31,14 +31,11 @@ export const GOV_COORDS: Record<string, { lat: number; lng: number }> = {
   Damietta: { lat: 31.42, lng: 31.67 },
 };
 
-// Regional city nodes (Gulf + major African cities) — regional network reach
+// Regional city nodes (Gulf + major African cities) — well-spread, no clustering
 export const REGIONAL_CITIES: { lat: number; lng: number; name: string; nameAr: string }[] = [
   { lat: 24.7, lng: 46.7, name: "Riyadh", nameAr: "الرياض" },
   { lat: 25.2, lng: 55.3, name: "Dubai", nameAr: "دبي" },
-  { lat: 25.3, lng: 51.5, name: "Doha", nameAr: "الدوحة" },
-  { lat: 29.4, lng: 48.0, name: "Kuwait City", nameAr: "الكويت" },
   { lat: 23.6, lng: 58.5, name: "Muscat", nameAr: "مسقط" },
-  { lat: 26.2, lng: 50.6, name: "Manama", nameAr: "المنامة" },
   { lat: 15.5, lng: 32.5, name: "Khartoum", nameAr: "الخرطوم" },
   { lat: 9.0, lng: 38.7, name: "Addis Ababa", nameAr: "أديس أبابا" },
   { lat: -1.3, lng: 36.8, name: "Nairobi", nameAr: "نيروبي" },
@@ -46,7 +43,6 @@ export const REGIONAL_CITIES: { lat: number; lng: number; name: string; nameAr: 
   { lat: 33.6, lng: -7.6, name: "Casablanca", nameAr: "الدار البيضاء" },
   { lat: -26.2, lng: 28.0, name: "Johannesburg", nameAr: "جوهانسبرغ" },
   { lat: 36.8, lng: 3.1, name: "Algiers", nameAr: "الجزائر" },
-  { lat: 36.8, lng: 10.2, name: "Tunis", nameAr: "تونس" },
   { lat: 32.9, lng: 13.2, name: "Tripoli", nameAr: "طرابلس" },
 ];
 
