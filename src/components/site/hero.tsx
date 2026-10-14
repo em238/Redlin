@@ -185,45 +185,48 @@ export function Hero() {
         </div>
       </motion.div>
 
-      {/* Image carousel controls — progress bar on top + arrows with play/pause in the middle */}
+      {/* Image carousel controls — full-width progress bar on top + arrows with play/pause in the middle */}
       {total > 1 && (
-        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20" dir="ltr">
-          {/* Loading progress bar (fills during each slide, resets on slide change, pauses when paused) */}
-          <div className="w-40 h-[2px] bg-white/15 rounded-full overflow-hidden mb-3">
+        <>
+          {/* Full-width loading progress bar at the very bottom of the hero (above marquee) */}
+          <div className="absolute bottom-[52px] inset-x-0 h-[3px] bg-white/10 z-20">
             <motion.div
               key={idx + (paused ? "-p" : "-r")}
               initial={{ width: paused ? "100%" : "0%" }}
               animate={{ width: paused ? "100%" : "100%" }}
               transition={{ duration: paused ? 0 : 5, ease: "linear" }}
-              className="h-full bg-white rounded-full"
+              className="h-full bg-gradient-to-r from-primary to-amber-400"
             />
           </div>
-          <div className="flex items-center justify-center text-white">
-            <button
-              onClick={prev}
-              aria-label="السابق"
-              className="px-5 py-1.5 hover:text-amber-300 transition-colors"
-            >
-              <ChevronLeft className="w-5 h-5" strokeWidth={1.5} />
-            </button>
-            <span className="w-px h-6 bg-white/20" />
-            <button
-              onClick={() => setManualPause((p) => !p)}
-              aria-label={manualPause ? "تشغيل" : "إيقاف"}
-              className="px-5 py-1.5 hover:text-amber-300 transition-colors"
-            >
-              {manualPause ? <Play className="w-4 h-4" strokeWidth={1.5} /> : <Pause className="w-4 h-4" strokeWidth={1.5} />}
-            </button>
-            <span className="w-px h-6 bg-white/20" />
-            <button
-              onClick={next}
-              aria-label="التالي"
-              className="px-5 py-1.5 hover:text-amber-300 transition-colors"
-            >
-              <ChevronRight className="w-5 h-5" strokeWidth={1.5} />
-            </button>
+          {/* Centered controls */}
+          <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20" dir="ltr">
+            <div className="flex items-center justify-center text-white">
+              <button
+                onClick={prev}
+                aria-label="السابق"
+                className="px-5 py-1.5 hover:text-amber-300 transition-colors"
+              >
+                <ChevronLeft className="w-5 h-5" strokeWidth={1.5} />
+              </button>
+              <span className="w-px h-6 bg-white/20" />
+              <button
+                onClick={() => setManualPause((p) => !p)}
+                aria-label={manualPause ? "تشغيل" : "إيقاف"}
+                className="px-5 py-1.5 hover:text-amber-300 transition-colors"
+              >
+                {manualPause ? <Play className="w-4 h-4" strokeWidth={1.5} /> : <Pause className="w-4 h-4" strokeWidth={1.5} />}
+              </button>
+              <span className="w-px h-6 bg-white/20" />
+              <button
+                onClick={next}
+                aria-label="التالي"
+                className="px-5 py-1.5 hover:text-amber-300 transition-colors"
+              >
+                <ChevronRight className="w-5 h-5" strokeWidth={1.5} />
+              </button>
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* Marquee */}

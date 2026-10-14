@@ -813,3 +813,26 @@ Stage Summary:
 - شريط التحكم بقى: شريط تحميل فوق (بيمشي مع مدة كل صورة) + [‹] | [⏸/▶] | [›] بدون أرقام
 - الـ progress bar بيرست مع كل صورة وبيقف لو الـ content متوقف
 - 0 errors
+
+---
+Task ID: 26
+Agent: Orchestrator (main)
+Task: شريط التحميل بقى full-width بعرض الصفحة مع الصورة
+
+Work Log:
+- المشكلة: شريط التحميل كان 40px بس (centered) — المستخدم عاوزه بعرض الصفحة كامل
+- الحل: فصلت شريط التحميل عن الـ controls وخلّيته full-width:
+  * شريط تحميل full-width: absolute bottom-[52px] inset-x-0 h-[3px] bg-white/10 (track) + motion fill بـ gradient from-primary to-amber-400
+  * بيحمل 0→100% على 5 ثواني مع كل صورة، key بيتغير مع idx (re-reset مع كل صورة) + بيقف لو paused
+  * الـ controls (سهمين + play/pause في النص) لسه centered تحته
+  * الشريط فوق الـ marquee مباشرة (bottom-[52px] فوق bottom-0 marquee)
+- ESLint: 0 errors
+- تحقق Agent Browser + VLM:
+  * progress bar width: 1440px = viewport full-width ✅
+  * VLM: "شريط التحميل بعرض الصفحة كامل (full-width) ويقع فوق الـ marquee"
+  * لا أخطا
+
+Stage Summary:
+- شريط التحميل بقى full-width بعرض الصفحة مع الصورة (gradient أحمر→ذهبي)، فوق الـ marquee
+- الـ controls (سهمين + play/pause) لسه centered تحته
+- 0 errors
