@@ -119,8 +119,16 @@ export function Hero() {
           >
             شحن يصل لكل مصر
             <br />
-            بسرعة <span className="text-gradient-red">Redline</span>
+            بسرعة <span className="text-gradient-red" style={{ textShadow: "0 2px 30px oklch(0.55 0.2 28 / 0.3)" }}>Redline</span>
           </motion.h1>
+
+          {/* Decorative gradient divider */}
+          <motion.div
+            initial={{ opacity: 0, scaleX: 0 }}
+            animate={{ opacity: 1, scaleX: 1 }}
+            transition={{ duration: 0.7, delay: 0.25 }}
+            className="mt-6 h-px w-32 bg-gradient-to-l from-transparent via-amber-400/60 to-transparent origin-right"
+          />
 
           <motion.p
             initial={{ opacity: 0, y: 24 }}
@@ -141,7 +149,7 @@ export function Hero() {
             <Button
               size="lg"
               onClick={() => scrollTo("#contact")}
-              className="bg-gradient-to-r from-primary to-red-700 hover:from-red-600 hover:to-red-800 text-primary-foreground gap-2 text-base h-12 px-6 font-semibold shadow-lg shadow-primary/30 hover:shadow-primary/40 transition-shadow"
+              className="btn-glow bg-gradient-to-r from-primary to-red-700 hover:from-red-600 hover:to-red-800 text-primary-foreground gap-2 text-base h-12 px-6 font-semibold shadow-lg shadow-primary/30 hover:shadow-primary/40 transition-shadow"
             >
               <Zap className="w-4.5 h-4.5" />
               اطلب شحن الآن

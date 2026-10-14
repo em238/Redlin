@@ -160,25 +160,33 @@
   box-shadow: 0 8px 28px -8px oklch(0 0 0 / 0.5);
 }
 
-/* Custom scrollbar (narrower, cleaner) */
+/* Custom scrollbar (gold-tinted luxury) */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
+  background: linear-gradient(oklch(0.55 0.2 28), oklch(0.7 0.15 60));
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--muted-foreground);
+  background: linear-gradient(oklch(0.62 0.22 28), oklch(0.78 0.15 75));
 }
 
-/* Subtle gradient text (more refined, less saturated) */
+/* Subtle gradient text (red→gold luxury) */
 .text-gradient-red {
-  background: linear-gradient(135deg, oklch(0.55 0.2 28), oklch(0.62 0.16 38));
+  background: linear-gradient(135deg, oklch(0.58 0.22 28), oklch(0.7 0.17 45), oklch(0.75 0.15 70));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Pure gold gradient text */
+.text-gradient-gold {
+  background: linear-gradient(135deg, oklch(0.78 0.15 75), oklch(0.85 0.13 85), oklch(0.72 0.16 65));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -235,9 +243,24 @@
   opacity: 1;
 }
 
-/* Refined primary glow */
-.glow-primary {
-  box-shadow: 0 0 40px -12px oklch(0.55 0.2 28 / 0.5);
+/* Decorative gradient divider line */
+.divider-gradient {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, oklch(0.55 0.2 28 / 0.4), oklch(0.78 0.15 75 / 0.5), oklch(0.55 0.2 28 / 0.4), transparent);
+}
+
+/* Premium button glow on hover */
+.btn-glow {
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+.btn-glow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px -8px oklch(0.55 0.2 28 / 0.55), 0 0 0 1px oklch(0.78 0.15 75 / 0.3);
+}
+
+/* Gold accent ring on icons */
+.icon-gold-ring {
+  box-shadow: 0 0 0 1px oklch(0.78 0.15 75 / 0.15), 0 4px 12px -4px oklch(0.78 0.15 75 / 0.2);
 }
 
 /* Gradient border (for emphasis cards) */

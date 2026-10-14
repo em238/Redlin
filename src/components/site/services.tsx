@@ -44,7 +44,7 @@ export function Services() {
             return (
               <StaggerItem key={s.name}>
                 <div className="card-premium rounded-2xl border border-border/60 bg-card shadow-soft p-6 sm:p-7 h-full group">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/15 via-primary/8 to-amber-500/10 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform icon-gold-ring">
                     <Icon className="w-6 h-6 text-primary" strokeWidth={2} />
                   </div>
                   <h3 className="text-lg font-bold">{s.nameAr}</h3>

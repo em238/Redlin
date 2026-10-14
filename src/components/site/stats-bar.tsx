@@ -32,7 +32,7 @@ export function StatsBar() {
             return (
               <StaggerItem key={s.id}>
                 <div className="card-premium rounded-2xl border border-border/60 bg-card shadow-soft p-6 sm:p-7 text-center group">
-                  <div className="mx-auto w-11 h-11 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-sm shadow-primary/20">
+                  <div className="mx-auto w-12 h-12 rounded-xl bg-gradient-to-br from-primary/15 via-primary/8 to-amber-500/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform icon-gold-ring">
                     <Icon className="w-5 h-5 text-primary" strokeWidth={2} />
                   </div>
                   <div className="text-3xl sm:text-4xl font-bold text-gradient-red">
