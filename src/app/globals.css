@@ -515,14 +515,6 @@
 }
 .fab-pulse { animation: fab-pulse 2.4s ease-out infinite; }
 
-/* Trust badge marquee — same keyframe as governorates ticker, slower */
-@keyframes trust-marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-.trust-marquee { animation: trust-marquee 30s linear infinite; }
-.trust-marquee:hover { animation-play-state: paused; }
-
 /* Sparkline mini-chart stroke draw on inview */
 @keyframes spark-draw {
   from { stroke-dashoffset: 200; }

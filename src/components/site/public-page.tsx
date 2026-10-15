@@ -3,7 +3,6 @@
 import { Navbar } from "./navbar";
 import { Hero } from "./hero";
 import { StatsBar } from "./stats-bar";
-import { TrustBadges } from "./trust-badges";
 import { Services } from "./services";
 import { HowItWorks } from "./how-it-works";
 import { InteractiveMap } from "./interactive-map";
@@ -28,7 +27,6 @@ export function PublicPage() {
       <main className="flex-1">
         <Hero />
         <StatsBar />
-        <TrustBadges />
         <SectionDivider className="my-2" />
         <Services />
         <HowItWorks />
