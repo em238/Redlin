@@ -69,112 +69,13 @@ export function Contact() {
           subtitle={t("contact.subtitle")}
         />
 
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-5 gap-6">
-          {/* Info side — single cohesive contact card */}
+        <div className="max-w-5xl mx-auto flex flex-col gap-6">
+          {/* Form section — full width */}
           <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="lg:col-span-2 rounded-3xl bg-gradient-to-br from-primary via-red-700 to-red-900 p-7 text-white relative overflow-hidden shadow-2xl shadow-primary/20"
-          >
-            {/* Decorative glows */}
-            <div className="absolute top-0 end-0 w-48 h-48 bg-white/10 rounded-full blur-3xl animate-aurora" />
-            <div className="absolute bottom-0 start-0 w-40 h-40 bg-amber-500/15 rounded-full blur-3xl" />
-            <div className="absolute inset-0 noise opacity-20" />
-
-            <div className="relative space-y-6">
-              {/* Logo + heading */}
-              <div>
-                <Image
-                  src="/redline-transport-white.png"
-                  alt="RedLine Transport"
-                  width={1200}
-                  height={514}
-                  className="h-9 w-auto max-w-none object-contain mb-4"
-                />
-                <h3 className="text-xl font-bold mb-1">{t("contact.direct")}</h3>
-                <p className="text-white/70 text-xs leading-relaxed">{t("contact.directDesc")}</p>
-              </div>
-
-              {/* Addresses section */}
-              <div className="border-t border-white/15 pt-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center shrink-0">
-                    <MapPin className="w-4 h-4" />
-                  </div>
-                  <h4 className="text-sm font-bold">{t("contact.address")}</h4>
-                </div>
-                <div className="space-y-2.5 ps-9">
-                  {ADDRESSES.map((a, i) => (
-                    <div key={i}>
-                      <div className="text-[11px] text-white/50 font-medium mb-0.5">{t(a.labelKey)}</div>
-                      <div className="text-sm font-semibold leading-snug">{t(a.valueKey)}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Phone section */}
-              <div className="border-t border-white/15 pt-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center shrink-0">
-                    <Phone className="w-4 h-4" />
-                  </div>
-                  <h4 className="text-sm font-bold">{t("contact.phoneLabel")}</h4>
-                </div>
-                <div className="space-y-2.5 ps-9">
-                  {PHONES.map((p, i) => (
-                    <div key={i} className="flex items-baseline justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="text-[11px] text-white/50 font-medium mb-0.5">{t(p.labelKey)}</div>
-                        <a href={p.href} className="text-sm font-semibold hover:text-amber-300 transition-colors" dir="ltr">
-                          {t(p.valueKey)}
-                        </a>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Email section */}
-              <div className="border-t border-white/15 pt-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center shrink-0">
-                    <Mail className="w-4 h-4" />
-                  </div>
-                  <h4 className="text-sm font-bold">{t("contact.emailLabel")}</h4>
-                </div>
-                <div className="space-y-2.5 ps-9">
-                  {EMAILS.map((e, i) => (
-                    <div key={i}>
-                      <div className="text-[11px] text-white/50 font-medium mb-0.5">{t(e.labelKey)}</div>
-                      <a href={e.href} className="text-sm font-semibold hover:text-amber-300 transition-colors break-all" dir="ltr">
-                        {t(e.valueKey)}
-                      </a>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Working hours */}
-              <div className="border-t border-white/15 pt-5 flex items-center gap-3">
-                <div className="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center shrink-0">
-                  <Clock className="w-4 h-4" />
-                </div>
-                <div>
-                  <h4 className="text-[11px] text-white/50 font-medium">{t("contact.hours")}</h4>
-                  <div className="text-sm font-semibold">{t("contact.hoursVal")}</div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Form side */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="lg:col-span-3 rounded-3xl border border-border bg-card p-8 shadow-card"
+            className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-card"
           >
             <div className="flex items-center gap-2 mb-6">
               <MessageSquare className="w-5 h-5 text-primary" />
@@ -234,7 +135,7 @@ export function Contact() {
                   value={form.message}
                   onChange={(e) => { setForm({ ...form, message: e.target.value }); setErrors({ ...errors, message: "" }); }}
                   placeholder={isAr ? "اكتب رسالتك هنا..." : "Write your message here..."}
-                  rows={5}
+                  rows={4}
                   className={`text-start placeholder:text-start ${errors.message ? "border-destructive" : ""}`}
                 />
                 {errors.message && <p className="text-xs text-destructive text-start">{errors.message}</p>}
@@ -250,6 +151,108 @@ export function Contact() {
                 : <Send className={`w-5 h-5 transition-transform ${isAr ? "-scale-x-100 group-hover:-translate-x-1" : "group-hover:translate-x-1"}`} />}
               {t("contact.submit")}
             </Button>
+          </motion.div>
+
+          {/* Contact info section — full width, horizontal sections */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="rounded-3xl bg-gradient-to-br from-primary via-red-700 to-red-900 p-7 text-white relative overflow-hidden shadow-2xl shadow-primary/20"
+          >
+            {/* Decorative glows */}
+            <div className="absolute top-0 end-0 w-48 h-48 bg-white/10 rounded-full blur-3xl animate-aurora" />
+            <div className="absolute bottom-0 start-0 w-40 h-40 bg-amber-500/15 rounded-full blur-3xl" />
+            <div className="absolute inset-0 noise opacity-20" />
+
+            <div className="relative">
+              {/* Logo + heading */}
+              <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
+                <div>
+                  <Image
+                    src="/redline-transport-white.png"
+                    alt="RedLine Transport"
+                    width={1200}
+                    height={514}
+                    className="h-8 w-auto max-w-none object-contain mb-3"
+                  />
+                  <h3 className="text-xl font-bold mb-1">{t("contact.direct")}</h3>
+                  <p className="text-white/70 text-xs leading-relaxed max-w-md">{t("contact.directDesc")}</p>
+                </div>
+              </div>
+
+              {/* Horizontal sections grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                {/* Addresses section */}
+                <div className="border-t border-white/15 pt-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center shrink-0">
+                      <MapPin className="w-4 h-4" />
+                    </div>
+                    <h4 className="text-sm font-bold">{t("contact.address")}</h4>
+                  </div>
+                  <div className="space-y-2.5">
+                    {ADDRESSES.map((a, i) => (
+                      <div key={i}>
+                        <div className="text-[11px] text-white/50 font-medium mb-0.5">{t(a.labelKey)}</div>
+                        <div className="text-sm font-semibold leading-snug">{t(a.valueKey)}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Phone section */}
+                <div className="border-t border-white/15 pt-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center shrink-0">
+                      <Phone className="w-4 h-4" />
+                    </div>
+                    <h4 className="text-sm font-bold">{t("contact.phoneLabel")}</h4>
+                  </div>
+                  <div className="space-y-2.5">
+                    {PHONES.map((p, i) => (
+                      <div key={i}>
+                        <div className="text-[11px] text-white/50 font-medium mb-0.5">{t(p.labelKey)}</div>
+                        <a href={p.href} className="text-sm font-semibold hover:text-amber-300 transition-colors" dir="ltr">
+                          {t(p.valueKey)}
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Email section */}
+                <div className="border-t border-white/15 pt-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center shrink-0">
+                      <Mail className="w-4 h-4" />
+                    </div>
+                    <h4 className="text-sm font-bold">{t("contact.emailLabel")}</h4>
+                  </div>
+                  <div className="space-y-2.5">
+                    {EMAILS.map((e, i) => (
+                      <div key={i}>
+                        <div className="text-[11px] text-white/50 font-medium mb-0.5">{t(e.labelKey)}</div>
+                        <a href={e.href} className="text-sm font-semibold hover:text-amber-300 transition-colors break-all" dir="ltr">
+                          {t(e.valueKey)}
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Working hours */}
+                <div className="border-t border-white/15 pt-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center shrink-0">
+                      <Clock className="w-4 h-4" />
+                    </div>
+                    <h4 className="text-sm font-bold">{t("contact.hours")}</h4>
+                  </div>
+                  <div className="text-sm font-semibold leading-relaxed">{t("contact.hoursVal")}</div>
+                </div>
+              </div>
+            </div>
           </motion.div>
         </div>
       </div>
