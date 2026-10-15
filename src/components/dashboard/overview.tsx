@@ -8,12 +8,32 @@ import {
   Clock, CheckCircle2, Loader2, ArrowLeft, Truck, Video, Sparkles
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { apiGet, formatEGP, formatDateTime, STATUS_LABELS, STATUS_COLORS } from "@/lib/api";
+import { apiGet, formatEGP, formatDateTime, STATUS_COLORS } from "@/lib/api";
 import { useAppStore } from "@/lib/store";
+import { useT } from "@/lib/i18n";
 import { StaggerWrap } from "./_shared";
+
+// localized status labels
+function useStatusLabels() {
+  const { t } = useT();
+  return {
+    pending: t("d.status.pending"),
+    picked_up: t("d.status.picked_up"),
+    in_transit: t("d.status.in_transit"),
+    out_for_delivery: t("d.status.out_for_delivery"),
+    delivered: t("d.status.delivered"),
+    returned: t("d.status.returned"),
+    cancelled: t("d.status.cancelled"),
+    confirmed: t("d.status.confirmed"),
+    processing: t("d.status.processing"),
+    new: t("d.status.new"),
+  };
+}
 
 export function DashboardOverview() {
   const { setDashboardSection } = useAppStore();
+  const { t, isAr } = useT();
+  const STATUS_LABELS = useStatusLabels();
   const { data, isLoading } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: () => apiGet<any>("/api/stats"),
@@ -52,10 +72,10 @@ export function DashboardOverview() {
   const s = data || { counts: {}, weekly: [], monthlyRevenue: [], recentShipments: [], recentOrders: [], statusMap: {}, revenue: 0 };
 
   const kpis = [
-    { label: "إجمالي الشحنات", value: s.counts.shipments ?? 0, icon: Package, color: "from-primary to-red-700", trend: "+12%", spark: s.weekly?.map((d: any) => d.count) || [] },
-    { label: "الطلبات الجديدة", value: s.counts.orders ?? 0, icon: ShoppingCart, color: "from-blue-500 to-blue-700", trend: "+8%", spark: [3, 5, 2, 6, 4, 8, 5] },
-    { label: "العملاء", value: s.counts.customers ?? 0, icon: Users, color: "from-emerald-500 to-emerald-700", trend: "+5%", spark: [1, 2, 3, 2, 4, 3, 5] },
-    { label: "إجمالي الإيرادات", value: formatEGP(s.revenue ?? 0), icon: Banknote, color: "from-amber-500 to-amber-700", trend: "+23%", spark: s.monthlyRevenue?.map((d: any) => d.revenue) || [] },
+    { label: t("d.overview.kpi.shipments"), value: s.counts.shipments ?? 0, icon: Package, color: "from-primary to-red-700", trend: "+12%", spark: s.weekly?.map((d: any) => d.count) || [] },
+    { label: t("d.overview.kpi.orders"), value: s.counts.orders ?? 0, icon: ShoppingCart, color: "from-blue-500 to-blue-700", trend: "+8%", spark: [3, 5, 2, 6, 4, 8, 5] },
+    { label: t("d.overview.kpi.customers"), value: s.counts.customers ?? 0, icon: Users, color: "from-emerald-500 to-emerald-700", trend: "+5%", spark: [1, 2, 3, 2, 4, 3, 5] },
+    { label: t("d.overview.kpi.revenue"), value: formatEGP(s.revenue ?? 0), icon: Banknote, color: "from-amber-500 to-amber-700", trend: "+23%", spark: s.monthlyRevenue?.map((d: any) => d.revenue) || [] },
   ];
 
   const maxWeekly = Math.max(...(s.weekly?.map((d: any) => d.count) || [1]), 1);
@@ -114,9 +134,9 @@ export function DashboardOverview() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="font-bold text-lg flex items-center gap-2">
-                <Truck className="w-5 h-5 text-primary" /> الشحنات آخر 7 أيام
+                <Truck className="w-5 h-5 text-primary" /> {t("d.overview.weeklyTitle")}
               </h3>
-              <p className="text-xs text-muted-foreground">عدد الشحنات اليومية</p>
+              <p className="text-xs text-muted-foreground">{t("d.overview.weeklySub")}</p>
             </div>
           </div>
           {/* Area chart */}
@@ -152,7 +172,7 @@ export function DashboardOverview() {
           <div className="flex justify-between mt-3 px-1">
             {s.weekly?.map((d: any, i: number) => (
               <span key={i} className="text-xs text-muted-foreground">
-                {new Date(d.date).toLocaleDateString("ar-EG", { weekday: "short" })}
+                {new Date(d.date).toLocaleDateString(isAr ? "ar-EG" : "en-US", { weekday: "short" })}
               </span>
             ))}
           </div>
@@ -160,8 +180,8 @@ export function DashboardOverview() {
 
         {/* Donut status */}
         <Card className="p-6">
-          <h3 className="font-bold text-lg mb-1">توزيع الحالات</h3>
-          <p className="text-xs text-muted-foreground mb-5">حالات الشحنات الحالية</p>
+          <h3 className="font-bold text-lg mb-1">{t("d.overview.donutTitle")}</h3>
+          <p className="text-xs text-muted-foreground mb-5">{t("d.overview.donutSub")}</p>
           <div className="flex items-center justify-center mb-5">
             <div className="relative w-40 h-40">
               <div
@@ -172,7 +192,7 @@ export function DashboardOverview() {
               />
               <div className="absolute inset-4 rounded-full bg-card flex flex-col items-center justify-center">
                 <div className="text-2xl font-black">{totalStatus}</div>
-                <div className="text-xs text-muted-foreground">إجمالي</div>
+                <div className="text-xs text-muted-foreground">{t("d.overview.total")}</div>
               </div>
             </div>
           </div>
@@ -195,8 +215,8 @@ export function DashboardOverview() {
         <Card className="lg:col-span-2 p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="font-bold text-lg flex items-center gap-2"><Banknote className="w-5 h-5 text-emerald-500" /> الإيرادات الشهرية</h3>
-              <p className="text-xs text-muted-foreground">آخر 6 أشهر</p>
+              <h3 className="font-bold text-lg flex items-center gap-2"><Banknote className="w-5 h-5 text-emerald-500" /> {t("d.overview.revenueTitle")}</h3>
+              <p className="text-xs text-muted-foreground">{t("d.overview.revenueSub")}</p>
             </div>
           </div>
           <div className="flex items-end justify-between gap-3 h-44">
@@ -224,12 +244,12 @@ export function DashboardOverview() {
         </Card>
 
         <Card className="p-6">
-          <h3 className="font-bold text-lg mb-5">مؤشرات سريعة</h3>
+          <h3 className="font-bold text-lg mb-5">{t("d.overview.quickStatsTitle")}</h3>
           <div className="space-y-3">
             {[
-              { icon: Clock, label: "شحنات قيد التنفيذ", value: s.counts.pending ?? 0, color: "bg-amber-500/10 text-amber-600" },
-              { icon: CheckCircle2, label: "تم تسليمها", value: s.counts.delivered ?? 0, color: "bg-emerald-500/10 text-emerald-600" },
-              { icon: Video, label: "فيديوهات منشورة", value: s.counts.videos ?? 0, color: "bg-primary/10 text-primary" },
+              { icon: Clock, label: t("d.overview.qs.pending"), value: s.counts.pending ?? 0, color: "bg-amber-500/10 text-amber-600" },
+              { icon: CheckCircle2, label: t("d.overview.qs.delivered"), value: s.counts.delivered ?? 0, color: "bg-emerald-500/10 text-emerald-600" },
+              { icon: Video, label: t("d.overview.qs.videos"), value: s.counts.videos ?? 0, color: "bg-primary/10 text-primary" },
             ].map((q, i) => (
               <motion.div
                 key={i}
@@ -253,9 +273,9 @@ export function DashboardOverview() {
       <div className="grid gap-4 lg:grid-cols-2">
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-lg flex items-center gap-2"><Sparkles className="w-4 h-4 text-primary" /> أحدث الشحنات</h3>
+            <h3 className="font-bold text-lg flex items-center gap-2"><Sparkles className="w-4 h-4 text-primary" /> {t("d.overview.recentShipments")}</h3>
             <button onClick={() => setDashboardSection("shipments")} className="text-xs text-primary hover:underline flex items-center gap-1">
-              عرض الكل <ArrowLeft className="w-3 h-3" />
+              {t("d.overview.viewAll")} <ArrowLeft className="w-3 h-3" />
             </button>
           </div>
           <div className="space-y-1">
@@ -275,9 +295,9 @@ export function DashboardOverview() {
 
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-lg flex items-center gap-2"><Sparkles className="w-4 h-4 text-primary" /> أحدث الطلبات</h3>
+            <h3 className="font-bold text-lg flex items-center gap-2"><Sparkles className="w-4 h-4 text-primary" /> {t("d.overview.recentOrders")}</h3>
             <button onClick={() => setDashboardSection("orders")} className="text-xs text-primary hover:underline flex items-center gap-1">
-              عرض الكل <ArrowLeft className="w-3 h-3" />
+              {t("d.overview.viewAll")} <ArrowLeft className="w-3 h-3" />
             </button>
           </div>
           <div className="space-y-1">

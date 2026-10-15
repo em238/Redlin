@@ -18,9 +18,11 @@ import { DashboardPricing } from "./pricing";
 import { DashboardMessages } from "./messages";
 import { DashboardSettings } from "./settings";
 import { Loader2 } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 export function DashboardApp() {
   const { user, authChecked, setUser, setAuthChecked, dashboardSection, theme } = useAppStore();
+  const { t } = useT();
 
   // restore theme from localStorage on mount
   useEffect(() => {
@@ -48,7 +50,7 @@ export function DashboardApp() {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">جاري التحقق...</p>
+          <p className="text-sm text-muted-foreground">{t("d.app.checking")}</p>
         </div>
       </div>
     );

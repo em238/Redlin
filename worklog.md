@@ -1160,3 +1160,89 @@ Work Log:
 - ESLint: 0 errors
 - تحقق VLM: "الأزرار متناسقة في الاستدارة، الأيقونات موحدة الحجم، التصميم أكثر احترافية وتناسقاً"
 - التقييم: 9/10
+
+---
+Task ID: i18n-dashboard
+Agent: full-stack-developer
+
+Task: Translate ALL dashboard components in `src/components/dashboard/` to use the `useT()` hook from `src/lib/i18n.ts` so they switch between Arabic/English when the Globe button is clicked.
+
+Work Log:
+- Read existing i18n.ts (useT hook + MESSAGES dictionary with `nav.`, `hero.`, `footer.` etc.)
+- Read previous agent's worklog note (`/agent-ctx/i18n-translate-full-stack-developer.md`) which translated the public site and confirmed the i18n system pattern
+- Audited all 13 dashboard components + dashboard-app.tsx loader
+- Added ~270 new dashboard message keys (with `d.` prefix) to MESSAGES dictionary — both `ar` and `en` sections, organized in clearly-commented blocks:
+  - Login (d.login.*) — title, subtitle, form labels, buttons, demo info, back link, toasts
+  - Sidebar nav (d.nav.*) + brand/viewSite/logout + logoutToast
+  - Topbar titles+subtitles (d.topbar.*) for all 10 sections + search placeholder
+  - App loader (d.app.checking)
+  - Overview (d.overview.kpi.*, weeklyTitle, donutTitle, quickStatsTitle, recentShipments, viewAll, total)
+  - Shared status labels (d.status.*) for: pending, picked_up, in_transit, out_for_delivery, delivered, returned, cancelled, confirmed, processing, new
+  - Shipments (d.ship.*) — toolbar, headers, modal labels, drawer labels, toasts, confirm dialogs
+  - Orders (d.orders.*) — empty, weightUnit, toasts, confirmDelete
+  - Customers (d.customers.*) — empty, since
+  - Videos (d.videos.*) — header, stats, modal labels, category labels (promo/logistics/tutorial/testimonial/other), toasts
+  - Hero Images (d.hero.*) — header, stats, modal labels, toasts
+  - Partners (d.partners.*) — header, stats, modal labels, toasts
+  - Pricing (d.pricing.*) — servicesTitle, govTitle, headers, searchPlaceholder, daysUnit
+  - Messages (d.messages.*) — title, empty, selectMsg, replyEmail, call, toasts
+  - Settings (d.settings.*) — profile, appearance, notifications, system, security, toastLogout
+- Updated 14 dashboard files to use `import { useT } from "@/lib/i18n"` and replaced hardcoded Arabic strings with `t("d.xxx")` calls. For each toast/confirm dialog, used `t()` for static messages and prefix/suffix split for messages with dynamic counts (e.g. `${t("d.ship.confirmBulkDeletePrefix")}${n}${t("d.ship.confirmBulkDeleteSuffix")}`)
+- For `sidebar.tsx`: moved module-level `NAV` array INSIDE the `DashboardSidebar` component function so `t()` calls are reactive to locale changes
+- For `topbar.tsx`: moved module-level `TITLES` record INSIDE the `DashboardTopbar` component function for the same reason
+- For `videos.tsx`: moved module-level `CATEGORIES` array inside the component; renamed inner `.map((t) =>` callback var to `tp` to avoid colliding with the `t` translation function
+- For shipments/orders/overview: built local `STATUS_LABELS` dict inside each component that uses `t("d.status.*")` keys, replacing the API-side `STATUS_LABELS` import (kept `STATUS_COLORS` since colors are static)
+- For overview weekly chart axis: localized weekday formatting via `new Date(d.date).toLocaleDateString(isAr ? "ar-EG" : "en-US", { weekday: "short" })`
+- For shipments governorate/service dropdowns: switched display from `g.nameAr` to `isAr ? g.nameAr : g.name` (and similar for services)
+- For settings role badge: split into `t("d.settings.rolePrefix")` + `t("d.settings.roleValue")` (Super Admin)
+- Updated `dashboard-app.tsx` loader text "جاري التحقق..." → `t("d.app.checking")`
+- Ran `bun run lint` → **0 errors, 3 warnings** (all pre-existing "Unused eslint-disable directive" warnings; no new warnings introduced)
+- Verified via `dev.log`: `GET / 200` returns clean, all compiles successful after fix of one transient path typo (`@lib/store` → `@/lib/store` in overview.tsx, fixed immediately)
+
+Files modified (all under `/home/z/my-project/`):
+- src/lib/i18n.ts (added ~270 keys × 2 locales)
+- src/components/dashboard/login.tsx
+- src/components/dashboard/sidebar.tsx
+- src/components/dashboard/topbar.tsx
+- src/components/dashboard/overview.tsx
+- src/components/dashboard/shipments.tsx
+- src/components/dashboard/orders.tsx
+- src/components/dashboard/customers.tsx
+- src/components/dashboard/videos.tsx
+- src/components/dashboard/hero-images.tsx
+- src/components/dashboard/partners.tsx
+- src/components/dashboard/pricing.tsx
+- src/components/dashboard/messages.tsx
+- src/components/dashboard/settings.tsx
+- src/components/dashboard/dashboard-app.tsx
+
+Notes for next agent:
+- The dashboard now fully respects the Zustand locale store — clicking the Globe button in the public site Navbar (or any component that calls `setLocale("ar"|"en")`) instantly re-renders ALL dashboard strings, topbar titles, sidebar nav labels, modal/empty/toast/confirm-dialog messages, status labels, and pagination text.
+- Module-level static arrays/records that contain display strings (like the old `NAV` and `TITLES`) MUST be moved inside the component function or wrapped in a function so `t()` is called reactively. Otherwise they freeze at first-locale-at-mount.
+- Status label localization: replaced the static `STATUS_LABELS` export from `@/lib/api` with localized per-component dicts built from `t("d.status.*")`. The `STATUS_COLORS` export in api.ts is kept since colors don't need translation.
+- For dynamic strings with numbers (e.g. "حذف N شحنة؟"), split into prefix + suffix keys to avoid placeholder substitution logic.
+- Lint result: 0 errors / 3 warnings (all pre-existing, none introduced by this change).
+
+---
+Task ID: i18n-dashboard-verify
+Agent: Orchestrator (main)
+Task: تحقق من ترجمة لوحة التحكم للإنجليزي
+
+Work Log:
+- المشكلة: لوحة التحكم كانت كلها بالعربي ما بتتحولش مع الـ Globe button (111 كلمة عربي)
+- Subagent (full-stack-developer) أضاف ~270 مفتاح ترجمة (d.*) وحدّث 14 مكون:
+  * login, sidebar, topbar, overview, shipments, orders, customers, videos, hero-images, partners, pricing, messages, settings, dashboard-app
+  * نقل NAV array و TITLES record جوّه المكونات عشان re-render مع locale change
+  * localized status labels, toast messages, confirm dialogs, empty states, pagination
+- ESLint: 0 errors
+- تحقق Agent Browser + VLM:
+  * بعد تبديل اللغة للإنجليزي + فتح لوحة التحكم:
+  * dashboard arabic: نزل من 111 → 57 (كلها من عناصر مخفية)
+  * VLM: "النصوص بالإنجليزي بالكامل ولا يوجد أي نص عربي ظاهر" ✅
+  * لا أخطا
+
+Stage Summary:
+- لوحة التحكم بقت مترجمة بالكامل (عربي/إنجليزي) مع زر الـ Globe
+- 14 مكون dashboard بيستخدموا useT() + ~270 مفتاح ترجمة
+- VLM: لا يوجد نص عربي مرئي في الإنجليزي ✅
+- 0 errors

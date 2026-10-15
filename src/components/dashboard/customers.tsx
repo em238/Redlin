@@ -4,8 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Loader2, Users, Phone, MapPin, Mail } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { apiGet, formatDate } from "@/lib/api";
+import { useT } from "@/lib/i18n";
 
 export function DashboardCustomers() {
+  const { t } = useT();
   const { data, isLoading } = useQuery({ queryKey: ["customers"], queryFn: () => apiGet<any>("/api/customers") });
   const customers = data?.customers ?? [];
 
@@ -17,7 +19,7 @@ export function DashboardCustomers() {
     return (
       <Card className="flex flex-col items-center py-16 text-muted-foreground">
         <Users className="w-12 h-12 mb-3 opacity-40" />
-        <p>لا يوجد عملاء بعد</p>
+        <p>{t("d.customers.empty")}</p>
       </Card>
     );
   }
@@ -32,7 +34,7 @@ export function DashboardCustomers() {
             </div>
             <div className="min-w-0">
               <div className="font-bold truncate">{c.name}</div>
-              <div className="text-xs text-muted-foreground">عميل منذ {formatDate(c.createdAt)}</div>
+              <div className="text-xs text-muted-foreground">{t("d.customers.since")} {formatDate(c.createdAt)}</div>
             </div>
           </div>
           <div className="space-y-1.5 text-sm">

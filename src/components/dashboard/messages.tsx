@@ -8,8 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { apiGet, apiDelete, formatDateTime } from "@/lib/api";
 import { toast } from "sonner";
 import { useState } from "react";
+import { useT } from "@/lib/i18n";
 
 export function DashboardMessages() {
+  const { t } = useT();
   const qc = useQueryClient();
   const [selected, setSelected] = useState<string | null>(null);
   const { data, isLoading } = useQuery({
@@ -19,10 +21,10 @@ export function DashboardMessages() {
   const messages = data?.messages ?? [];
 
   const remove = async (id: string) => {
-    if (!confirm("حذف الرسالة؟")) return;
+    if (!confirm(t("d.messages.confirmDelete"))) return;
     try {
       await apiDelete(`/api/contact/${id}`);
-      toast.success("تم الحذف");
+      toast.success(t("d.messages.toastDeleted"));
       qc.invalidateQueries({ queryKey: ["contact-messages"] });
     } catch (e: any) { toast.error(e.message); }
   };
@@ -35,7 +37,7 @@ export function DashboardMessages() {
     return (
       <Card className="flex flex-col items-center py-16 text-muted-foreground">
         <Inbox className="w-12 h-12 mb-3 opacity-40" />
-        <p>لا توجد رسائل بعد</p>
+        <p>{t("d.messages.empty")}</p>
       </Card>
     );
   }
@@ -48,7 +50,7 @@ export function DashboardMessages() {
       <Card className="lg:col-span-1 overflow-hidden flex flex-col">
         <div className="p-4 border-b border-border">
           <h3 className="font-bold flex items-center gap-2">
-            <MessageSquare className="w-4 h-4 text-primary" /> الرسائل الواردة ({messages.length})
+            <MessageSquare className="w-4 h-4 text-primary" /> {t("d.messages.title")} ({messages.length})
           </h3>
         </div>
         <div className="flex-1 overflow-y-auto">
@@ -60,7 +62,7 @@ export function DashboardMessages() {
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="font-bold text-sm truncate">{m.name}</div>
-                {m.status === "new" && <Badge className="bg-primary text-primary-foreground text-[10px]">جديد</Badge>}
+                {m.status === "new" && <Badge className="bg-primary text-primary-foreground text-[10px]">{t("d.messages.new")}</Badge>}
               </div>
               <div className="text-xs text-muted-foreground truncate mt-0.5">{m.subject}</div>
               <div className="text-xs text-muted-foreground truncate mt-1">{m.message}</div>
@@ -104,18 +106,18 @@ export function DashboardMessages() {
               </div>
             </div>
             <div className="pt-4 border-t border-border">
-              <h4 className="text-xs font-bold text-muted-foreground mb-2">الرسالة</h4>
+              <h4 className="text-xs font-bold text-muted-foreground mb-2">{t("d.messages.messageLabel")}</h4>
               <p className="text-sm leading-relaxed whitespace-pre-wrap">{sel.message}</p>
             </div>
             <div className="mt-6 flex gap-2">
-              <a href={`mailto:${sel.email}?subject=رد: ${encodeURIComponent(sel.subject)}`}>
+              <a href={`mailto:${sel.email}?subject=${encodeURIComponent(t("d.messages.replyEmail"))}: ${encodeURIComponent(sel.subject)}`}>
                 <Button className="bg-gradient-to-r from-primary to-red-700 text-white gap-2">
-                  <Mail className="w-4 h-4" /> الرد بالبريد
+                  <Mail className="w-4 h-4" /> {t("d.messages.replyEmail")}
                 </Button>
               </a>
               {sel.phone && (
                 <a href={`tel:${sel.phone}`}>
-                  <Button variant="outline" className="gap-2"><Phone className="w-4 h-4" /> اتصال</Button>
+                  <Button variant="outline" className="gap-2"><Phone className="w-4 h-4" /> {t("d.messages.call")}</Button>
                 </a>
               )}
             </div>
@@ -123,7 +125,7 @@ export function DashboardMessages() {
         ) : (
           <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
             <Mail className="w-12 h-12 mb-3 opacity-30" />
-            <p>اختر رسالة لعرض تفاصيلها</p>
+            <p>{t("d.messages.selectMsg")}</p>
           </div>
         )}
       </Card>

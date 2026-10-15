@@ -21,14 +21,7 @@ import {
 import { apiGet, apiPost, apiPatch, apiDelete, formatDate } from "@/lib/api";
 import { toast } from "sonner";
 import { FileUpload } from "@/components/shared/file-upload";
-
-const CATEGORIES = [
-  { value: "promo", label: "ترويجي" },
-  { value: "logistics", label: "لوجستيات" },
-  { value: "tutorial", label: "شرح" },
-  { value: "testimonial", label: "رأي عميل" },
-  { value: "other", label: "أخرى" },
-];
+import { useT } from "@/lib/i18n";
 
 const TEMPLATE_VIDEOS = [
   { title: "Redline — رحلة شحنة", url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", description: "وثائقي قصير يوثّق رحلة شحنة من المخزن حتى باب العميل", category: "promo" },
@@ -36,6 +29,7 @@ const TEMPLATE_VIDEOS = [
 ];
 
 export function DashboardVideos() {
+  const { t } = useT();
   const qc = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
@@ -45,6 +39,14 @@ export function DashboardVideos() {
     title: "", description: "", url: "", thumbnail: "",
     category: "promo", featured: false, active: true,
   });
+
+  const CATEGORIES = [
+    { value: "promo", label: t("d.videos.cat.promo") },
+    { value: "logistics", label: t("d.videos.cat.logistics") },
+    { value: "tutorial", label: t("d.videos.cat.tutorial") },
+    { value: "testimonial", label: t("d.videos.cat.testimonial") },
+    { value: "other", label: t("d.videos.cat.other") },
+  ];
 
   const { data, isLoading } = useQuery({
     queryKey: ["videos-admin"],
@@ -79,16 +81,16 @@ export function DashboardVideos() {
   };
 
   const save = async () => {
-    if (!form.title || !form.url) { toast.error("العنوان والرابط مطلوبان"); return; }
+    if (!form.title || !form.url) { toast.error(t("d.videos.toastMissing")); return; }
     setSaving(true);
     try {
       const payload = { ...form, url: normalizeUrl(form.url) };
       if (editing) {
         await apiPatch(`/api/videos/${editing.id}`, payload);
-        toast.success("تم تحديث الفيديو");
+        toast.success(t("d.videos.toastUpdated"));
       } else {
         await apiPost("/api/videos", payload);
-        toast.success("تم رفع الفيديو");
+        toast.success(t("d.videos.toastCreated"));
       }
       setModalOpen(false);
       qc.invalidateQueries({ queryKey: ["videos-admin"] });
@@ -96,17 +98,17 @@ export function DashboardVideos() {
       qc.invalidateQueries({ queryKey: ["site-stats"] });
       qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
     } catch (e: any) {
-      toast.error(e.message || "خطأ");
+      toast.error(e.message || t("d.videos.toastError"));
     } finally {
       setSaving(false);
     }
   };
 
   const remove = async (id: string) => {
-    if (!confirm("حذف هذا الفيديو؟")) return;
+    if (!confirm(t("d.videos.confirmDelete"))) return;
     try {
       await apiDelete(`/api/videos/${id}`);
-      toast.success("تم الحذف");
+      toast.success(t("d.videos.toastDeleted"));
       qc.invalidateQueries({ queryKey: ["videos-admin"] });
       qc.invalidateQueries({ queryKey: ["site-videos"] });
     } catch (e: any) { toast.error(e.message); }
@@ -115,7 +117,7 @@ export function DashboardVideos() {
   const toggleFeatured = async (v: any) => {
     try {
       await apiPatch(`/api/videos/${v.id}`, { featured: !v.featured });
-      toast.success(!v.featured ? "تم التمييز كفيديو مميز" : "تم إلغاء التمييز");
+      toast.success(!v.featured ? t("d.videos.toastFeaturedOn") : t("d.videos.toastFeaturedOff"));
       qc.invalidateQueries({ queryKey: ["videos-admin"] });
       qc.invalidateQueries({ queryKey: ["site-videos"] });
     } catch (e: any) { toast.error(e.message); }
@@ -136,15 +138,15 @@ export function DashboardVideos() {
     const text = e.dataTransfer.getData("text/plain") || e.dataTransfer.getData("text/uri-list") || "";
     const url = text.trim();
     if (url) {
-      setForm((f: any) => ({ ...f, url, title: f.title || "فيديو جديد" }));
-      toast.success("تم إضافة الرابط — أكمل البيانات وارفع");
+      setForm((f: any) => ({ ...f, url, title: f.title || t("d.videos.newTitle") }));
+      toast.success(t("d.videos.toastUrlAdded"));
     } else {
-      toast.error("اسحب رابط فيديو صحيح");
+      toast.error(t("d.videos.toastInvalidUrl"));
     }
   };
 
-  const applyTemplate = (t: typeof TEMPLATE_VIDEOS[0]) => {
-    setForm({ title: t.title, description: t.description, url: t.url, thumbnail: thumbOptions[Math.floor(Math.random() * thumbOptions.length)], category: t.category, featured: false, active: true });
+  const applyTemplate = (tp: typeof TEMPLATE_VIDEOS[0]) => {
+    setForm({ title: tp.title, description: tp.description, url: tp.url, thumbnail: thumbOptions[Math.floor(Math.random() * thumbOptions.length)], category: tp.category, featured: false, active: true });
     setEditing(null);
     setModalOpen(true);
   };
@@ -160,12 +162,12 @@ export function DashboardVideos() {
               <Video className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h3 className="font-bold text-lg">قسم رفع الفيديوهات</h3>
-              <p className="text-sm text-muted-foreground">ارفع وأدر الفيديوهات التي تظهر في معرض الموقع</p>
+              <h3 className="font-bold text-lg">{t("d.videos.headerTitle")}</h3>
+              <p className="text-sm text-muted-foreground">{t("d.videos.headerSub")}</p>
             </div>
           </div>
           <Button onClick={openCreate} className="bg-gradient-to-r from-primary to-red-700 text-white gap-2 shrink-0">
-            <Upload className="w-4 h-4" /> رفع فيديو جديد
+            <Upload className="w-4 h-4" /> {t("d.videos.uploadNew")}
           </Button>
         </div>
       </Card>
@@ -173,9 +175,9 @@ export function DashboardVideos() {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { v: videos.length, l: "إجمالي الفيديوهات", c: "text-gradient-red" },
-          { v: videos.filter((v: any) => v.active).length, l: "منشورة", c: "text-emerald-600" },
-          { v: videos.filter((v: any) => v.featured).length, l: "مميزة", c: "text-amber-600" },
+          { v: videos.length, l: t("d.videos.stats.total"), c: "text-gradient-red" },
+          { v: videos.filter((v: any) => v.active).length, l: t("d.videos.stats.active"), c: "text-emerald-600" },
+          { v: videos.filter((v: any) => v.featured).length, l: t("d.videos.stats.featured"), c: "text-amber-600" },
         ].map((s, i) => (
           <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
             <Card className="p-4 text-center">
@@ -195,8 +197,8 @@ export function DashboardVideos() {
           className={`p-12 border-2 border-dashed text-center transition-colors ${dragOver ? "border-primary bg-primary/5" : "border-border"}`}
         >
           <Cloud className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-          <p className="font-bold">اسحب رابط فيديو هنا لرفعه</p>
-          <p className="text-sm text-muted-foreground mt-1">أو استخدم زر "رفع فيديو جديد"</p>
+          <p className="font-bold">{t("d.videos.emptyTitle")}</p>
+          <p className="text-sm text-muted-foreground mt-1">{t("d.videos.emptySub")}</p>
         </Card>
       )}
 
@@ -229,12 +231,12 @@ export function DashboardVideos() {
                   </div>
                   {v.featured && (
                     <Badge className="absolute top-2 right-2 bg-amber-500 text-white gap-1">
-                      <Star className="w-3 h-3 fill-white" /> مميز
+                      <Star className="w-3 h-3 fill-white" /> {t("d.videos.featured")}
                     </Badge>
                   )}
                   {!v.active && (
                     <Badge className="absolute top-2 left-2 bg-zinc-800 text-white gap-1">
-                      <EyeOff className="w-3 h-3" /> مخفي
+                      <EyeOff className="w-3 h-3" /> {t("d.videos.hidden")}
                     </Badge>
                   )}
                   <div className="absolute bottom-2 right-2">
@@ -254,12 +256,12 @@ export function DashboardVideos() {
                   </div>
                   <div className="mt-3 flex gap-1.5">
                     <Button variant="outline" size="sm" className="h-8 flex-1 gap-1" onClick={() => openEdit(v)}>
-                      <Pencil className="w-3.5 h-3.5" /> تعديل
+                      <Pencil className="w-3.5 h-3.5" /> {t("d.videos.edit")}
                     </Button>
-                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => toggleFeatured(v)} title="تمييز">
+                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => toggleFeatured(v)} title={t("d.videos.featured")}>
                       <Star className={`w-3.5 h-3.5 ${v.featured ? "fill-amber-400 text-amber-500" : ""}`} />
                     </Button>
-                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => toggleActive(v)} title="إظهار/إخفاء">
+                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => toggleActive(v)} title={t("d.videos.hidden")}>
                       {v.active ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                     </Button>
                     <Button variant="outline" size="icon" className="h-8 w-8 text-rose-600 hover:text-rose-700" onClick={() => remove(v.id)}>
@@ -279,7 +281,7 @@ export function DashboardVideos() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Upload className="w-5 h-5 text-primary" />
-              {editing ? "تعديل الفيديو" : "رفع فيديو جديد"}
+              {editing ? t("d.videos.modal.edit") : t("d.videos.modal.create")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
@@ -291,7 +293,7 @@ export function DashboardVideos() {
               className={`space-y-1 rounded-xl border-2 border-dashed p-3 transition-colors ${dragOver ? "border-primary bg-primary/5" : "border-border"}`}
             >
               <Label className="text-xs flex items-center gap-1.5">
-                <FileVideo className="w-3.5 h-3.5 text-primary" /> رابط الفيديو (YouTube/Vimeo) * — اسحب الرابط هنا
+                <FileVideo className="w-3.5 h-3.5 text-primary" /> {t("d.videos.modal.urlLabel")}
               </Label>
               <div className="relative">
                 <Youtube className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -303,21 +305,21 @@ export function DashboardVideos() {
                   dir="ltr"
                 />
               </div>
-              <p className="text-[11px] text-muted-foreground">يتم تحويل روابط YouTube (watch/youtu.be/shorts/embed) تلقائياً للصيغة المضمنة</p>
+              <p className="text-[11px] text-muted-foreground">{t("d.videos.modal.urlHint")}</p>
             </div>
 
             <div className="space-y-1">
-              <Label className="text-xs">عنوان الفيديو *</Label>
-              <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="مثال: Redline — قصة شحن" className="h-10" />
+              <Label className="text-xs">{t("d.videos.modal.titleLabel")}</Label>
+              <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder={t("d.videos.modal.titlePlaceholder")} className="h-10" />
             </div>
 
             <div className="space-y-1">
-              <Label className="text-xs">الوصف</Label>
-              <Textarea value={form.description || ""} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} placeholder="وصف مختصر للفيديو..." />
+              <Label className="text-xs">{t("d.videos.modal.descLabel")}</Label>
+              <Textarea value={form.description || ""} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} placeholder={t("d.videos.modal.descPlaceholder")} />
             </div>
 
             <FileUpload
-              label="صورة الغلاف (Thumbnail) — ارفع من جهازك"
+              label={t("d.videos.modal.thumbLabel")}
               accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
               currentUrl={form.thumbnail}
               onUploaded={(url) => setForm({ ...form, thumbnail: url })}
@@ -325,16 +327,16 @@ export function DashboardVideos() {
             />
 
             <div className="space-y-2">
-              <Label className="text-xs">أو اختر صورة من المعرض:</Label>
+              <Label className="text-xs">{t("d.videos.modal.galleryLabel")}</Label>
               <div className="grid grid-cols-5 gap-2">
-                {thumbOptions.map((t) => (
+                {thumbOptions.map((tp) => (
                   <button
-                    key={t}
-                    onClick={() => setForm({ ...form, thumbnail: t })}
-                    className={`relative aspect-video rounded-lg overflow-hidden border-2 transition-all ${form.thumbnail === t ? "border-primary ring-2 ring-primary/30" : "border-transparent hover:border-border"}`}
+                    key={tp}
+                    onClick={() => setForm({ ...form, thumbnail: tp })}
+                    className={`relative aspect-video rounded-lg overflow-hidden border-2 transition-all ${form.thumbnail === tp ? "border-primary ring-2 ring-primary/30" : "border-transparent hover:border-border"}`}
                   >
-                    <img src={t} alt={t} className="w-full h-full object-cover" />
-                    {form.thumbnail === t && (
+                    <img src={tp} alt={tp} className="w-full h-full object-cover" />
+                    {form.thumbnail === tp && (
                       <div className="absolute inset-0 bg-primary/30 flex items-center justify-center">
                         <Check className="w-5 h-5 text-white" />
                       </div>
@@ -345,7 +347,7 @@ export function DashboardVideos() {
               <Input
                 value={form.thumbnail || ""}
                 onChange={(e) => setForm({ ...form, thumbnail: e.target.value })}
-                placeholder="رابط صورة مخصص (اختياري)"
+                placeholder={t("d.videos.modal.customUrl")}
                 className="h-9 text-xs"
                 dir="ltr"
               />
@@ -353,7 +355,7 @@ export function DashboardVideos() {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label className="text-xs">التصنيف</Label>
+                <Label className="text-xs">{t("d.videos.modal.category")}</Label>
                 <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
                   <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -364,11 +366,11 @@ export function DashboardVideos() {
               <div className="flex items-end gap-4 pb-1">
                 <label className="flex items-center gap-2 text-sm cursor-pointer">
                   <Switch checked={!!form.featured} onCheckedChange={(v) => setForm({ ...form, featured: v })} />
-                  <span className="flex items-center gap-1"><Star className="w-3.5 h-3.5 text-amber-500" /> مميز</span>
+                  <span className="flex items-center gap-1"><Star className="w-3.5 h-3.5 text-amber-500" /> {t("d.videos.modal.featured")}</span>
                 </label>
                 <label className="flex items-center gap-2 text-sm cursor-pointer">
                   <Switch checked={!!form.active} onCheckedChange={(v) => setForm({ ...form, active: v })} />
-                  <span>منشور</span>
+                  <span>{t("d.videos.modal.published")}</span>
                 </label>
               </div>
             </div>
@@ -376,11 +378,11 @@ export function DashboardVideos() {
             {/* Quick templates */}
             {!editing && (
               <div className="rounded-xl bg-muted/40 p-3">
-                <p className="text-xs font-semibold mb-2 flex items-center gap-1.5"><Plus className="w-3.5 h-3.5 text-primary" /> قوالب جاهزة:</p>
+                <p className="text-xs font-semibold mb-2 flex items-center gap-1.5"><Plus className="w-3.5 h-3.5 text-primary" /> {t("d.videos.modal.templates")}</p>
                 <div className="flex flex-wrap gap-2">
-                  {TEMPLATE_VIDEOS.map((t, i) => (
-                    <button key={i} onClick={() => applyTemplate(t)} className="px-3 py-1.5 text-xs rounded-lg border border-border bg-card hover:border-primary/40 hover:text-primary transition-colors text-right">
-                      {t.title}
+                  {TEMPLATE_VIDEOS.map((tp, i) => (
+                    <button key={i} onClick={() => applyTemplate(tp)} className="px-3 py-1.5 text-xs rounded-lg border border-border bg-card hover:border-primary/40 hover:text-primary transition-colors text-right">
+                      {tp.title}
                     </button>
                   ))}
                 </div>
@@ -399,9 +401,9 @@ export function DashboardVideos() {
             <div className="flex gap-2 pt-2">
               <Button onClick={save} disabled={saving} className="flex-1 bg-gradient-to-r from-primary to-red-700 text-white gap-2">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                {editing ? "حفظ التعديلات" : "رفع الفيديو"}
+                {editing ? t("d.videos.modal.saveEdit") : t("d.videos.modal.saveCreate")}
               </Button>
-              <Button variant="outline" onClick={() => setModalOpen(false)}>إلغاء</Button>
+              <Button variant="outline" onClick={() => setModalOpen(false)}>{t("d.videos.modal.cancel")}</Button>
             </div>
           </div>
         </DialogContent>

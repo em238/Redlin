@@ -11,9 +11,11 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { apiPost } from "@/lib/api";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
 export function DashboardSettings() {
   const { user, setUser, setView, setAuthChecked, theme, toggleTheme } = useAppStore();
+  const { t } = useT();
   const [profile, setProfile] = useState({ name: user?.name || "", email: user?.email || "" });
   const [notifications, setNotifications] = useState({ email: true, push: true, orders: true, messages: false });
 
@@ -22,8 +24,15 @@ export function DashboardSettings() {
     setUser(null);
     setAuthChecked(true);
     setView("public");
-    toast.success("تم تسجيل الخروج");
+    toast.success(t("d.settings.toastLogout"));
   };
+
+  const notifList = [
+    { key: "email", label: t("d.settings.notif.emailLabel"), desc: t("d.settings.notif.emailDesc") },
+    { key: "push", label: t("d.settings.notif.pushLabel"), desc: t("d.settings.notif.pushDesc") },
+    { key: "orders", label: t("d.settings.notif.ordersLabel"), desc: t("d.settings.notif.ordersDesc") },
+    { key: "messages", label: t("d.settings.notif.messagesLabel"), desc: t("d.settings.notif.messagesDesc") },
+  ];
 
   return (
     <div className="space-y-5 max-w-4xl">
@@ -34,27 +43,27 @@ export function DashboardSettings() {
             <User className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h3 className="font-bold">الملف الشخصي</h3>
-            <p className="text-xs text-muted-foreground">بيانات حساب الإدارة</p>
+            <h3 className="font-bold">{t("d.settings.profile.title")}</h3>
+            <p className="text-xs text-muted-foreground">{t("d.settings.profile.sub")}</p>
           </div>
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <Label className="text-sm">الاسم</Label>
+            <Label className="text-sm">{t("d.settings.l.name")}</Label>
             <Input value={profile.name} onChange={(e) => setProfile({ ...profile, name: e.target.value })} className="h-10" />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-sm">البريد الإلكتروني</Label>
+            <Label className="text-sm">{t("d.settings.l.email")}</Label>
             <Input value={profile.email} onChange={(e) => setProfile({ ...profile, email: e.target.value })} className="h-10" dir="ltr" />
           </div>
         </div>
         <div className="mt-4 flex items-center gap-3">
-          <Badge className="bg-primary/10 text-primary border-primary/30">دور: مدير عام</Badge>
-          <Badge className="bg-emerald-500/10 text-emerald-700 border-emerald-500/30">حساب نشط</Badge>
+          <Badge className="bg-primary/10 text-primary border-primary/30">{t("d.settings.rolePrefix")} {t("d.settings.roleValue")}</Badge>
+          <Badge className="bg-emerald-500/10 text-emerald-700 border-emerald-500/30">{t("d.settings.active")}</Badge>
         </div>
         <div className="mt-4">
           <Button className="bg-gradient-to-r from-primary to-red-700 text-white gap-2">
-            <Save className="w-4 h-4" /> حفظ التغييرات
+            <Save className="w-4 h-4" /> {t("d.settings.saveChanges")}
           </Button>
         </div>
       </Card>
@@ -66,16 +75,16 @@ export function DashboardSettings() {
             <Palette className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h3 className="font-bold">المظهر</h3>
-            <p className="text-xs text-muted-foreground">السمة والثيم</p>
+            <h3 className="font-bold">{t("d.settings.appearance.title")}</h3>
+            <p className="text-xs text-muted-foreground">{t("d.settings.appearance.sub")}</p>
           </div>
         </div>
         <div className="flex items-center justify-between p-4 rounded-xl bg-muted/40">
           <div className="flex items-center gap-3">
             {theme === "light" ? <Sun className="w-5 h-5 text-amber-500" /> : <Moon className="w-5 h-5 text-primary" />}
             <div>
-              <div className="font-semibold text-sm">السمة الحالية</div>
-              <div className="text-xs text-muted-foreground">{theme === "light" ? "فاتح" : "داكن"}</div>
+              <div className="font-semibold text-sm">{t("d.settings.currentTheme")}</div>
+              <div className="text-xs text-muted-foreground">{theme === "light" ? t("d.settings.light") : t("d.settings.dark")}</div>
             </div>
           </div>
           <Switch checked={theme === "dark"} onCheckedChange={toggleTheme} />
@@ -89,17 +98,12 @@ export function DashboardSettings() {
             <Bell className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h3 className="font-bold">الإشعارات</h3>
-            <p className="text-xs text-muted-foreground">إعدادات التنبيهات</p>
+            <h3 className="font-bold">{t("d.settings.notif.title")}</h3>
+            <p className="text-xs text-muted-foreground">{t("d.settings.notif.sub")}</p>
           </div>
         </div>
         <div className="space-y-3">
-          {[
-            { key: "email", label: "إشعارات البريد الإلكتروني", desc: "استلام تنبيهات عبر البريد" },
-            { key: "push", label: "إشعارات فورية", desc: "تنبيهات في المتصفح" },
-            { key: "orders", label: "تنبيهات الطلبات الجديدة", desc: "عند وصول طلب جديد" },
-            { key: "messages", label: "تنبيهات الرسائل", desc: "عند وصول رسالة من عميل" },
-          ].map((n) => (
+          {notifList.map((n) => (
             <div key={n.key} className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/40">
               <div>
                 <div className="font-medium text-sm">{n.label}</div>
@@ -119,22 +123,22 @@ export function DashboardSettings() {
         <Card className="p-5">
           <div className="flex items-center gap-2 mb-3">
             <Truck className="w-4 h-4 text-primary" />
-            <h4 className="font-bold text-sm">معلومات النظام</h4>
+            <h4 className="font-bold text-sm">{t("d.settings.system.title")}</h4>
           </div>
           <div className="space-y-1.5 text-xs text-muted-foreground">
-            <div className="flex justify-between"><span>الإصدار</span><span className="font-mono text-foreground">Redline v2.4.1</span></div>
-            <div className="flex justify-between"><span>قاعدة البيانات</span><span className="font-mono text-foreground">SQLite</span></div>
-            <div className="flex justify-between"><span>المنطقة الزمنية</span><span className="font-mono text-foreground">Africa/Cairo</span></div>
+            <div className="flex justify-between"><span>{t("d.settings.system.version")}</span><span className="font-mono text-foreground">Redline v2.4.1</span></div>
+            <div className="flex justify-between"><span>{t("d.settings.system.database")}</span><span className="font-mono text-foreground">SQLite</span></div>
+            <div className="flex justify-between"><span>{t("d.settings.system.timezone")}</span><span className="font-mono text-foreground">Africa/Cairo</span></div>
           </div>
         </Card>
         <Card className="p-5">
           <div className="flex items-center gap-2 mb-3">
             <Shield className="w-4 h-4 text-primary" />
-            <h4 className="font-bold text-sm">الأمان</h4>
+            <h4 className="font-bold text-sm">{t("d.settings.security.title")}</h4>
           </div>
-          <p className="text-xs text-muted-foreground mb-3">جلسة آمنة ومشفرة. للحماية، يُنصح بتسجيل الخروج بعد الانتهاء.</p>
+          <p className="text-xs text-muted-foreground mb-3">{t("d.settings.security.desc")}</p>
           <Button variant="outline" className="w-full text-rose-600 hover:text-rose-700 gap-2" onClick={logout}>
-            <LogOut className="w-4 h-4" /> تسجيل الخروج
+            <LogOut className="w-4 h-4" /> {t("d.settings.security.logout")}
           </Button>
         </Card>
       </div>

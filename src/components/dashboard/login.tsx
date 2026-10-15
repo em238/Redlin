@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { Truck, Lock, Mail, ArrowRight, Loader2, ShieldCheck, LayoutDashboard } from "lucide-react";
@@ -11,26 +10,34 @@ import { useState } from "react";
 import { apiPost } from "@/lib/api";
 import { toast } from "sonner";
 import { useAppStore } from "@/lib/store";
+import { useT } from "@/lib/i18n";
 
 export function DashboardLogin() {
-  const { setUser, setAuthChecked, setView } = useAppStore();
+  const { setUser, setView } = useAppStore();
+  const { t, isAr } = useT();
   const [email, setEmail] = useState("admin@redline.eg");
   const [password, setPassword] = useState("admin123");
   const [loading, setLoading] = useState(false);
 
   const login = async () => {
-    if (!email || !password) { toast.error("أكمل البيانات"); return; }
+    if (!email || !password) { toast.error(isAr ? "أكمل البيانات" : "Please complete the form"); return; }
     setLoading(true);
     try {
       const r = await apiPost<{ user: any }>("/api/auth/login", { email, password });
       setUser(r.user);
-      toast.success(`مرحباً ${r.user.name}!`);
+      toast.success(isAr ? `مرحباً ${r.user.name}!` : `Welcome ${r.user.name}!`);
     } catch (e: any) {
-      toast.error(e.message || "فشل تسجيل الدخول");
+      toast.error(e.message || (isAr ? "فشل تسجيل الدخول" : "Login failed"));
     } finally {
       setLoading(false);
     }
   };
+
+  const stats = [
+    { v: "850K+", l: t("d.login.stat1") },
+    { v: "27", l: t("d.login.stat2") },
+    { v: "12K+", l: t("d.login.stat3") },
+  ];
 
   return (
     <div className="min-h-screen flex">
@@ -45,20 +52,17 @@ export function DashboardLogin() {
             </div>
             <div>
               <div className="text-2xl font-black">Red<span className="text-primary">line</span></div>
-              <div className="text-[11px] text-zinc-400">لوحة تحكم الإدارة</div>
+              <div className="text-[11px] text-zinc-400">{t("d.login.adminPanel")}</div>
             </div>
           </div>
 
           <div className="max-w-md">
             <h1 className="text-4xl font-black leading-tight">
-              أدر عمليات الشحن <span className="text-gradient-red">من مكان واحد</span>
+              {t("d.login.title1")} <span className="text-gradient-red">{t("d.login.title2")}</span>
             </h1>
-            <p className="mt-4 text-zinc-300 leading-relaxed">
-              تتبّع الشحنات، إدارة الطلبات والعملاء، رفع الفيديوهات، التحكم في الأسعار،
-              ومتابعة كل مؤشرات الأداء — كل ذلك من لوحة تحكم متكاملة واحترافية.
-            </p>
+            <p className="mt-4 text-zinc-300 leading-relaxed">{t("d.login.subtitle")}</p>
             <div className="mt-8 grid grid-cols-3 gap-4">
-              {[{ v: "850K+", l: "شحنة" }, { v: "27", l: "محافظة" }, { v: "12K+", l: "عميل" }].map((s, i) => (
+              {stats.map((s, i) => (
                 <div key={i} className="glass rounded-xl border border-white/10 p-3 text-center">
                   <div className="text-2xl font-black text-primary">{s.v}</div>
                   <div className="text-[11px] text-zinc-400">{s.l}</div>
@@ -69,7 +73,7 @@ export function DashboardLogin() {
 
           <div className="flex items-center gap-2 text-sm text-zinc-400">
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            اتصال آمن ومشفّر — جميع البيانات محمية
+            {t("d.login.secure")}
           </div>
         </div>
       </div>
@@ -90,14 +94,14 @@ export function DashboardLogin() {
 
           <div className="flex items-center gap-2 mb-2">
             <LayoutDashboard className="w-5 h-5 text-primary" />
-            <span className="text-sm font-semibold text-primary">لوحة التحكم</span>
+            <span className="text-sm font-semibold text-primary">{t("d.login.brand")}</span>
           </div>
-          <h2 className="text-3xl font-black">تسجيل الدخول</h2>
-          <p className="mt-2 text-muted-foreground">أدخل بياناتك للوصول إلى لوحة تحكم Redline</p>
+          <h2 className="text-3xl font-black">{t("d.login.header")}</h2>
+          <p className="mt-2 text-muted-foreground">{t("d.login.subheader")}</p>
 
           <div className="mt-8 space-y-5">
             <div className="space-y-1.5">
-              <Label className="text-sm">البريد الإلكتروني</Label>
+              <Label className="text-sm">{t("d.login.emailLabel")}</Label>
               <div className="relative">
                 <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -110,7 +114,7 @@ export function DashboardLogin() {
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-sm">كلمة المرور</Label>
+              <Label className="text-sm">{t("d.login.passwordLabel")}</Label>
               <div className="relative">
                 <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -127,9 +131,9 @@ export function DashboardLogin() {
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center gap-2 text-muted-foreground cursor-pointer">
                 <input type="checkbox" className="rounded accent-primary" defaultChecked />
-                تذكرني
+                {t("d.login.remember")}
               </label>
-              <button className="text-primary hover:underline">نسيت كلمة المرور؟</button>
+              <button className="text-primary hover:underline">{t("d.login.forgot")}</button>
             </div>
 
             <Button
@@ -138,13 +142,13 @@ export function DashboardLogin() {
               className="w-full h-12 bg-gradient-to-r from-primary to-red-700 hover:from-red-600 hover:to-red-800 text-white gap-2 text-base"
             >
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <LayoutDashboard className="w-5 h-5" />}
-              دخول لوحة التحكم
+              {t("d.login.button")}
               {!loading && <ArrowRight className="w-4 h-4" />}
             </Button>
 
             <div className="rounded-xl border border-dashed border-border bg-muted/30 p-4 text-center">
               <p className="text-xs text-muted-foreground">
-                بيانات تجريبية: <span className="font-mono font-semibold text-foreground">admin@redline.eg</span>
+                {t("d.login.demo")} <span className="font-mono font-semibold text-foreground">admin@redline.eg</span>
                 {" / "}
                 <span className="font-mono font-semibold text-foreground">admin123</span>
               </p>
@@ -154,7 +158,7 @@ export function DashboardLogin() {
               onClick={() => setView("public")}
               className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors"
             >
-              ← العودة للموقع
+              {t("d.login.back")}
             </button>
           </div>
         </motion.div>

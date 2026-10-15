@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { apiGet, formatEGP } from "@/lib/api";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
 const ICONS: Record<string, any> = {
   truck: Truck, zap: Zap, rocket: Rocket, package: Package, banknote: Banknote, "rotate-ccw": RotateCcw,
@@ -20,6 +21,7 @@ const ZONE_STYLE: Record<string, string> = {
 };
 
 export function DashboardPricing() {
+  const { t } = useT();
   const { data: govData, isLoading } = useQuery({ queryKey: ["governorates"], queryFn: () => apiGet<any>("/api/governorates") });
   const { data: svcData } = useQuery({ queryKey: ["services"], queryFn: () => apiGet<any>("/api/services") });
   const govs = govData?.governorates ?? [];
@@ -35,7 +37,7 @@ export function DashboardPricing() {
       {/* Services overview */}
       <Card className="p-5">
         <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-          <Zap className="w-5 h-5 text-primary" /> خدمات الشحن
+          <Zap className="w-5 h-5 text-primary" /> {t("d.pricing.servicesTitle")}
         </h3>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {svcs.map((s: any) => {
@@ -61,14 +63,14 @@ export function DashboardPricing() {
         <div className="p-5 border-b border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
             <h3 className="font-bold text-lg flex items-center gap-2">
-              <DollarSign className="w-5 h-5 text-primary" /> أسعار المحافظات
+              <DollarSign className="w-5 h-5 text-primary" /> {t("d.pricing.govTitle")}
             </h3>
-            <p className="text-xs text-muted-foreground mt-0.5">السعر الأساسي لكل محافظة ووقت التوصيل المتوقع</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{t("d.pricing.govSub")}</p>
           </div>
           <Input
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            placeholder="بحث محافظة..."
+            placeholder={t("d.pricing.searchPlaceholder")}
             className="h-9 w-full sm:w-56"
           />
         </div>
@@ -79,12 +81,12 @@ export function DashboardPricing() {
             <table className="w-full text-sm">
               <thead className="bg-muted/60 sticky top-0 z-10">
                 <tr className="text-right">
-                  <th className="px-4 py-3 font-semibold">المحافظة</th>
-                  <th className="px-4 py-3 font-semibold">المنطقة</th>
-                  <th className="px-4 py-3 font-semibold">السعر الأساسي</th>
-                  <th className="px-4 py-3 font-semibold hidden sm:table-cell">وقت التوصيل</th>
-                  <th className="px-4 py-3 font-semibold">سعر ممتاز (×1.6)</th>
-                  <th className="px-4 py-3 font-semibold hidden md:table-cell">سعر نفس اليوم (×2.3)</th>
+                  <th className="px-4 py-3 font-semibold">{t("d.pricing.h.gov")}</th>
+                  <th className="px-4 py-3 font-semibold">{t("d.pricing.h.zone")}</th>
+                  <th className="px-4 py-3 font-semibold">{t("d.pricing.h.basePrice")}</th>
+                  <th className="px-4 py-3 font-semibold hidden sm:table-cell">{t("d.pricing.h.eta")}</th>
+                  <th className="px-4 py-3 font-semibold">{t("d.pricing.h.express")}</th>
+                  <th className="px-4 py-3 font-semibold hidden md:table-cell">{t("d.pricing.h.sameday")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -100,12 +102,12 @@ export function DashboardPricing() {
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-bold border ${ZONE_STYLE[g.zone] || ZONE_STYLE.A}`}>المنطقة {g.zone}</span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-bold border ${ZONE_STYLE[g.zone] || ZONE_STYLE.A}`}>{t("d.pricing.zoneLabel")} {g.zone}</span>
                     </td>
                     <td className="px-4 py-3 font-bold">{formatEGP(g.basePrice)}</td>
                     <td className="px-4 py-3 hidden sm:table-cell">
                       <span className="flex items-center gap-1 text-muted-foreground">
-                        <Clock className="w-3.5 h-3.5" /> {Math.ceil(g.etaHours / 24)} يوم
+                        <Clock className="w-3.5 h-3.5" /> {Math.ceil(g.etaHours / 24)} {t("d.pricing.daysUnit")}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-emerald-600 font-semibold">{formatEGP(g.basePrice * 1.6)}</td>

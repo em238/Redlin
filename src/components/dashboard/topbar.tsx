@@ -4,23 +4,26 @@ import { Menu, Moon, Sun, Bell, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAppStore, DashboardSection } from "@/lib/store";
-
-const TITLES: Record<DashboardSection, { title: string; subtitle: string }> = {
-  overview: { title: "نظرة عامة", subtitle: "ملخص أداء عمليات الشحن" },
-  shipments: { title: "إدارة الشحنات", subtitle: "كل الشحنات وتتبّع حالاتها" },
-  orders: { title: "الطلبات الجديدة", subtitle: "طلبات العملاء من الموقع" },
-  customers: { title: "العملاء", subtitle: "قاعدة عملاء Redline" },
-  videos: { title: "إدارة الفيديوهات", subtitle: "ارفع وأدر الفيديوهات المعروضة بالموقع" },
-  "hero-images": { title: "صور الهيدر", subtitle: "أدر صور الـ carousel الظاهرة في أعلى الموقع" },
-  partners: { title: "الشركاء", subtitle: "أدر شعارات الشركات الظاهرة بقسم الشركاء" },
-  pricing: { title: "الأسعار والتغطية", subtitle: "أسعار المحافظات وخدمات الشحن" },
-  messages: { title: "الرسائل", subtitle: "رسائل التواصل من العملاء" },
-  settings: { title: "الإعدادات", subtitle: "إعدادات الحساب والنظام" },
-};
+import { useT } from "@/lib/i18n";
 
 export function DashboardTopbar() {
   const { dashboardSection, setSidebarOpen, theme, toggleTheme } = useAppStore();
-  const t = TITLES[dashboardSection];
+  const { t } = useT();
+
+  const TITLES: Record<DashboardSection, { title: string; subtitle: string }> = {
+    overview: { title: t("d.topbar.overview"), subtitle: t("d.topbar.overviewSub") },
+    shipments: { title: t("d.topbar.shipments"), subtitle: t("d.topbar.shipmentsSub") },
+    orders: { title: t("d.topbar.orders"), subtitle: t("d.topbar.ordersSub") },
+    customers: { title: t("d.topbar.customers"), subtitle: t("d.topbar.customersSub") },
+    videos: { title: t("d.topbar.videos"), subtitle: t("d.topbar.videosSub") },
+    "hero-images": { title: t("d.topbar.heroImages"), subtitle: t("d.topbar.heroImagesSub") },
+    partners: { title: t("d.topbar.partners"), subtitle: t("d.topbar.partnersSub") },
+    pricing: { title: t("d.topbar.pricing"), subtitle: t("d.topbar.pricingSub") },
+    messages: { title: t("d.topbar.messages"), subtitle: t("d.topbar.messagesSub") },
+    settings: { title: t("d.topbar.settings"), subtitle: t("d.topbar.settingsSub") },
+  };
+
+  const current = TITLES[dashboardSection];
 
   return (
     <header className="sticky top-0 z-30 h-16 border-b border-border bg-background/85 backdrop-blur-xl">
@@ -30,14 +33,14 @@ export function DashboardTopbar() {
         </Button>
 
         <div className="min-w-0">
-          <h1 className="text-lg font-black truncate">{t.title}</h1>
-          <p className="text-xs text-muted-foreground truncate hidden sm:block">{t.subtitle}</p>
+          <h1 className="text-lg font-black truncate">{current.title}</h1>
+          <p className="text-xs text-muted-foreground truncate hidden sm:block">{current.subtitle}</p>
         </div>
 
         <div className="mr-auto flex items-center gap-2">
           <div className="relative hidden md:block">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input placeholder="بحث..." className="h-9 w-48 pr-9 bg-muted/50 border-0" />
+            <Input placeholder={t("d.topbar.search")} className="h-9 w-48 pr-9 bg-muted/50 border-0" />
           </div>
           <Button variant="ghost" size="icon" className="rounded-full relative">
             <Bell className="w-5 h-5" />

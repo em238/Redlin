@@ -17,12 +17,14 @@ import { Card } from "@/components/ui/card";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle
 } from "@/components/ui/dialog";
-import { apiGet, apiPost, apiPatch, apiDelete, formatEGP, formatDateTime, STATUS_LABELS, STATUS_COLORS } from "@/lib/api";
+import { apiGet, apiPost, apiPatch, apiDelete, formatEGP, formatDateTime, STATUS_COLORS } from "@/lib/api";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
 const STATUSES = ["pending", "picked_up", "in_transit", "out_for_delivery", "delivered", "returned", "cancelled"];
 
 export function DashboardShipments() {
+  const { t, isAr } = useT();
   const qc = useQueryClient();
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
@@ -38,6 +40,20 @@ export function DashboardShipments() {
     receiverName: "", receiverPhone: "", receiverAddress: "",
     governorate: "", service: "Standard", weight: 1, notes: "", price: 0, status: "pending",
   });
+
+  // localized status labels
+  const STATUS_LABELS: Record<string, string> = {
+    pending: t("d.status.pending"),
+    picked_up: t("d.status.picked_up"),
+    in_transit: t("d.status.in_transit"),
+    out_for_delivery: t("d.status.out_for_delivery"),
+    delivered: t("d.status.delivered"),
+    returned: t("d.status.returned"),
+    cancelled: t("d.status.cancelled"),
+    confirmed: t("d.status.confirmed"),
+    processing: t("d.status.processing"),
+    new: t("d.status.new"),
+  };
 
   const { data: govData } = useQuery({ queryKey: ["governorates"], queryFn: () => apiGet<any>("/api/governorates") });
   const { data: svcData } = useQuery({ queryKey: ["services"], queryFn: () => apiGet<any>("/api/services") });
@@ -88,26 +104,26 @@ export function DashboardShipments() {
     try {
       if (editing) {
         await apiPatch(`/api/shipments/${editing.id}`, form);
-        toast.success("تم تحديث الشحنة");
+        toast.success(t("d.ship.toastUpdated"));
       } else {
         await apiPost("/api/shipments", form);
-        toast.success("تم إنشاء الشحنة");
+        toast.success(t("d.ship.toastCreated"));
       }
       setModalOpen(false);
       qc.invalidateQueries({ queryKey: ["shipments"] });
       qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
     } catch (e: any) {
-      toast.error(e.message || "خطأ");
+      toast.error(e.message || t("d.ship.toastError"));
     } finally {
       setSaving(false);
     }
   };
 
   const remove = async (id: string) => {
-    if (!confirm("هل أنت متأكد من حذف هذه الشحنة؟")) return;
+    if (!confirm(t("d.ship.confirmDelete"))) return;
     try {
       await apiDelete(`/api/shipments/${id}`);
-      toast.success("تم الحذف");
+      toast.success(t("d.ship.toastDeleted"));
       qc.invalidateQueries({ queryKey: ["shipments"] });
       qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
     } catch (e: any) {
@@ -117,12 +133,12 @@ export function DashboardShipments() {
 
   const bulkDelete = async () => {
     if (selected.size === 0) return;
-    if (!confirm(`حذف ${selected.size} شحنة؟`)) return;
+    if (!confirm(`${t("d.ship.confirmBulkDeletePrefix")}${selected.size}${t("d.ship.confirmBulkDeleteSuffix")}`)) return;
     let ok = 0;
     for (const id of selected) {
       try { await apiDelete(`/api/shipments/${id}`); ok++; } catch {}
     }
-    toast.success(`تم حذف ${ok} شحنة`);
+    toast.success(`${t("d.ship.toastBulkDeletedPrefix")}${ok}${t("d.ship.toastBulkDeletedSuffix")}`);
     setSelected(new Set());
     qc.invalidateQueries({ queryKey: ["shipments"] });
     qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
@@ -130,8 +146,8 @@ export function DashboardShipments() {
 
   const quickStatus = async (sh: any, newStatus: string) => {
     try {
-      await apiPatch(`/api/shipments/${sh.id}`, { status: newStatus, note: "تحديث سريع من اللوحة" });
-      toast.success("تم تحديث الحالة");
+      await apiPatch(`/api/shipments/${sh.id}`, { status: newStatus, note: t("d.ship.quickStatusNote") });
+      toast.success(t("d.ship.toastStatus"));
       qc.invalidateQueries({ queryKey: ["shipments"] });
       qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
     } catch (e: any) {
@@ -150,7 +166,7 @@ export function DashboardShipments() {
     a.download = `redline-shipments-${Date.now()}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("تم تصدير الشحنات إلى CSV");
+    toast.success(t("d.ship.toastExported"));
   };
 
   return (
@@ -160,20 +176,20 @@ export function DashboardShipments() {
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input value={q} onChange={(e) => { setQ(e.target.value); setPage(1); }} placeholder="بحث برقم التتبع أو الاسم أو الهاتف..." className="h-10 pr-9" />
+            <Input value={q} onChange={(e) => { setQ(e.target.value); setPage(1); }} placeholder={t("d.ship.search")} className="h-10 pr-9" />
           </div>
           <Select value={status || "all"} onValueChange={(v) => { setStatus(v === "all" ? "" : v); setPage(1); }}>
-            <SelectTrigger className="h-10 w-full sm:w-44"><Filter className="w-4 h-4 ml-2" /><SelectValue placeholder="كل الحالات" /></SelectTrigger>
+            <SelectTrigger className="h-10 w-full sm:w-44"><Filter className="w-4 h-4 ml-2" /><SelectValue placeholder={t("d.ship.allStatuses")} /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">كل الحالات</SelectItem>
+              <SelectItem value="all">{t("d.ship.allStatuses")}</SelectItem>
               {STATUSES.map((s) => <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>)}
             </SelectContent>
           </Select>
           <Button variant="outline" onClick={exportCSV} className="h-10 gap-2">
-            <Download className="w-4 h-4" /> تصدير CSV
+            <Download className="w-4 h-4" /> {t("d.ship.export")}
           </Button>
           <Button onClick={openCreate} className="bg-gradient-to-r from-primary to-red-700 text-white gap-2 h-10">
-            <Plus className="w-4 h-4" /> شحنة جديدة
+            <Plus className="w-4 h-4" /> {t("d.ship.new")}
           </Button>
         </div>
         {/* Bulk actions bar */}
@@ -186,11 +202,11 @@ export function DashboardShipments() {
               className="overflow-hidden"
             >
               <div className="mt-3 flex items-center justify-between p-3 rounded-xl bg-primary/5 border border-primary/20">
-                <span className="text-sm font-semibold">تم اختيار {selected.size} شحنة</span>
+                <span className="text-sm font-semibold">{t("d.ship.selectedPrefix")}{selected.size}{t("d.ship.selectedSuffix")}</span>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="h-8" onClick={() => setSelected(new Set())}>إلغاء</Button>
+                  <Button variant="outline" size="sm" className="h-8" onClick={() => setSelected(new Set())}>{t("d.ship.cancel")}</Button>
                   <Button variant="outline" size="sm" className="h-8 text-rose-600" onClick={bulkDelete}>
-                    <Trash2 className="w-3.5 h-3.5" /> حذف المحدد
+                    <Trash2 className="w-3.5 h-3.5" /> {t("d.ship.deleteSelected")}
                   </Button>
                 </div>
               </div>
@@ -206,7 +222,7 @@ export function DashboardShipments() {
         ) : pagedShipments.length === 0 ? (
           <div className="flex flex-col items-center py-16 text-muted-foreground">
             <Package className="w-12 h-12 mb-3 opacity-40" />
-            <p>لا توجد شحنات مطابقة</p>
+            <p>{t("d.ship.empty")}</p>
           </div>
         ) : (
           <>
@@ -219,13 +235,13 @@ export function DashboardShipments() {
                         {allSelected ? <CheckSquare className="w-4 h-4 text-primary" /> : <Square className="w-4 h-4 text-muted-foreground" />}
                       </button>
                     </th>
-                    <th className="px-4 py-3 font-semibold">رقم التتبع</th>
-                    <th className="px-4 py-3 font-semibold">المستلم</th>
-                    <th className="px-4 py-3 font-semibold hidden md:table-cell">المحافظة</th>
-                    <th className="px-4 py-3 font-semibold hidden lg:table-cell">الخدمة</th>
-                    <th className="px-4 py-3 font-semibold">السعر</th>
-                    <th className="px-4 py-3 font-semibold">الحالة</th>
-                    <th className="px-4 py-3 font-semibold text-left">إجراءات</th>
+                    <th className="px-4 py-3 font-semibold">{t("d.ship.h.tracking")}</th>
+                    <th className="px-4 py-3 font-semibold">{t("d.ship.h.receiver")}</th>
+                    <th className="px-4 py-3 font-semibold hidden md:table-cell">{t("d.ship.h.governorate")}</th>
+                    <th className="px-4 py-3 font-semibold hidden lg:table-cell">{t("d.ship.h.service")}</th>
+                    <th className="px-4 py-3 font-semibold">{t("d.ship.h.price")}</th>
+                    <th className="px-4 py-3 font-semibold">{t("d.ship.h.status")}</th>
+                    <th className="px-4 py-3 font-semibold text-left">{t("d.ship.h.actions")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -264,7 +280,7 @@ export function DashboardShipments() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex gap-1 justify-end">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDrawerShipment(sh)} title="عرض">
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDrawerShipment(sh)} title={t("d.ship.viewAction")}>
                             <Search className="w-4 h-4" />
                           </Button>
                           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(sh)}>
@@ -284,14 +300,14 @@ export function DashboardShipments() {
             {/* Pagination */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 border-t border-border">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>عرض</span>
+                <span>{t("d.ship.showing")}</span>
                 <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v)); setPage(1); }}>
                   <SelectTrigger className="h-8 w-20"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {[8, 12, 20, 50].map((n) => <SelectItem key={n} value={String(n)}>{n}</SelectItem>)}
                   </SelectContent>
                 </Select>
-                <span>من {allShipments.length} شحنة</span>
+                <span>{t("d.ship.of")} {allShipments.length} {t("d.ship.shipmentsUnit")}</span>
               </div>
               <div className="flex items-center gap-1">
                 <Button variant="outline" size="icon" className="h-8 w-8" disabled={currentPage === 1} onClick={() => setPage(1)}>
@@ -300,7 +316,7 @@ export function DashboardShipments() {
                 <Button variant="outline" size="icon" className="h-8 w-8" disabled={currentPage === 1} onClick={() => setPage((p) => p - 1)}>
                   <ChevronRight className="w-4 h-4" />
                 </Button>
-                <span className="px-3 text-sm font-medium">صفحة {currentPage} من {totalPages}</span>
+                <span className="px-3 text-sm font-medium">{t("d.ship.page")} {currentPage} {t("d.ship.ofPages")} {totalPages}</span>
                 <Button variant="outline" size="icon" className="h-8 w-8" disabled={currentPage === totalPages} onClick={() => setPage((p) => p + 1)}>
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
@@ -319,60 +335,60 @@ export function DashboardShipments() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Package className="w-5 h-5 text-primary" />
-              {editing ? "تعديل الشحنة" : "شحنة جديدة"}
+              {editing ? t("d.ship.modal.edit") : t("d.ship.modal.create")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid sm:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label className="text-xs">اسم المرسل</Label>
+                <Label className="text-xs">{t("d.ship.l.senderName")}</Label>
                 <Input value={form.senderName} onChange={(e) => setForm({ ...form, senderName: e.target.value })} className="h-10" />
               </div>
               <div className="space-y-1">
-                <Label className="text-xs">هاتف المرسل</Label>
+                <Label className="text-xs">{t("d.ship.l.senderPhone")}</Label>
                 <Input value={form.senderPhone} onChange={(e) => setForm({ ...form, senderPhone: e.target.value })} className="h-10" dir="ltr" />
               </div>
               <div className="space-y-1 sm:col-span-2">
-                <Label className="text-xs">عنوان المرسل</Label>
+                <Label className="text-xs">{t("d.ship.l.senderAddress")}</Label>
                 <Input value={form.senderAddress} onChange={(e) => setForm({ ...form, senderAddress: e.target.value })} className="h-10" />
               </div>
             </div>
             <div className="h-px bg-border" />
             <div className="grid sm:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label className="text-xs">اسم المستلم *</Label>
+                <Label className="text-xs">{t("d.ship.l.receiverName")}</Label>
                 <Input value={form.receiverName} onChange={(e) => setForm({ ...form, receiverName: e.target.value })} className="h-10" />
               </div>
               <div className="space-y-1">
-                <Label className="text-xs">هاتف المستلم *</Label>
+                <Label className="text-xs">{t("d.ship.l.receiverPhone")}</Label>
                 <Input value={form.receiverPhone} onChange={(e) => setForm({ ...form, receiverPhone: e.target.value })} className="h-10" dir="ltr" />
               </div>
               <div className="space-y-1 sm:col-span-2">
-                <Label className="text-xs">عنوان المستلم</Label>
+                <Label className="text-xs">{t("d.ship.l.receiverAddress")}</Label>
                 <Input value={form.receiverAddress} onChange={(e) => setForm({ ...form, receiverAddress: e.target.value })} className="h-10" />
               </div>
             </div>
             <div className="grid sm:grid-cols-3 gap-3">
               <div className="space-y-1">
-                <Label className="text-xs">المحافظة *</Label>
+                <Label className="text-xs">{t("d.ship.l.governorate")}</Label>
                 <Select value={form.governorate} onValueChange={(v) => setForm({ ...form, governorate: v })}>
                   <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
                   <SelectContent className="max-h-72">
-                    {govData?.governorates?.map((g: any) => <SelectItem key={g.name} value={g.name}>{g.nameAr}</SelectItem>)}
+                    {govData?.governorates?.map((g: any) => <SelectItem key={g.name} value={g.name}>{isAr ? g.nameAr : g.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1">
-                <Label className="text-xs">الخدمة *</Label>
+                <Label className="text-xs">{t("d.ship.l.service")}</Label>
                 <Select value={form.service} onValueChange={(v) => setForm({ ...form, service: v })}>
                   <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {svcData?.services?.map((s: any) => <SelectItem key={s.name} value={s.name}>{s.nameAr}</SelectItem>)}
+                    {svcData?.services?.map((s: any) => <SelectItem key={s.name} value={s.name}>{isAr ? s.nameAr : s.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1">
-                <Label className="text-xs">الحالة</Label>
+                <Label className="text-xs">{t("d.ship.l.status")}</Label>
                 <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
                   <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -383,24 +399,24 @@ export function DashboardShipments() {
             </div>
             <div className="grid sm:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label className="text-xs">الوزن (كجم)</Label>
+                <Label className="text-xs">{t("d.ship.l.weight")}</Label>
                 <Input type="number" step="0.1" value={form.weight} onChange={(e) => setForm({ ...form, weight: Number(e.target.value) })} className="h-10" />
               </div>
               <div className="space-y-1">
-                <Label className="text-xs">السعر (ج.م)</Label>
+                <Label className="text-xs">{t("d.ship.l.price")}</Label>
                 <Input type="number" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} className="h-10" />
               </div>
             </div>
             <div className="space-y-1">
-              <Label className="text-xs">ملاحظات</Label>
+              <Label className="text-xs">{t("d.ship.l.notes")}</Label>
               <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} />
             </div>
             <div className="flex gap-2 pt-2">
               <Button onClick={save} disabled={saving} className="flex-1 bg-gradient-to-r from-primary to-red-700 text-white gap-2">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-                {editing ? "حفظ التعديلات" : "إنشاء الشحنة"}
+                {editing ? t("d.ship.saveEdit") : t("d.ship.saveCreate")}
               </Button>
-              <Button variant="outline" onClick={() => setModalOpen(false)}>إلغاء</Button>
+              <Button variant="outline" onClick={() => setModalOpen(false)}>{t("d.ship.cancel")}</Button>
             </div>
           </div>
         </DialogContent>
@@ -427,7 +443,7 @@ export function DashboardShipments() {
               <div className="sticky top-0 bg-gradient-to-l from-primary to-red-700 text-white p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <div className="text-xs text-white/80">رقم التتبع</div>
+                    <div className="text-xs text-white/80">{t("d.ship.trackingNo")}</div>
                     <div className="text-2xl font-black font-mono" dir="ltr">{drawerShipment.trackingNo}</div>
                   </div>
                   <button onClick={() => setDrawerShipment(null)} className="w-9 h-9 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center">
@@ -442,7 +458,7 @@ export function DashboardShipments() {
 
               <div className="p-6 space-y-5">
                 <div>
-                  <h4 className="text-xs font-bold text-muted-foreground mb-3 flex items-center gap-1.5"><User className="w-3.5 h-3.5" /> المستلم</h4>
+                  <h4 className="text-xs font-bold text-muted-foreground mb-3 flex items-center gap-1.5"><User className="w-3.5 h-3.5" /> {t("d.ship.receiver")}</h4>
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2"><User className="w-4 h-4 text-primary" /> {drawerShipment.receiverName}</div>
                     <div className="flex items-center gap-2" dir="ltr"><Phone className="w-4 h-4 text-primary" /> {drawerShipment.receiverPhone}</div>
@@ -450,7 +466,7 @@ export function DashboardShipments() {
                   </div>
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-muted-foreground mb-3 flex items-center gap-1.5"><Package className="w-3.5 h-3.5" /> المرسل</h4>
+                  <h4 className="text-xs font-bold text-muted-foreground mb-3 flex items-center gap-1.5"><Package className="w-3.5 h-3.5" /> {t("d.ship.sender")}</h4>
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2"><User className="w-4 h-4 text-primary" /> {drawerShipment.senderName}</div>
                     <div className="flex items-center gap-2" dir="ltr"><Phone className="w-4 h-4 text-primary" /> {drawerShipment.senderPhone}</div>
@@ -460,33 +476,33 @@ export function DashboardShipments() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="p-3 rounded-xl bg-muted/50">
                     <MapPin className="w-4 h-4 text-primary mb-1" />
-                    <div className="text-xs text-muted-foreground">المحافظة</div>
+                    <div className="text-xs text-muted-foreground">{t("d.ship.h.governorate")}</div>
                     <div className="font-bold text-sm">{drawerShipment.governorate}</div>
                   </div>
                   <div className="p-3 rounded-xl bg-muted/50">
                     <Tag className="w-4 h-4 text-primary mb-1" />
-                    <div className="text-xs text-muted-foreground">الخدمة</div>
+                    <div className="text-xs text-muted-foreground">{t("d.ship.h.service")}</div>
                     <div className="font-bold text-sm">{drawerShipment.service}</div>
                   </div>
                   <div className="p-3 rounded-xl bg-muted/50">
                     <Scale className="w-4 h-4 text-primary mb-1" />
-                    <div className="text-xs text-muted-foreground">الوزن</div>
-                    <div className="font-bold text-sm tabular-nums">{drawerShipment.weight} كجم</div>
+                    <div className="text-xs text-muted-foreground">{t("d.ship.l.weight")}</div>
+                    <div className="font-bold text-sm tabular-nums">{drawerShipment.weight} {t("d.ship.weightUnit")}</div>
                   </div>
                   <div className="p-3 rounded-xl bg-muted/50">
                     <Banknote className="w-4 h-4 text-primary mb-1" />
-                    <div className="text-xs text-muted-foreground">السعر</div>
+                    <div className="text-xs text-muted-foreground">{t("d.ship.h.price")}</div>
                     <div className="font-bold text-sm tabular-nums">{formatEGP(drawerShipment.price)}</div>
                   </div>
                 </div>
                 <div className="p-3 rounded-xl bg-muted/50 flex items-center gap-2 text-sm">
                   <Calendar className="w-4 h-4 text-primary" />
-                  <span className="text-muted-foreground">تاريخ الإنشاء:</span>
+                  <span className="text-muted-foreground">{t("d.ship.createdAt")}</span>
                   <span className="font-semibold">{formatDateTime(drawerShipment.createdAt)}</span>
                 </div>
                 {drawerShipment.notes && (
                   <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
-                    <div className="text-xs font-bold text-amber-700 dark:text-amber-400 mb-1">ملاحظات</div>
+                    <div className="text-xs font-bold text-amber-700 dark:text-amber-400 mb-1">{t("d.ship.notesLabel")}</div>
                     <p className="text-sm">{drawerShipment.notes}</p>
                   </div>
                 )}
@@ -498,7 +514,7 @@ export function DashboardShipments() {
                   if (history.length === 0) return null;
                   return (
                     <div>
-                      <h4 className="text-xs font-bold text-muted-foreground mb-3 flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> سجل الحالة</h4>
+                      <h4 className="text-xs font-bold text-muted-foreground mb-3 flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {t("d.ship.history")}</h4>
                       <div className="relative pr-6 space-y-4">
                         <div className="absolute right-3 top-2 bottom-2 w-0.5 bg-border" />
                         {history.map((h, i) => (
@@ -516,9 +532,9 @@ export function DashboardShipments() {
 
                 <div className="flex gap-2 pt-2">
                   <Button onClick={() => { setDrawerShipment(null); openEdit(drawerShipment); }} className="flex-1 gap-2">
-                    <Pencil className="w-4 h-4" /> تعديل
+                    <Pencil className="w-4 h-4" /> {t("d.ship.edit")}
                   </Button>
-                  <Button variant="outline" onClick={() => setDrawerShipment(null)}>إغلاق</Button>
+                  <Button variant="outline" onClick={() => setDrawerShipment(null)}>{t("d.ship.close")}</Button>
                 </div>
               </div>
             </motion.div>

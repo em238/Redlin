@@ -4,22 +4,20 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Loader2, Plus, Trash2, Handshake, Eye, EyeOff, Pencil, ExternalLink, Upload, Check
+  Loader2, Plus, Trash2, Handshake, Eye, EyeOff, Pencil, ExternalLink, Upload
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle
 } from "@/components/ui/dialog";
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 import { toast } from "sonner";
 import { FileUpload } from "@/components/shared/file-upload";
-
-
+import { useT } from "@/lib/i18n";
 
 const LOGO_OPTIONS = [
   "/images/partner-1.png", "/images/partner-2.png", "/images/partner-3.png",
@@ -28,6 +26,7 @@ const LOGO_OPTIONS = [
 ];
 
 export function DashboardPartners() {
+  const { t } = useT();
   const qc = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
@@ -55,31 +54,31 @@ export function DashboardPartners() {
   };
 
   const save = async () => {
-    if (!form.name) { toast.error("الاسم مطلوب"); return; }
+    if (!form.name) { toast.error(t("d.partners.toastMissingName")); return; }
     setSaving(true);
     try {
       if (editing) {
         await apiPatch(`/api/partners/${editing.id}`, form);
-        toast.success("تم تحديث الشريك");
+        toast.success(t("d.partners.toastUpdated"));
       } else {
         await apiPost("/api/partners", form);
-        toast.success("تم إضافة الشريك");
+        toast.success(t("d.partners.toastCreated"));
       }
       setModalOpen(false);
       qc.invalidateQueries({ queryKey: ["partners-admin"] });
       qc.invalidateQueries({ queryKey: ["partners"] });
     } catch (e: any) {
-      toast.error(e.message || "خطأ");
+      toast.error(e.message || t("d.partners.toastError"));
     } finally {
       setSaving(false);
     }
   };
 
   const remove = async (id: string) => {
-    if (!confirm("حذف هذا الشريك؟")) return;
+    if (!confirm(t("d.partners.confirmDelete"))) return;
     try {
       await apiDelete(`/api/partners/${id}`);
-      toast.success("تم الحذف");
+      toast.success(t("d.partners.toastDeleted"));
       qc.invalidateQueries({ queryKey: ["partners-admin"] });
       qc.invalidateQueries({ queryKey: ["partners"] });
     } catch (e: any) { toast.error(e.message); }
@@ -104,12 +103,12 @@ export function DashboardPartners() {
               <Handshake className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h3 className="font-bold text-lg">قسم الشركاء والعملاء</h3>
-              <p className="text-sm text-muted-foreground">شعارات الشركات الظاهرة بقسم "شركاء النجاح" بالموقع</p>
+              <h3 className="font-bold text-lg">{t("d.partners.headerTitle")}</h3>
+              <p className="text-sm text-muted-foreground">{t("d.partners.headerSub")}</p>
             </div>
           </div>
           <Button onClick={openCreate} className="bg-gradient-to-r from-primary to-red-700 text-white gap-2 shrink-0">
-            <Plus className="w-4 h-4" /> إضافة شريك
+            <Plus className="w-4 h-4" /> {t("d.partners.add")}
           </Button>
         </div>
       </Card>
@@ -117,8 +116,8 @@ export function DashboardPartners() {
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4">
         {[
-          { v: partners.length, l: "إجمالي الشركاء", c: "text-gradient-red" },
-          { v: partners.filter((p: any) => p.active).length, l: "منشورة", c: "text-emerald-600" },
+          { v: partners.length, l: t("d.partners.stats.total"), c: "text-gradient-red" },
+          { v: partners.filter((p: any) => p.active).length, l: t("d.partners.stats.published"), c: "text-emerald-600" },
         ].map((s, i) => (
           <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
             <Card className="p-4 text-center">
@@ -135,8 +134,8 @@ export function DashboardPartners() {
       ) : partners.length === 0 ? (
         <Card className="p-12 border-2 border-dashed text-center border-border">
           <Handshake className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-          <p className="font-bold">لا يوجد شركاء بعد</p>
-          <p className="text-sm text-muted-foreground mt-1">اضغط "إضافة شريك" لإضافة شعارات الشركات</p>
+          <p className="font-bold">{t("d.partners.emptyTitle")}</p>
+          <p className="text-sm text-muted-foreground mt-1">{t("d.partners.emptySub")}</p>
         </Card>
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -164,7 +163,7 @@ export function DashboardPartners() {
                       <div className="text-sm font-bold text-foreground/80">{p.name}</div>
                       {!p.active && (
                         <span className="absolute top-2 left-2 px-2 py-0.5 rounded bg-zinc-800 text-white text-[10px] font-bold flex items-center gap-1">
-                          <EyeOff className="w-3 h-3" /> مخفي
+                          <EyeOff className="w-3 h-3" /> {t("d.partners.hidden")}
                         </span>
                       )}
                     </div>
@@ -176,9 +175,9 @@ export function DashboardPartners() {
                       )}
                       <div className="flex gap-1.5">
                         <Button variant="outline" size="sm" className="h-8 flex-1 gap-1" onClick={() => openEdit(p)}>
-                          <Pencil className="w-3.5 h-3.5" /> تعديل
+                          <Pencil className="w-3.5 h-3.5" /> {t("d.partners.edit")}
                         </Button>
-                        <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => toggleActive(p)} title="إظهار/إخفاء">
+                        <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => toggleActive(p)} title={t("d.partners.toggleVisibility")}>
                           {p.active ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                         </Button>
                         <Button variant="outline" size="icon" className="h-8 w-8 text-rose-600 hover:text-rose-700" onClick={() => remove(p.id)}>
@@ -200,17 +199,17 @@ export function DashboardPartners() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Upload className="w-5 h-5 text-primary" />
-              {editing ? "تعديل شريك" : "إضافة شريك جديد"}
+              {editing ? t("d.partners.modal.edit") : t("d.partners.modal.create")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-1">
-              <Label className="text-xs">اسم الشركة *</Label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="مثال: TechStore" className="h-10" />
+              <Label className="text-xs">{t("d.partners.modal.nameLabel")}</Label>
+              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t("d.partners.modal.namePlaceholder")} className="h-10" />
             </div>
 
             <FileUpload
-              label="شعار الشركة (Logo) — ارفع من جهازك"
+              label={t("d.partners.modal.logoLabel")}
               accept="image/png,image/jpeg,image/jpg,image/webp,image/gif,image/svg+xml"
               currentUrl={form.logo}
               onUploaded={(url) => setForm({ ...form, logo: url })}
@@ -219,25 +218,25 @@ export function DashboardPartners() {
             <Input
               value={form.logo || ""}
               onChange={(e) => setForm({ ...form, logo: e.target.value })}
-              placeholder="أو أدخل رابط شعار مخصص"
+              placeholder={t("d.partners.modal.logoPlaceholder")}
               className="h-9 text-xs"
               dir="ltr"
             />
 
             <div className="space-y-1">
-              <Label className="text-xs">رابط موقع الشركة (اختياري)</Label>
+              <Label className="text-xs">{t("d.partners.modal.websiteLabel")}</Label>
               <Input value={form.website || ""} onChange={(e) => setForm({ ...form, website: e.target.value })} placeholder="https://example.com" className="h-10" dir="ltr" />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label className="text-xs">الترتيب</Label>
+                <Label className="text-xs">{t("d.partners.modal.order")}</Label>
                 <Input type="number" value={form.order} onChange={(e) => setForm({ ...form, order: Number(e.target.value) })} className="h-10" />
               </div>
               <div className="flex items-end pb-1">
                 <label className="flex items-center gap-2 text-sm cursor-pointer">
                   <Switch checked={!!form.active} onCheckedChange={(v) => setForm({ ...form, active: v })} />
-                  <span>منشور</span>
+                  <span>{t("d.partners.modal.published")}</span>
                 </label>
               </div>
             </div>
@@ -245,9 +244,9 @@ export function DashboardPartners() {
             <div className="flex gap-2 pt-2">
               <Button onClick={save} disabled={saving} className="flex-1 bg-gradient-to-r from-primary to-red-700 text-white gap-2">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-                {editing ? "حفظ التعديلات" : "إضافة الشريك"}
+                {editing ? t("d.partners.modal.saveEdit") : t("d.partners.modal.saveCreate")}
               </Button>
-              <Button variant="outline" onClick={() => setModalOpen(false)}>إلغاء</Button>
+              <Button variant="outline" onClick={() => setModalOpen(false)}>{t("d.partners.modal.cancel")}</Button>
             </div>
           </div>
         </DialogContent>

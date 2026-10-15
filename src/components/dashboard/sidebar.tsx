@@ -9,29 +9,31 @@ import { Button } from "@/components/ui/button";
 import { useAppStore, DashboardSection } from "@/lib/store";
 import { apiPost } from "@/lib/api";
 import { toast } from "sonner";
-
-const NAV: { id: DashboardSection; label: string; icon: any }[] = [
-  { id: "overview", label: "نظرة عامة", icon: LayoutDashboard },
-  { id: "shipments", label: "الشحنات", icon: Package },
-  { id: "orders", label: "الطلبات", icon: ShoppingCart },
-  { id: "customers", label: "العملاء", icon: Users },
-  { id: "videos", label: "الفيديوهات", icon: Video },
-  { id: "hero-images", label: "صور الهيدر", icon: ImageIcon },
-  { id: "partners", label: "الشركاء", icon: Handshake },
-  { id: "pricing", label: "الأسعار والتغطية", icon: DollarSign },
-  { id: "messages", label: "الرسائل", icon: MessageSquare },
-  { id: "settings", label: "الإعدادات", icon: Settings },
-];
+import { useT } from "@/lib/i18n";
 
 export function DashboardSidebar() {
   const { dashboardSection, setDashboardSection, sidebarOpen, setSidebarOpen, user, setUser, setView, setAuthChecked } = useAppStore();
+  const { t } = useT();
+
+  const NAV: { id: DashboardSection; label: string; icon: any }[] = [
+    { id: "overview", label: t("d.nav.overview"), icon: LayoutDashboard },
+    { id: "shipments", label: t("d.nav.shipments"), icon: Package },
+    { id: "orders", label: t("d.nav.orders"), icon: ShoppingCart },
+    { id: "customers", label: t("d.nav.customers"), icon: Users },
+    { id: "videos", label: t("d.nav.videos"), icon: Video },
+    { id: "hero-images", label: t("d.nav.heroImages"), icon: ImageIcon },
+    { id: "partners", label: t("d.nav.partners"), icon: Handshake },
+    { id: "pricing", label: t("d.nav.pricing"), icon: DollarSign },
+    { id: "messages", label: t("d.nav.messages"), icon: MessageSquare },
+    { id: "settings", label: t("d.nav.settings"), icon: Settings },
+  ];
 
   const logout = async () => {
     try { await apiPost("/api/auth/logout"); } catch {}
     setUser(null);
     setAuthChecked(true);
     setView("public");
-    toast.success("تم تسجيل الخروج");
+    toast.success(t("d.sidebar.logoutToast"));
   };
 
   const content = (
@@ -44,7 +46,7 @@ export function DashboardSidebar() {
           </div>
           <div>
             <div className="text-lg font-black">Red<span className="text-primary">line</span></div>
-            <div className="text-[10px] text-muted-foreground">لوحة التحكم</div>
+            <div className="text-[10px] text-muted-foreground">{t("d.sidebar.brand")}</div>
           </div>
         </button>
         <Button variant="ghost" size="icon" className="lg:hidden rounded-full" onClick={() => setSidebarOpen(false)}>
@@ -94,14 +96,14 @@ export function DashboardSidebar() {
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent transition-colors"
         >
           <Globe className="w-5 h-5" />
-          عرض الموقع
+          {t("d.sidebar.viewSite")}
         </button>
         <button
           onClick={logout}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-rose-600 hover:bg-rose-500/10 transition-colors"
         >
           <LogOut className="w-5 h-5" />
-          تسجيل الخروج
+          {t("d.sidebar.logout")}
         </button>
       </div>
     </div>

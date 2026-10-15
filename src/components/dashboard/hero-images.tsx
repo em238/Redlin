@@ -4,8 +4,8 @@ import { useState, type DragEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Loader2, Plus, Trash2, ImageIcon, Upload, Eye, EyeOff, ArrowUp, ArrowDown,
-  Check, X, GripVertical, MoveUp, MoveDown
+  Loader2, Plus, Trash2, ImageIcon, Upload, Eye, EyeOff,
+  Check, MoveUp, MoveDown
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ import {
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 import { toast } from "sonner";
 import { FileUpload } from "@/components/shared/file-upload";
+import { useT } from "@/lib/i18n";
 
 const IMAGE_OPTIONS = [
   "/images/hero-truck.png", "/images/fleet.png", "/images/warehouse.png",
@@ -26,6 +27,7 @@ const IMAGE_OPTIONS = [
 ];
 
 export function DashboardHeroImages() {
+  const { t } = useT();
   const qc = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -44,26 +46,26 @@ export function DashboardHeroImages() {
   };
 
   const save = async () => {
-    if (!form.url) { toast.error("الرابط مطلوب"); return; }
+    if (!form.url) { toast.error(t("d.hero.toastMissingUrl")); return; }
     setSaving(true);
     try {
       await apiPost("/api/hero-images", form);
-      toast.success("تمت إضافة الصورة للهيدر");
+      toast.success(t("d.hero.toastAdded"));
       setModalOpen(false);
       qc.invalidateQueries({ queryKey: ["hero-images-admin"] });
       qc.invalidateQueries({ queryKey: ["hero-images"] });
     } catch (e: any) {
-      toast.error(e.message || "خطأ");
+      toast.error(e.message || t("d.hero.toastError"));
     } finally {
       setSaving(false);
     }
   };
 
   const remove = async (id: string) => {
-    if (!confirm("حذف هذه الصورة من الهيدر؟")) return;
+    if (!confirm(t("d.hero.confirmDelete"))) return;
     try {
       await apiDelete(`/api/hero-images/${id}`);
-      toast.success("تم الحذف");
+      toast.success(t("d.hero.toastDeleted"));
       qc.invalidateQueries({ queryKey: ["hero-images-admin"] });
       qc.invalidateQueries({ queryKey: ["hero-images"] });
     } catch (e: any) { toast.error(e.message); }
@@ -91,7 +93,7 @@ export function DashboardHeroImages() {
       ]);
       qc.invalidateQueries({ queryKey: ["hero-images-admin"] });
       qc.invalidateQueries({ queryKey: ["hero-images"] });
-      toast.success("تم إعادة الترتيب");
+      toast.success(t("d.hero.toastReordered"));
     } catch (e: any) { toast.error(e.message); }
   };
 
@@ -102,7 +104,7 @@ export function DashboardHeroImages() {
     const url = text.trim();
     if (url) {
       setForm((f: any) => ({ ...f, url }));
-      toast.success("تم إضافة الرابط — أكمل البيانات");
+      toast.success(t("d.hero.toastUrlAdded"));
     }
   };
 
@@ -117,12 +119,12 @@ export function DashboardHeroImages() {
               <ImageIcon className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h3 className="font-bold text-lg">صور الهيدر (Carousel)</h3>
-              <p className="text-sm text-muted-foreground">الصور الظاهرة في الـ slider بأعلى الموقع — تتبدّل تلقائياً</p>
+              <h3 className="font-bold text-lg">{t("d.hero.headerTitle")}</h3>
+              <p className="text-sm text-muted-foreground">{t("d.hero.headerSub")}</p>
             </div>
           </div>
           <Button onClick={openCreate} className="bg-gradient-to-r from-primary to-red-700 text-white gap-2 shrink-0">
-            <Plus className="w-4 h-4" /> إضافة صورة
+            <Plus className="w-4 h-4" /> {t("d.hero.add")}
           </Button>
         </div>
       </Card>
@@ -130,9 +132,9 @@ export function DashboardHeroImages() {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { v: images.length, l: "إجمالي الصور", c: "text-gradient-red" },
-          { v: images.filter((i: any) => i.active).length, l: "منشورة", c: "text-emerald-600" },
-          { v: images.filter((i: any) => !i.active).length, l: "مخفية", c: "text-zinc-500" },
+          { v: images.length, l: t("d.hero.stats.total"), c: "text-gradient-red" },
+          { v: images.filter((i: any) => i.active).length, l: t("d.hero.stats.published"), c: "text-emerald-600" },
+          { v: images.filter((i: any) => !i.active).length, l: t("d.hero.stats.hidden"), c: "text-zinc-500" },
         ].map((s, i) => (
           <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
             <Card className="p-4 text-center">
@@ -147,8 +149,8 @@ export function DashboardHeroImages() {
       {images.length === 0 && !isLoading && (
         <Card className="p-12 border-2 border-dashed text-center border-border">
           <ImageIcon className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-          <p className="font-bold">لا توجد صور في الهيدر بعد</p>
-          <p className="text-sm text-muted-foreground mt-1">اضغط "إضافة صورة" لبدء بناء الـ carousel</p>
+          <p className="font-bold">{t("d.hero.emptyTitle")}</p>
+          <p className="text-sm text-muted-foreground mt-1">{t("d.hero.emptySub")}</p>
         </Card>
       )}
 
@@ -176,29 +178,29 @@ export function DashboardHeroImages() {
                         #{i + 1}
                       </span>
                       {i === 0 && (
-                        <span className="px-2 py-0.5 rounded bg-amber-500 text-white text-[10px] font-bold">الأولى</span>
+                        <span className="px-2 py-0.5 rounded bg-amber-500 text-white text-[10px] font-bold">{t("d.hero.first")}</span>
                       )}
                     </div>
                     {!img.active && (
                       <span className="absolute top-2 left-2 px-2 py-0.5 rounded bg-zinc-800 text-white text-[10px] font-bold flex items-center gap-1">
-                        <EyeOff className="w-3 h-3" /> مخفي
+                        <EyeOff className="w-3 h-3" /> {t("d.hero.hidden")}
                       </span>
                     )}
                   </div>
                   <div className="p-4">
-                    <div className="font-bold text-sm truncate">{img.title || "بدون عنوان"}</div>
+                    <div className="font-bold text-sm truncate">{img.title || t("d.hero.untitled")}</div>
                     <div className="text-xs text-muted-foreground font-mono mt-1 truncate" dir="ltr">{img.url}</div>
                     <div className="mt-3 flex gap-1.5">
-                      <Button variant="outline" size="icon" className="h-8 w-8" disabled={i === 0} onClick={() => reorder(img, "up")} title="تحريك لأعلى">
+                      <Button variant="outline" size="icon" className="h-8 w-8" disabled={i === 0} onClick={() => reorder(img, "up")} title={t("d.hero.up")}>
                         <MoveUp className="w-3.5 h-3.5" />
                       </Button>
-                      <Button variant="outline" size="icon" className="h-8 w-8" disabled={i === images.length - 1} onClick={() => reorder(img, "down")} title="تحريك لأسفل">
+                      <Button variant="outline" size="icon" className="h-8 w-8" disabled={i === images.length - 1} onClick={() => reorder(img, "down")} title={t("d.hero.down")}>
                         <MoveDown className="w-3.5 h-3.5" />
                       </Button>
-                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => toggleActive(img)} title="إظهار/إخفاء">
+                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => toggleActive(img)} title={t("d.hero.toggleVisibility")}>
                         {img.active ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                       </Button>
-                      <Button variant="outline" size="icon" className="h-8 w-8 text-rose-600 hover:text-rose-700" onClick={() => remove(img.id)} title="حذف">
+                      <Button variant="outline" size="icon" className="h-8 w-8 text-rose-600 hover:text-rose-700" onClick={() => remove(img.id)} title={t("d.hero.delete")}>
                         <Trash2 className="w-3.5 h-3.5" />
                       </Button>
                     </div>
@@ -216,7 +218,7 @@ export function DashboardHeroImages() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Upload className="w-5 h-5 text-primary" />
-              إضافة صورة للهيدر
+              {t("d.hero.modal.title")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
@@ -228,7 +230,7 @@ export function DashboardHeroImages() {
               className={`space-y-1 rounded-xl border-2 border-dashed p-3 transition-colors ${dragOver ? "border-primary bg-primary/5" : "border-border"}`}
             >
               <Label className="text-xs flex items-center gap-1.5">
-                <ImageIcon className="w-3.5 h-3.5 text-primary" /> رابط الصورة * — اسحب رابط صورة هنا
+                <ImageIcon className="w-3.5 h-3.5 text-primary" /> {t("d.hero.modal.urlLabel")}
               </Label>
               <Input
                 value={form.url}
@@ -250,7 +252,7 @@ export function DashboardHeroImages() {
 
             {/* Upload from desktop */}
             <FileUpload
-              label="ارفع صورة من جهازك"
+              label={t("d.hero.modal.uploadLabel")}
               accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
               currentUrl={form.url}
               onUploaded={(url) => setForm({ ...form, url })}
@@ -259,7 +261,7 @@ export function DashboardHeroImages() {
 
             {/* Quick select from existing images */}
             <div className="space-y-2">
-              <Label className="text-xs">أو اختر صورة من المعرض:</Label>
+              <Label className="text-xs">{t("d.hero.modal.galleryLabel")}</Label>
               <div className="grid grid-cols-4 gap-2">
                 {IMAGE_OPTIONS.map((url) => (
                   <button
@@ -279,18 +281,18 @@ export function DashboardHeroImages() {
             </div>
 
             <div className="space-y-1">
-              <Label className="text-xs">عنوان/وصف الصورة (اختياري)</Label>
+              <Label className="text-xs">{t("d.hero.modal.titleLabel")}</Label>
               <Input
                 value={form.title || ""}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
-                placeholder="مثال: شاحنة Redline على الطريق السريع"
+                placeholder={t("d.hero.modal.titlePlaceholder")}
                 className="h-10"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label className="text-xs">الترتيب</Label>
+                <Label className="text-xs">{t("d.hero.modal.order")}</Label>
                 <Input
                   type="number"
                   value={form.order}
@@ -301,7 +303,7 @@ export function DashboardHeroImages() {
               <div className="flex items-end pb-1">
                 <label className="flex items-center gap-2 text-sm cursor-pointer">
                   <Switch checked={!!form.active} onCheckedChange={(v) => setForm({ ...form, active: v })} />
-                  <span>منشورة</span>
+                  <span>{t("d.hero.modal.published")}</span>
                 </label>
               </div>
             </div>
@@ -309,9 +311,9 @@ export function DashboardHeroImages() {
             <div className="flex gap-2 pt-2">
               <Button onClick={save} disabled={saving} className="flex-1 bg-gradient-to-r from-primary to-red-700 text-white gap-2">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-                إضافة الصورة
+                {t("d.hero.modal.save")}
               </Button>
-              <Button variant="outline" onClick={() => setModalOpen(false)}>إلغاء</Button>
+              <Button variant="outline" onClick={() => setModalOpen(false)}>{t("d.hero.modal.cancel")}</Button>
             </div>
           </div>
         </DialogContent>
