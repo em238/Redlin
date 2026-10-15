@@ -1092,3 +1092,37 @@ Stage Summary:
 - تحسينات احترافية: أيقونات إحصائيات أكبر ومتناسقة + تباين مرفوع (subtitle + marquee) + performance مظبوط (lazy loading + staleTime)
 - VLM: 9/10 برفورمنس بصري احترافي
 - 0 errors
+
+---
+Task ID: partners-images
+Agent: Orchestrator (main)
+Task: ضيف صور PNG لكل الشركاء بدون أي أيقونات
+
+Work Log:
+- ولّدت صورة PNG جديدة لـ RedSeaMart (partner-9.png) — red shopping cart logo
+- حدّثت DB: RedSeaMart بقى عنده logo = /images/partner-9.png
+- كل الـ 9 شركاء ليهم صور PNG:
+  * TechStore → partner-1.png
+  * FashionHub → partner-2.png
+  * Adel Trading → partner-3.png
+  * Nour Crafts → partner-4.png
+  * Ibrahim Group → partner-5.png
+  * MegaMart → partner-6.png
+  * QuickShip → partner-7.png
+  * GlobalTech → partner-8.png
+  * RedSeaMart → partner-9.png
+- أحدّث Partners component:
+  * شيلت الـ icon fallback بالكامل (مفيش أي `<svg>` icons للشركاء)
+  * بقى بيعرض بس `<Image>` لكل شريك (grayscale→color على hover)
+  * شيلت استيراد كل أيقونات الشركاء (Building2, Briefcase, etc.)
+- ESLint: 0 errors
+- تحقق Agent Browser:
+  * partner images: 9 ✅ (كلهم PNG <img>)
+  * لا icon fallbacks للشركاء ✅
+  * لا أخطا
+
+Stage Summary:
+- كل الـ 9 شركاء بيظهروا بصور PNG بدون أي أيقونات
+- RedSeaMart بقى عنده صورة (partner-9.png)
+- الـ Partners component شال أي icon fallback — بس صور
+- 0 errors
