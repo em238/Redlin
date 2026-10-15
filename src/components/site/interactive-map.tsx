@@ -437,27 +437,12 @@ export function InteractiveMap() {
                     </span>
                   </div>
 
-                  {/* Stats grid: base price + ETA + status */}
-                  <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
-                    <div className="rounded-xl bg-white/5 border border-white/10 px-3 py-2">
-                      <div className="text-[10px] uppercase tracking-wide text-zinc-500">{t("map.basePrice")}</div>
-                      <div className="text-sm sm:text-base font-bold text-amber-400 mt-0.5 truncate">
-                        {sel.basePrice} <span className="text-[10px] font-medium text-zinc-400">{t("map.currency")}</span>
-                      </div>
-                    </div>
-                    <div className="rounded-xl bg-white/5 border border-white/10 px-3 py-2">
-                      <div className="text-[10px] uppercase tracking-wide text-zinc-500">{t("map.eta")}</div>
-                      <div className="text-sm sm:text-base font-bold text-white mt-0.5 truncate">
-                        {sel.etaHours}<span className="text-[10px] font-medium text-zinc-400 ms-1">{t("map.etaHours")}</span>
-                      </div>
-                    </div>
-                    <div className="rounded-xl bg-white/5 border border-white/10 px-3 py-2">
-                      <div className="text-[10px] uppercase tracking-wide text-zinc-500">{t("map.status")}</div>
-                      <div className="text-sm sm:text-base font-bold text-emerald-400 mt-0.5 flex items-center gap-1 truncate">
-                        <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                        <span className="truncate">{t("map.active")}</span>
-                      </div>
-                    </div>
+                  {/* Active status pill (replaces former stats grid) */}
+                  <div className="mt-3 flex items-center">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-xs font-semibold text-emerald-400">
+                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                      {t("map.active")}
+                    </span>
                   </div>
                 </motion.div>
               ) : (
