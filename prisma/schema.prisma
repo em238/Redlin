@@ -97,6 +97,7 @@ model Testimonial {
   rating    Int      @default(5)
   avatar    String?
   active    Boolean  @default(true)
+  status    String   @default("approved") // approved | pending | rejected
   createdAt DateTime @default(now())
 }
 

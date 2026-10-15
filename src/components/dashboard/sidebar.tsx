@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Package, ShoppingCart, Users, Video, DollarSign,
-  MessageSquare, Settings, LogOut, X, Globe, ChevronLeft, ImageIcon, Handshake
+  MessageSquare, Settings, LogOut, X, Globe, ChevronLeft, ImageIcon, Handshake, Star
 } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,7 @@ export function DashboardSidebar() {
     { id: "partners", label: t("d.nav.partners"), icon: Handshake },
     { id: "pricing", label: t("d.nav.pricing"), icon: DollarSign },
     { id: "messages", label: t("d.nav.messages"), icon: MessageSquare },
+    { id: "reviews", label: t("d.nav.reviews"), icon: Star },
     { id: "settings", label: t("d.nav.settings"), icon: Settings },
   ];
 

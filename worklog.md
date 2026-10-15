@@ -1313,3 +1313,15 @@ VERIFICATION (Agent Browser):
   - Desktop 1440px: scrollWidth=1440, clientWidth=1440, overflow=false ✅
   - VLM Mobile: "لا يوجد horizontal scroll ولا white gap. الأقسام مظبوطة. 9/10"
   - ESLint: 0 errors
+
+---
+Task ID: 4
+Agent: general-purpose
+Task: Add "reviews" to DashboardSection store type + add i18n keys for review form and moderation module
+
+Work Log:
+- Updated src/lib/store.ts DashboardSection union to include "reviews"
+- Added 30+ i18n keys to both Arabic and English dictionaries in src/lib/i18n.ts
+
+Stage Summary:
+- Store type updated, i18n keys added for review form + dashboard moderation

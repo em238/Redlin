@@ -16,6 +16,7 @@ import { DashboardHeroImages } from "./hero-images";
 import { DashboardPartners } from "./partners";
 import { DashboardPricing } from "./pricing";
 import { DashboardMessages } from "./messages";
+import { DashboardReviews } from "./reviews";
 import { DashboardSettings } from "./settings";
 import { Loader2 } from "lucide-react";
 import { useT } from "@/lib/i18n";
@@ -68,6 +69,7 @@ export function DashboardApp() {
     partners: <DashboardPartners />,
     pricing: <DashboardPricing />,
     messages: <DashboardMessages />,
+    reviews: <DashboardReviews />,
     settings: <DashboardSettings />,
   };
 

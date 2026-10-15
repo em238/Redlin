@@ -11,7 +11,8 @@ export type DashboardSection =
   | "partners"
   | "pricing"
   | "messages"
-  | "settings";
+  | "settings"
+  | "reviews";
 
 interface AppState {
   view: View;

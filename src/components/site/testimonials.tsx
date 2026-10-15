@@ -3,10 +3,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Star, Quote, ChevronLeft, ChevronRight } from "lucide-react";
+import { Star, Quote, ChevronLeft, ChevronRight, PenLine } from "lucide-react";
 import { apiGet } from "@/lib/api";
 import { useT } from "@/lib/i18n";
 import { SectionHeading } from "@/components/shared/section-heading";
+import { ReviewModal } from "@/components/shared/review-modal";
+import { useQueryClient } from "@tanstack/react-query";
 
 const FALLBACK = [
   { name: "Ahmed Mansour", role: "صاحب متجر", company: "TechStore", content: "خدمة ممتازة وسريعة!", rating: 5 },
@@ -24,6 +26,7 @@ const TEST_EN: Record<string, { role: string; content: string }> = {
 
 export function Testimonials() {
   const { t, isAr } = useT();
+  const queryClient = useQueryClient();
   const { data } = useQuery({
     queryKey: ["site-testimonials"],
     queryFn: () => apiGet<{ testimonials: typeof FALLBACK }>("/api/site"),
@@ -31,6 +34,7 @@ export function Testimonials() {
   const items = data?.testimonials ?? FALLBACK;
   const [index, setIndex] = useState(0);
   const [auto, setAuto] = useState(true);
+  const [reviewOpen, setReviewOpen] = useState(false);
 
   const next = useCallback(() => setIndex((i) => (i + 1) % Math.max(items.length, 1)), [items.length]);
   const prev = () => setIndex((i) => (i - 1 + items.length) % Math.max(items.length, 1));
@@ -55,6 +59,19 @@ export function Testimonials() {
           title={t("test.title")}
           subtitle={t("test.subtitle")}
         />
+
+        {/* Leave a Review button */}
+        <div className="text-center mb-8">
+          <button
+            onClick={() => setReviewOpen(true)}
+            className="group inline-flex items-center gap-2 h-11 px-6 rounded-xl bg-gradient-to-r from-primary to-red-700 hover:from-red-600 hover:to-red-800 text-white text-sm font-semibold shadow-lg shadow-primary/25 hover:shadow-primary/35 transition-all hover:-translate-y-0.5"
+          >
+            <PenLine className="w-4 h-4" />
+            {t("review.leaveReview")}
+          </button>
+        </div>
+
+        <ReviewModal open={reviewOpen} onClose={() => { setReviewOpen(false); queryClient.invalidateQueries({ queryKey: ["site-testimonials"] }); }} />
 
         <div className="max-w-4xl mx-auto" onMouseEnter={() => setAuto(false)} onMouseLeave={() => setAuto(true)}>
           <div className="relative">
