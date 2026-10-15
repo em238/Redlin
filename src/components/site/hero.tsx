@@ -73,7 +73,7 @@ export function Hero() {
   return (
     <section
       id="home"
-      className="relative min-h-[100svh] flex items-center overflow-hidden pt-20 bg-zinc-950"
+      className="relative min-h-[100svh] flex flex-col overflow-hidden pt-20 bg-zinc-950"
       onMouseEnter={() => setHoverPaused(true)}
       onMouseLeave={() => setHoverPaused(false)}
     >
@@ -101,16 +101,16 @@ export function Hero() {
           </AnimatePresence>
           <div className="absolute inset-0 bg-gradient-to-l from-black/80 via-black/35 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
-          {/* Rich red ambient tint */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-transparent to-amber-900/10 mix-blend-overlay" />
         </motion.div>
       </div>
 
       {/* Aurora glows */}
-      <div className="absolute top-1/3 left-0 w-[28rem] h-[28rem] bg-primary/25 rounded-full blur-[140px] -z-0 animate-aurora" />
-      <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-amber-500/15 rounded-full blur-[120px] -z-0 animate-aurora" style={{ animationDelay: "4s" }} />
+      <div className="absolute top-1/3 left-0 w-[28rem] h-[28rem] bg-primary/25 rounded-full blur-[140px] -z-0 animate-aurora pointer-events-none" />
+      <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-amber-500/15 rounded-full blur-[120px] -z-0 animate-aurora pointer-events-none" style={{ animationDelay: "4s" }} />
 
-      <motion.div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20 relative" style={{ y: yContent, opacity }}>
+      {/* Main content — flex-1 so it takes available space, pushes controls down */}
+      <motion.div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-20 relative flex-1 flex flex-col justify-center z-10" style={{ y: yContent, opacity }}>
         <div className="max-w-3xl">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -181,14 +181,14 @@ export function Hero() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="mt-9 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap gap-x-6 text-white/70"
+            className="mt-8 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap gap-x-6 text-white/70 relative z-10"
           >
             {[
               { icon: Zap, text: t("hero.feat1") },
               { icon: ShieldCheck, text: t("hero.feat2") },
               { icon: MapPin, text: t("hero.feat3") },
             ].map((f, i) => (
-              <div key={i} className="flex items-center gap-1.5 text-sm">
+              <div key={i} className="flex items-center gap-1.5 text-xs sm:text-sm">
                 <f.icon className="w-[18px] h-[18px] text-amber-400 shrink-0" />
                 {f.text}
               </div>
@@ -197,22 +197,23 @@ export function Hero() {
         </div>
       </motion.div>
 
-      {/* Image carousel controls — full-width progress bar on top + arrows with play/pause in the middle */}
-      {total > 1 && (
-        <>
-          {/* Full-width loading progress bar just ABOVE the controls */}
-          <div className="absolute bottom-[104px] inset-x-0 h-[3px] bg-white/10 z-20">
-            <motion.div
-              key={idx + (paused ? "-p" : "-r")}
-              initial={{ width: paused ? "100%" : "0%" }}
-              animate={{ width: paused ? "100%" : "100%" }}
-              transition={{ duration: paused ? 0 : 5, ease: "linear" }}
-              className="h-full bg-gradient-to-r from-primary to-amber-400"
-            />
-          </div>
-          {/* Centered controls */}
-          <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20" dir="ltr">
-            <div className="flex items-center justify-center text-white">
+      {/* Bottom zone — controls + marquee in normal flow (not absolute) */}
+      <div className="relative z-20 shrink-0">
+        {/* Carousel controls — progress bar + arrows + play/pause */}
+        {total > 1 && (
+          <div className="relative" dir="ltr">
+            {/* Progress bar */}
+            <div className="h-[3px] bg-white/10">
+              <motion.div
+                key={idx + (paused ? "-p" : "-r")}
+                initial={{ width: paused ? "100%" : "0%" }}
+                animate={{ width: paused ? "100%" : "100%" }}
+                transition={{ duration: paused ? 0 : 5, ease: "linear" }}
+                className="h-full bg-gradient-to-r from-primary to-amber-400"
+              />
+            </div>
+            {/* Controls */}
+            <div className="flex items-center justify-center text-white py-2">
               <button
                 onClick={prev}
                 aria-label={isAr ? "السابق" : "Previous"}
@@ -238,26 +239,24 @@ export function Hero() {
               </button>
             </div>
           </div>
-        </>
-      )}
+        )}
 
-      {/* Marquee — identical twin-track infinite scroll for both EN & AR (dir=ltr to isolate from RTL) */}
-      <div className="absolute bottom-0 inset-x-0 border-t border-white/10 bg-black/40 backdrop-blur-md py-3 overflow-hidden" dir="ltr">
-        <div className="flex animate-marquee whitespace-nowrap will-change-transform">
-          {/* Track 1 */}
-          {(isAr ? GOV_MARQUEE_AR : GOV_MARQUEE_EN).map((g, i) => (
-            <span key={`t1-${i}`} className="mx-4 text-sm text-white/80 font-medium inline-flex items-center gap-1.5 shrink-0 leading-none">
-              <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
-              {g}
-            </span>
-          ))}
-          {/* Track 2 — identical clone for seamless reset */}
-          {(isAr ? GOV_MARQUEE_AR : GOV_MARQUEE_EN).map((g, i) => (
-            <span key={`t2-${i}`} className="mx-4 text-sm text-white/80 font-medium inline-flex items-center gap-1.5 shrink-0 leading-none" aria-hidden="true">
-              <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
-              {g}
-            </span>
-          ))}
+        {/* Marquee — twin-track infinite scroll */}
+        <div className="border-t border-white/10 bg-black/40 backdrop-blur-md py-3 overflow-hidden" dir="ltr">
+          <div className="flex animate-marquee whitespace-nowrap will-change-transform">
+            {(isAr ? GOV_MARQUEE_AR : GOV_MARQUEE_EN).map((g, i) => (
+              <span key={`t1-${i}`} className="mx-4 text-sm text-white/80 font-medium inline-flex items-center gap-1.5 shrink-0 leading-none">
+                <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
+                {g}
+              </span>
+            ))}
+            {(isAr ? GOV_MARQUEE_AR : GOV_MARQUEE_EN).map((g, i) => (
+              <span key={`t2-${i}`} className="mx-4 text-sm text-white/80 font-medium inline-flex items-center gap-1.5 shrink-0 leading-none" aria-hidden="true">
+                <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
+                {g}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
     </section>
