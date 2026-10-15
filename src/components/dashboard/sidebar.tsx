@@ -2,9 +2,10 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Truck, LayoutDashboard, Package, ShoppingCart, Users, Video, DollarSign,
+  LayoutDashboard, Package, ShoppingCart, Users, Video, DollarSign,
   MessageSquare, Settings, LogOut, X, Globe, ChevronLeft, ImageIcon, Handshake
 } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useAppStore, DashboardSection } from "@/lib/store";
 import { apiPost } from "@/lib/api";
@@ -40,14 +41,14 @@ export function DashboardSidebar() {
     <div className="flex flex-col h-full bg-sidebar text-sidebar-foreground">
       {/* Logo */}
       <div className="flex items-center justify-between p-5 border-b border-sidebar-border">
-        <button onClick={() => setView("public")} className="flex items-center gap-2.5 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-red-700 flex items-center justify-center shadow-lg shadow-primary/30 group-hover:scale-105 transition-transform">
-            <Truck className="w-5 h-5 text-white" strokeWidth={2.5} />
-          </div>
-          <div>
-            <div className="text-lg font-black">Red<span className="text-primary">line</span></div>
-            <div className="text-[10px] text-muted-foreground">{t("d.sidebar.brand")}</div>
-          </div>
+        <button onClick={() => setView("public")} className="flex items-center group focus:outline-none">
+          <Image
+            src="/redline-transport-logo.png"
+            alt="RedLine Transport"
+            width={600}
+            height={257}
+            className="h-9 w-auto object-contain transition-transform group-hover:scale-105 dark:[filter:invert(1)_hue-rotate(180deg)]"
+          />
         </button>
         <Button variant="ghost" size="icon" className="lg:hidden rounded-full" onClick={() => setSidebarOpen(false)}>
           <X className="w-5 h-5" />

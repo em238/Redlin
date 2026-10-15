@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Truck } from "lucide-react";
+import Image from "next/image";
 
 /**
  * Cinematic page-load reveal:
@@ -63,34 +63,28 @@ export function PageLoadReveal() {
             className="absolute inset-0 bg-zinc-950 origin-top"
           >
             {/* Centered brand logo */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-6">
               <motion.div
                 initial={{ scale: 0.6, opacity: 0, rotate: -8 }}
                 animate={{ scale: 1, opacity: 1, rotate: 0 }}
                 transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-red-700 flex items-center justify-center shadow-2xl shadow-primary/40 ring-4 ring-primary/20"
+                className="px-6"
               >
-                <Truck className="w-8 h-8 text-primary-foreground" strokeWidth={2.4} />
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.25 }}
-                className="text-center"
-              >
-                <div className="text-2xl font-black tracking-tight text-white">
-                  Red<span className="text-primary">line</span>
-                </div>
-                <div className="mt-1 text-[11px] font-medium tracking-wider uppercase text-white/50">
-                  Egypt&apos;s Premier Shipping
-                </div>
+                <Image
+                  src="/redline-transport-logo.png"
+                  alt="RedLine Transport"
+                  width={600}
+                  height={257}
+                  priority
+                  className="h-16 sm:h-20 w-auto object-contain [filter:invert(1)_hue-rotate(180deg)] drop-shadow-2xl"
+                />
               </motion.div>
               {/* Loading bar */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
-                className="mt-2 w-40 h-0.5 bg-white/10 overflow-hidden rounded-full"
+                className="w-40 h-0.5 bg-white/10 overflow-hidden rounded-full"
               >
                 <motion.div
                   initial={{ x: "-100%" }}

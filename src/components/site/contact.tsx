@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { MapPin, Phone, Mail, Clock, Send, Loader2, Truck, MessageSquare, CheckCircle2 } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Send, Loader2, MessageSquare, CheckCircle2 } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -70,11 +71,14 @@ export function Contact() {
             <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl animate-aurora" />
             <div className="absolute bottom-0 left-0 w-40 h-40 bg-amber-500/20 rounded-full blur-3xl" />
             <div className="relative">
-              <div className="flex items-center gap-2 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-                  <Truck className="w-5 h-5" />
-                </div>
-                <span className="text-xl font-black">Redline</span>
+              <div className="mb-6">
+                <Image
+                  src="/redline-transport-logo.png"
+                  alt="RedLine Transport"
+                  width={600}
+                  height={257}
+                  className="h-10 w-auto object-contain [filter:invert(1)_hue-rotate(180deg)]"
+                />
               </div>
               <h3 className="text-2xl font-bold mb-2">{t("contact.direct")}</h3>
               <p className="text-white/80 text-sm mb-8">

@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
-import { Menu, X, Truck, LayoutDashboard, Moon, Sun, Globe } from "lucide-react";
+import { Menu, X, LayoutDashboard, Moon, Sun, Globe } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/store";
 import { useScrollSpy } from "@/hooks/use-scroll-spy";
@@ -52,17 +53,24 @@ export function Navbar() {
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <button onClick={() => go("#home")} className="flex items-center gap-2.5 group">
-              <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center shadow-soft group-hover:scale-105 transition-transform">
-                <Truck className="w-[18px] h-[18px] text-primary-foreground" strokeWidth={2.4} />
-              </div>
-              <div className="flex flex-col leading-none">
-                <span className={`text-lg font-bold tracking-tight transition-colors ${scrolled ? "text-foreground" : "text-white"}`}>
-                  Red<span className="text-primary">line</span>
-                </span>
-                <span className={`text-[10px] font-medium mt-0.5 transition-colors ${scrolled ? "text-muted-foreground" : "text-white/60"}`}>{t("nav.tagline")}</span>
-              </div>
+            {/* Logo — RedLine transport official logo */}
+            <button
+              onClick={() => go("#home")}
+              className="flex items-center group focus:outline-none"
+              aria-label="RedLine Transport"
+            >
+              <Image
+                src="/redline-transport-logo.png"
+                alt="RedLine Transport"
+                width={600}
+                height={257}
+                priority
+                className={`h-8 sm:h-10 w-auto object-contain transition-transform group-hover:scale-105 ${
+                  !scrolled || theme === "dark"
+                    ? "[filter:invert(1)_hue-rotate(180deg)]"
+                    : ""
+                }`}
+              />
             </button>
 
             {/* Desktop nav — clean, minimal */}

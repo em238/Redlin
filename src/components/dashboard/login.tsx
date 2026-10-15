@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { Truck, Lock, Mail, ArrowLeft, ArrowRight, Loader2, ShieldCheck, LayoutDashboard } from "lucide-react";
+import { Lock, Mail, ArrowLeft, ArrowRight, Loader2, ShieldCheck, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,13 +47,13 @@ export function DashboardLogin() {
         <div className="absolute inset-0 bg-gradient-to-l from-zinc-950 via-zinc-950/70 to-transparent" />
         <div className="relative z-10 flex flex-col justify-between p-12 text-white w-full">
           <div className="flex items-center gap-2.5">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-red-700 flex items-center justify-center shadow-lg shadow-primary/30">
-              <Truck className="w-6 h-6 text-white" strokeWidth={2.5} />
-            </div>
-            <div>
-              <div className="text-2xl font-black">Red<span className="text-primary">line</span></div>
-              <div className="text-[11px] text-zinc-400">{t("d.login.adminPanel")}</div>
-            </div>
+            <Image
+              src="/redline-transport-logo.png"
+              alt="RedLine Transport"
+              width={600}
+              height={257}
+              className="h-10 w-auto object-contain [filter:invert(1)_hue-rotate(180deg)]"
+            />
           </div>
 
           <div className="max-w-md">
@@ -86,10 +86,13 @@ export function DashboardLogin() {
           className="w-full max-w-md"
         >
           <div className="lg:hidden flex items-center gap-2.5 mb-8 justify-center">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-red-700 flex items-center justify-center shadow-lg shadow-primary/30">
-              <Truck className="w-6 h-6 text-white" strokeWidth={2.5} />
-            </div>
-            <div className="text-2xl font-black">Red<span className="text-primary">line</span></div>
+            <Image
+              src="/redline-transport-logo.png"
+              alt="RedLine Transport"
+              width={600}
+              height={257}
+              className="h-10 w-auto object-contain dark:[filter:invert(1)_hue-rotate(180deg)]"
+            />
           </div>
 
           <div className="flex items-center gap-2 mb-2">
