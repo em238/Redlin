@@ -5,7 +5,6 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { ShieldCheck, Zap, Headphones, Banknote, MapPinned, BarChart3 } from "lucide-react";
 import { useT } from "@/lib/i18n";
-import { SectionHeading } from "@/components/shared/section-heading";
 import { StaggerGroup, StaggerItem } from "@/components/shared/section-reveal";
 
 const FEATURES_AR = [
@@ -32,72 +31,104 @@ export function About() {
   const y1 = useTransform(scrollYProgress, [0, 1], [40, -40]);
   const y2 = useTransform(scrollYProgress, [0, 1], [-30, 30]);
   const FEATURES = isAr ? FEATURES_AR : FEATURES_EN;
+  const textAlign = isAr ? "text-right items-end" : "text-left items-start";
 
   return (
-    <section id="about" className="py-14 sm:py-24 lg:py-28">
+    <section id="about" className="py-14 sm:py-24 lg:py-28 overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Images with parallax */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          {/* Left Column — Media */}
           <motion.div
             ref={ref}
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="relative"
+            className="relative w-full"
           >
-            <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl">
+            {/* Main warehouse image */}
+            <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-xl w-full">
               <Image src="/images/warehouse.png" alt="Redline warehouses" fill sizes="(max-width:1024px) 100vw, 540px" className="object-cover" />
             </div>
-            {/* Overlapping images — hidden on mobile to avoid overlap */}
-            <motion.div style={{ y: y2 }} className="hidden sm:block absolute -bottom-8 left-8 w-2/3 aspect-video rounded-2xl overflow-hidden shadow-2xl ring-4 ring-background">
-              <Image src="/images/operations.png" alt="Operations center" fill sizes="360px" className="object-cover" />
+            {/* Overlapping operations image — hidden on mobile, safely anchored on desktop */}
+            <motion.div
+              style={{ y: y2 }}
+              className="hidden sm:block absolute -bottom-8 left-8 w-1/2 max-w-[280px] aspect-video rounded-2xl overflow-hidden shadow-2xl ring-4 ring-background"
+            >
+              <Image src="/images/operations.png" alt="Operations center" fill sizes="280px" className="object-cover" />
             </motion.div>
+            {/* +15 Years badge — anchored top-right inside parent */}
             <motion.div
               style={{ y: y1 }}
-              className="hidden sm:block absolute -top-6 -right-6 glass rounded-2xl border border-border/60 px-5 py-4 shadow-xl"
+              className="hidden sm:block absolute top-6 end-6 glass rounded-2xl border border-border/60 px-5 py-4 shadow-xl"
             >
               <div className="text-3xl font-black text-gradient-red">+15</div>
               <div className="text-xs text-muted-foreground font-medium">{t("about.exp")}</div>
             </motion.div>
           </motion.div>
 
-          {/* Content */}
-          <div>
-            <SectionHeading
-              align="right"
-              eyebrow={t("about.eyebrow")}
-              title={
-                <>
-                  {t("about.title").split("Redline")[0]}
-                  <span className="text-gradient-red">Redline</span>
-                  {t("about.title").split("Redline")[1]}
-                </>
-              }
-            />
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
+          {/* Right Column — Content */}
+          <div className={`flex flex-col ${textAlign}`}>
+            {/* 1. Pill Badge */}
+            <motion.span
+              initial={{ opacity: 0, y: 8 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-muted-foreground text-lg leading-relaxed -mt-6"
+              transition={{ duration: 0.4 }}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-l from-primary/10 via-primary/8 to-amber-500/10 text-primary text-xs font-semibold mb-4 tracking-wide border border-primary/15 self-start"
+            >
+              <span className="w-1 h-1 rounded-full bg-gradient-to-r from-primary to-amber-500" />
+              {t("about.eyebrow")}
+            </motion.span>
+
+            {/* 2. Main Heading */}
+            <motion.h2
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight"
+            >
+              {t("about.title").split("Redline")[0]}
+              <span className="text-gradient-red">Redline</span>
+              {t("about.title").split("Redline")[1]}
+            </motion.h2>
+
+            {/* Decorative divider */}
+            <motion.div
+              initial={{ opacity: 0, scaleX: 0 }}
+              whileInView={{ opacity: 1, scaleX: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.15 }}
+              className="h-px w-16 divider-gradient mt-5 self-start"
+            />
+
+            {/* 3. Paragraphs */}
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="mt-4 text-muted-foreground text-base sm:text-lg leading-relaxed"
             >
               {t("about.p1")}
             </motion.p>
             <motion.p
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="mt-3 text-muted-foreground leading-relaxed"
+              transition={{ duration: 0.5, delay: 0.15 }}
+              className="mt-4 text-muted-foreground leading-relaxed"
             >
               {t("about.p2")}
             </motion.p>
 
-            <StaggerGroup className="mt-8 grid sm:grid-cols-2 gap-4" stagger={0.06}>
+            {/* 4. Features Grid */}
+            <StaggerGroup className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 pt-4" stagger={0.06}>
               {FEATURES.map((f, i) => (
                 <StaggerItem key={i}>
                   <div className="flex gap-3 p-3 rounded-xl hover:bg-muted/40 transition-colors">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center shrink-0 icon-gold-ring">
                       <f.icon className="w-5 h-5 text-primary" />
                     </div>
                     <div>
