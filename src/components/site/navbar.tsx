@@ -53,23 +53,19 @@ export function Navbar() {
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Logo — RedLine transport official logo (clean, no filters) */}
+            {/* Logo — RedLine transport official logo (switches light/dark variant by background) */}
             <button
               onClick={() => go("#home")}
               className="flex items-center shrink-0 group focus:outline-none"
               aria-label="RedLine Transport"
             >
               <Image
-                src="/redline-transport-logo.png"
+                src={!scrolled || theme === "dark" ? "/redline-transport-white.png" : "/redline-transport-logo.png"}
                 alt="RedLine Transport"
                 width={1200}
                 height={514}
                 priority
-                className={`h-10 sm:h-12 w-auto max-w-none object-contain transition-transform group-hover:scale-105 ${
-                  !scrolled || theme === "dark"
-                    ? "drop-shadow-[0_1px_2px_rgba(255,255,255,0.15)]"
-                    : ""
-                }`}
+                className="h-10 sm:h-12 w-auto max-w-none object-contain transition-transform group-hover:scale-105"
               />
             </button>
 

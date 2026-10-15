@@ -53,11 +53,11 @@ export function Footer() {
           <div className="lg:col-span-3">
             <div className="mb-5">
               <Image
-                src="/redline-transport-logo.png"
+                src="/redline-transport-white.png"
                 alt="RedLine Transport"
                 width={1200}
                 height={514}
-                className="h-10 w-auto max-w-none object-contain drop-shadow-[0_1px_2px_rgba(255,255,255,0.15)]"
+                className="h-10 w-auto max-w-none object-contain"
               />
             </div>
             <p className="text-sm text-zinc-400 leading-relaxed max-w-sm">
