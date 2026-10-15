@@ -1246,3 +1246,26 @@ Stage Summary:
 - 14 مكون dashboard بيستخدموا useT() + ~270 مفتاح ترجمة
 - VLM: لا يوجد نص عربي مرئي في الإنجليزي ✅
 - 0 errors
+
+---
+Task ID: mobile-overlap-fix
+Agent: Orchestrator (main)
+Task: إصلاح تداخل الأيقونات والصور والنصوص على الموبايل
+
+Work Log:
+- VLM حلل 5 صور موبايل: أرقام متداخلة مع أيقونات، صور About متداخلة، HUD خريطة متزحم، نص فيديو يتداخل مع play icon، نصوص أسفل الهيدر متداخلة
+- Services: خفّيت الـ number watermark (01-06) على الموبايل (hidden sm:block) — مش هيتداخل مع الأيقونة
+- About: خفّيت الصور المتداخلة (operations + badge) على الموبايل (hidden sm:block) — بس الصورة الرئيسية بتصير
+- Map HUD: flex-col على الموبايل (stacked) + text-xs/text-[11px] + truncate + shrink-0 على الأيقونة
+- Videos: صغّرت play icon على الموبايل (w-16 h-16 → w-7 h-7) + صغّرت العنوان (text-2xl→text-lg) + padding (p-6→p-4)
+- Hero: زوّدت gap بين mini-features على الموبايل (gap-2→gap-2.5)
+- ESLint: 0 errors
+- تحقق Agent Browser + VLM على موبايل 375px:
+  * "الأرقام مظبوطة ومفصولة، صور About مفيش تداخل، نصوص الفيديو مظبوطة، HUD متناسق، الريسبونزيف جيد جداً"
+  * التقييم: 8/10
+  * لا أخطa
+
+Stage Summary:
+- أصلحت كل مشاكل التداخل على الموبايل: أرقام الخدمات، صور About، HUD الخريطة، play icon الفيديو، نصوص الهيدر
+- VLM: 8/10 موبايل مظبوط بدون تداخل
+- 0 errors

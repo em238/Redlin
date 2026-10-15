@@ -135,12 +135,12 @@ export function InteractiveMap() {
             className="relative rounded-3xl bg-black border border-primary/20 shadow-2xl shadow-primary/10 overflow-hidden"
           >
             {/* HUD header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-zinc-950/80">
-              <div className="flex items-center gap-2 text-sm text-white">
-                <Radio className="w-4 h-4 text-primary animate-slow-pulse" />
-                <span className="font-bold">{t("map.hud")}</span>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 px-3 sm:px-4 py-2.5 sm:py-3 border-b border-white/10 bg-zinc-950/80">
+              <div className="flex items-center gap-2 text-[11px] sm:text-sm text-white">
+                <Radio className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary animate-slow-pulse shrink-0" />
+                <span className="font-bold truncate">{t("map.hud")}</span>
               </div>
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-400">
+              <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-semibold text-amber-400">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />

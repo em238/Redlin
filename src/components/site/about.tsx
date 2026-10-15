@@ -47,14 +47,15 @@ export function About() {
             className="relative"
           >
             <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl">
-              <Image src="/images/warehouse.png" alt="مستودعات Redline" fill sizes="(max-width:1024px) 100vw, 540px" className="object-cover" />
+              <Image src="/images/warehouse.png" alt="Redline warehouses" fill sizes="(max-width:1024px) 100vw, 540px" className="object-cover" />
             </div>
-            <motion.div style={{ y: y2 }} className="absolute -bottom-8 -left-4 sm:left-8 w-2/3 aspect-video rounded-2xl overflow-hidden shadow-2xl ring-4 ring-background">
-              <Image src="/images/operations.png" alt="مركز العمليات" fill sizes="360px" className="object-cover" />
+            {/* Overlapping images — hidden on mobile to avoid overlap */}
+            <motion.div style={{ y: y2 }} className="hidden sm:block absolute -bottom-8 left-8 w-2/3 aspect-video rounded-2xl overflow-hidden shadow-2xl ring-4 ring-background">
+              <Image src="/images/operations.png" alt="Operations center" fill sizes="360px" className="object-cover" />
             </motion.div>
             <motion.div
               style={{ y: y1 }}
-              className="absolute -top-6 -right-2 sm:-right-6 glass rounded-2xl border border-border/60 px-5 py-4 shadow-xl"
+              className="hidden sm:block absolute -top-6 -right-6 glass rounded-2xl border border-border/60 px-5 py-4 shadow-xl"
             >
               <div className="text-3xl font-black text-gradient-red">+15</div>
               <div className="text-xs text-muted-foreground font-medium">{t("about.exp")}</div>

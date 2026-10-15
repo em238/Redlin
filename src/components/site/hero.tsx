@@ -175,7 +175,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="mt-9 flex flex-col gap-2 sm:flex-row sm:flex-wrap gap-x-6 text-white/70"
+            className="mt-9 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap gap-x-6 text-white/70"
           >
             {[
               { icon: Zap, text: t("hero.feat1") },

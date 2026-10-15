@@ -113,15 +113,14 @@ export function VideoSection() {
               <div className="absolute inset-0 flex items-center justify-center">
                 <motion.div
                   whileHover={{ scale: 1.1 }}
-                  className="w-20 h-20 rounded-full bg-white/95 flex items-center justify-center shadow-2xl"
+                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/95 flex items-center justify-center shadow-2xl"
                 >
-                  <Play className="w-9 h-9 text-primary ml-1" fill="currentColor" />
+                  <Play className="w-7 h-7 sm:w-9 sm:h-9 text-primary ml-1" fill="currentColor" />
                 </motion.div>
-                <div className="absolute inset-0 rounded-full border-2 border-white/30 animate-slow-pulse" style={{ width: 96, height: 96, margin: "auto" }} />
               </div>
-              <div className="absolute bottom-0 inset-x-0 p-6 text-right">
-                <span className="inline-block px-2 py-0.5 rounded bg-primary text-white text-xs font-bold mb-2">{isAr ? "المميز" : "Featured"}</span>
-                <h3 className="text-2xl sm:text-3xl font-black text-white">{isAr ? featured.title : (VIDEO_EN[featured.title]?.title || featured.title)}</h3>
+              <div className="absolute bottom-0 inset-x-0 p-4 sm:p-6 text-right">
+                <span className="inline-block px-2 py-0.5 rounded bg-primary text-white text-[10px] sm:text-xs font-bold mb-2">{isAr ? "المميز" : "Featured"}</span>
+                <h3 className="text-lg sm:text-2xl lg:text-3xl font-black text-white">{isAr ? featured.title : (VIDEO_EN[featured.title]?.title || featured.title)}</h3>
                 <p className="mt-1 text-white/75 text-sm max-w-xl">{isAr ? featured.description : (VIDEO_EN[featured.title]?.desc || featured.description)}</p>
               </div>
             </motion.button>

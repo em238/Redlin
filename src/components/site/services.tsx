@@ -61,8 +61,8 @@ export function Services() {
             return (
               <StaggerItem key={s.name}>
                 <div className="card-premium shine rounded-2xl border border-border/60 bg-card shadow-soft p-6 sm:p-7 h-full group relative overflow-hidden">
-                  {/* Big faded number watermark */}
-                  <span className="absolute top-4 left-5 text-6xl font-black text-primary/[0.06] leading-none select-none pointer-events-none">
+                  {/* Big faded number watermark — hidden on mobile to avoid overlap */}
+                  <span className="hidden sm:block absolute top-4 left-5 text-6xl font-black text-primary/[0.06] leading-none select-none pointer-events-none">
                     {String(idx + 1).padStart(2, "0")}
                   </span>
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/15 via-primary/8 to-amber-500/10 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform icon-gold-ring relative">
