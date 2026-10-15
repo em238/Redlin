@@ -74,6 +74,15 @@ export const MESSAGES: Record<Locale, Record<string, string>> = {
     "map.covered": "محافظة مغطاة",
     "map.delivery": "تسليم في الوقت",
     "map.quicklist": "قائمة المحافظات",
+    "map.selectGov": "اختر محافظة لعرض التفاصيل",
+    "map.selectGovHint": "اضغط على أي نقطة على الخريطة أو اختر من القائمة بالأسفل",
+    "map.zone": "المنطقة",
+    "map.basePrice": "السعر الأساسي",
+    "map.eta": "وقت التوصيل",
+    "map.status": "الحالة",
+    "map.networkHealth": "صحة الشبكة",
+    "map.etaHours": "ساعة",
+    "map.currency": "ج.م",
 
     // Videos
     "videos.eyebrow": "معرض الفيديو",
@@ -546,6 +555,15 @@ export const MESSAGES: Record<Locale, Record<string, string>> = {
     "map.covered": "Governorates covered",
     "map.delivery": "On-time delivery",
     "map.quicklist": "Governorates list",
+    "map.selectGov": "Select a governorate to view stats",
+    "map.selectGovHint": "Tap any point on the map or pick from the list below",
+    "map.zone": "Zone",
+    "map.basePrice": "Base Price",
+    "map.eta": "Delivery Time",
+    "map.status": "Status",
+    "map.networkHealth": "Network Health",
+    "map.etaHours": "hrs",
+    "map.currency": "EGP",
 
     // Videos
     "videos.eyebrow": "Video Gallery",

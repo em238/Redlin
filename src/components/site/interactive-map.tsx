@@ -88,14 +88,14 @@ export function InteractiveMap() {
   }, [markers]);
 
   return (
-    <section id="map" className="py-14 sm:py-24 lg:py-28 bg-zinc-950 relative overflow-hidden">
+    <section id="map" className="scroll-mt-20 pt-20 pb-14 sm:pt-28 sm:pb-20 lg:pt-32 lg:pb-24 bg-zinc-950 relative overflow-hidden">
       {/* Atmospheric background */}
       <div className="absolute inset-0 grid-bg opacity-15" />
       <div className="absolute top-10 right-20 w-[500px] h-[500px] bg-primary/15 rounded-full blur-[140px] animate-aurora" />
       <div className="absolute bottom-10 left-20 w-[400px] h-[400px] bg-cyan-500/10 rounded-full blur-[120px] animate-aurora" style={{ animationDelay: "5s" }} />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <div className="text-center max-w-2xl mx-auto mb-12">
+        <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
           <motion.span
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -126,13 +126,13 @@ export function InteractiveMap() {
           </motion.p>
         </div>
 
-        <div className="max-w-7xl mx-auto space-y-4">
+        <div className="max-w-4xl mx-auto w-full px-4 space-y-4">
           {/* Map card — holographic command center */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="relative rounded-3xl bg-black border border-primary/20 shadow-2xl shadow-primary/10 overflow-hidden"
+            className="relative w-full rounded-2xl overflow-hidden bg-slate-950/80 border border-slate-800/80 shadow-2xl shadow-primary/10"
           >
             {/* HUD header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 px-3 sm:px-4 py-2.5 sm:py-3 border-b border-white/10 bg-zinc-950/80">
@@ -359,7 +359,7 @@ export function InteractiveMap() {
               </svg>
 
               {/* Floating selected overlay (top-right) */}
-              <div className="absolute top-3 right-3 sm:top-4 sm:right-4 w-[210px]">
+              <div className="absolute top-3 right-3 sm:top-4 sm:right-4 w-[min(210px,calc(100%-1.5rem))]">
                 <AnimatePresence mode="wait">
                   {sel ? (
                     <motion.div key={sel.id} initial={{ opacity: 0, y: -10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10, scale: 0.95 }}
@@ -403,37 +403,137 @@ export function InteractiveMap() {
             </div>
           </motion.div>
 
-          {/* Bottom row */}
-          <div className="grid sm:grid-cols-3 gap-4">
-            <div className="rounded-2xl border border-white/10 bg-zinc-950 p-5 flex items-center justify-around">
-              <div className="text-center">
-                <div className="text-3xl font-black text-gradient-red">{markers.length}</div>
-                <div className="text-xs text-zinc-500 mt-1">{t("map.covered")}</div>
-              </div>
-              <div className="w-px h-12 bg-white/10" />
-              <div className="text-center">
-                <div className="text-3xl font-black text-amber-400">99.2%</div>
-                <div className="text-xs text-zinc-500 mt-1">{t("map.delivery")}</div>
-              </div>
+          {/* Selected Governorate Details — middle card with empty-state fallback */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="w-full rounded-2xl overflow-hidden bg-slate-950/80 border border-slate-800/80 p-4 min-h-[140px] flex"
+          >
+            <AnimatePresence mode="wait" className="w-full">
+              {sel ? (
+                <motion.div
+                  key={sel.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.25 }}
+                  className="w-full"
+                >
+                  {/* Header: zone label + name + zone badge */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5 text-xs text-zinc-400">
+                        <MapPin className="w-3.5 h-3.5 shrink-0" style={{ color: ZONE[sel.zone]?.color }} />
+                        <span className="truncate">{zoneLabel(sel.zone)}</span>
+                      </div>
+                      <h4 className="font-black text-lg sm:text-xl mt-0.5 text-white truncate">{govName(sel)}</h4>
+                    </div>
+                    <span
+                      className="px-2.5 py-1 rounded-full text-[10px] font-bold text-white shrink-0 whitespace-nowrap"
+                      style={{ background: ZONE[sel.zone]?.color, boxShadow: "0 0 10px " + ZONE[sel.zone]?.color }}
+                    >
+                      {t("map.zone")} {sel.zone}
+                    </span>
+                  </div>
+
+                  {/* Stats grid: base price + ETA + status */}
+                  <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
+                    <div className="rounded-xl bg-white/5 border border-white/10 px-3 py-2">
+                      <div className="text-[10px] uppercase tracking-wide text-zinc-500">{t("map.basePrice")}</div>
+                      <div className="text-sm sm:text-base font-bold text-amber-400 mt-0.5 truncate">
+                        {sel.basePrice} <span className="text-[10px] font-medium text-zinc-400">{t("map.currency")}</span>
+                      </div>
+                    </div>
+                    <div className="rounded-xl bg-white/5 border border-white/10 px-3 py-2">
+                      <div className="text-[10px] uppercase tracking-wide text-zinc-500">{t("map.eta")}</div>
+                      <div className="text-sm sm:text-base font-bold text-white mt-0.5 truncate">
+                        {sel.etaHours}<span className="text-[10px] font-medium text-zinc-400 ms-1">{t("map.etaHours")}</span>
+                      </div>
+                    </div>
+                    <div className="rounded-xl bg-white/5 border border-white/10 px-3 py-2">
+                      <div className="text-[10px] uppercase tracking-wide text-zinc-500">{t("map.status")}</div>
+                      <div className="text-sm sm:text-base font-bold text-emerald-400 mt-0.5 flex items-center gap-1 truncate">
+                        <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                        <span className="truncate">{t("map.active")}</span>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="empty"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="w-full flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 py-2"
+                >
+                  {/* Empty-state placeholder with hint */}
+                  <div className="flex flex-col items-center text-center gap-2 flex-1">
+                    <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+                      <Navigation className="w-5 h-5 text-zinc-500" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-zinc-300">{t("map.selectGov")}</p>
+                      <p className="text-xs text-zinc-500 mt-0.5 max-w-xs">{t("map.selectGovHint")}</p>
+                    </div>
+                  </div>
+
+                  {/* Network health snapshot (kept useful in empty state) */}
+                  <div className="hidden sm:flex items-center gap-4 ps-4 border-s border-white/10">
+                    <div className="text-center">
+                      <div className="text-2xl font-black text-gradient-red leading-none">{markers.length}</div>
+                      <div className="text-[10px] uppercase tracking-wide text-zinc-500 mt-1">{t("map.covered")}</div>
+                    </div>
+                    <div className="w-px h-10 bg-white/10" />
+                    <div className="text-center">
+                      <div className="text-2xl font-black text-amber-400 leading-none">99.2%</div>
+                      <div className="text-[10px] uppercase tracking-wide text-zinc-500 mt-1">{t("map.delivery")}</div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+
+          {/* Governorates list — wrapped badge grid */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="w-full rounded-2xl overflow-hidden bg-slate-950/80 border border-slate-800/80 p-4"
+          >
+            <div className="flex items-center gap-2 mb-3 text-start">
+              <Building2 className="w-4 h-4 text-primary shrink-0" />
+              <h4 className="font-bold text-sm text-white">{t("map.quicklist")}</h4>
+              <span className="ms-auto text-[10px] text-zinc-500 font-medium">{markers.length}</span>
             </div>
-            <div className="sm:col-span-2 rounded-2xl border border-white/10 bg-zinc-950 p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Building2 className="w-4 h-4 text-primary" />
-                <h4 className="font-bold text-sm text-white">{t("map.quicklist")}</h4>
-              </div>
-              <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
-                {markers.map((m) => (
-                  <button key={m.id} onClick={() => setSelected(m.name)} onMouseEnter={() => setHovered(m.name)} onMouseLeave={() => setHovered(null)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-colors ${
-                      selected === m.name ? "bg-primary/15 text-primary border border-primary/40" : "text-zinc-300 hover:bg-white/5 border border-transparent"
-                    }`}>
-                    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: ZONE[m.zone]?.color, boxShadow: "0 0 6px " + ZONE[m.zone]?.color }} />
+            <div className="flex flex-wrap gap-2.5 sm:gap-3">
+              {markers.map((m) => {
+                const isSel = selected === m.name;
+                return (
+                  <button
+                    key={m.id}
+                    onClick={() => setSelected(m.name)}
+                    onMouseEnter={() => setHovered(m.name)}
+                    onMouseLeave={() => setHovered(null)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs sm:text-sm transition-colors ${
+                      isSel
+                        ? "bg-primary/15 text-primary border border-primary/40"
+                        : "bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white border border-white/10"
+                    }`}
+                  >
+                    <span
+                      className="w-1.5 h-1.5 rounded-full shrink-0"
+                      style={{ background: ZONE[m.zone]?.color, boxShadow: "0 0 6px " + ZONE[m.zone]?.color }}
+                    />
                     {govName(m)}
                   </button>
-                ))}
-              </div>
+                );
+              })}
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>
