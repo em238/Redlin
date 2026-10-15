@@ -4,8 +4,7 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Loader2, Plus, Trash2, Handshake, Eye, EyeOff, Pencil, ExternalLink,
-  Upload, Building2, Briefcase, Store, Truck, Cpu, Smartphone, Shirt, Palette, ShoppingBag, Check
+  Loader2, Plus, Trash2, Handshake, Eye, EyeOff, Pencil, ExternalLink, Upload, Check
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 import { toast } from "sonner";
+import { FileUpload } from "@/components/shared/file-upload";
 
 const ICONS: Record<string, any> = {
   building: Building2, briefcase: Briefcase, store: Store, truck: Truck,
@@ -236,71 +236,20 @@ export function DashboardPartners() {
               <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="مثال: TechStore" className="h-10" />
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-xs">شعار الشركة (Logo)</Label>
-              {form.logo && (
-                <div className="rounded-xl border border-border overflow-hidden w-32 h-32 bg-white p-3 mx-auto">
-                  <img src={form.logo} alt={form.name} className="w-full h-full object-contain" />
-                </div>
-              )}
-              <div className="grid grid-cols-4 gap-2">
-                {LOGO_OPTIONS.map((url) => (
-                  <button
-                    key={url}
-                    onClick={() => setForm({ ...form, logo: url })}
-                    className={`relative aspect-square rounded-lg overflow-hidden border-2 bg-white p-1 transition-all ${form.logo === url ? "border-primary ring-2 ring-primary/30" : "border-transparent hover:border-border"}`}
-                  >
-                    <img src={url} alt={url} className="w-full h-full object-contain" />
-                    {form.logo === url && (
-                      <div className="absolute inset-0 bg-primary/30 flex items-center justify-center">
-                        <Check className="w-4 h-4 text-white" />
-                      </div>
-                    )}
-                  </button>
-                ))}
-              </div>
-              <Input
-                value={form.logo || ""}
-                onChange={(e) => setForm({ ...form, logo: e.target.value })}
-                placeholder="أو رابط شعار مخصص (اتركه فارغاً لاستخدام أيقونة)"
-                className="h-9 text-xs"
-                dir="ltr"
-              />
-              <p className="text-[11px] text-muted-foreground">إذا لم ترفع شعار، سيتم عرض أيقونة ملونة باسم الشركة</p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label className="text-xs">الأيقونة (إذا لا يوجد شعار)</Label>
-                <Select value={form.icon} onValueChange={(v) => setForm({ ...form, icon: v })}>
-                  <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {ICON_OPTIONS.map((o) => {
-                      const I = ICONS[o.value] || Building2;
-                      return (
-                        <SelectItem key={o.value} value={o.value}>
-                          <span className="flex items-center gap-2"><I className="w-4 h-4" /> {o.label}</span>
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">لون الأيقونة</Label>
-                <div className="flex flex-wrap gap-1.5 pt-1.5">
-                  {COLOR_OPTIONS.map((c) => (
-                    <button
-                      key={c.value}
-                      onClick={() => setForm({ ...form, color: c.value })}
-                      className={`w-7 h-7 rounded-full border-2 transition-all ${form.color === c.value ? "scale-110 border-foreground" : "border-transparent hover:scale-105"}`}
-                      style={{ background: c.value }}
-                      aria-label={c.label}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
+            <FileUpload
+              label="شعار الشركة (Logo) — ارفع من جهازك"
+              accept="image/png,image/jpeg,image/jpg,image/webp,image/gif,image/svg+xml"
+              currentUrl={form.logo}
+              onUploaded={(url) => setForm({ ...form, logo: url })}
+              type="image"
+            />
+            <Input
+              value={form.logo || ""}
+              onChange={(e) => setForm({ ...form, logo: e.target.value })}
+              placeholder="أو أدخل رابط شعار مخصص"
+              className="h-9 text-xs"
+              dir="ltr"
+            />
 
             <div className="space-y-1">
               <Label className="text-xs">رابط موقع الشركة (اختياري)</Label>

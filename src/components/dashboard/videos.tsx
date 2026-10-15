@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { apiGet, apiPost, apiPatch, apiDelete, formatDate } from "@/lib/api";
 import { toast } from "sonner";
+import { FileUpload } from "@/components/shared/file-upload";
 
 const CATEGORIES = [
   { value: "promo", label: "ترويجي" },
@@ -315,8 +316,16 @@ export function DashboardVideos() {
               <Textarea value={form.description || ""} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} placeholder="وصف مختصر للفيديو..." />
             </div>
 
+            <FileUpload
+              label="صورة الغلاف (Thumbnail) — ارفع من جهازك"
+              accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+              currentUrl={form.thumbnail}
+              onUploaded={(url) => setForm({ ...form, thumbnail: url })}
+              type="image"
+            />
+
             <div className="space-y-2">
-              <Label className="text-xs">صورة الغلاف (Thumbnail)</Label>
+              <Label className="text-xs">أو اختر صورة من المعرض:</Label>
               <div className="grid grid-cols-5 gap-2">
                 {thumbOptions.map((t) => (
                   <button

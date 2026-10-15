@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 import { toast } from "sonner";
+import { FileUpload } from "@/components/shared/file-upload";
 
 const IMAGE_OPTIONS = [
   "/images/hero-truck.png", "/images/fleet.png", "/images/warehouse.png",
@@ -246,6 +247,15 @@ export function DashboardHeroImages() {
                 </div>
               </div>
             )}
+
+            {/* Upload from desktop */}
+            <FileUpload
+              label="ارفع صورة من جهازك"
+              accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+              currentUrl={form.url}
+              onUploaded={(url) => setForm({ ...form, url })}
+              type="image"
+            />
 
             {/* Quick select from existing images */}
             <div className="space-y-2">
