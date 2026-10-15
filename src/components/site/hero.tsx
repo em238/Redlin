@@ -235,12 +235,12 @@ export function Hero() {
         </>
       )}
 
-      {/* Marquee */}
+      {/* Marquee — identical seamless flow for both EN & AR */}
       <div className="absolute bottom-0 inset-x-0 border-t border-white/10 bg-black/40 backdrop-blur-md py-3 overflow-hidden">
         <div className="flex animate-marquee whitespace-nowrap">
           {[...(isAr ? GOV_MARQUEE_AR : GOV_MARQUEE_EN), ...(isAr ? GOV_MARQUEE_AR : GOV_MARQUEE_EN)].map((g, i) => (
-            <span key={i} className="mx-6 text-sm text-white/80 font-medium flex items-center gap-2">
-              <MapPin className="w-3.5 h-3.5 text-primary" />
+            <span key={i} className="mx-6 text-sm text-white/80 font-medium flex items-center gap-2 shrink-0">
+              <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
               {g}
             </span>
           ))}

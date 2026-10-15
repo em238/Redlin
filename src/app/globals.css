@@ -308,20 +308,13 @@
   background-size: 48px 48px;
 }
 
-/* Marquee animation */
+/* Marquee animation — same keyframe for both LTR & RTL */
 @keyframes marquee {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
 }
-@keyframes marquee-rtl {
-  from { transform: translateX(-50%); }
-  to { transform: translateX(0); }
-}
 .animate-marquee {
   animation: marquee 30s linear infinite;
-}
-html[dir="rtl"] .animate-marquee {
-  animation: marquee-rtl 30s linear infinite;
 }
 
 /* Slow pulse */
