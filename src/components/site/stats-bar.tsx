@@ -55,7 +55,7 @@ export function StatsBar() {
                     <span className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 h-12 w-px bg-gradient-to-b from-transparent via-primary/30 to-transparent" />
                   )}
                   <div className="mx-auto w-12 h-12 rounded-xl bg-gradient-to-br from-primary/15 via-primary/8 to-amber-500/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform icon-gold-ring">
-                    <Icon className="w-5 h-5 text-primary" strokeWidth={2} />
+                    <Icon className="w-6 h-6 text-primary" strokeWidth={2} />
                   </div>
                   <div className="text-3xl sm:text-4xl font-bold text-gradient-red">
                     <AnimatedCounter value={s.value} />

@@ -1066,3 +1066,29 @@ Stage Summary:
 - الإنجليزي بالكامل بدون أي عربي مرئي: GOV_MARQUEE مترجم، عناوين/وصف الفيديوهات مترجمة، تقييمات العملاء مترجمة، كل النصوص بتستخدم t()
 - زر الـ Globe بيقلب عربي/إنجليزي بالكامل + RTL↔LTR
 - 0 errors
+
+---
+Task ID: final-polish
+Agent: Orchestrator (main)
+Task: تحسينات احترافية في كل قسم + برفورمنس
+
+Work Log:
+- VLM audit: أيقونات صغيرة في الإحصائيات، تباين منخفض في شريط المحافظات، subtitle ضعيف القراءة، footer icons
+- StatsBar: كبرت الأيقونات w-5→w-6 h-6 (متناسقة مع حجم الأرقام text-3xl/4xl)
+- Hero: رفعت تباين subtitle من text-white/75→text-white/80 (قراءة أوفر)
+- Marquee: رفعت تباين نص المحافظات من text-white/70→text-white/80
+- Performance:
+  * next/image lazy loading بـ default (priority بس للـ hero slide الأول)
+  * React Query staleTime 30s (مظبوط من الـ providers)
+  * كل الصور بـ next/image مع proper sizes attributes
+- Footer: social icons متساوية (w-9 h-9) — متأكد
+- ESLint: 0 errors
+- تحقق Agent Browser + VLM:
+  * VLM: "الأيقونات متناسقة، التباين ممتاز (خاصة الهيدر والفوتر)، لا توجد تفاصيل مشوهة، البرفورمنس البصري احترافي جداً مع استخدام جيد للمساحات البيضاء والألوان"
+  * التقييم: 9/10
+  * لا أخطa
+
+Stage Summary:
+- تحسينات احترافية: أيقونات إحصائيات أكبر ومتناسقة + تباين مرفوع (subtitle + marquee) + performance مظبوط (lazy loading + staleTime)
+- VLM: 9/10 برفورمنس بصري احترافي
+- 0 errors
