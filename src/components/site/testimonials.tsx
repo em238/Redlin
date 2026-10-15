@@ -70,20 +70,20 @@ export function Testimonials() {
                 {/* 3-part layout: Content → Divider → Client Info */}
                 <div className="relative flex flex-col md:flex-row md:items-center gap-6 md:gap-8">
 
-                  {/* 1. Review Content Side (flex-1) */}
-                  <div className="relative flex-1 space-y-4">
-                    {/* Watermark quote — on the TEXT side only, at the start */}
-                    <Quote className={`absolute -top-4 ${isAr ? "right-0" : "left-0"} w-16 h-16 sm:w-20 sm:h-20 text-primary/[0.07] pointer-events-none select-none -z-0 ${isAr ? "" : "rotate-180"}`} />
+                  {/* 1. Review Content Side (flex-1) — uses logical alignment */}
+                  <div className="relative flex-1 flex flex-col items-start text-start space-y-3">
+                    {/* Watermark quote — at the start of the text column */}
+                    <Quote className={`absolute -top-4 start-0 w-16 h-16 sm:w-20 sm:h-20 text-primary/[0.07] pointer-events-none select-none -z-0 ${isAr ? "" : "rotate-180"}`} />
 
-                    {/* Star rating */}
-                    <div className={`flex gap-0.5 relative z-10 ${isAr ? "justify-end" : "justify-start"}`}>
+                    {/* Star rating — aligned to text start via flex+items-start */}
+                    <div className="flex items-center gap-1 text-amber-400 relative z-10">
                       {Array.from({ length: current.rating }).map((_, j) => (
                         <Star key={j} className="w-4 h-4 sm:w-5 sm:h-5 fill-amber-400 text-amber-400" />
                       ))}
                     </div>
 
-                    {/* Testimonial quote */}
-                    <p className={`text-base sm:text-lg lg:text-xl leading-relaxed font-medium text-foreground/90 relative z-10 ${isAr ? "text-right" : "text-left"}`}>
+                    {/* Testimonial paragraph — same parent, same alignment */}
+                    <p className="text-base sm:text-lg lg:text-xl leading-relaxed font-medium text-foreground/90 relative z-10 text-start">
                       "{contentFor()}"
                     </p>
                   </div>
