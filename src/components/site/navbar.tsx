@@ -54,7 +54,7 @@ export function Navbar() {
             {/* Logo */}
             <button onClick={() => go("#home")} className="flex items-center gap-2.5 group">
               <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center shadow-soft group-hover:scale-105 transition-transform">
-                <Truck className="w-4.5 h-4.5 text-primary-foreground" strokeWidth={2.4} />
+                <Truck className="w-[18px] h-[18px] text-primary-foreground" strokeWidth={2.4} />
               </div>
               <div className="flex flex-col leading-none">
                 <span className={`text-lg font-bold tracking-tight transition-colors ${scrolled ? "text-foreground" : "text-white"}`}>
@@ -116,7 +116,7 @@ export function Navbar() {
                 size="sm"
                 className="hidden sm:inline-flex bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 font-semibold"
               >
-                <LayoutDashboard className="w-4 h-4" />
+                <LayoutDashboard className="w-[18px] h-[18px]" />
                 {t("nav.dashboard")}
               </Button>
               <Button
@@ -126,7 +126,7 @@ export function Navbar() {
                 onClick={() => setMobileOpen((v) => !v)}
                 aria-label="القائمة"
               >
-                {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                {mobileOpen ? <X className="w-[18px] h-[18px]" /> : <Menu className="w-[18px] h-[18px]" />}
               </Button>
             </div>
           </div>
@@ -160,7 +160,7 @@ export function Navbar() {
                 onClick={() => { setMobileOpen(false); setView("dashboard"); }}
                 className="mt-2 bg-primary text-primary-foreground gap-2"
               >
-                <LayoutDashboard className="w-4 h-4" />
+                <LayoutDashboard className="w-[18px] h-[18px]" />
                 {t("nav.dashboard")}
               </Button>
               </nav>
