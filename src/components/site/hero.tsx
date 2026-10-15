@@ -241,11 +241,19 @@ export function Hero() {
         </>
       )}
 
-      {/* Marquee — identical seamless flow for both EN & AR */}
-      <div className="absolute bottom-0 inset-x-0 border-t border-white/10 bg-black/40 backdrop-blur-md py-3 overflow-hidden">
-        <div className="flex animate-marquee whitespace-nowrap">
-          {[...(isAr ? GOV_MARQUEE_AR : GOV_MARQUEE_EN), ...(isAr ? GOV_MARQUEE_AR : GOV_MARQUEE_EN)].map((g, i) => (
-            <span key={i} className="mx-4 text-sm text-white/80 font-medium flex items-center gap-1.5 shrink-0">
+      {/* Marquee — identical twin-track infinite scroll for both EN & AR (dir=ltr to isolate from RTL) */}
+      <div className="absolute bottom-0 inset-x-0 border-t border-white/10 bg-black/40 backdrop-blur-md py-3 overflow-hidden" dir="ltr">
+        <div className="flex animate-marquee whitespace-nowrap will-change-transform">
+          {/* Track 1 */}
+          {(isAr ? GOV_MARQUEE_AR : GOV_MARQUEE_EN).map((g, i) => (
+            <span key={`t1-${i}`} className="mx-4 text-sm text-white/80 font-medium inline-flex items-center gap-1.5 shrink-0 leading-none">
+              <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
+              {g}
+            </span>
+          ))}
+          {/* Track 2 — identical clone for seamless reset */}
+          {(isAr ? GOV_MARQUEE_AR : GOV_MARQUEE_EN).map((g, i) => (
+            <span key={`t2-${i}`} className="mx-4 text-sm text-white/80 font-medium inline-flex items-center gap-1.5 shrink-0 leading-none" aria-hidden="true">
               <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
               {g}
             </span>
