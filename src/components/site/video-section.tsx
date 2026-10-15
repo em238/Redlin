@@ -106,34 +106,34 @@ export function VideoSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               onClick={() => setActive(featured)}
-              className="group relative w-full aspect-video rounded-3xl overflow-hidden border border-border shadow-2xl shadow-black/20 block"
+              className="group relative w-full aspect-[4/3] sm:aspect-video min-h-[280px] rounded-3xl overflow-hidden border border-border shadow-2xl shadow-black/20 block"
             >
               {featured.thumbnail ? (
                 <Image src={featured.thumbnail} alt={featured.title} fill sizes="(max-width:1024px) 100vw, 1024px" className="object-cover transition-transform duration-700 group-hover:scale-105" />
               ) : (
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-red-900/40" />
               )}
-              {/* Gradient overlay bottom */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-              {/* Centered play button */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/95 flex items-center justify-center shadow-2xl"
-                >
+              {/* High-contrast dark gradient overlay — bottom 75% for text legibility */}
+              <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/90 via-black/60 to-transparent pointer-events-none" />
+              {/* Centered play button — visual only, clicks bubble to parent */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/95 flex items-center justify-center shadow-2xl ring-4 ring-white/30 transition-transform duration-300 group-hover:scale-110">
                   <Play className="w-7 h-7 sm:w-9 sm:h-9 text-primary ml-1" fill="currentColor" />
-                </motion.div>
+                </div>
               </div>
-              {/* Bottom content block — badge, title, description */}
-              <div className="absolute bottom-0 inset-x-0 p-4 sm:p-6 lg:p-8 flex flex-col items-start gap-2 text-left">
-                <span className="inline-block px-2.5 py-1 rounded-full bg-primary text-white text-[10px] sm:text-xs font-bold">
+              {/* Featured badge — top-start corner */}
+              <div className="absolute top-4 start-4 z-10">
+                <span className="inline-block px-2.5 py-1 rounded-full bg-primary text-white text-[10px] sm:text-xs font-bold shadow-lg shadow-primary/30">
                   {isAr ? "المميز" : "Featured"}
                 </span>
-                <h3 className="text-lg sm:text-2xl lg:text-3xl font-black text-white leading-tight">
+              </div>
+              {/* Bottom-anchored text block — title + description */}
+              <div className="absolute inset-x-0 bottom-0 p-4 sm:p-6 lg:p-8 flex flex-col items-start text-start z-10 gap-1.5 sm:gap-2">
+                <h3 className="text-lg sm:text-2xl lg:text-3xl font-bold text-white drop-shadow-md leading-tight line-clamp-2 max-w-md">
                   {titleFor(featured)}
                 </h3>
                 {descFor(featured) && (
-                  <p className="text-white/75 text-xs sm:text-sm max-w-xl leading-relaxed">
+                  <p className="text-xs sm:text-sm text-white/80 line-clamp-2 max-w-md drop-shadow leading-relaxed">
                     {descFor(featured)}
                   </p>
                 )}
@@ -154,7 +154,7 @@ export function VideoSection() {
                     exit={{ opacity: 0, scale: 0.9 }}
                     transition={{ delay: i * 0.06 }}
                     onClick={() => setActive(v)}
-                    className="group relative aspect-video rounded-2xl overflow-hidden border border-border hover:border-primary/40 hover:shadow-lg transition-all"
+                    className="group relative aspect-video min-h-[180px] rounded-2xl overflow-hidden border border-border hover:border-primary/40 hover:shadow-lg transition-all"
                   >
                     {v.thumbnail ? (
                       <Image src={v.thumbnail} alt={v.title} fill sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 332px" className="object-cover transition-transform duration-500 group-hover:scale-110" />
@@ -163,20 +163,25 @@ export function VideoSection() {
                         <Film className="w-8 h-8 text-white/70" />
                       </div>
                     )}
-                    {/* Gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
-                    {/* Category badge — top-right (adapts to LTR/RTL) */}
-                    <div className="absolute top-2 end-2">
-                      <span className="px-2 py-0.5 rounded-full bg-black/60 text-white text-[10px] font-bold backdrop-blur-sm">
+                    {/* Stronger dark gradient overlay — bottom 70% for label legibility */}
+                    <div className="absolute inset-x-0 bottom-0 h-[70%] bg-gradient-to-t from-black/90 via-black/55 to-transparent pointer-events-none" />
+                    {/* Category badge — top-end corner */}
+                    <div className="absolute top-2 end-2 z-10">
+                      <span className="px-2 py-0.5 rounded-full bg-black/70 text-white text-[10px] font-bold backdrop-blur-sm border border-white/10">
                         {catLabel(v.category)}
                       </span>
                     </div>
-                    {/* Bottom row — play button + title */}
-                    <div className="absolute bottom-2 inset-x-2 flex items-center gap-2">
-                      <div className="w-10 h-10 rounded-full bg-white/90 group-hover:bg-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                        <Play className="w-4.5 h-4.5 text-primary ml-0.5" fill="currentColor" />
+                    {/* Centered play button — visual only, clicks bubble to parent */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/90 flex items-center justify-center shadow-xl ring-2 ring-white/20 transition-transform duration-300 group-hover:scale-110">
+                        <Play className="w-4 h-4 sm:w-5 sm:h-5 text-primary ml-0.5" fill="currentColor" />
                       </div>
-                      <span className="text-white text-xs font-semibold line-clamp-2">{titleFor(v)}</span>
+                    </div>
+                    {/* Bottom-anchored title */}
+                    <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4 flex flex-col items-start text-start z-10">
+                      <span className="text-white text-xs sm:text-sm font-semibold line-clamp-2 drop-shadow-md leading-snug">
+                        {titleFor(v)}
+                      </span>
                     </div>
                   </motion.button>
                 ))}
