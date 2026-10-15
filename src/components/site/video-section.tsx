@@ -157,8 +157,8 @@ export function VideoSection() {
                     </span>
                   </div>
                   <div className="absolute bottom-2 inset-x-2 flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-white/90 group-hover:bg-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                      <Play className="w-3.5 h-3.5 text-primary ml-0.5" fill="currentColor" />
+                    <div className="w-10 h-10 rounded-full bg-white/90 group-hover:bg-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                      <Play className="w-4.5 h-4.5 text-primary ml-0.5" fill="currentColor" />
                     </div>
                     <span className="text-white text-xs font-semibold line-clamp-2">{isAr ? v.title : (VIDEO_EN[v.title]?.title || v.title)}</span>
                   </div>

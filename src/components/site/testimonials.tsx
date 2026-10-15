@@ -68,9 +68,9 @@ export function Testimonials() {
                 {/* Big watermark quote */}
                 <Quote className="absolute -top-4 -left-2 w-32 h-32 text-primary/[0.05] rotate-180" />
                 {/* Horizontal layout: quote on right, author card on left */}
-                <div className="relative flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-10">
+                <div className="relative flex flex-col sm:flex-row sm:items-start gap-6 sm:gap-10">
                   {/* Author side */}
-                  <div className="flex sm:flex-col items-center gap-4 sm:gap-3 sm:min-w-[180px] sm:border-l-2 sm:border-primary/30 sm:pr-8 sm:order-2">
+                  <div className="flex sm:flex-col items-center gap-3 sm:min-w-[180px] sm:border-l-2 sm:border-primary/30 sm:pr-8 sm:order-2 sm:pt-2">
                     <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-amber-600 p-[2px] shadow-soft shrink-0">
                       <div className="w-full h-full rounded-full bg-card flex items-center justify-center text-primary font-bold text-xl">
                         {current.name.charAt(0)}

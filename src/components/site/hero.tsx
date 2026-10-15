@@ -162,7 +162,7 @@ export function Hero() {
               size="lg"
               variant="outline"
               onClick={() => scrollTo("#services")}
-              className="bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/15 hover:text-white gap-2 text-base h-12 px-6 w-full sm:w-auto justify-center"
+              className="bg-white/15 backdrop-blur-md border-white/30 text-white hover:bg-white/25 hover:text-white gap-2 text-base h-12 px-6 w-full sm:w-auto justify-center font-medium"
             >
               <Truck className="w-4.5 h-4.5" />
               {t("hero.cta2")}
@@ -183,7 +183,7 @@ export function Hero() {
               { icon: MapPin, text: t("hero.feat3") },
             ].map((f, i) => (
               <div key={i} className="flex items-center gap-1.5 text-sm">
-                <f.icon className="w-4 h-4 text-amber-400" />
+                <f.icon className="w-[18px] h-[18px] text-amber-400 shrink-0" />
                 {f.text}
               </div>
             ))}

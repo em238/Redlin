@@ -114,13 +114,13 @@ export function Footer() {
           <div className="lg:col-span-3">
             <h4 className="font-bold text-white text-sm mb-4">{t("footer.newsletter")}</h4>
             <p className="text-xs text-zinc-400 mb-3">{t("footer.newsletterDesc")}</p>
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-stretch">
               <Input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={isAr ? "بريدك" : "Your email"}
-                className="h-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-500"
+                className="h-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-500 flex-1"
               />
               <Button size="icon" onClick={subscribe} className="bg-primary hover:bg-red-600 h-10 w-10 shrink-0">
                 <Send className="w-4 h-4" />

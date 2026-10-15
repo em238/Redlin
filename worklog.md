@@ -1126,3 +1126,18 @@ Stage Summary:
 - RedSeaMart بقى عنده صورة (partner-9.png)
 - الـ Partners component شال أي icon fallback — بس صور
 - 0 errors
+
+---
+Task ID: detail-fixes
+Agent: Orchestrator (main)
+Task: تحسينات تفصيلية — أيقونات + contrast + alignment + play icon
+
+Work Log:
+- Hero: كبرت أيقونات المميزات (w-4 → w-[18px] h-[18px]) + shrink-0 (مش هتتداخل)
+- Hero: رفعت contrast زر "Our Services" (bg-white/10→/15 + border-white/20→/30 + font-medium)
+- Videos: كبرت play icon في بطاقات الفيديو الصغيرة (w-8 h-8 → w-10 h-10, icon w-3.5 → w-4.5)
+- Footer: ظبطت alignment حقل الإيميل + الزر (items-stretch + flex-1 على الإيميل)
+- Testimonials: ظبطت alignment الـ avatar (sm:items-center → sm:items-start + sm:pt-2 على author side + gap-4 → gap-3)
+- ESLint: 0 errors
+- تحقق VLM: "الأيقونات متناسقة، Our Services أوضح، play icon مناسب، footer مظبوط، testimonials avatar محاذي"
+- التقييم: 9/10
