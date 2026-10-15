@@ -399,6 +399,14 @@
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+/* Defensive baseline: force all input/textarea placeholders to align with
+   the document's start edge (left in LTR, right in RTL). Prevents email/phone
+   inputs with dir="ltr" from pushing Arabic placeholders to the left. */
+input::placeholder,
+textarea::placeholder {
+  text-align: start;
+}
+
 /* Flowing dashes for network lines (logistics flow effect) */
 @keyframes flow {
   to { stroke-dashoffset: -24; }

@@ -114,56 +114,74 @@ export function Contact() {
               <MessageSquare className="w-5 h-5 text-primary" />
               <h3 className="text-xl font-bold">{t("contact.formTitle")}</h3>
             </div>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label className="text-sm">{t("contact.name")} *</Label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Field 1: Name */}
+              <div className="flex flex-col gap-1.5 text-start">
+                <Label className="text-xs sm:text-sm font-semibold">{t("contact.name")} *</Label>
                 <Input
                   value={form.name}
                   onChange={(e) => { setForm({ ...form, name: e.target.value }); setErrors({ ...errors, name: "" }); }}
-                  placeholder={isAr ? "اسمك الكامل" : "Your full name"} className={`h-11 ${errors.name ? "border-destructive" : ""}`}
+                  placeholder={isAr ? "اسمك الكامل" : "Your full name"}
+                  className={`h-11 text-start placeholder:text-start ${errors.name ? "border-destructive" : ""}`}
                 />
-                {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
+                {errors.name && <p className="text-xs text-destructive text-start">{errors.name}</p>}
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-sm">{t("contact.email")} *</Label>
+              {/* Field 2: Email */}
+              <div className="flex flex-col gap-1.5 text-start">
+                <Label className="text-xs sm:text-sm font-semibold">{t("contact.email")} *</Label>
                 <Input
-                  type="email" dir="ltr" value={form.email}
+                  type="email"
+                  inputMode="email"
+                  value={form.email}
                   onChange={(e) => { setForm({ ...form, email: e.target.value }); setErrors({ ...errors, email: "" }); }}
-                  placeholder="email@example.com" className={`h-11 text-right ${errors.email ? "border-destructive" : ""}`}
+                  placeholder="email@example.com"
+                  className={`h-11 text-start placeholder:text-start ${errors.email ? "border-destructive" : ""}`}
                 />
-                {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
+                {errors.email && <p className="text-xs text-destructive text-start">{errors.email}</p>}
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-sm">{t("contact.phone")}</Label>
+              {/* Field 3: Phone */}
+              <div className="flex flex-col gap-1.5 text-start">
+                <Label className="text-xs sm:text-sm font-semibold">{t("contact.phone")}</Label>
                 <Input
-                  value={form.phone} dir="ltr"
+                  type="tel"
+                  inputMode="tel"
+                  value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  placeholder="01XXXXXXXXX" className="h-11 text-right"
+                  placeholder="01XXXXXXXXX"
+                  className="h-11 text-start placeholder:text-start"
                 />
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-sm">{t("contact.subject")}</Label>
+              {/* Field 4: Subject */}
+              <div className="flex flex-col gap-1.5 text-start">
+                <Label className="text-xs sm:text-sm font-semibold">{t("contact.subject")}</Label>
                 <Input
                   value={form.subject}
                   onChange={(e) => setForm({ ...form, subject: e.target.value })}
-                  placeholder={isAr ? "موضوع الرسالة" : "Message subject"} className="h-11"
+                  placeholder={isAr ? "موضوع الرسالة" : "Message subject"}
+                  className="h-11 text-start placeholder:text-start"
                 />
               </div>
-              <div className="space-y-1.5 sm:col-span-2">
-                <Label className="text-sm">{t("contact.message")} *</Label>
+              {/* Field 5: Message (full width) */}
+              <div className="flex flex-col gap-1.5 text-start sm:col-span-2">
+                <Label className="text-xs sm:text-sm font-semibold">{t("contact.message")} *</Label>
                 <Textarea
                   value={form.message}
                   onChange={(e) => { setForm({ ...form, message: e.target.value }); setErrors({ ...errors, message: "" }); }}
-                  placeholder={isAr ? "اكتب رسالتك هنا..." : "Write your message here..."} rows={5} className={errors.message ? "border-destructive" : ""}
+                  placeholder={isAr ? "اكتب رسالتك هنا..." : "Write your message here..."}
+                  rows={5}
+                  className={`text-start placeholder:text-start ${errors.message ? "border-destructive" : ""}`}
                 />
-                {errors.message && <p className="text-xs text-destructive">{errors.message}</p>}
+                {errors.message && <p className="text-xs text-destructive text-start">{errors.message}</p>}
               </div>
             </div>
             <Button
-              onClick={submit} disabled={loading}
-              className="btn-glow mt-5 w-full h-12 bg-gradient-to-r from-primary to-red-700 hover:from-red-600 hover:to-red-800 text-white gap-2 text-base font-semibold"
+              onClick={submit}
+              disabled={loading}
+              className="group btn-glow mt-5 w-full h-12 bg-gradient-to-r from-primary to-red-700 hover:from-red-600 hover:to-red-800 text-white gap-2 text-base font-semibold"
             >
-              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
+              {loading
+                ? <Loader2 className="w-5 h-5 animate-spin" />
+                : <Send className={`w-5 h-5 transition-transform ${isAr ? "-scale-x-100 group-hover:-translate-x-1" : "group-hover:translate-x-1"}`} />}
               {t("contact.submit")}
             </Button>
           </motion.div>
