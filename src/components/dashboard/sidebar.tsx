@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 
 export function DashboardSidebar() {
-  const { dashboardSection, setDashboardSection, sidebarOpen, setSidebarOpen, user, setUser, setView, setAuthChecked, theme } = useAppStore();
+  const { dashboardSection, setDashboardSection, sidebarOpen, setSidebarOpen, user, setUser, setView, setAuthChecked } = useAppStore();
   const { t } = useT();
 
   const NAV: { id: DashboardSection; label: string; icon: any }[] = [
@@ -43,11 +43,11 @@ export function DashboardSidebar() {
       <div className="flex items-center justify-between p-5 border-b border-sidebar-border">
         <button onClick={() => setView("public")} className="flex items-center group focus:outline-none">
           <Image
-            src={theme === "dark" ? "/redline-transport-logo-dark.png" : "/redline-transport-logo.png"}
+            src="/redline-transport-logo.png"
             alt="RedLine Transport"
-            width={600}
-            height={257}
-            className="h-9 w-auto object-contain opacity-100 drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)] transition-transform group-hover:scale-105"
+            width={1200}
+            height={514}
+            className="h-10 w-auto max-w-none object-contain drop-shadow-[0_1px_2px_rgba(255,255,255,0.15)] transition-transform group-hover:scale-105"
           />
         </button>
         <Button variant="ghost" size="icon" className="lg:hidden rounded-full" onClick={() => setSidebarOpen(false)}>

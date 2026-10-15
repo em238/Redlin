@@ -73,11 +73,11 @@ export function Contact() {
             <div className="relative">
               <div className="mb-6">
                 <Image
-                  src="/redline-transport-logo-dark.png"
+                  src="/redline-transport-logo.png"
                   alt="RedLine Transport"
-                  width={600}
-                  height={257}
-                  className="h-10 w-auto object-contain opacity-100 drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]"
+                  width={1200}
+                  height={514}
+                  className="h-10 w-auto max-w-none object-contain drop-shadow-[0_1px_2px_rgba(255,255,255,0.15)]"
                 />
               </div>
               <h3 className="text-2xl font-bold mb-2">{t("contact.direct")}</h3>

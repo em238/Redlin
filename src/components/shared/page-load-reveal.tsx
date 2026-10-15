@@ -71,12 +71,12 @@ export function PageLoadReveal() {
                 className="px-6"
               >
                 <Image
-                  src="/redline-transport-logo-dark.png"
+                  src="/redline-transport-logo.png"
                   alt="RedLine Transport"
-                  width={600}
-                  height={257}
+                  width={1200}
+                  height={514}
                   priority
-                  className="h-16 sm:h-20 w-auto object-contain opacity-100 drop-shadow-[0_4px_20px_rgba(0,0,0,0.6)]"
+                  className="h-16 sm:h-20 w-auto max-w-none object-contain drop-shadow-[0_1px_2px_rgba(255,255,255,0.15)]"
                 />
               </motion.div>
               {/* Loading bar */}
