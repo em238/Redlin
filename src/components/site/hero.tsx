@@ -201,19 +201,22 @@ export function Hero() {
       <div className="relative z-20 shrink-0">
         {/* Carousel controls — progress bar + arrows + play/pause */}
         {total > 1 && (
-          <div className="relative" dir="ltr">
-            {/* Progress bar */}
-            <div className="h-[3px] bg-white/10">
+          <div className="relative">
+            {/* Progress bar — direction-aware fill
+                LTR: grows left → right (origin: left)
+                RTL: grows right → left (origin: right) */}
+            <div className="relative h-[3px] w-full bg-white/10 overflow-hidden">
               <motion.div
                 key={idx + (paused ? "-p" : "-r")}
-                initial={{ width: paused ? "100%" : "0%" }}
-                animate={{ width: paused ? "100%" : "100%" }}
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
                 transition={{ duration: paused ? 0 : 5, ease: "linear" }}
-                className="h-full bg-gradient-to-r from-primary to-amber-400"
+                className="absolute top-0 h-full w-full bg-gradient-to-r from-primary to-amber-400"
+                style={{ transformOrigin: isAr ? "right center" : "left center" }}
               />
             </div>
-            {/* Controls */}
-            <div className="flex items-center justify-center text-white py-2">
+            {/* Controls — kept LTR for conventional media control layout (prev on left, next on right) */}
+            <div className="flex items-center justify-center text-white py-2" dir="ltr">
               <button
                 onClick={prev}
                 aria-label={isAr ? "السابق" : "Previous"}
