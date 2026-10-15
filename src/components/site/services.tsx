@@ -61,18 +61,22 @@ export function Services() {
             return (
               <StaggerItem key={s.name}>
                 <div className="card-premium shine rounded-2xl border border-border/60 bg-card shadow-soft p-6 sm:p-7 h-full group relative overflow-hidden">
-                  {/* Big faded number watermark — hidden on mobile to avoid overlap */}
-                  <span className="hidden sm:block absolute top-4 left-5 text-6xl font-black text-primary/[0.06] leading-none select-none pointer-events-none">
-                    {String(idx + 1).padStart(2, "0")}
-                  </span>
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/15 via-primary/8 to-amber-500/10 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform icon-gold-ring relative">
-                    <Icon className="w-6 h-6 text-primary" strokeWidth={2} />
+                  {/* Top row: icon on start side, number watermark on end side */}
+                  <div className="relative flex items-center justify-between w-full mb-5 z-10">
+                    {/* Icon */}
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/15 via-primary/8 to-amber-500/10 flex items-center justify-center group-hover:scale-110 transition-transform icon-gold-ring shrink-0">
+                      <Icon className="w-6 h-6 text-primary" strokeWidth={2} />
+                    </div>
+                    {/* Number watermark — opposite side, adapts to LTR/RTL automatically */}
+                    <span className="text-5xl font-black text-primary/[0.07] leading-none select-none pointer-events-none">
+                      {String(idx + 1).padStart(2, "0")}
+                    </span>
                   </div>
-                  <h3 className="text-lg font-bold relative">{nameFor(s)}</h3>
-                  <p className="mt-2 text-muted-foreground text-sm leading-relaxed relative">{descFor(s)}</p>
+                  <h3 className="text-lg font-bold relative z-10">{nameFor(s)}</h3>
+                  <p className="mt-2 text-muted-foreground text-sm leading-relaxed relative z-10">{descFor(s)}</p>
                   <button
                     onClick={() => scrollTo("#contact")}
-                    className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:gap-2 transition-all relative"
+                    className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:gap-2 transition-all relative z-10"
                   >
                     {t("services.cta")}
                     <ArrowLeft className="w-4 h-4" />
