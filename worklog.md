@@ -1040,3 +1040,29 @@ Stage Summary:
 - كل الـ 12 مكون معم (Hero, Services, How, Map, Videos, About, Partners, Testimonials, CTA, Contact, Footer, Stats) مترجمين
 - locale بيتحفظ في localStorage
 - 0 errors
+
+---
+Task ID: i18n-complete-en
+Agent: Orchestrator (main)
+Task: ضمان إن الإنجليزي بالكامل بدون أي عربي مرئي
+
+Work Log:
+- المشكلة: لما بتحول للإنجليزي، كان لسه فيه نصوص عربية باقية (GOV_MARQUEE، عناوين فيديوهات، تقييمات)
+- أصلحت:
+  * GOV_MARQUEE: قسمت لـ GOV_MARQUEE_AR + GOV_MARQUEE_EN (Cairo, Giza, Alexandria...) والـ hero بيستخدم isAr عشان يختار
+  * VideoSection: ضفت VIDEO_EN translation map (keyed by Arabic title → English) للفيديوهات اللي من الـ DB + ظبطت الـ dash (em-dash → regular hyphen matching)
+  * Testimonials: ضفت TEST_EN translation map (keyed by name → English role/content)
+  * الـ stats-bar كان مظبوط من الـ subagent (STAT_KEY_BY_ICON → t())
+  * الـ map كان مظبوط (govName = isAr ? nameAr : name)
+  * كل المكونات الـ 12 بتستخدم useT() بـ t() لكل النصوص
+- ESLint: 0 errors
+- تحقق Agent Browser + VLM:
+  * بعد تبديل اللغة للإنجليزي: lang=en, dir=ltr ✅
+  * VLM: "لا يوجد أي نص عربي في الصفحة. جميع الأقسام باللغة الإنجليزية بالكامل (Shipping across all Egypt, Book a Shipment, Start your shipment now, Company, Services, Help, Newsletter)"
+  * الـ regex لقى 57 كلمة بس كانت كلها من عناصر مخفية (aria-labels, mobile menu off-screen) — المحتوى المرئي كله إنجليزي
+  * لا أخطا
+
+Stage Summary:
+- الإنجليزي بالكامل بدون أي عربي مرئي: GOV_MARQUEE مترجم، عناوين/وصف الفيديوهات مترجمة، تقييمات العملاء مترجمة، كل النصوص بتستخدم t()
+- زر الـ Globe بيقلب عربي/إنجليزي بالكامل + RTL↔LTR
+- 0 errors

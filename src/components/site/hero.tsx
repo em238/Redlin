@@ -16,10 +16,15 @@ const FALLBACK_IMAGES = [
   { id: "3", url: "/images/warehouse.png", title: "مستودعات Redline", order: 2, active: true },
 ];
 
-const GOV_MARQUEE = [
+const GOV_MARQUEE_AR = [
   "القاهره", "الجيزه", "الاسكندريه", "المنيا", "اسيوط", "سوهاج",
   "الاقصر", "اسوان", "بورسعيد", "السويس", "طنطا", "المنصوره",
   "دمياط", "الفيوم", "الزقازيق", "الاسماعيليه", "شرم الشيخ", "الغردقه",
+];
+const GOV_MARQUEE_EN = [
+  "Cairo", "Giza", "Alexandria", "Minya", "Asyut", "Sohag",
+  "Luxor", "Aswan", "Port Said", "Suez", "Tanta", "Mansoura",
+  "Damietta", "Faiyum", "Zagazig", "Ismailia", "Sharm El Sheikh", "Hurghada",
 ];
 
 export function Hero() {
@@ -233,7 +238,7 @@ export function Hero() {
       {/* Marquee */}
       <div className="absolute bottom-0 inset-x-0 border-t border-white/10 bg-black/40 backdrop-blur-md py-3 overflow-hidden">
         <div className="flex animate-marquee whitespace-nowrap">
-          {[...GOV_MARQUEE, ...GOV_MARQUEE].map((g, i) => (
+          {[...(isAr ? GOV_MARQUEE_AR : GOV_MARQUEE_EN), ...(isAr ? GOV_MARQUEE_AR : GOV_MARQUEE_EN)].map((g, i) => (
             <span key={i} className="mx-6 text-sm text-white/70 font-medium flex items-center gap-2">
               <MapPin className="w-3.5 h-3.5 text-primary" />
               {g}

@@ -14,6 +14,15 @@ const FALLBACK = [
   { name: "Mohamed Adel", role: "تاجر جملة", company: "Adel Trading", content: "شحن ثقيل واحترافية عالية.", rating: 5 },
 ];
 
+// English translations for DB testimonial data (keyed by name)
+const TEST_EN: Record<string, { role: string; content: string }> = {
+  "Ahmed Mansour": { role: "Store Owner", content: "Excellent and fast service! Shipments reached my customers across all Egyptian governorates on time. Redline completely changed how I manage my shipments." },
+  "Sara El-Sayed": { role: "Sales Manager", content: "The best shipping company I've dealt with. Competitive prices and professional service. The tracking system is excellent." },
+  "Mohamed Adel": { role: "Wholesale Trader", content: "Heavy shipping and high professionalism. The team is professional and delivery is precise. I recommend Redline to everyone." },
+  "Nour Hassan": { role: "Startup Founder", content: "As a small business, Redline provided me with affordable shipping solutions with high quality. Thank you for the professionalism." },
+  "Khaled Ibrahim": { role: "Supply Chain Manager", content: "A strategic partnership for two years. The flexibility and speed in handling large quantities is unmatched. A reliable company by all measures." },
+};
+
 export function Testimonials() {
   const { t, isAr } = useT();
   const { data } = useQuery({
@@ -69,7 +78,7 @@ export function Testimonials() {
                     </div>
                     <div className="text-center sm:text-left">
                       <div className="font-bold">{current.name}</div>
-                      <div className="text-sm text-muted-foreground">{current.role}{current.company ? ` · ${current.company}` : ""}</div>
+                      <div className="text-sm text-muted-foreground">{isAr ? current.role : (TEST_EN[current.name]?.role || current.role)}{current.company ? ` · ${current.company}` : ""}</div>
                     </div>
                   </div>
                   {/* Quote side */}
@@ -80,7 +89,7 @@ export function Testimonials() {
                       ))}
                     </div>
                     <p className="text-lg sm:text-2xl leading-relaxed font-medium text-foreground/90">
-                      "{current.content}"
+                      "{isAr ? current.content : (TEST_EN[current.name]?.content || current.content)}"
                     </p>
                   </div>
                 </div>
