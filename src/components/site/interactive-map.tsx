@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Building2, Navigation, Layers, CheckCircle2, Radio, Zap } from "lucide-react";
+import { MapPin, Building2, Navigation, Layers, CheckCircle2, Radio } from "lucide-react";
 import { apiGet } from "@/lib/api";
 import { useT } from "@/lib/i18n";
 import { SectionHeading } from "@/components/shared/section-heading";
@@ -47,31 +47,6 @@ const NODE_CODES: Record<string, string> = {
   Casablanca: "MA-CAS", Johannesburg: "ZA-JNB", Algiers: "DZ-ALG", Tripoli: "LY-TIP",
 };
 
-// SLA / transit speed for each node
-const NODE_SLA: Record<string, { ar: string; en: string }> = {
-  Cairo: { ar: "المركز الرئيسي", en: "Primary Hub" },
-  Riyadh: { ar: "شحن جوي اكسبرس • 48 ساعة", en: "Express Air Freight • 48h" },
-  Dubai: { ar: "شحن جوي اكسبرس • 48 ساعة", en: "Express Air Freight • 48h" },
-  Muscat: { ar: "شحن جوي • 72 ساعة", en: "Air Freight • 72h" },
-  Khartoum: { ar: "شحن بري • 72 ساعة", en: "Ground Freight • 72h" },
-  "Addis Ababa": { ar: "شحن جوي • 96 ساعة", en: "Air Freight • 96h" },
-  Nairobi: { ar: "شحن جوي • 96 ساعة", en: "Air Freight • 96h" },
-  Lagos: { ar: "شحن جوي • 120 ساعة", en: "Air Freight • 120h" },
-  Casablanca: { ar: "شحن جوي • 120 ساعة", en: "Air Freight • 120h" },
-  Johannesburg: { ar: "شحن جوي • 144 ساعة", en: "Air Freight • 144h" },
-  Algiers: { ar: "شحن جوي • 96 ساعة", en: "Air Freight • 96h" },
-  Tripoli: { ar: "شحن بري • 72 ساعة", en: "Ground Freight • 72h" },
-};
-
-// Returns SLA text for a node
-const slaFor = (name: string, isAr: boolean, etaHours?: number, isRegional?: boolean) => {
-  if (NODE_SLA[name]) return isAr ? NODE_SLA[name].ar : NODE_SLA[name].en;
-  if (isRegional) return isAr ? "شحن إقليمي • 48 ساعة" : "Regional Freight • 48h";
-  if (etaHours && etaHours <= 24) return isAr ? "توصيل خلال 24 ساعة" : "Next-Day Delivery • 24h";
-  if (etaHours && etaHours <= 48) return isAr ? "توصيل خلال 48 ساعة" : "2-Day Delivery • 48h";
-  return isAr ? "توصيل خلال 72 ساعة" : "Standard Delivery • 72h";
-};
-
 // Stars + particles (stable random positions)
 const STARS = Array.from({ length: 80 }).map((_, i) => ({
   x: (i * 137.5) % 760,
@@ -95,9 +70,6 @@ export function InteractiveMap() {
   const [selected, setSelected] = useState<string | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>("ALL");
-  const [autoCycleIdx, setAutoCycleIdx] = useState(0);
-  const [isAutoCycling, setIsAutoCycling] = useState(false);
-  const lastInteractionRef = useRef<number>(Date.now());
 
   // Returns the localized name for a governorate (Arabic uses nameAr, English uses name).
   const govName = (g: Gov) => (isAr ? g.nameAr : g.name);
@@ -143,52 +115,11 @@ export function InteractiveMap() {
   const selReg = regional.find((r) => r.name === activeName);
   const sel = selGov || selReg || null;
 
-  // All nodes merged for category filtering
-  const allNodes = useMemo(() => [
-    ...markers.map(m => ({ ...m, isRegional: false })),
-    ...regional.map(r => ({ ...r, isRegional: true })),
-  ], [markers, regional]);
-
   // Category filter — determines which nodes are highlighted vs dimmed
   const isNodeActive = (zone: string) => {
     if (activeCategory === "ALL") return true;
     return zone === activeCategory;
   };
-
-  // Key hubs for auto-cycle
-  const autoCycleHubs = useMemo(() => {
-    const hubNames = ["Cairo", "Alexandria", "Aswan", "Riyadh", "Dubai"];
-    return hubNames.map(n => allNodes.find(node => node.name === n)).filter(Boolean) as typeof allNodes;
-  }, [allNodes]);
-
-  // Reset interaction timer on user activity
-  const onUserInteraction = useCallback(() => {
-    lastInteractionRef.current = Date.now();
-    setIsAutoCycling(false);
-  }, []);
-
-  // Idle auto-cycle: after 4 seconds of no interaction, cycle through key hubs
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const idleTime = Date.now() - lastInteractionRef.current;
-      if (idleTime > 4000) {
-        setIsAutoCycling(true);
-        setAutoCycleIdx(prev => (prev + 1) % Math.max(autoCycleHubs.length, 1));
-      }
-    }, 1500);
-    return () => clearInterval(interval);
-  }, [autoCycleHubs.length]);
-
-  // Apply auto-cycle selection
-  useEffect(() => {
-    if (isAutoCycling && autoCycleHubs.length > 0) {
-      const target = autoCycleHubs[autoCycleIdx % autoCycleHubs.length];
-      if (target) {
-        setSelected(target.name);
-        setActiveCategory("ALL");
-      }
-    }
-  }, [isAutoCycling, autoCycleIdx, autoCycleHubs]);
 
   // Compute curved beam path from hub to active node (quadratic Bezier)
   const beamPath = useMemo(() => {
@@ -267,7 +198,7 @@ export function InteractiveMap() {
 
             {/* SVG holographic map — wide */}
             <div className="relative w-full aspect-[16/11] sm:aspect-[16/9] bg-gradient-to-b from-black via-zinc-950 to-black">
-              <svg viewBox="0 0 760 700" preserveAspectRatio="xMidYMid meet" className="w-full h-full" style={{ touchAction: "none" }} onMouseEnter={onUserInteraction} onTouchStart={onUserInteraction}>
+              <svg viewBox="0 0 760 700" preserveAspectRatio="xMidYMid meet" className="w-full h-full" style={{ touchAction: "none" }}>
                 <defs>
                   {/* beam gradients (vertical: transparent top → bright base) */}
                   {Object.entries(ZONE).map(([k, v]) => (
@@ -421,9 +352,9 @@ export function InteractiveMap() {
                     <g key={r.name} transform={`translate(${r.x} ${r.y})`}
                       className="cursor-pointer"
                       style={{ opacity: isDimmed ? 0.3 : 1, transition: "opacity 0.3s ease" }}
-                      onMouseEnter={() => { onUserInteraction(); setHovered(r.name); }}
-                      onMouseLeave={() => { onUserInteraction(); setHovered(null); }}
-                      onClick={() => { onUserInteraction(); setSelected(r.name); }}
+                      onMouseEnter={() => setHovered(r.name)}
+                      onMouseLeave={() => setHovered(null)}
+                      onClick={() => setSelected(r.name)}
                     >
                       {/* Pulsing ripple when active */}
                       {isActive && (
@@ -450,9 +381,9 @@ export function InteractiveMap() {
                 {/* Cairo HQ — Egypt service cluster (27 governorates represented) */}
                 {hub && (
                   <g transform={`translate(${hub.x} ${hub.y})`} className="cursor-pointer"
-                    onMouseEnter={() => { onUserInteraction(); setHovered(hub.name); }}
-                    onMouseLeave={() => { onUserInteraction(); setHovered(null); }}
-                    onClick={() => { onUserInteraction(); setSelected(hub.name); }}
+                    onMouseEnter={() => setHovered(hub.name)}
+                    onMouseLeave={() => setHovered(null)}
+                    onClick={() => setSelected(hub.name)}
                   >
                     {/* radar sweep */}
                     <g>
@@ -496,9 +427,9 @@ export function InteractiveMap() {
                       transition={{ type: "spring", stiffness: 200, damping: 18 }}
                       transform={`translate(${selGov.x} ${selGov.y})`}
                       className="cursor-pointer"
-                      onMouseEnter={() => { onUserInteraction(); setHovered(selGov.name); }}
-                      onMouseLeave={() => { onUserInteraction(); setHovered(null); }}
-                      onClick={() => { onUserInteraction(); setSelected(null); }}
+                      onMouseEnter={() => setHovered(selGov.name)}
+                      onMouseLeave={() => setHovered(null)}
+                      onClick={() => setSelected(null)}
                     >
                       <circle r="18" fill="none" stroke={ZONE[selGov.zone]?.color} strokeWidth="1.8" className="radar-ring" style={{ filter: "drop-shadow(0 0 6px " + ZONE[selGov.zone]?.color + ")" }} />
                       <circle r="14" fill={`url(#dg${selGov.zone})`} opacity="0.95" className="city-light" />
@@ -553,11 +484,6 @@ export function InteractiveMap() {
                           {t("map.active")}
                         </span>
                       </div>
-                      {/* SLA / Transit speed */}
-                      <div className="mt-2 flex items-center gap-1 text-[11px] text-zinc-400">
-                        <Zap className="w-3 h-3 text-amber-400 shrink-0" />
-                        <span className="truncate">{slaFor(sel.name, isAr, selGov?.etaHours, !!selReg)}</span>
-                      </div>
                     </motion.div>
                   ) : (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -574,7 +500,7 @@ export function InteractiveMap() {
             <div className="flex flex-wrap items-center justify-center gap-2 px-4 py-3 border-t border-white/10 bg-zinc-950/80">
               {/* All button */}
               <button
-                onClick={() => { onUserInteraction(); setActiveCategory("ALL"); }}
+                onClick={() => setActiveCategory("ALL")}
                 className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
                   activeCategory === "ALL"
                     ? "bg-white/15 text-white border border-white/20"
@@ -588,7 +514,7 @@ export function InteractiveMap() {
               {Object.entries(ZONE).map(([k, v]) => (
                 <button
                   key={k}
-                  onClick={() => { onUserInteraction(); setActiveCategory(k); }}
+                  onClick={() => setActiveCategory(k)}
                   className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
                     activeCategory === k
                       ? "bg-white/15 text-white border border-white/20"
