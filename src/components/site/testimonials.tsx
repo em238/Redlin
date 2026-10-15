@@ -46,8 +46,6 @@ export function Testimonials() {
 
   const roleFor = () => isAr ? current.role : (TEST_EN[current.name]?.role || current.role);
   const contentFor = () => isAr ? current.content : (TEST_EN[current.name]?.content || current.content);
-  const authorAlign = isAr ? "text-right items-end" : "text-left items-start";
-  const quoteAlign = isAr ? "text-right" : "text-left";
 
   return (
     <section className="py-14 sm:py-24 lg:py-28">
@@ -67,28 +65,34 @@ export function Testimonials() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -16 }}
                 transition={{ duration: 0.35 }}
-                className="relative rounded-3xl border border-border/60 bg-gradient-to-br from-card to-muted/20 shadow-card p-6 sm:p-10 lg:p-12 overflow-hidden"
+                className="relative rounded-3xl border border-border/60 bg-card shadow-card p-6 sm:p-8 lg:p-10 overflow-hidden"
               >
-                {/* Watermark quote — background, adapts to LTR/RTL */}
-                <Quote className={`absolute top-4 ${isAr ? "right-4" : "left-4"} w-24 h-24 text-primary/[0.06] pointer-events-none ${isAr ? "" : "rotate-180"}`} />
+                {/* 3-part layout: Content → Divider → Client Info */}
+                <div className="relative flex flex-col md:flex-row md:items-center gap-6 md:gap-8">
 
-                {/* Flex row: quote + author — stacks on mobile */}
-                <div className="relative flex flex-col sm:flex-row sm:items-start gap-6 sm:gap-8">
-                  {/* Quote side — order-1 in LTR, order-2 in RTL */}
-                  <div className={`flex-1 ${isAr ? "sm:order-2" : "sm:order-1"} ${quoteAlign}`}>
-                    {/* Star rating — matches content alignment */}
-                    <div className={`flex gap-0.5 mb-4 ${isAr ? "justify-end" : "justify-start"}`}>
+                  {/* 1. Review Content Side (flex-1) */}
+                  <div className="relative flex-1 space-y-4">
+                    {/* Watermark quote — on the TEXT side only, at the start */}
+                    <Quote className={`absolute -top-4 ${isAr ? "right-0" : "left-0"} w-16 h-16 sm:w-20 sm:h-20 text-primary/[0.07] pointer-events-none select-none -z-0 ${isAr ? "" : "rotate-180"}`} />
+
+                    {/* Star rating */}
+                    <div className={`flex gap-0.5 relative z-10 ${isAr ? "justify-end" : "justify-start"}`}>
                       {Array.from({ length: current.rating }).map((_, j) => (
                         <Star key={j} className="w-4 h-4 sm:w-5 sm:h-5 fill-amber-400 text-amber-400" />
                       ))}
                     </div>
-                    <p className="text-base sm:text-xl lg:text-2xl leading-relaxed font-medium text-foreground/90">
+
+                    {/* Testimonial quote */}
+                    <p className={`text-base sm:text-lg lg:text-xl leading-relaxed font-medium text-foreground/90 relative z-10 ${isAr ? "text-right" : "text-left"}`}>
                       "{contentFor()}"
                     </p>
                   </div>
 
-                  {/* Author side — with vertical border indicator */}
-                  <div className={`flex sm:flex-col items-center gap-3 sm:min-w-[160px] sm:pt-2 ${isAr ? "sm:order-1 sm:border-r-2 sm:border-primary/30 sm:pr-6" : "sm:order-2 sm:border-l-2 sm:border-primary/30 sm:pl-6"} ${authorAlign}`}>
+                  {/* 2. Vertical Divider — strictly BETWEEN content and author */}
+                  <div className="hidden md:block w-px self-stretch bg-gradient-to-b from-transparent via-primary/30 to-transparent shrink-0" />
+
+                  {/* 3. Client Info Side (shrink-0, fixed width) */}
+                  <div className={`flex flex-col items-center gap-3 shrink-0 min-w-[160px] ${isAr ? "text-right" : "text-left"}`}>
                     {/* Avatar */}
                     <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-primary to-amber-600 p-[2px] shadow-soft shrink-0">
                       <div className="w-full h-full rounded-full bg-card flex items-center justify-center text-primary font-bold text-lg sm:text-xl">
@@ -96,21 +100,22 @@ export function Testimonials() {
                       </div>
                     </div>
                     {/* Name + role */}
-                    <div className={`text-center sm:${isAr ? "text-right" : "text-left"}`}>
+                    <div className="text-center">
                       <div className="font-bold text-sm sm:text-base">{current.name}</div>
                       <div className="text-xs sm:text-sm text-muted-foreground mt-0.5">
                         {roleFor()}{current.company ? ` · ${current.company}` : ""}
                       </div>
                     </div>
                   </div>
+
                 </div>
               </motion.div>
             </AnimatePresence>
           </div>
 
-          {/* Navigation: arrows + dots centered */}
+          {/* Navigation: centered arrows + dots */}
           <div className="mt-6 flex items-center justify-center gap-4">
-            {/* Previous — left in LTR, right in RTL */}
+            {/* Previous — left arrow in LTR, right arrow in RTL */}
             <button
               onClick={prev}
               className="w-9 h-9 rounded-full border border-border bg-card hover:border-primary/40 hover:bg-muted flex items-center justify-center transition-colors"
@@ -131,7 +136,7 @@ export function Testimonials() {
               ))}
             </div>
 
-            {/* Next — right in LTR, left in RTL */}
+            {/* Next — right arrow in LTR, left arrow in RTL */}
             <button
               onClick={next}
               className="w-9 h-9 rounded-full border border-border bg-card hover:border-primary/40 hover:bg-muted flex items-center justify-center transition-colors"
