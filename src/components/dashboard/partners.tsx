@@ -19,34 +19,7 @@ import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 import { toast } from "sonner";
 import { FileUpload } from "@/components/shared/file-upload";
 
-const ICONS: Record<string, any> = {
-  building: Building2, briefcase: Briefcase, store: Store, truck: Truck,
-  cpu: Cpu, smartphone: Smartphone, shirt: Shirt, palette: Palette,
-  "shopping-bag": ShoppingBag,
-};
 
-const ICON_OPTIONS = [
-  { value: "building", label: "مبنى" },
-  { value: "briefcase", label: "حقيبة" },
-  { value: "store", label: "متجر" },
-  { value: "truck", label: "شاحنة" },
-  { value: "cpu", label: "تقنية" },
-  { value: "smartphone", label: "هاتف" },
-  { value: "shirt", label: "ملابس" },
-  { value: "palette", label: "فن" },
-  { value: "shopping-bag", label: "تسوق" },
-];
-
-const COLOR_OPTIONS = [
-  { value: "#dc2626", label: "أحمر" },
-  { value: "#2563eb", label: "أزرق" },
-  { value: "#16a34a", label: "أخضر" },
-  { value: "#d97706", label: "كهرماني" },
-  { value: "#9333ea", label: "بنفسجي" },
-  { value: "#ec4899", label: "وردي" },
-  { value: "#0d9488", label: "تركواز" },
-  { value: "#4f46e5", label: "نيلي" },
-];
 
 const LOGO_OPTIONS = [
   "/images/partner-1.png", "/images/partner-2.png", "/images/partner-3.png",
@@ -169,7 +142,7 @@ export function DashboardPartners() {
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           <AnimatePresence>
             {partners.map((p: any) => {
-              const Icon = ICONS[p.icon] || Building2;
+              // Icons removed — only images used for partners now
               return (
                 <motion.div
                   key={p.id}
@@ -184,8 +157,8 @@ export function DashboardPartners() {
                       {p.logo ? (
                         <img src={p.logo} alt={p.name} className="w-16 h-16 object-contain" />
                       ) : (
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: `${p.color}15` }}>
-                          <Icon className="w-6 h-6" style={{ color: p.color }} />
+                        <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
+                          <span className="text-lg font-bold text-muted-foreground">{p.name?.charAt(0)}</span>
                         </div>
                       )}
                       <div className="text-sm font-bold text-foreground/80">{p.name}</div>
