@@ -55,18 +55,23 @@ export function CustomCursor() {
   if (!enabled) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-[100] hidden md:block" aria-hidden>
+    <div
+      dir="ltr"
+      className="pointer-events-none fixed top-0 left-0 z-[999999] hidden md:block"
+      aria-hidden
+      style={{ width: 0, height: 0 }}
+    >
       {/* Outer ring (springs behind) */}
       <motion.div
         style={{ x: ringX, y: ringY }}
-        className="absolute -ml-4 -mt-4 w-8 h-8 rounded-full border border-primary/60"
+        className="absolute left-0 top-0 -ml-4 -mt-4 w-8 h-8 rounded-full border border-primary/60"
         animate={{ scale: hovering ? 1.6 : 1, opacity: hovering ? 1 : 0.5 }}
         transition={{ type: "spring", stiffness: 250, damping: 20 }}
       />
       {/* Inner dot (1:1 tracking) */}
       <motion.div
         style={{ x: dotX, y: dotY }}
-        className="absolute -ml-1 -mt-1 w-2 h-2 rounded-full bg-primary"
+        className="absolute left-0 top-0 -ml-1 -mt-1 w-2 h-2 rounded-full bg-primary"
         animate={{ scale: hovering ? 0.5 : 1, opacity: 1 }}
         transition={{ type: "spring", stiffness: 500, damping: 28 }}
       />
