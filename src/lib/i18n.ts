@@ -16,6 +16,15 @@ export const MESSAGES: Record<Locale, Record<string, string>> = {
     "nav.dashboard": "لوحة التحكم",
     "nav.tagline": "شحن سريع وآمن",
 
+    // WhatsApp Chat Widget
+    "wa.brand": "ريدلاين للشحن",
+    "wa.online": "نشط الآن",
+    "wa.welcome": "مرحباً بك في Redline! كيف يمكننا مساعدتك في شحنتك اليوم؟",
+    "wa.placeholder": "اكتب رسالتك...",
+    "wa.send": "إرسال",
+    "wa.tooltip": "تواصل معنا على واتساب",
+    "wa.default": "مرحباً، أريد الاستفسار عن خدمات الشحن",
+
     // Hero
     "hero.badge": "نشحن لكل محافظات مصر — 27 محافظة بنفس السرعة",
     "hero.title1": "شحن يصل لكل مصر",
@@ -490,6 +499,15 @@ export const MESSAGES: Record<Locale, Record<string, string>> = {
     "nav.contact": "Contact",
     "nav.dashboard": "Dashboard",
     "nav.tagline": "Fast & Safe Shipping",
+
+    // WhatsApp Chat Widget
+    "wa.brand": "Redline Transport",
+    "wa.online": "Online now",
+    "wa.welcome": "Hello! Welcome to Redline. How can we help you with your shipment today?",
+    "wa.placeholder": "Type your message...",
+    "wa.send": "Send",
+    "wa.tooltip": "Chat with us on WhatsApp",
+    "wa.default": "Hello, I'd like to inquire about shipping services",
 
     // Hero
     "hero.badge": "Shipping to all of Egypt — 27 governorates at the same speed",

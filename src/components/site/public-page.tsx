@@ -17,6 +17,7 @@ import { CustomCursor } from "@/components/shared/custom-cursor";
 import { PageLoadReveal } from "@/components/shared/page-load-reveal";
 import { SectionDivider } from "@/components/shared/section-divider";
 import { FloatingCTA, ScrollTopButton } from "@/components/shared/floating-cta";
+import { WhatsAppChat } from "@/components/shared/whatsapp-chat";
 
 export function PublicPage() {
   return (
@@ -44,6 +45,7 @@ export function PublicPage() {
       <Footer />
       <FloatingCTA />
       <ScrollTopButton />
+      <WhatsAppChat />
     </div>
   );
 }

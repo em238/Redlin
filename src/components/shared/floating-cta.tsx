@@ -46,7 +46,7 @@ export function FloatingCTA() {
           exit={{ y: 80, opacity: 0, scale: 0.8 }}
           transition={{ type: "spring", stiffness: 280, damping: 24 }}
           onClick={onClick}
-          className="md:hidden fixed bottom-5 end-4 z-40 inline-flex items-center gap-2 h-12 ps-4 pe-5 rounded-full bg-gradient-to-r from-primary to-red-700 text-primary-foreground font-semibold text-sm shadow-2xl shadow-primary/40 fab-pulse"
+          className="md:hidden fixed bottom-5 start-4 z-40 inline-flex items-center gap-2 h-12 ps-4 pe-5 rounded-full bg-gradient-to-r from-primary to-red-700 text-primary-foreground font-semibold text-sm shadow-2xl shadow-primary/40 fab-pulse"
           aria-label={t("hero.cta1")}
         >
           <Zap className="w-4.5 h-4.5" fill="currentColor" />
@@ -74,7 +74,7 @@ export function ScrollTopButton() {
           whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.92 }}
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="hidden md:flex fixed bottom-6 end-6 z-40 w-11 h-11 rounded-full bg-card border border-border shadow-elevated items-center justify-center text-foreground hover:text-primary hover:border-primary/40 transition-colors"
+          className="hidden md:flex fixed bottom-6 start-6 z-40 w-11 h-11 rounded-full bg-card border border-border shadow-elevated items-center justify-center text-foreground hover:text-primary hover:border-primary/40 transition-colors"
           aria-label="Scroll to top"
         >
           <ArrowUp className="w-4 h-4" />
