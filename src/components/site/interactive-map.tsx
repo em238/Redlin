@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Building2, Navigation, Layers, CheckCircle2, Radio } from "lucide-react";
+import { MapPin, Building2, Navigation, Layers, CheckCircle2, Radio, Zap } from "lucide-react";
 import { apiGet } from "@/lib/api";
 import { useT } from "@/lib/i18n";
 import { SectionHeading } from "@/components/shared/section-heading";
@@ -26,11 +26,51 @@ const ZONE: Record<string, { labelAr: string; labelEn: string; color: string }> 
   A: { labelAr: "القاهرة الكبرى", labelEn: "Greater Cairo", color: "#34d399" },
   B: { labelAr: "الوجه البحري", labelEn: "Delta", color: "#60a5fa" },
   C: { labelAr: "الصعيد", labelEn: "Upper Egypt", color: "#fbbf24" },
-  D: { labelAr: "الحدود", labelEn: "Borders", color: "#fb7185" },
+  D: { labelAr: "الحدود والقناة", labelEn: "Borders & Canal", color: "#fb7185" },
+  R: { labelAr: "مراكز إقليمية وخليجية", labelEn: "Regional & Gulf Hubs", color: "#fbbf24" },
 };
 
 const HUB = "Cairo";
 const HUB_COLOR = "#ef4444";
+
+// Node codes for telemetry display (e.g. "EG-ASW", "SA-RUH", "UAE-DXB")
+const NODE_CODES: Record<string, string> = {
+  Cairo: "EG-CAI", Giza: "EG-GIZ", Alexandria: "EG-ALX", Qalyubia: "EG-QLY",
+  "Port Said": "EG-PSD", Suez: "EG-SUZ", Dakahlia: "EG-DAK", Sharqia: "EG-SHR",
+  "Kafr El Sheikh": "EG-KFS", Gharbia: "EG-GHB", Monufia: "EG-MNF", Beheira: "EG-BHR",
+  Ismailia: "EG-ISM", Faiyum: "EG-FYM", "Beni Suef": "EG-BNS", Minya: "EG-MIN",
+  Asyut: "EG-ASY", Sohag: "EG-SHG", Qena: "EG-QEN", Luxor: "EG-LXR",
+  Aswan: "EG-ASW", "Red Sea": "EG-RDS", "New Valley": "EG-NWV", Matrouh: "EG-MAT",
+  "North Sinai": "EG-NSN", "South Sinai": "EG-SSN", Damietta: "EG-DMT",
+  Riyadh: "SA-RUH", Dubai: "UAE-DXB", Muscat: "OM-MCT", Khartoum: "SD-KRT",
+  "Addis Ababa": "ET-ADD", Nairobi: "KE-NBO", Lagos: "NG-LOS",
+  Casablanca: "MA-CAS", Johannesburg: "ZA-JNB", Algiers: "DZ-ALG", Tripoli: "LY-TIP",
+};
+
+// SLA / transit speed for each node
+const NODE_SLA: Record<string, { ar: string; en: string }> = {
+  Cairo: { ar: "المركز الرئيسي", en: "Primary Hub" },
+  Riyadh: { ar: "شحن جوي اكسبرس • 48 ساعة", en: "Express Air Freight • 48h" },
+  Dubai: { ar: "شحن جوي اكسبرس • 48 ساعة", en: "Express Air Freight • 48h" },
+  Muscat: { ar: "شحن جوي • 72 ساعة", en: "Air Freight • 72h" },
+  Khartoum: { ar: "شحن بري • 72 ساعة", en: "Ground Freight • 72h" },
+  "Addis Ababa": { ar: "شحن جوي • 96 ساعة", en: "Air Freight • 96h" },
+  Nairobi: { ar: "شحن جوي • 96 ساعة", en: "Air Freight • 96h" },
+  Lagos: { ar: "شحن جوي • 120 ساعة", en: "Air Freight • 120h" },
+  Casablanca: { ar: "شحن جوي • 120 ساعة", en: "Air Freight • 120h" },
+  Johannesburg: { ar: "شحن جوي • 144 ساعة", en: "Air Freight • 144h" },
+  Algiers: { ar: "شحن جوي • 96 ساعة", en: "Air Freight • 96h" },
+  Tripoli: { ar: "شحن بري • 72 ساعة", en: "Ground Freight • 72h" },
+};
+
+// Returns SLA text for a node
+const slaFor = (name: string, isAr: boolean, etaHours?: number, isRegional?: boolean) => {
+  if (NODE_SLA[name]) return isAr ? NODE_SLA[name].ar : NODE_SLA[name].en;
+  if (isRegional) return isAr ? "شحن إقليمي • 48 ساعة" : "Regional Freight • 48h";
+  if (etaHours && etaHours <= 24) return isAr ? "توصيل خلال 24 ساعة" : "Next-Day Delivery • 24h";
+  if (etaHours && etaHours <= 48) return isAr ? "توصيل خلال 48 ساعة" : "2-Day Delivery • 48h";
+  return isAr ? "توصيل خلال 72 ساعة" : "Standard Delivery • 72h";
+};
 
 // Stars + particles (stable random positions)
 const STARS = Array.from({ length: 80 }).map((_, i) => ({
@@ -54,11 +94,17 @@ export function InteractiveMap() {
   const govs = data?.governorates ?? FALLBACK;
   const [selected, setSelected] = useState<string | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string>("ALL");
+  const [autoCycleIdx, setAutoCycleIdx] = useState(0);
+  const [isAutoCycling, setIsAutoCycling] = useState(false);
+  const lastInteractionRef = useRef<number>(Date.now());
 
   // Returns the localized name for a governorate (Arabic uses nameAr, English uses name).
   const govName = (g: Gov) => (isAr ? g.nameAr : g.name);
   // Returns the localized zone label.
   const zoneLabel = (z: string) => (isAr ? ZONE[z]?.labelAr : ZONE[z]?.labelEn) ?? z;
+  // Returns the node code (e.g. "EG-ASW", "SA-RUH")
+  const nodeCode = (name: string) => NODE_CODES[name] || `EG-${name.slice(0, 3).toUpperCase()}`;
 
   const markers = useMemo(
     () =>
@@ -72,20 +118,90 @@ export function InteractiveMap() {
     [govs]
   );
 
-  // Regional city nodes (Gulf + Africa) projected
+  // Regional city nodes (Gulf + Africa) projected — assigned zone "R"
   const regional = useMemo(
-    () => REGIONAL_CITIES.map((c) => ({ ...c, ...project(c.lat, c.lng) })),
+    () => REGIONAL_CITIES.map((c) => ({ ...c, ...project(c.lat, c.lng), zone: "R" as const })),
     []
   );
 
   const hub = markers.find((m) => m.name === HUB) || markers[0];
-  const sel = markers.find((m) => m.name === selected);
 
+  // Combined zone counts including regional
   const zoneCounts = useMemo(() => {
-    const c: Record<string, number> = { A: 0, B: 0, C: 0, D: 0 };
+    const c: Record<string, number> = { A: 0, B: 0, C: 0, D: 0, R: 0 };
     markers.forEach((m) => { if (ZONE[m.zone]) c[m.zone]++; });
+    c.R = regional.length;
     return c;
-  }, [markers]);
+  }, [markers, regional]);
+
+  // Total node count
+  const totalNodes = markers.length + regional.length;
+
+  // Active node = selected OR hovered (hovered takes priority for live feedback)
+  const activeName = hovered || selected;
+  const selGov = markers.find((m) => m.name === activeName);
+  const selReg = regional.find((r) => r.name === activeName);
+  const sel = selGov || selReg || null;
+
+  // All nodes merged for category filtering
+  const allNodes = useMemo(() => [
+    ...markers.map(m => ({ ...m, isRegional: false })),
+    ...regional.map(r => ({ ...r, isRegional: true })),
+  ], [markers, regional]);
+
+  // Category filter — determines which nodes are highlighted vs dimmed
+  const isNodeActive = (zone: string) => {
+    if (activeCategory === "ALL") return true;
+    return zone === activeCategory;
+  };
+
+  // Key hubs for auto-cycle
+  const autoCycleHubs = useMemo(() => {
+    const hubNames = ["Cairo", "Alexandria", "Aswan", "Riyadh", "Dubai"];
+    return hubNames.map(n => allNodes.find(node => node.name === n)).filter(Boolean) as typeof allNodes;
+  }, [allNodes]);
+
+  // Reset interaction timer on user activity
+  const onUserInteraction = useCallback(() => {
+    lastInteractionRef.current = Date.now();
+    setIsAutoCycling(false);
+  }, []);
+
+  // Idle auto-cycle: after 4 seconds of no interaction, cycle through key hubs
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const idleTime = Date.now() - lastInteractionRef.current;
+      if (idleTime > 4000) {
+        setIsAutoCycling(true);
+        setAutoCycleIdx(prev => (prev + 1) % Math.max(autoCycleHubs.length, 1));
+      }
+    }, 1500);
+    return () => clearInterval(interval);
+  }, [autoCycleHubs.length]);
+
+  // Apply auto-cycle selection
+  useEffect(() => {
+    if (isAutoCycling && autoCycleHubs.length > 0) {
+      const target = autoCycleHubs[autoCycleIdx % autoCycleHubs.length];
+      if (target) {
+        setSelected(target.name);
+        setActiveCategory("ALL");
+      }
+    }
+  }, [isAutoCycling, autoCycleIdx, autoCycleHubs]);
+
+  // Compute curved beam path from hub to active node (quadratic Bezier)
+  const beamPath = useMemo(() => {
+    if (!hub || !sel) return null;
+    const midX = (hub.x + sel.x) / 2;
+    const midY = (hub.y + sel.y) / 2;
+    // Offset control point for a gentle curve
+    const dx = sel.x - hub.x;
+    const dy = sel.y - hub.y;
+    const perpX = -dy * 0.25;
+    const perpY = dx * 0.25;
+    return `M ${hub.x} ${hub.y} Q ${midX + perpX} ${midY + perpY} ${sel.x} ${sel.y}`;
+  }, [hub, sel]);
 
   return (
     <section id="map" className="scroll-mt-20 pt-20 pb-14 sm:pt-28 sm:pb-20 lg:pt-32 lg:pb-24 bg-zinc-950 relative overflow-hidden">
@@ -122,7 +238,7 @@ export function InteractiveMap() {
             transition={{ delay: 0.1 }}
             className="mt-4 text-zinc-300 text-lg"
           >
-            {markers.length} {t("map.subtitle").split("+")[0].trim()} + {regional.length} {t("map.subtitle").split("+")[1]?.trim()}
+            {totalNodes} {isAr ? "نقطة لوجستية نشطة" : "Nodes Active"}
           </motion.p>
         </div>
 
@@ -145,13 +261,13 @@ export function InteractiveMap() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
                 </span>
-                {markers.length + regional.length} {t("map.nodes")}
+                {totalNodes} {t("map.nodes")}
               </div>
             </div>
 
             {/* SVG holographic map — wide */}
             <div className="relative w-full aspect-[16/11] sm:aspect-[16/9] bg-gradient-to-b from-black via-zinc-950 to-black">
-              <svg viewBox="0 0 760 700" preserveAspectRatio="xMidYMid meet" className="w-full h-full" style={{ touchAction: "none" }}>
+              <svg viewBox="0 0 760 700" preserveAspectRatio="xMidYMid meet" className="w-full h-full" style={{ touchAction: "none" }} onMouseEnter={onUserInteraction} onTouchStart={onUserInteraction}>
                 <defs>
                   {/* beam gradients (vertical: transparent top → bright base) */}
                   {Object.entries(ZONE).map(([k, v]) => (
@@ -183,6 +299,13 @@ export function InteractiveMap() {
                   <linearGradient id="radarGrad" x1="0" y1="0" x2="1" y2="0">
                     <stop offset="0%" stopColor={HUB_COLOR} stopOpacity="0.5" />
                     <stop offset="100%" stopColor={HUB_COLOR} stopOpacity="0" />
+                  </linearGradient>
+
+                  {/* Active beam gradient (cyan → red) */}
+                  <linearGradient id="beamGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.9" />
+                    <stop offset="50%" stopColor="#a78bfa" stopOpacity="0.7" />
+                    <stop offset="100%" stopColor={HUB_COLOR} stopOpacity="0.9" />
                   </linearGradient>
 
                   {/* nile neon */}
@@ -237,19 +360,40 @@ export function InteractiveMap() {
                 {hub && markers.filter((m) => m.name !== hub.name).map((m, i) => {
                   const zc = ZONE[m.zone]?.color || HUB_COLOR;
                   const isActive = selected === m.name || hovered === m.name;
+                  const isDimmed = !isNodeActive(m.zone);
                   return (
                     <line key={"net" + m.id} x1={hub.x} y1={hub.y} x2={m.x} y2={m.y}
                       stroke={zc} strokeWidth={isActive ? 1.4 : 0.6} strokeOpacity={isActive ? 0.6 : 0.16}
-                      strokeDasharray="4 4" className="flow-line" style={{ animationDelay: (i % 6) * 0.2 + "s" }} />
+                      strokeDasharray="4 4" className="flow-line"
+                      style={{ animationDelay: (i % 6) * 0.2 + "s", opacity: isDimmed ? 0.1 : 1, transition: "opacity 0.3s ease" }} />
                   );
                 })}
 
                 {/* Regional network lines from Cairo to Gulf + African cities (amber) */}
-                {hub && regional.map((r, i) => (
-                  <line key={"reg" + i} x1={hub.x} y1={hub.y} x2={r.x} y2={r.y}
-                    stroke="#fbbf24" strokeWidth="0.5" strokeOpacity="0.18"
-                    strokeDasharray="3 5" className="flow-line" style={{ animationDelay: (i % 5) * 0.25 + "s" }} />
-                ))}
+                {hub && regional.map((r, i) => {
+                  const isDimmed = !isNodeActive("R");
+                  return (
+                    <line key={"reg" + i} x1={hub.x} y1={hub.y} x2={r.x} y2={r.y}
+                      stroke="#fbbf24" strokeWidth="0.5" strokeOpacity="0.18"
+                      strokeDasharray="3 5" className="flow-line"
+                      style={{ animationDelay: (i % 5) * 0.25 + "s", opacity: isDimmed ? 0.1 : 1, transition: "opacity 0.3s ease" }} />
+                  );
+                })}
+
+                {/* Animated beam from Cairo hub to active node (curved, flowing dashes) */}
+                {beamPath && (
+                  <>
+                    {/* Glow underlay */}
+                    <path d={beamPath} fill="none" stroke="url(#beamGrad)" strokeWidth="6"
+                      strokeLinecap="round" opacity="0.25" filter="url(#bigGlow)" />
+                    {/* Main beam with flowing dashes */}
+                    <path d={beamPath} fill="none" stroke="url(#beamGrad)" strokeWidth="2"
+                      strokeLinecap="round" strokeDasharray="8 6" className="flow-line" opacity="0.9" />
+                    {/* Bright core */}
+                    <path d={beamPath} fill="none" stroke="#fff" strokeWidth="0.8"
+                      strokeLinecap="round" strokeDasharray="2 10" className="flow-line" opacity="0.7" />
+                  </>
+                )}
 
                 {/* Floating particles */}
                 {PARTICLES.map((p, i) => (
@@ -270,17 +414,33 @@ export function InteractiveMap() {
                 {/* Regional city nodes — flat luminous gold dots */}
                 {regional.map((r) => {
                   const isHov = hovered === r.name;
+                  const isSel = selected === r.name;
+                  const isActive = isHov || isSel;
+                  const isDimmed = !isNodeActive("R");
                   return (
-                    <g key={r.name} transform={`translate(${r.x} ${r.y})`} className="cursor-pointer" onMouseEnter={() => setHovered(r.name)} onMouseLeave={() => setHovered(null)}>
+                    <g key={r.name} transform={`translate(${r.x} ${r.y})`}
+                      className="cursor-pointer"
+                      style={{ opacity: isDimmed ? 0.3 : 1, transition: "opacity 0.3s ease" }}
+                      onMouseEnter={() => { onUserInteraction(); setHovered(r.name); }}
+                      onMouseLeave={() => { onUserInteraction(); setHovered(null); }}
+                      onClick={() => { onUserInteraction(); setSelected(r.name); }}
+                    >
+                      {/* Pulsing ripple when active */}
+                      {isActive && (
+                        <circle r="20" fill="none" stroke="#fbbf24" strokeWidth="1.5" opacity="0.6">
+                          <animate attributeName="r" values="8;22;8" dur="2s" repeatCount="indefinite" />
+                          <animate attributeName="opacity" values="0.6;0;0.6" dur="2s" repeatCount="indefinite" />
+                        </circle>
+                      )}
                       <circle r="16" fill="#fbbf24" fillOpacity="0.12" className="city-light" filter="url(#bigGlow)" />
                       <circle r="8" fill="#fbbf24" fillOpacity="0.28" filter="url(#softGlow)" />
-                      <circle r={isHov ? 6 : 4.8} fill="#fbbf24" stroke="#fff" strokeWidth="1.8" filter="url(#softGlow)" />
+                      <circle r={isActive ? 6 : 4.8} fill="#fbbf24" stroke="#fff" strokeWidth="1.8" filter="url(#softGlow)" />
                       <circle r="1.8" fill="#fff" />
-                      {isHov && (
+                      {(isActive) && (
                         <g transform="translate(0 -18)">
                           <path d="M -3 8 L 3 8 L 0 12 Z" fill="#0a0a0a" stroke="#fbbf24" strokeWidth="1.4" />
                           <rect x="-54" y="-16" width="108" height="24" rx="6" fill="#0a0a0a" stroke="#fbbf24" strokeWidth="1.4" filter="url(#softGlow)" />
-                          <text y="0" textAnchor="middle" fill="#fde68a" fontSize="11" className="font-bold">{(isAr ? r.nameAr : r.name)} · {isAr ? "مركز إقليمي" : "Regional Hub"}</text>
+                          <text y="0" textAnchor="middle" fill="#fde68a" fontSize="11" className="font-bold">{(isAr ? r.nameAr : r.name)} · {nodeCode(r.name)}</text>
                         </g>
                       )}
                     </g>
@@ -289,7 +449,11 @@ export function InteractiveMap() {
 
                 {/* Cairo HQ — Egypt service cluster (27 governorates represented) */}
                 {hub && (
-                  <g transform={`translate(${hub.x} ${hub.y})`} className="cursor-pointer" onMouseEnter={() => setHovered(hub.name)} onMouseLeave={() => setHovered(null)} onClick={() => setSelected(hub.name)}>
+                  <g transform={`translate(${hub.x} ${hub.y})`} className="cursor-pointer"
+                    onMouseEnter={() => { onUserInteraction(); setHovered(hub.name); }}
+                    onMouseLeave={() => { onUserInteraction(); setHovered(null); }}
+                    onClick={() => { onUserInteraction(); setSelected(hub.name); }}
+                  >
                     {/* radar sweep */}
                     <g>
                       <path d="M 0 0 L 110 0 A 110 110 0 0 0 78 -78 Z" fill="url(#radarGrad)" opacity="0.4">
@@ -323,28 +487,28 @@ export function InteractiveMap() {
 
                 {/* Selected governorate marker — appears ON-DEMAND only (no permanent clutter) */}
                 <AnimatePresence>
-                  {sel && sel.name !== HUB && (
+                  {selGov && selGov.name !== HUB && (
                     <motion.g
-                      key={sel.id}
+                      key={selGov.id}
                       initial={{ opacity: 0, scale: 0.4 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.4 }}
                       transition={{ type: "spring", stiffness: 200, damping: 18 }}
-                      transform={`translate(${sel.x} ${sel.y})`}
+                      transform={`translate(${selGov.x} ${selGov.y})`}
                       className="cursor-pointer"
-                      onMouseEnter={() => setHovered(sel.name)}
-                      onMouseLeave={() => setHovered(null)}
-                      onClick={() => setSelected(null)}
+                      onMouseEnter={() => { onUserInteraction(); setHovered(selGov.name); }}
+                      onMouseLeave={() => { onUserInteraction(); setHovered(null); }}
+                      onClick={() => { onUserInteraction(); setSelected(null); }}
                     >
-                      <circle r="18" fill="none" stroke={ZONE[sel.zone]?.color} strokeWidth="1.8" className="radar-ring" style={{ filter: "drop-shadow(0 0 6px " + ZONE[sel.zone]?.color + ")" }} />
-                      <circle r="14" fill={`url(#dg${sel.zone})`} opacity="0.95" className="city-light" />
-                      <circle r="6.5" fill={ZONE[sel.zone]?.color} fillOpacity="0.4" filter="url(#softGlow)" />
-                      <circle r="4.5" fill={ZONE[sel.zone]?.color} stroke="#fff" strokeWidth="2" filter="url(#softGlow)" />
+                      <circle r="18" fill="none" stroke={ZONE[selGov.zone]?.color} strokeWidth="1.8" className="radar-ring" style={{ filter: "drop-shadow(0 0 6px " + ZONE[selGov.zone]?.color + ")" }} />
+                      <circle r="14" fill={`url(#dg${selGov.zone})`} opacity="0.95" className="city-light" />
+                      <circle r="6.5" fill={ZONE[selGov.zone]?.color} fillOpacity="0.4" filter="url(#softGlow)" />
+                      <circle r="4.5" fill={ZONE[selGov.zone]?.color} stroke="#fff" strokeWidth="2" filter="url(#softGlow)" />
                       <circle r="1.8" fill="#fff" />
                       <g transform="translate(0 -24)">
-                        <path d="M -3 8 L 3 8 L 0 13 Z" fill="#0a0a0a" stroke={ZONE[sel.zone]?.color} strokeWidth="1.4" />
-                        <rect x="-46" y="-16" width="92" height="24" rx="6" fill="#0a0a0a" stroke={ZONE[sel.zone]?.color} strokeWidth="1.4" filter="url(#softGlow)" />
-                        <text y="0" textAnchor="middle" fill="#fff" fontSize="11" className="font-bold">{govName(sel)}</text>
+                        <path d="M -3 8 L 3 8 L 0 13 Z" fill="#0a0a0a" stroke={ZONE[selGov.zone]?.color} strokeWidth="1.4" />
+                        <rect x="-54" y="-16" width="108" height="24" rx="6" fill="#0a0a0a" stroke={ZONE[selGov.zone]?.color} strokeWidth="1.4" filter="url(#softGlow)" />
+                        <text y="0" textAnchor="middle" fill="#fff" fontSize="11" className="font-bold">{govName(selGov)} · {nodeCode(selGov.name)}</text>
                       </g>
                     </motion.g>
                   )}
@@ -362,22 +526,37 @@ export function InteractiveMap() {
               <div className="absolute top-3 right-3 sm:top-4 sm:right-4 w-[min(210px,calc(100%-1.5rem))]">
                 <AnimatePresence mode="wait">
                   {sel ? (
-                    <motion.div key={sel.id} initial={{ opacity: 0, y: -10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                      className="rounded-2xl bg-zinc-950/90 backdrop-blur-md border border-primary/30 shadow-2xl p-4">
+                    <motion.div key={sel.name} initial={{ opacity: 0, y: -10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      transition={{ duration: 0.25 }}
+                      className="rounded-2xl bg-zinc-950/90 backdrop-blur-md border border-primary/30 shadow-2xl p-4 min-w-[200px]">
+                      {/* Node name + code */}
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5 text-[11px] text-zinc-300">
                             <MapPin className="w-3 h-3" style={{ color: ZONE[sel.zone]?.color }} />
                             {zoneLabel(sel.zone)}
                           </div>
-                          <h4 className="font-black text-lg mt-0.5 text-white truncate">{govName(sel)}</h4>
+                          <h4 className="font-black text-base mt-0.5 text-white truncate">
+                            {selGov ? govName(selGov) : (isAr ? (selReg?.nameAr || sel.name) : sel.name)}
+                          </h4>
+                          <div className="text-[10px] text-zinc-500 font-mono mt-0.5">{nodeCode(sel.name)}</div>
                         </div>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white shrink-0" style={{ background: ZONE[sel.zone]?.color, boxShadow: "0 0 10px " + ZONE[sel.zone]?.color }}>{sel.zone}</span>
-                      </div>
-                      <div className="mt-3 flex items-center gap-2 text-xs">
-                        <span className="flex items-center gap-1 text-amber-400 font-semibold">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> {t("map.active")}
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white shrink-0"
+                          style={{ background: ZONE[sel.zone]?.color, boxShadow: "0 0 10px " + ZONE[sel.zone]?.color }}>
+                          {sel.zone}
                         </span>
+                      </div>
+                      {/* Status pill */}
+                      <div className="mt-2.5 flex items-center gap-1.5">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-semibold text-emerald-400">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-slow-pulse" />
+                          {t("map.active")}
+                        </span>
+                      </div>
+                      {/* SLA / Transit speed */}
+                      <div className="mt-2 flex items-center gap-1 text-[11px] text-zinc-400">
+                        <Zap className="w-3 h-3 text-amber-400 shrink-0" />
+                        <span className="truncate">{slaFor(sel.name, isAr, selGov?.etaHours, !!selReg)}</span>
                       </div>
                     </motion.div>
                   ) : (
@@ -391,14 +570,35 @@ export function InteractiveMap() {
               </div>
             </div>
 
-            {/* Zone legend */}
-            <div className="flex flex-wrap items-center justify-center gap-3 px-4 py-3 border-t border-white/10 bg-zinc-950/80">
+            {/* Zone legend — clickable category filter */}
+            <div className="flex flex-wrap items-center justify-center gap-2 px-4 py-3 border-t border-white/10 bg-zinc-950/80">
+              {/* All button */}
+              <button
+                onClick={() => { onUserInteraction(); setActiveCategory("ALL"); }}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
+                  activeCategory === "ALL"
+                    ? "bg-white/15 text-white border border-white/20"
+                    : "text-zinc-400 hover:text-zinc-200 border border-transparent"
+                }`}
+              >
+                <span className="w-2.5 h-2.5 rounded-full bg-white/80" />
+                {isAr ? "الكل" : "All"}
+                <span className="text-zinc-500">({totalNodes})</span>
+              </button>
               {Object.entries(ZONE).map(([k, v]) => (
-                <div key={k} className="flex items-center gap-1.5 text-xs text-zinc-300">
+                <button
+                  key={k}
+                  onClick={() => { onUserInteraction(); setActiveCategory(k); }}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
+                    activeCategory === k
+                      ? "bg-white/15 text-white border border-white/20"
+                      : "text-zinc-400 hover:text-zinc-200 border border-transparent"
+                  }`}
+                >
                   <span className="w-2.5 h-2.5 rounded-full" style={{ background: v.color, boxShadow: "0 0 8px " + v.color }} />
-                  <span className="font-medium">{isAr ? v.labelAr : v.labelEn}</span>
-                  <span className="text-zinc-600">({zoneCounts[k] || 0})</span>
-                </div>
+                  <span>{isAr ? v.labelAr : v.labelEn}</span>
+                  <span className="text-zinc-500">({zoneCounts[k] || 0})</span>
+                </button>
               ))}
             </div>
           </motion.div>
