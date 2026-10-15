@@ -70,135 +70,103 @@ export function Contact() {
         />
 
         <div className="max-w-6xl mx-auto grid lg:grid-cols-5 gap-6">
-          {/* Info side — multi-entry contact cards */}
+          {/* Info side — single cohesive contact card */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="lg:col-span-2 space-y-4"
+            className="lg:col-span-2 rounded-3xl bg-gradient-to-br from-primary via-red-700 to-red-900 p-7 text-white relative overflow-hidden shadow-2xl shadow-primary/20"
           >
-            {/* Logo + heading */}
-            <div className="rounded-3xl bg-gradient-to-br from-primary to-red-800 p-6 text-white relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl animate-aurora" />
-              <div className="relative">
-                <div className="mb-4">
-                  <Image
-                    src="/redline-transport-white.png"
-                    alt="RedLine Transport"
-                    width={1200}
-                    height={514}
-                    className="h-9 w-auto max-w-none object-contain"
-                  />
-                </div>
+            {/* Decorative glows */}
+            <div className="absolute top-0 end-0 w-48 h-48 bg-white/10 rounded-full blur-3xl animate-aurora" />
+            <div className="absolute bottom-0 start-0 w-40 h-40 bg-amber-500/15 rounded-full blur-3xl" />
+            <div className="absolute inset-0 noise opacity-20" />
+
+            <div className="relative space-y-6">
+              {/* Logo + heading */}
+              <div>
+                <Image
+                  src="/redline-transport-white.png"
+                  alt="RedLine Transport"
+                  width={1200}
+                  height={514}
+                  className="h-9 w-auto max-w-none object-contain mb-4"
+                />
                 <h3 className="text-xl font-bold mb-1">{t("contact.direct")}</h3>
-                <p className="text-white/80 text-xs">{t("contact.directDesc")}</p>
+                <p className="text-white/70 text-xs leading-relaxed">{t("contact.directDesc")}</p>
+              </div>
+
+              {/* Addresses section */}
+              <div className="border-t border-white/15 pt-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center shrink-0">
+                    <MapPin className="w-4 h-4" />
+                  </div>
+                  <h4 className="text-sm font-bold">{t("contact.address")}</h4>
+                </div>
+                <div className="space-y-2.5 ps-9">
+                  {ADDRESSES.map((a, i) => (
+                    <div key={i}>
+                      <div className="text-[11px] text-white/50 font-medium mb-0.5">{t(a.labelKey)}</div>
+                      <div className="text-sm font-semibold leading-snug">{t(a.valueKey)}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Phone section */}
+              <div className="border-t border-white/15 pt-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center shrink-0">
+                    <Phone className="w-4 h-4" />
+                  </div>
+                  <h4 className="text-sm font-bold">{t("contact.phoneLabel")}</h4>
+                </div>
+                <div className="space-y-2.5 ps-9">
+                  {PHONES.map((p, i) => (
+                    <div key={i} className="flex items-baseline justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="text-[11px] text-white/50 font-medium mb-0.5">{t(p.labelKey)}</div>
+                        <a href={p.href} className="text-sm font-semibold hover:text-amber-300 transition-colors" dir="ltr">
+                          {t(p.valueKey)}
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Email section */}
+              <div className="border-t border-white/15 pt-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center shrink-0">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  <h4 className="text-sm font-bold">{t("contact.emailLabel")}</h4>
+                </div>
+                <div className="space-y-2.5 ps-9">
+                  {EMAILS.map((e, i) => (
+                    <div key={i}>
+                      <div className="text-[11px] text-white/50 font-medium mb-0.5">{t(e.labelKey)}</div>
+                      <a href={e.href} className="text-sm font-semibold hover:text-amber-300 transition-colors break-all" dir="ltr">
+                        {t(e.valueKey)}
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Working hours */}
+              <div className="border-t border-white/15 pt-5 flex items-center gap-3">
+                <div className="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center shrink-0">
+                  <Clock className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-[11px] text-white/50 font-medium">{t("contact.hours")}</h4>
+                  <div className="text-sm font-semibold">{t("contact.hoursVal")}</div>
+                </div>
               </div>
             </div>
-
-            {/* Addresses card */}
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.05 }}
-              className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5"
-            >
-              <div className="flex items-center gap-2 mb-4 text-start">
-                <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
-                  <MapPin className="w-4 h-4 text-primary" />
-                </div>
-                <h4 className="text-sm font-bold text-white">{t("contact.address")}</h4>
-              </div>
-              <div className="space-y-3 text-start">
-                {ADDRESSES.map((a, i) => (
-                  <div key={i}>
-                    <div className="text-xs text-slate-400 font-medium mb-0.5">{t(a.labelKey)}</div>
-                    <div className="text-sm font-semibold text-white leading-relaxed">{t(a.valueKey)}</div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Phone numbers card */}
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5"
-            >
-              <div className="flex items-center gap-2 mb-4 text-start">
-                <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
-                  <Phone className="w-4 h-4 text-primary" />
-                </div>
-                <h4 className="text-sm font-bold text-white">{t("contact.phoneLabel")}</h4>
-              </div>
-              <div className="space-y-3 text-start" dir="ltr">
-                {PHONES.map((p, i) => (
-                  <div key={i}>
-                    <div className="text-xs text-slate-400 font-medium mb-0.5" dir={isAr ? "rtl" : "ltr"}>
-                      <span dir={isAr ? "rtl" : "ltr"}>{t(p.labelKey)}</span>
-                    </div>
-                    <a
-                      href={p.href}
-                      className="text-sm sm:text-base font-semibold text-white hover:text-red-500 transition-colors"
-                      dir="ltr"
-                    >
-                      {t(p.valueKey)}
-                    </a>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Emails card */}
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.15 }}
-              className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5"
-            >
-              <div className="flex items-center gap-2 mb-4 text-start">
-                <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
-                  <Mail className="w-4 h-4 text-primary" />
-                </div>
-                <h4 className="text-sm font-bold text-white">{t("contact.emailLabel")}</h4>
-              </div>
-              <div className="space-y-3 text-start" dir="ltr">
-                {EMAILS.map((e, i) => (
-                  <div key={i}>
-                    <div className="text-xs text-slate-400 font-medium mb-0.5" dir={isAr ? "rtl" : "ltr"}>
-                      <span dir={isAr ? "rtl" : "ltr"}>{t(e.labelKey)}</span>
-                    </div>
-                    <a
-                      href={e.href}
-                      className="text-sm sm:text-base font-semibold text-white hover:text-red-500 transition-colors"
-                      dir="ltr"
-                    >
-                      {t(e.valueKey)}
-                    </a>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Working hours card */}
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5"
-            >
-              <div className="flex items-center gap-2 mb-3 text-start">
-                <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
-                  <Clock className="w-4 h-4 text-primary" />
-                </div>
-                <h4 className="text-sm font-bold text-white">{t("contact.hours")}</h4>
-              </div>
-              <div className="text-sm font-semibold text-white text-start">{t("contact.hoursVal")}</div>
-            </motion.div>
           </motion.div>
 
           {/* Form side */}
