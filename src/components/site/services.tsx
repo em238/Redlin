@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Truck, Zap, Rocket, Package, Banknote, RotateCcw, ArrowLeft } from "lucide-react";
+import { Truck, Zap, Rocket, Package, Banknote, RotateCcw, ArrowLeft, ArrowRight } from "lucide-react";
 import { apiGet } from "@/lib/api";
 import { useT } from "@/lib/i18n";
 import { SectionHeading } from "@/components/shared/section-heading";
@@ -76,10 +76,12 @@ export function Services() {
                   <p className="mt-2 text-muted-foreground text-sm leading-relaxed relative z-10">{descFor(s)}</p>
                   <button
                     onClick={() => scrollTo("#contact")}
-                    className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:gap-2 transition-all relative z-10"
+                    className="group mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:gap-2 transition-all relative z-10"
                   >
                     {t("services.cta")}
-                    <ArrowLeft className="w-4 h-4" />
+                    {isAr
+                      ? <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                      : <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />}
                   </button>
                 </div>
               </StaggerItem>

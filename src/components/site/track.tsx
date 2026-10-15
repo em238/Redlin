@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Package, Truck, CheckCircle2, MapPin, Scale, Tag, Loader2, Clock, ArrowLeft, Hash } from "lucide-react";
+import { Search, Package, Truck, CheckCircle2, MapPin, Scale, Tag, Loader2, Clock, Hash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { apiGet, formatEGP, formatDate, STATUS_LABELS, STATUS_COLORS } from "@/lib/api";

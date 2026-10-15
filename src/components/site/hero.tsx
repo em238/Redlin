@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
-import { ArrowLeft, Truck, ShieldCheck, Zap, MapPin, ChevronRight, ChevronLeft, Play, Pause } from "lucide-react";
+import { ArrowLeft, ArrowRight, Truck, ShieldCheck, Zap, MapPin, ChevronRight, ChevronLeft, Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
@@ -172,11 +172,13 @@ export function Hero() {
                 size="lg"
                 variant="outline"
                 onClick={() => scrollTo("#services")}
-                className="bg-white/15 backdrop-blur-md border-white/30 text-white hover:bg-white/25 hover:text-white gap-2 text-base h-12 px-6 w-full sm:w-auto justify-center font-medium"
+                className="group bg-white/15 backdrop-blur-md border-white/30 text-white hover:bg-white/25 hover:text-white gap-2 text-base h-12 px-6 w-full sm:w-auto justify-center font-medium"
               >
                 <Truck className="w-4.5 h-4.5" />
                 {t("hero.cta2")}
-                <ArrowLeft className="w-4 h-4" />
+                {isAr
+                  ? <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                  : <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />}
               </Button>
             </Magnetic>
           </motion.div>

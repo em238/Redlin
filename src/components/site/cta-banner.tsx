@@ -1,13 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowLeft, Zap, Phone } from "lucide-react";
+import { ArrowLeft, ArrowRight, Zap, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
 import { Magnetic } from "@/components/shared/custom-cursor";
 
 export function CtaBanner() {
-  const { t } = useT();
+  const { t, isAr } = useT();
   const scrollTo = (id: string) => document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });
 
   return (
@@ -41,11 +41,13 @@ export function CtaBanner() {
                 <Button
                   size="lg"
                   onClick={() => scrollTo("#contact")}
-                  className="bg-white text-primary hover:bg-white/90 gap-2 h-12 px-7 text-base font-semibold shadow-soft w-full sm:w-auto"
+                  className="group bg-white text-primary hover:bg-white/90 gap-2 h-12 px-7 text-base font-semibold shadow-soft w-full sm:w-auto"
                 >
                   <Zap className="w-5 h-5" />
                   {t("cta.button")}
-                  <ArrowLeft className="w-4 h-4" />
+                  {isAr
+                    ? <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                    : <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />}
                 </Button>
               </Magnetic>
               <Magnetic strength={0.2} className="w-full sm:w-auto">

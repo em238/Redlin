@@ -244,10 +244,12 @@ export function HowItWorks() {
           <Magnetic strength={0.2} className="inline-block">
             <button
               onClick={() => scrollTo("#contact")}
-              className="btn-glow inline-flex items-center gap-2 h-12 px-6 bg-gradient-to-r from-primary to-red-700 hover:from-red-600 hover:to-red-800 text-primary-foreground text-base font-semibold rounded-lg shadow-soft"
+              className="group btn-glow inline-flex items-center gap-2 h-12 px-6 bg-gradient-to-r from-primary to-red-700 hover:from-red-600 hover:to-red-800 text-primary-foreground text-base font-semibold rounded-lg shadow-soft"
             >
               {t("how.cta")}
-              {isAr ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+              {isAr
+                ? <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                : <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />}
             </button>
           </Magnetic>
         </div>

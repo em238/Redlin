@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useMemo } from "react";
 import {
   Package, ShoppingCart, Users, Banknote, TrendingUp,
-  Clock, CheckCircle2, Loader2, ArrowLeft, Truck, Video, Sparkles
+  Clock, CheckCircle2, Loader2, ArrowLeft, ArrowRight, Truck, Video, Sparkles
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { apiGet, formatEGP, formatDateTime, STATUS_COLORS } from "@/lib/api";
@@ -274,8 +274,11 @@ export function DashboardOverview() {
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-lg flex items-center gap-2"><Sparkles className="w-4 h-4 text-primary" /> {t("d.overview.recentShipments")}</h3>
-            <button onClick={() => setDashboardSection("shipments")} className="text-xs text-primary hover:underline flex items-center gap-1">
-              {t("d.overview.viewAll")} <ArrowLeft className="w-3 h-3" />
+            <button onClick={() => setDashboardSection("shipments")} className="group text-xs text-primary hover:underline flex items-center gap-1">
+              {t("d.overview.viewAll")}{" "}
+              {isAr
+                ? <ArrowLeft className="w-3 h-3 transition-transform group-hover:-translate-x-0.5" />
+                : <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5" />}
             </button>
           </div>
           <div className="space-y-1">
@@ -296,8 +299,11 @@ export function DashboardOverview() {
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-lg flex items-center gap-2"><Sparkles className="w-4 h-4 text-primary" /> {t("d.overview.recentOrders")}</h3>
-            <button onClick={() => setDashboardSection("orders")} className="text-xs text-primary hover:underline flex items-center gap-1">
-              {t("d.overview.viewAll")} <ArrowLeft className="w-3 h-3" />
+            <button onClick={() => setDashboardSection("orders")} className="group text-xs text-primary hover:underline flex items-center gap-1">
+              {t("d.overview.viewAll")}{" "}
+              {isAr
+                ? <ArrowLeft className="w-3 h-3 transition-transform group-hover:-translate-x-0.5" />
+                : <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5" />}
             </button>
           </div>
           <div className="space-y-1">

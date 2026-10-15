@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { Truck, Lock, Mail, ArrowRight, Loader2, ShieldCheck, LayoutDashboard } from "lucide-react";
+import { Truck, Lock, Mail, ArrowLeft, ArrowRight, Loader2, ShieldCheck, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -139,11 +139,15 @@ export function DashboardLogin() {
             <Button
               onClick={login}
               disabled={loading}
-              className="w-full h-12 bg-gradient-to-r from-primary to-red-700 hover:from-red-600 hover:to-red-800 text-white gap-2 text-base"
+              className="group w-full h-12 bg-gradient-to-r from-primary to-red-700 hover:from-red-600 hover:to-red-800 text-white gap-2 text-base"
             >
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <LayoutDashboard className="w-5 h-5" />}
               {t("d.login.button")}
-              {!loading && <ArrowRight className="w-4 h-4" />}
+              {!loading && (
+                isAr
+                  ? <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                  : <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              )}
             </Button>
 
             <div className="rounded-xl border border-dashed border-border bg-muted/30 p-4 text-center">
