@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Video, X, Clapperboard, Film, Filter } from "lucide-react";
+import { Play, Video, X, Clapperboard, Film } from "lucide-react";
 import { apiGet } from "@/lib/api";
 import { useT } from "@/lib/i18n";
 import { SectionHeading } from "@/components/shared/section-heading";
@@ -27,7 +27,6 @@ const CATEGORY_LABELS_EN: Record<string, string> = {
   promo: "Promo", logistics: "Logistics", tutorial: "Tutorial", testimonial: "Testimonials", other: "Other",
 };
 
-// English translations for DB video titles/descriptions (keyed by Arabic)
 const VIDEO_EN: Record<string, { title: string; desc: string }> = {
   "Redline - قصة شحن": { title: "Redline - The Shipping Story", desc: "Discover Redline's journey from the beginning to becoming Egypt's largest shipping company" },
   "Redline — قصة شحن": { title: "Redline - The Shipping Story", desc: "Discover Redline's journey from the beginning to becoming Egypt's largest shipping company" },
@@ -59,9 +58,12 @@ export function VideoSection() {
   const featured = videos.find((v) => v.featured) ?? videos[0];
   const others = filtered.filter((v) => v.id !== featured?.id).slice(0, 6);
 
+  const titleFor = (v: VideoItem) => isAr ? v.title : (VIDEO_EN[v.title]?.title || v.title);
+  const descFor = (v: VideoItem) => isAr ? v.description : (VIDEO_EN[v.title]?.desc || v.description);
+
   return (
-    <section id="videos" className="py-14 sm:py-24 lg:py-28 bg-muted/30">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px]" />
+    <section id="videos" className="py-14 sm:py-24 lg:py-28 bg-muted/30 relative overflow-hidden">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
         <SectionHeading
           eyebrow={<span className="flex items-center gap-1.5"><Clapperboard className="w-4 h-4" /> {t("videos.eyebrow")}</span>}
@@ -82,7 +84,7 @@ export function VideoSection() {
               <button
                 key={c}
                 onClick={() => setCategory(c)}
-                className={`relative px-4 py-1.5 rounded-full text-sm font-semibold border transition-all ${
+                className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-all ${
                   category === c
                     ? "bg-gradient-to-l from-primary to-red-700 text-white border-transparent shadow-md shadow-primary/25"
                     : "bg-card border-border hover:border-primary/40"
@@ -94,10 +96,12 @@ export function VideoSection() {
           </div>
         )}
 
-        {featured && category === "ALL" && (
-          <motion.div layout className="max-w-5xl mx-auto">
-            {/* Featured player */}
+        {/* Unified container — featured + grid share same max-width */}
+        <div className="max-w-6xl mx-auto">
+          {/* Featured Video Card — full width */}
+          {featured && category === "ALL" && (
             <motion.button
+              layout
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -109,7 +113,9 @@ export function VideoSection() {
               ) : (
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-red-900/40" />
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
+              {/* Gradient overlay bottom */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+              {/* Centered play button */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <motion.div
                   whileHover={{ scale: 1.1 }}
@@ -118,54 +124,66 @@ export function VideoSection() {
                   <Play className="w-7 h-7 sm:w-9 sm:h-9 text-primary ml-1" fill="currentColor" />
                 </motion.div>
               </div>
-              <div className="absolute bottom-0 inset-x-0 p-4 sm:p-6 text-right">
-                <span className="inline-block px-2 py-0.5 rounded bg-primary text-white text-[10px] sm:text-xs font-bold mb-2">{isAr ? "المميز" : "Featured"}</span>
-                <h3 className="text-lg sm:text-2xl lg:text-3xl font-black text-white">{isAr ? featured.title : (VIDEO_EN[featured.title]?.title || featured.title)}</h3>
-                <p className="mt-1 text-white/75 text-sm max-w-xl">{isAr ? featured.description : (VIDEO_EN[featured.title]?.desc || featured.description)}</p>
+              {/* Bottom content block — badge, title, description */}
+              <div className="absolute bottom-0 inset-x-0 p-4 sm:p-6 lg:p-8 flex flex-col items-start gap-2 text-left">
+                <span className="inline-block px-2.5 py-1 rounded-full bg-primary text-white text-[10px] sm:text-xs font-bold">
+                  {isAr ? "المميز" : "Featured"}
+                </span>
+                <h3 className="text-lg sm:text-2xl lg:text-3xl font-black text-white leading-tight">
+                  {titleFor(featured)}
+                </h3>
+                {descFor(featured) && (
+                  <p className="text-white/75 text-xs sm:text-sm max-w-xl leading-relaxed">
+                    {descFor(featured)}
+                  </p>
+                )}
               </div>
             </motion.button>
-          </motion.div>
-        )}
+          )}
 
-        {/* Other videos */}
-        {others.length > 0 && (
-          <motion.div layout className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
-            <AnimatePresence mode="popLayout">
-              {others.map((v, i) => (
-                <motion.button
-                  key={v.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ delay: i * 0.06 }}
-                  onClick={() => setActive(v)}
-                  className="group relative aspect-video rounded-2xl overflow-hidden border border-border hover:border-primary/40 hover:shadow-lg transition-all text-right"
-                >
-                  {v.thumbnail ? (
-                    <Image src={v.thumbnail} alt={v.title} fill sizes="(max-width:640px) 100vw, 332px" className="object-cover transition-transform duration-500 group-hover:scale-110" />
-                  ) : (
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-red-900/40 flex items-center justify-center">
-                      <Film className="w-8 h-8 text-white/70" />
+          {/* Secondary Videos Grid — matches featured width exactly */}
+          {others.length > 0 && (
+            <motion.div layout className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              <AnimatePresence mode="popLayout">
+                {others.map((v, i) => (
+                  <motion.button
+                    key={v.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ delay: i * 0.06 }}
+                    onClick={() => setActive(v)}
+                    className="group relative aspect-video rounded-2xl overflow-hidden border border-border hover:border-primary/40 hover:shadow-lg transition-all"
+                  >
+                    {v.thumbnail ? (
+                      <Image src={v.thumbnail} alt={v.title} fill sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 332px" className="object-cover transition-transform duration-500 group-hover:scale-110" />
+                    ) : (
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-red-900/40 flex items-center justify-center">
+                        <Film className="w-8 h-8 text-white/70" />
+                      </div>
+                    )}
+                    {/* Gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+                    {/* Category badge — top-right (adapts to LTR/RTL) */}
+                    <div className="absolute top-2 end-2">
+                      <span className="px-2 py-0.5 rounded-full bg-black/60 text-white text-[10px] font-bold backdrop-blur-sm">
+                        {catLabel(v.category)}
+                      </span>
                     </div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
-                  <div className="absolute top-2 right-2">
-                    <span className="px-2 py-0.5 rounded bg-black/60 text-white text-[10px] font-bold backdrop-blur-sm">
-                      {catLabel(v.category)}
-                    </span>
-                  </div>
-                  <div className="absolute bottom-2 inset-x-2 flex items-center gap-2">
-                    <div className="w-10 h-10 rounded-full bg-white/90 group-hover:bg-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                      <Play className="w-4.5 h-4.5 text-primary ml-0.5" fill="currentColor" />
+                    {/* Bottom row — play button + title */}
+                    <div className="absolute bottom-2 inset-x-2 flex items-center gap-2">
+                      <div className="w-10 h-10 rounded-full bg-white/90 group-hover:bg-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                        <Play className="w-4.5 h-4.5 text-primary ml-0.5" fill="currentColor" />
+                      </div>
+                      <span className="text-white text-xs font-semibold line-clamp-2">{titleFor(v)}</span>
                     </div>
-                    <span className="text-white text-xs font-semibold line-clamp-2">{isAr ? v.title : (VIDEO_EN[v.title]?.title || v.title)}</span>
-                  </div>
-                </motion.button>
-              ))}
-            </AnimatePresence>
-          </motion.div>
-        )}
+                  </motion.button>
+                ))}
+              </AnimatePresence>
+            </motion.div>
+          )}
+        </div>
       </div>
 
       {/* Modal player */}
@@ -204,9 +222,9 @@ export function VideoSection() {
               <div className="p-5 bg-card">
                 <h3 className="text-lg font-bold flex items-center gap-2">
                   <Video className="w-5 h-5 text-primary" />
-                  {active.title}
+                  {titleFor(active)}
                 </h3>
-                {active.description && <p className="mt-1 text-sm text-muted-foreground">{active.description}</p>}
+                {active.description && <p className="mt-1 text-sm text-muted-foreground">{descFor(active)}</p>}
               </div>
             </motion.div>
           </motion.div>
