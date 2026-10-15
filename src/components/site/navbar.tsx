@@ -60,16 +60,12 @@ export function Navbar() {
               aria-label="RedLine Transport"
             >
               <Image
-                src="/redline-transport-logo.png"
+                src={!scrolled || theme === "dark" ? "/redline-transport-logo-dark.png" : "/redline-transport-logo.png"}
                 alt="RedLine Transport"
                 width={600}
                 height={257}
                 priority
-                className={`h-8 sm:h-11 md:h-12 w-auto object-contain transition-transform group-hover:scale-105 ${
-                  !scrolled || theme === "dark"
-                    ? "[filter:invert(1)_hue-rotate(180deg)_drop-shadow(0_2px_10px_rgba(0,0,0,0.45))]"
-                    : "drop-shadow-[0_1px_4px_rgba(0,0,0,0.12)]"
-                }`}
+                className="h-8 sm:h-11 md:h-12 w-auto object-contain opacity-100 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] transition-transform group-hover:scale-105"
               />
             </button>
 

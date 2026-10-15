@@ -13,7 +13,7 @@ import { useAppStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
 
 export function DashboardLogin() {
-  const { setUser, setView } = useAppStore();
+  const { setUser, setView, theme } = useAppStore();
   const { t, isAr } = useT();
   const [email, setEmail] = useState("admin@redline.eg");
   const [password, setPassword] = useState("admin123");
@@ -48,11 +48,11 @@ export function DashboardLogin() {
         <div className="relative z-10 flex flex-col justify-between p-12 text-white w-full">
           <div className="flex items-center gap-2.5">
             <Image
-              src="/redline-transport-logo.png"
+              src="/redline-transport-logo-dark.png"
               alt="RedLine Transport"
               width={600}
               height={257}
-              className="h-10 w-auto object-contain [filter:invert(1)_hue-rotate(180deg)]"
+              className="h-10 w-auto object-contain opacity-100 drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]"
             />
           </div>
 
@@ -87,11 +87,11 @@ export function DashboardLogin() {
         >
           <div className="lg:hidden flex items-center gap-2.5 mb-8 justify-center">
             <Image
-              src="/redline-transport-logo.png"
+              src={theme === "dark" ? "/redline-transport-logo-dark.png" : "/redline-transport-logo.png"}
               alt="RedLine Transport"
               width={600}
               height={257}
-              className="h-10 w-auto object-contain dark:[filter:invert(1)_hue-rotate(180deg)]"
+              className="h-10 w-auto object-contain opacity-100 drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]"
             />
           </div>
 
