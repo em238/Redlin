@@ -2,31 +2,34 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
-import { Menu, X, Truck, LayoutDashboard, Moon, Sun } from "lucide-react";
+import { Menu, X, Truck, LayoutDashboard, Moon, Sun, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/store";
 import { useScrollSpy } from "@/hooks/use-scroll-spy";
 import { ScrollProgress } from "@/components/shared/scroll-progress";
+import { useT, useI18n } from "@/lib/i18n";
 
-const NAV_LINKS = [
-  { href: "#home", label: "الرئيسية" },
-  { href: "#services", label: "خدماتنا" },
-  { href: "#how", label: "كيف نعمل" },
-  { href: "#map", label: "الخريطة" },
-  { href: "#videos", label: "المعرض" },
-  { href: "#partners", label: "الشركاء" },
-  { href: "#contact", label: "تواصل" },
+const NAV_KEYS = [
+  { href: "#home", key: "nav.home" },
+  { href: "#services", key: "nav.services" },
+  { href: "#how", key: "nav.how" },
+  { href: "#map", key: "nav.map" },
+  { href: "#videos", key: "nav.videos" },
+  { href: "#partners", key: "nav.partners" },
+  { href: "#contact", key: "nav.contact" },
 ];
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { view, setView, theme, toggleTheme } = useAppStore();
+  const { t, isAr } = useT();
+  const { locale, setLocale } = useI18n();
   const { scrollY } = useScroll();
 
   useMotionValueEvent(scrollY, "change", (latest) => setScrolled(latest > 24));
 
-  const activeSection = useScrollSpy(NAV_LINKS.map((l) => l.href), 140);
+  const activeSection = useScrollSpy(NAV_KEYS.map((l) => l.href), 140);
 
   const go = (href: string) => {
     setMobileOpen(false);
@@ -57,13 +60,13 @@ export function Navbar() {
                 <span className={`text-lg font-bold tracking-tight transition-colors ${scrolled ? "text-foreground" : "text-white"}`}>
                   Red<span className="text-primary">line</span>
                 </span>
-                <span className={`text-[10px] font-medium mt-0.5 transition-colors ${scrolled ? "text-muted-foreground" : "text-white/60"}`}>شحن سريع وآمن</span>
+                <span className={`text-[10px] font-medium mt-0.5 transition-colors ${scrolled ? "text-muted-foreground" : "text-white/60"}`}>{t("nav.tagline")}</span>
               </div>
             </button>
 
             {/* Desktop nav — clean, minimal */}
             <nav className="hidden lg:flex items-center gap-0.5">
-              {NAV_LINKS.map((link) => {
+              {NAV_KEYS.map((link) => {
                 const isActive = activeSection === link.href;
                 return (
                   <button
@@ -75,7 +78,7 @@ export function Navbar() {
                         : (scrolled ? "text-foreground/70 hover:text-foreground" : "text-white/80 hover:text-white")
                     }`}
                   >
-                    {link.label}
+                    {t(link.key)}
                     {isActive && (
                       <motion.span
                         layoutId="nav-active"
@@ -93,6 +96,15 @@ export function Navbar() {
               <Button
                 variant="ghost"
                 size="icon"
+                onClick={() => setLocale(isAr ? "en" : "ar")}
+                className={`rounded-lg transition-colors ${scrolled ? "text-foreground hover:bg-muted" : "text-white hover:bg-white/10"}`}
+                aria-label="Language"
+              >
+                <Globe className="w-[18px] h-[18px]" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={toggleTheme}
                 className={`rounded-lg transition-colors ${scrolled ? "text-foreground hover:bg-muted" : "text-white hover:bg-white/10"}`}
                 aria-label="تبديل السمة"
@@ -105,7 +117,7 @@ export function Navbar() {
                 className="hidden sm:inline-flex bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 font-semibold"
               >
                 <LayoutDashboard className="w-4 h-4" />
-                لوحة التحكم
+                {t("nav.dashboard")}
               </Button>
               <Button
                 variant="ghost"
@@ -130,7 +142,9 @@ export function Navbar() {
               className="lg:hidden overflow-hidden bg-background/95 backdrop-blur-xl border-b border-border"
             >
               <nav className="container mx-auto px-4 py-3 flex flex-col gap-0.5">
-                {NAV_LINKS.map((link) => (
+              {NAV_KEYS.map((link) => {
+                const isActive = activeSection === link.href;
+                return (
                   <button
                     key={link.href}
                     onClick={() => go(link.href)}
@@ -138,16 +152,17 @@ export function Navbar() {
                       activeSection === link.href ? "bg-primary/10 text-primary" : "hover:bg-muted"
                     }`}
                   >
-                    {link.label}
+                    {t(link.key)}
                   </button>
-                ))}
-                <Button
-                  onClick={() => { setMobileOpen(false); setView("dashboard"); }}
-                  className="mt-2 bg-primary text-primary-foreground gap-2"
-                >
-                  <LayoutDashboard className="w-4 h-4" />
-                  لوحة التحكم
-                </Button>
+                );
+              })}
+              <Button
+                onClick={() => { setMobileOpen(false); setView("dashboard"); }}
+                className="mt-2 bg-primary text-primary-foreground gap-2"
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                {t("nav.dashboard")}
+              </Button>
               </nav>
             </motion.div>
           )}

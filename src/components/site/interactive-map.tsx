@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Building2, Navigation, Layers, CheckCircle2, Radio } from "lucide-react";
 import { apiGet } from "@/lib/api";
+import { useT } from "@/lib/i18n";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { AFRICA_BORDER, MIDEAST_BORDER, REGIONAL_CITIES, NILE_MAIN, NILE_DAMIETTA, NILE_ROSETTA, GOV_COORDS, project, pathFromCoords } from "@/lib/egypt-coords";
 
@@ -21,11 +22,11 @@ const FALLBACK: Gov[] = [
   { id: "5", name: "Luxor", nameAr: "الاقصر", zone: "D", basePrice: 80, etaHours: 96, active: true },
 ];
 
-const ZONE: Record<string, { label: string; color: string }> = {
-  A: { label: "القاهرة الكبرى", color: "#34d399" },
-  B: { label: "الوجه البحري", color: "#60a5fa" },
-  C: { label: "الصعيد", color: "#fbbf24" },
-  D: { label: "الحدود", color: "#fb7185" },
+const ZONE: Record<string, { labelAr: string; labelEn: string; color: string }> = {
+  A: { labelAr: "القاهرة الكبرى", labelEn: "Greater Cairo", color: "#34d399" },
+  B: { labelAr: "الوجه البحري", labelEn: "Delta", color: "#60a5fa" },
+  C: { labelAr: "الصعيد", labelEn: "Upper Egypt", color: "#fbbf24" },
+  D: { labelAr: "الحدود", labelEn: "Borders", color: "#fb7185" },
 };
 
 const HUB = "Cairo";
@@ -45,6 +46,7 @@ const PARTICLES = Array.from({ length: 22 }).map((_, i) => ({
 }));
 
 export function InteractiveMap() {
+  const { t, isAr } = useT();
   const { data } = useQuery({
     queryKey: ["governorates"],
     queryFn: () => apiGet<{ governorates: Gov[] }>("/api/governorates"),
@@ -52,6 +54,11 @@ export function InteractiveMap() {
   const govs = data?.governorates ?? FALLBACK;
   const [selected, setSelected] = useState<string | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
+
+  // Returns the localized name for a governorate (Arabic uses nameAr, English uses name).
+  const govName = (g: Gov) => (isAr ? g.nameAr : g.name);
+  // Returns the localized zone label.
+  const zoneLabel = (z: string) => (isAr ? ZONE[z]?.labelAr : ZONE[z]?.labelEn) ?? z;
 
   const markers = useMemo(
     () =>
@@ -96,7 +103,7 @@ export function InteractiveMap() {
             className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-primary/20 text-primary text-sm font-bold mb-4 border border-primary/40"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-slow-pulse" />
-            <Radio className="w-4 h-4" /> الشبكة الإقليمية — أفريقيا والخليج
+            <Radio className="w-4 h-4" /> {t("map.eyebrow")}
           </motion.span>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -104,7 +111,9 @@ export function InteractiveMap() {
             viewport={{ once: true }}
             className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-[1.15] text-white"
           >
-            شبكة <span className="text-gradient-red">Redline</span> على خريطة أفريقيا والخليج
+            {t("map.title").split("Redline")[0]}
+            <span className="text-gradient-red">Redline</span>
+            {t("map.title").split("Redline")[1]}
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -113,7 +122,7 @@ export function InteractiveMap() {
             transition={{ delay: 0.1 }}
             className="mt-4 text-zinc-300 text-lg"
           >
-            {markers.length} محافظة مصرية + {regional.length} مركز إقليمي — جرّب الضغط على أي نقطة
+            {markers.length} {t("map.subtitle").split("+")[0].trim()} + {regional.length} {t("map.subtitle").split("+")[1]?.trim()}
           </motion.p>
         </div>
 
@@ -129,14 +138,14 @@ export function InteractiveMap() {
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-zinc-950/80">
               <div className="flex items-center gap-2 text-sm text-white">
                 <Radio className="w-4 h-4 text-primary animate-slow-pulse" />
-                <span className="font-bold">LIVE LOGISTICS GRID — AFRICA & MIDDLE EAST</span>
+                <span className="font-bold">{t("map.hud")}</span>
               </div>
               <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-400">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
                 </span>
-                {markers.length + regional.length} NODES ACTIVE
+                {markers.length + regional.length} {t("map.nodes")}
               </div>
             </div>
 
@@ -271,7 +280,7 @@ export function InteractiveMap() {
                         <g transform="translate(0 -18)">
                           <path d="M -3 8 L 3 8 L 0 12 Z" fill="#0a0a0a" stroke="#fbbf24" strokeWidth="1.4" />
                           <rect x="-54" y="-16" width="108" height="24" rx="6" fill="#0a0a0a" stroke="#fbbf24" strokeWidth="1.4" filter="url(#softGlow)" />
-                          <text y="0" textAnchor="middle" fill="#fde68a" fontSize="11" className="font-bold">{r.nameAr} · مركز إقليمي</text>
+                          <text y="0" textAnchor="middle" fill="#fde68a" fontSize="11" className="font-bold">{(isAr ? r.nameAr : r.name)} · {isAr ? "مركز إقليمي" : "Regional Hub"}</text>
                         </g>
                       )}
                     </g>
@@ -306,7 +315,7 @@ export function InteractiveMap() {
                       <g transform="translate(0 -34)">
                         <path d="M -3 8 L 3 8 L 0 13 Z" fill="#dc2626" />
                         <rect x="-62" y="-16" width="124" height="26" rx="6" fill="#0a0a0a" stroke={HUB_COLOR} strokeWidth="1.5" filter="url(#softGlow)" />
-                        <text y="0" textAnchor="middle" fill="#fff" fontSize="12" className="font-bold">★ {hub.nameAr} — مصر (27 محافظة)</text>
+                        <text y="0" textAnchor="middle" fill="#fff" fontSize="12" className="font-bold">★ {isAr ? hub.nameAr : hub.name} — {isAr ? "مصر (27 محافظة)" : "Egypt (27 governorates)"}</text>
                       </g>
                     )}
                   </g>
@@ -335,7 +344,7 @@ export function InteractiveMap() {
                       <g transform="translate(0 -24)">
                         <path d="M -3 8 L 3 8 L 0 13 Z" fill="#0a0a0a" stroke={ZONE[sel.zone]?.color} strokeWidth="1.4" />
                         <rect x="-46" y="-16" width="92" height="24" rx="6" fill="#0a0a0a" stroke={ZONE[sel.zone]?.color} strokeWidth="1.4" filter="url(#softGlow)" />
-                        <text y="0" textAnchor="middle" fill="#fff" fontSize="11" className="font-bold">{sel.nameAr}</text>
+                        <text y="0" textAnchor="middle" fill="#fff" fontSize="11" className="font-bold">{govName(sel)}</text>
                       </g>
                     </motion.g>
                   )}
@@ -359,15 +368,15 @@ export function InteractiveMap() {
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5 text-[11px] text-zinc-300">
                             <MapPin className="w-3 h-3" style={{ color: ZONE[sel.zone]?.color }} />
-                            {ZONE[sel.zone]?.label}
+                            {zoneLabel(sel.zone)}
                           </div>
-                          <h4 className="font-black text-lg mt-0.5 text-white truncate">{sel.nameAr}</h4>
+                          <h4 className="font-black text-lg mt-0.5 text-white truncate">{govName(sel)}</h4>
                         </div>
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white shrink-0" style={{ background: ZONE[sel.zone]?.color, boxShadow: "0 0 10px " + ZONE[sel.zone]?.color }}>{sel.zone}</span>
                       </div>
                       <div className="mt-3 flex items-center gap-2 text-xs">
                         <span className="flex items-center gap-1 text-amber-400 font-semibold">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> نقطة توصيل نشطة
+                          <CheckCircle2 className="w-3.5 h-3.5" /> {t("map.active")}
                         </span>
                       </div>
                     </motion.div>
@@ -375,7 +384,7 @@ export function InteractiveMap() {
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                       className="rounded-2xl bg-zinc-950/85 backdrop-blur-md border border-white/10 shadow-lg p-3 flex items-center gap-2">
                       <Radio className="w-4 h-4 text-primary animate-slow-pulse shrink-0" />
-                      <span className="text-xs text-zinc-300">اضغط على أي محافظة</span>
+                      <span className="text-xs text-zinc-300">{t("map.placeholder")}</span>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -387,7 +396,7 @@ export function InteractiveMap() {
               {Object.entries(ZONE).map(([k, v]) => (
                 <div key={k} className="flex items-center gap-1.5 text-xs text-zinc-300">
                   <span className="w-2.5 h-2.5 rounded-full" style={{ background: v.color, boxShadow: "0 0 8px " + v.color }} />
-                  <span className="font-medium">{v.label}</span>
+                  <span className="font-medium">{isAr ? v.labelAr : v.labelEn}</span>
                   <span className="text-zinc-600">({zoneCounts[k] || 0})</span>
                 </div>
               ))}
@@ -399,18 +408,18 @@ export function InteractiveMap() {
             <div className="rounded-2xl border border-white/10 bg-zinc-950 p-5 flex items-center justify-around">
               <div className="text-center">
                 <div className="text-3xl font-black text-gradient-red">{markers.length}</div>
-                <div className="text-xs text-zinc-500 mt-1">محافظة مغطاة</div>
+                <div className="text-xs text-zinc-500 mt-1">{t("map.covered")}</div>
               </div>
               <div className="w-px h-12 bg-white/10" />
               <div className="text-center">
                 <div className="text-3xl font-black text-amber-400">99.2%</div>
-                <div className="text-xs text-zinc-500 mt-1">تسليم في الوقت</div>
+                <div className="text-xs text-zinc-500 mt-1">{t("map.delivery")}</div>
               </div>
             </div>
             <div className="sm:col-span-2 rounded-2xl border border-white/10 bg-zinc-950 p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Building2 className="w-4 h-4 text-primary" />
-                <h4 className="font-bold text-sm text-white">قائمة المحافظات</h4>
+                <h4 className="font-bold text-sm text-white">{t("map.quicklist")}</h4>
               </div>
               <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
                 {markers.map((m) => (
@@ -419,7 +428,7 @@ export function InteractiveMap() {
                       selected === m.name ? "bg-primary/15 text-primary border border-primary/40" : "text-zinc-300 hover:bg-white/5 border border-transparent"
                     }`}>
                     <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: ZONE[m.zone]?.color, boxShadow: "0 0 6px " + ZONE[m.zone]?.color }} />
-                    {m.nameAr}
+                    {govName(m)}
                   </button>
                 ))}
               </div>

@@ -2,37 +2,33 @@
 
 import { motion } from "framer-motion";
 import { ClipboardList, Truck, Home, ArrowLeft } from "lucide-react";
+import { useT } from "@/lib/i18n";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { StaggerGroup, StaggerItem } from "@/components/shared/section-reveal";
 
-const STEPS = [
-  {
-    icon: ClipboardList,
-    title: "احجز شحنتك",
-    desc: "احجز شحنتك أونلاين أو بالهاتف 19999 في دقائق معدودة — بدون تعقيد.",
-  },
-  {
-    icon: Truck,
-    title: "نستلم ونشحن",
-    desc: "مندوبنا يستلم الشحنة منك ونشحنها لوجهتها بأسرع خدمة مناسبة لك.",
-  },
-  {
-    icon: Home,
-    title: "توصّل للمستلم",
-    desc: "توصّل الشحنة لأي محافظة في مصر وتسليمها للمستلم بأمان وضمان كامل.",
-  },
-];
-
 export function HowItWorks() {
+  const { t } = useT();
   const scrollTo = (id: string) => document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });
+
+  const STEPS = [
+    { icon: ClipboardList, title: t("how.step1"), desc: t("how.step1.desc") },
+    { icon: Truck, title: t("how.step2"), desc: t("how.step2.desc") },
+    { icon: Home, title: t("how.step3"), desc: t("how.step3.desc") },
+  ];
 
   return (
     <section id="how" className="py-14 sm:py-24 lg:py-28 bg-muted/30">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
-          eyebrow="إزاي بنشتغل"
-          title={<>الشحن مع <span className="text-gradient-red">Redline</span> في 3 خطوات</>}
-          subtitle="من الحجز للتسليم — عملية بسيطة وسريعة من البداية للنهاية"
+          eyebrow={t("how.eyebrow")}
+          title={
+            <>
+              {t("how.title").split("Redline")[0]}
+              <span className="text-gradient-red">Redline</span>
+              {t("how.title").split("Redline")[1]}
+            </>
+          }
+          subtitle={t("how.subtitle")}
         />
 
         {/* RTL so step 1 is on the right → step 3 on the left (Arabic reading flow) */}
@@ -92,7 +88,7 @@ export function HowItWorks() {
               onClick={() => scrollTo("#contact")}
               className="btn-glow inline-flex items-center gap-2 h-12 px-6 bg-gradient-to-r from-primary to-red-700 hover:from-red-600 hover:to-red-800 text-primary-foreground text-base font-semibold rounded-lg shadow-soft"
             >
-              ابدأ شحنتك الآن
+              {t("how.cta")}
               <ArrowLeft className="w-4 h-4" />
             </button>
           </div>

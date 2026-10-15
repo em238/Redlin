@@ -7,6 +7,7 @@ import Image from "next/image";
 import { ArrowLeft, Truck, ShieldCheck, Zap, MapPin, ChevronRight, ChevronLeft, Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/store";
+import { useT } from "@/lib/i18n";
 import { apiGet } from "@/lib/api";
 
 const FALLBACK_IMAGES = [
@@ -23,6 +24,7 @@ const GOV_MARQUEE = [
 
 export function Hero() {
   const { setView } = useAppStore();
+  const { t, isAr } = useT();
   const { data } = useQuery({
     queryKey: ["hero-images"],
     queryFn: () => apiGet<{ images: typeof FALLBACK_IMAGES }>("/api/hero-images"),
@@ -106,7 +108,7 @@ export function Hero() {
             className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-white/90 text-xs font-medium mb-6"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-            نشحن لكل محافظات مصر — 27 محافظة بنفس السرعة
+            {t("hero.badge")}
           </motion.div>
 
           <motion.h1
@@ -115,9 +117,9 @@ export function Hero() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] text-white tracking-tight"
           >
-            شحن يصل لكل مصر
+            {t("hero.title1")}
             <br />
-            بسرعة <span className="text-gradient-red" style={{ textShadow: "0 2px 30px oklch(0.55 0.2 28 / 0.3)" }}>Redline</span>
+            {t("hero.title2")} <span className="text-gradient-red" style={{ textShadow: "0 2px 30px oklch(0.55 0.2 28 / 0.3)" }}>Redline</span>
           </motion.h1>
 
           {/* Decorative gradient divider */}
@@ -134,8 +136,7 @@ export function Hero() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="mt-6 text-sm sm:text-lg text-white/75 max-w-2xl leading-relaxed"
           >
-            شركة شحن احترافية تغطي جميع محافظات مصر بخدمات متنوعة — عادي، ممتاز،
-            نفس اليوم، وشحن ثقيل — مع تتبع مباشر وأسعار منافسة وضمان التسليم.
+            {t("hero.subtitle")}
           </motion.p>
 
           <motion.div
@@ -150,7 +151,7 @@ export function Hero() {
               className="btn-glow bg-gradient-to-r from-primary to-red-700 hover:from-red-600 hover:to-red-800 text-primary-foreground gap-2 text-base h-12 px-6 font-semibold shadow-lg shadow-primary/30 hover:shadow-primary/40 transition-shadow w-full sm:w-auto justify-center"
             >
               <Zap className="w-4.5 h-4.5" />
-              اطلب شحن الآن
+              {t("hero.cta1")}
             </Button>
             <Button
               size="lg"
@@ -159,7 +160,7 @@ export function Hero() {
               className="bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/15 hover:text-white gap-2 text-base h-12 px-6 w-full sm:w-auto justify-center"
             >
               <Truck className="w-4.5 h-4.5" />
-              خدماتنا
+              {t("hero.cta2")}
               <ArrowLeft className="w-4 h-4" />
             </Button>
           </motion.div>
@@ -172,9 +173,9 @@ export function Hero() {
             className="mt-9 flex flex-col gap-2 sm:flex-row sm:flex-wrap gap-x-6 text-white/70"
           >
             {[
-              { icon: Zap, text: "توصيل نفس اليوم في القاهرة الكبرى" },
-              { icon: ShieldCheck, text: "ضمان كامل على كل شحنة" },
-              { icon: MapPin, text: "27 محافظة بتغطية كاملة" },
+              { icon: Zap, text: t("hero.feat1") },
+              { icon: ShieldCheck, text: t("hero.feat2") },
+              { icon: MapPin, text: t("hero.feat3") },
             ].map((f, i) => (
               <div key={i} className="flex items-center gap-1.5 text-sm">
                 <f.icon className="w-4 h-4 text-amber-400" />
@@ -203,7 +204,7 @@ export function Hero() {
             <div className="flex items-center justify-center text-white">
               <button
                 onClick={prev}
-                aria-label="السابق"
+                aria-label={isAr ? "السابق" : "Previous"}
                 className="px-5 py-1.5 hover:text-amber-300 transition-colors"
               >
                 <ChevronLeft className="w-5 h-5" strokeWidth={1.5} />
@@ -211,7 +212,7 @@ export function Hero() {
               <span className="w-px h-6 bg-white/20" />
               <button
                 onClick={() => setManualPause((p) => !p)}
-                aria-label={manualPause ? "تشغيل" : "إيقاف"}
+                aria-label={manualPause ? (isAr ? "تشغيل" : "Play") : (isAr ? "إيقاف" : "Pause")}
                 className="px-5 py-1.5 hover:text-amber-300 transition-colors"
               >
                 {manualPause ? <Play className="w-4 h-4" strokeWidth={1.5} /> : <Pause className="w-4 h-4" strokeWidth={1.5} />}
@@ -219,7 +220,7 @@ export function Hero() {
               <span className="w-px h-6 bg-white/20" />
               <button
                 onClick={next}
-                aria-label="التالي"
+                aria-label={isAr ? "التالي" : "Next"}
                 className="px-5 py-1.5 hover:text-amber-300 transition-colors"
               >
                 <ChevronRight className="w-5 h-5" strokeWidth={1.5} />

@@ -984,3 +984,59 @@ Stage Summary:
   * Footer: 2 أعمدة على تابلت، 12 على ديسكتوب
 - VLM: موبايل 8/10، تابلت 7/10، ديسكتوب 8/10
 - 0 errors
+
+---
+Task ID: i18n-translate
+Agent: full-stack-developer
+Task: Translate all public components to use i18n (EN/AR)
+
+Work Log:
+- Updated src/components/site/hero.tsx — wired to `useT()` hook; replaced hardcoded Arabic for badge (hero.badge), title (hero.title1 + hero.title2 + Redline gradient), subtitle (hero.subtitle), CTA buttons (hero.cta1, hero.cta2), mini-feature labels (hero.feat1/2/3), and carousel aria-labels (localized Previous/Next/Play/Pause via isAr).
+- Updated src/components/site/stats-bar.tsx — added `useT()`; for AR uses DB/fallback Arabic label; for EN uses `STAT_KEY_BY_ICON` mapping to `t("stats.shipments|governorates|customers|branches")`.
+- Updated src/components/site/services.tsx — added `useT()`; localized SectionHeading (services.eyebrow/title/subtitle), service names + descriptions via `SERVICE_KEY_BY_NAME` mapping (AR uses DB Arabic name+desc; EN uses `t("service.<key>")` + `t("service.<key>.desc")`), CTA button uses `t("services.cta")`. Removed unused `motion` import.
+- Updated src/components/site/how-it-works.tsx — added `useT()`; STEPS array now built from `t("how.step1|2|3")` + `.desc`; SectionHeading eyebrow/title (Redline gradient split)/subtitle, and CTA all use `t()` keys.
+- Updated src/components/site/interactive-map.tsx — added `useT()`; localized section eyebrow/title (Redline gradient split)/subtitle (markers.length + regional.length interpolated via `.split("+")` of t("map.subtitle")), HUD header (`t("map.hud")`, `t("map.nodes")`), overlay panel (`t("map.active")`, `t("map.placeholder")`), zone legend labels (`ZONE.labelAr`/`labelEn` via isAr), bottom stats (`t("map.covered")`, `t("map.delivery")`), quick list title (`t("map.quicklist")`). Governorate & regional city names use `isAr ? nameAr : name` via `govName()` helper; hub label localized similarly. ZONE object restructured to {labelAr, labelEn, color}.
+- Updated src/components/site/video-section.tsx — added `useT()`; SectionHeading eyebrow (with Clapperboard icon)/title (Redline gradient split)/subtitle all localized; split CATEGORY_LABELS into AR/EN maps; category pill "ALL" label localized; featured badge localized; modal close aria-label localized.
+- Updated src/components/site/about.tsx — added `useT()`; SectionHeading eyebrow (about.eyebrow) and title (about.title Redline gradient split), paragraphs (about.p1, about.p2), experience label (about.exp) all via `t()`; split FEATURES into FEATURES_AR/FEATURES_EN and selected via isAr.
+- Updated src/components/site/partners.tsx — added `useT()`; SectionHeading eyebrow (with Star icon), title (full string, no Redline), subtitle all localized; trust line below grid uses `t("partners.trust")`.
+- Updated src/components/site/testimonials.tsx — added `useT()`; SectionHeading eyebrow/title/subtitle via `t("test.*")`; prev/next/pagination aria-labels localized via isAr.
+- Updated src/components/site/cta-banner.tsx — added `useT()`; main title (cta.title with Redline gradient split), subtitle (cta.subtitle), button label (cta.button) all via `t()`.
+- Updated src/components/site/contact.tsx — added `useT()`; SectionHeading eyebrow/title/subtitle (contact.*), info card title (contact.direct) and description (contact.directDesc), info rows (address/phone/email/hours via contact.* key/value pairs), form title (contact.formTitle), all form Labels (contact.name/email/phone/subject/message) and submit button (contact.submit) use `t()`. Validation errors + toast messages localized via isAr; placeholders localized via isAr.
+- Updated src/components/site/footer.tsx — added `useT()`; brand tagline (nav.tagline), description (footer.desc), address/phone lines localized via isAr; LINKS split into LINKS_AR/LINKS_EN (company/services/help column items); column titles use `t("footer.company|services|help")`; newsletter title/desc (footer.newsletter/newsletterDesc), dashboard link (footer.dashboard), copyright (footer.copyright with year interpolation), made-in-Egypt line (footer.made), and back-to-top aria-label all localized. Toast messages localized via isAr.
+
+Stage Summary:
+- All 12 listed public components (hero, stats-bar, services, how-it-works, interactive-map, video-section, about, partners, testimonials, cta-banner, contact, footer) now use the `useT()` hook from `src/lib/i18n.ts` for translations.
+- Language switcher (Globe icon in Navbar, already wired before this task) toggles AR ⇄ EN; RTL/LTR direction switches automatically via the Zustand i18n store.
+- For data-driven UI (services, stats, governorates, regional cities, video categories), local mapping objects translate the Arabic DB content when locale is English; Arabic content continues to come from the DB / FALLBACK unchanged.
+- Titles containing "Redline" preserve the gradient span by splitting `t()` result on the literal "Redline" and re-inserting the styled span.
+- `bun run lint`: 0 errors (3 pre-existing unused eslint-disable warnings remain unchanged).
+- Dev server (`bun run dev`) auto-compiled cleanly after each edit; all `/api/*` routes returned 200 OK.
+
+---
+Task ID: i18n-verify
+Agent: Orchestrator (main)
+Task: التحقق من نظام اللغتين (عربي/إنجليزي)
+
+Work Log:
+- أنشأت نظام i18n كامل:
+  * src/lib/i18n.ts: MESSAGES dictionary (en/ar لكل نص) + useT() hook + useI18n store (Zustand) + locale من localStorage
+  * الغة افتراضية: عربي (RTL) → تبديل لإنجليزي (LTR) بزر الـ Globe
+- Navbar: ضفت زر Globe للتبديل بين AR/EN + كل النصوص بتستخدم t()
+- Subagent (full-stack-developer) أحدّث كل المكونات الـ 12 لاستخدام useT():
+  * hero, stats-bar, services, how-it-works, interactive-map, video-section, about, partners, testimonials, cta-banner, contact, footer
+  * كل نص اتاستبدل بـ t("key") 
+  * زرار Globe بيقلب اللغة + الاتجاه (RTL↔LTR) بيتحول تلقائياً
+- ESLint: 0 errors
+- تحقق Agent Browser:
+  * عربي (افتراضي): lang=ar, dir=rtl ✅, title "شحن يصل لكل مصر بسرعة Redline"
+  * بعد الضغط على Globe → إنجليزي: lang=en, dir=ltr ✅, title "Shipping across all Egypt with Redline"
+  * VLM: "الموقع بالإنجليزي واتجاهه من اليسار لليمين (LTR)"
+  * بعد الضغط تاني → عربي: lang=ar, dir=rtl ✅
+  * لا أخطا
+
+Stage Summary:
+- الموقع بقى يدعم عربي + إنجليزي بالكامل
+- زر الـ Globe في الناف بار بيقلب اللغة + الاتجاه (RTL↔LTR) تلقائياً
+- كل الـ 12 مكون معم (Hero, Services, How, Map, Videos, About, Partners, Testimonials, CTA, Contact, Footer, Stats) مترجمين
+- locale بيتحفظ في localStorage
+- 0 errors

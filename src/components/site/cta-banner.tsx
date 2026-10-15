@@ -3,8 +3,10 @@
 import { motion } from "framer-motion";
 import { ArrowLeft, Zap, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useT } from "@/lib/i18n";
 
 export function CtaBanner() {
+  const { t } = useT();
   const scrollTo = (id: string) => document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });
 
   return (
@@ -26,10 +28,12 @@ export function CtaBanner() {
           <div className="absolute inset-0 noise" />
           <div className="relative">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight">
-              جاهز تبدأ شحن مع <span className="text-amber-300">Redline؟</span>
+              {t("cta.title").split("Redline")[0]}
+              <span className="text-amber-300">Redline</span>
+              {t("cta.title").split("Redline")[1]}
             </h2>
             <p className="mt-4 text-white/85 text-lg max-w-2xl mx-auto leading-relaxed">
-              انضم لأكثر من 12,000 عميل يثقون بنا يومياً. تواصل معنا الآن واحصل على عرض سعر مخصص لشحناتك.
+              {t("cta.subtitle")}
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Button
@@ -38,7 +42,7 @@ export function CtaBanner() {
                 className="bg-white text-primary hover:bg-white/90 gap-2 h-12 px-7 text-base font-semibold shadow-soft"
               >
                 <Zap className="w-5 h-5" />
-                اطلب عرض سعر
+                {t("cta.button")}
                 <ArrowLeft className="w-4 h-4" />
               </Button>
               <a href="tel:19999">

@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Package, Map, Users, Building2 } from "lucide-react";
 import { apiGet } from "@/lib/api";
+import { useT } from "@/lib/i18n";
 import { AnimatedCounter } from "@/components/shared/animated-counter";
 import { StaggerGroup, StaggerItem } from "@/components/shared/section-reveal";
 
@@ -15,13 +16,30 @@ const FALLBACK = [
   { id: "4", label: "فرع ومستودع", value: "40+", icon: "building" },
 ];
 
+// Map the stat icon (in API data + FALLBACK) to a translation key for English locale.
+const STAT_KEY_BY_ICON: Record<string, string> = {
+  package: "stats.shipments",
+  map: "stats.governorates",
+  users: "stats.customers",
+  building: "stats.branches",
+};
+
 export function StatsBar() {
+  const { t, isAr } = useT();
   const { data } = useQuery({
     queryKey: ["site-stats"],
     queryFn: () => apiGet<{ stats: typeof FALLBACK }>("/api/site"),
   });
 
   const stats = data?.stats ?? FALLBACK;
+
+  // Returns localized label: Arabic uses DB/fallback Arabic label, English uses t() mapping.
+  const labelFor = (s: (typeof FALLBACK)[number]) => {
+    if (isAr) return s.label;
+    const key = STAT_KEY_BY_ICON[s.icon];
+    const translated = key ? t(key) : "";
+    return translated || s.label;
+  };
 
   return (
     <section className="py-8 sm:py-12">
@@ -42,7 +60,7 @@ export function StatsBar() {
                   <div className="text-3xl sm:text-4xl font-bold text-gradient-red">
                     <AnimatedCounter value={s.value} />
                   </div>
-                  <div className="mt-1.5 text-sm text-muted-foreground font-medium">{s.label}</div>
+                  <div className="mt-1.5 text-sm text-muted-foreground font-medium">{labelFor(s)}</div>
                 </div>
               </StaggerItem>
             );

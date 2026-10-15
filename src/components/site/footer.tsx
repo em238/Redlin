@@ -4,6 +4,7 @@ import { Truck, MapPin, Phone, Mail, Facebook, Instagram, Twitter, Linkedin, Sen
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/store";
+import { useT } from "@/lib/i18n";
 import { toast } from "sonner";
 import { useState } from "react";
 
@@ -14,23 +15,33 @@ const SOCIALS = [
   { icon: Linkedin, label: "LinkedIn" },
 ];
 
-const LINKS = {
-  company: { title: "الشركة", items: ["من نحن", "فريق العمل", "الوظائف", "المدونة", "الأخبار"] },
-  services: { title: "الخدمات", items: ["شحن عادي", "شحن ممتاز", "نفس اليوم", "شحن ثقيل", "دفع عند الاستلام"] },
-  help: { title: "المساعدة", items: ["تتبع الشحنة", "الأسئلة الشائعة", "سياسة الإرجاع", "الشروط والأحكام", "سياسة الخصوصية"] },
+const LINKS_AR = {
+  company: ["من نحن", "فريق العمل", "الوظائف", "المدونة", "الأخبار"],
+  services: ["شحن عادي", "شحن ممتاز", "نفس اليوم", "شحن ثقيل", "دفع عند الاستلام"],
+  help: ["تتبع الشحنة", "الأسئلة الشائعة", "سياسة الإرجاع", "الشروط والأحكام", "سياسة الخصوصية"],
+};
+const LINKS_EN = {
+  company: ["About", "Team", "Careers", "Blog", "News"],
+  services: ["Standard", "Express", "Same Day", "Freight", "Cash on Delivery"],
+  help: ["Track Shipment", "FAQ", "Return Policy", "Terms & Conditions", "Privacy Policy"],
 };
 
 export function Footer() {
+  const { t, isAr } = useT();
   const { setView } = useAppStore();
   const [email, setEmail] = useState("");
+  const LINKS = isAr ? LINKS_AR : LINKS_EN;
 
   const subscribe = () => {
-    if (!email) { toast.error("أدخل بريدك الإلكتروني"); return; }
-    toast.success("تم الاشتراك في النشرة البريدية!");
+    if (!email) { toast.error(isAr ? "أدخل بريدك الإلكتروني" : "Please enter your email"); return; }
+    toast.success(isAr ? "تم الاشتراك في النشرة البريدية!" : "Successfully subscribed to the newsletter!");
     setEmail("");
   };
 
   const go = (id: string) => document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });
+
+  // Match the help list item used to jump to the contact section (track shipment).
+  const trackItem = isAr ? LINKS_AR.help[0] : LINKS_EN.help[0];
 
   return (
     <footer className="mt-auto bg-zinc-950 text-zinc-300">
@@ -45,19 +56,18 @@ export function Footer() {
               </div>
               <div>
                 <div className="text-lg font-bold text-white">Red<span className="text-primary">line</span></div>
-                <div className="text-[10px] text-zinc-500 mt-0.5">شحن سريع وآمن</div>
+                <div className="text-[10px] text-zinc-500 mt-0.5">{t("nav.tagline")}</div>
               </div>
             </div>
             <p className="text-sm text-zinc-400 leading-relaxed max-w-sm">
-              شركة Redline للشحن — شريكك اللوجستي الموثوق في مصر. نغطي 27 محافظة بأكثر من 40 فرعاً ومستودعاً،
-              بأسرع خدمة وأفضل الأسعار وضمان التسليم.
+              {t("footer.desc")}
             </p>
             <div className="mt-5 space-y-2 text-sm">
               <div className="flex items-center gap-2 text-zinc-400">
-                <MapPin className="w-4 h-4 text-primary" /> التجمع الخامس، القاهرة الجديدة
+                <MapPin className="w-4 h-4 text-primary" /> {isAr ? "التجمع الخامس، القاهرة الجديدة" : "5th Settlement, New Cairo"}
               </div>
               <a href="tel:19999" className="flex items-center gap-2 text-zinc-400 hover:text-white">
-                <Phone className="w-4 h-4 text-primary" /> 19999 (موحد)
+                <Phone className="w-4 h-4 text-primary" /> {isAr ? "19999 (موحد)" : "19999 (nationwide)"}
               </a>
               <a href="mailto:support@redline.eg" className="flex items-center gap-2 text-zinc-400 hover:text-white">
                 <Mail className="w-4 h-4 text-primary" /> support@redline.eg
@@ -74,27 +84,27 @@ export function Footer() {
 
           {/* Links */}
           <div className="lg:col-span-2">
-            <h4 className="font-bold text-white text-sm mb-4">{LINKS.company.title}</h4>
+            <h4 className="font-bold text-white text-sm mb-4">{t("footer.company")}</h4>
             <ul className="space-y-2 text-sm">
-              {LINKS.company.items.map((l, i) => (
+              {LINKS.company.map((l, i) => (
                 <li key={i}><a href="#" className="text-zinc-400 hover:text-primary transition-colors">{l}</a></li>
               ))}
             </ul>
           </div>
           <div className="lg:col-span-2">
-            <h4 className="font-bold text-white text-sm mb-4">{LINKS.services.title}</h4>
+            <h4 className="font-bold text-white text-sm mb-4">{t("footer.services")}</h4>
             <ul className="space-y-2 text-sm">
-              {LINKS.services.items.map((l, i) => (
+              {LINKS.services.map((l, i) => (
                 <li key={i}><button onClick={() => go("#services")} className="text-zinc-400 hover:text-primary transition-colors">{l}</button></li>
               ))}
             </ul>
           </div>
           <div className="lg:col-span-2">
-            <h4 className="font-bold text-white text-sm mb-4">{LINKS.help.title}</h4>
+            <h4 className="font-bold text-white text-sm mb-4">{t("footer.help")}</h4>
             <ul className="space-y-2 text-sm">
-              {LINKS.help.items.map((l, i) => (
+              {LINKS.help.map((l, i) => (
                 <li key={i}>
-                  <button onClick={() => l === "تتبع الشحنة" ? go("#contact") : undefined} className="text-zinc-400 hover:text-primary transition-colors">{l}</button>
+                  <button onClick={() => l === trackItem ? go("#contact") : undefined} className="text-zinc-400 hover:text-primary transition-colors">{l}</button>
                 </li>
               ))}
             </ul>
@@ -102,14 +112,14 @@ export function Footer() {
 
           {/* Newsletter */}
           <div className="lg:col-span-3">
-            <h4 className="font-bold text-white text-sm mb-4">النشرة البريدية</h4>
-            <p className="text-xs text-zinc-400 mb-3">اشترك لتصلك آخر العروض والأخبار</p>
+            <h4 className="font-bold text-white text-sm mb-4">{t("footer.newsletter")}</h4>
+            <p className="text-xs text-zinc-400 mb-3">{t("footer.newsletterDesc")}</p>
             <div className="flex gap-2">
               <Input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="بريدك"
+                placeholder={isAr ? "بريدك" : "Your email"}
                 className="h-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-500"
               />
               <Button size="icon" onClick={subscribe} className="bg-primary hover:bg-red-600 h-10 w-10 shrink-0">
@@ -120,21 +130,21 @@ export function Footer() {
               onClick={() => setView("dashboard")}
               className="mt-4 text-xs text-zinc-500 hover:text-primary transition-colors"
             >
-              دخول لوحة التحكم ←
+              {t("footer.dashboard")} ←
             </button>
           </div>
         </div>
 
         <div className="mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-zinc-500">
-            © {new Date().getFullYear()} Redline Shipping. جميع الحقوق محفوظة.
+            {t("footer.copyright").replace("© ", `© ${new Date().getFullYear()} `)}
           </p>
           <div className="flex items-center gap-4 text-xs text-zinc-500">
-            <span>صُنع بشغف في مصر 🇪🇬</span>
+            <span>{t("footer.made")} 🇪🇬</span>
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
               className="w-8 h-8 rounded-full bg-white/5 hover:bg-primary flex items-center justify-center transition-colors"
-              aria-label="للأعلى"
+              aria-label={isAr ? "للأعلى" : "To top"}
             >
               <ArrowUp className="w-4 h-4" />
             </button>

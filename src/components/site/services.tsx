@@ -1,9 +1,9 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "framer-motion";
 import { Truck, Zap, Rocket, Package, Banknote, RotateCcw, ArrowLeft } from "lucide-react";
 import { apiGet } from "@/lib/api";
+import { useT } from "@/lib/i18n";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { StaggerGroup, StaggerItem } from "@/components/shared/section-reveal";
 
@@ -20,7 +20,18 @@ const FALLBACK = [
   { name: "Returns", nameAr: "مرتجعات", description: "استرجاع الشحنات المرتجعة من العملاء", icon: "rotate-ccw" },
 ];
 
+// Map the service `name` (English, used by API + FALLBACK) to an i18n key suffix.
+const SERVICE_KEY_BY_NAME: Record<string, string> = {
+  "Standard": "standard",
+  "Express": "express",
+  "Same Day": "sameday",
+  "Freight": "freight",
+  "Cash on Delivery": "cod",
+  "Returns": "returns",
+};
+
 export function Services() {
+  const { t, isAr } = useT();
   const { data } = useQuery({
     queryKey: ["services"],
     queryFn: () => apiGet<{ services: typeof FALLBACK }>("/api/services"),
@@ -29,13 +40,19 @@ export function Services() {
 
   const scrollTo = (id: string) => document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });
 
+  // Localize service name/description. Arabic uses DB Arabic fields; English uses t() lookup by name.
+  const nameFor = (s: (typeof FALLBACK)[number]) =>
+    isAr ? s.nameAr : (SERVICE_KEY_BY_NAME[s.name] ? t(`service.${SERVICE_KEY_BY_NAME[s.name]}`) : s.name);
+  const descFor = (s: (typeof FALLBACK)[number]) =>
+    isAr ? s.description : (SERVICE_KEY_BY_NAME[s.name] ? t(`service.${SERVICE_KEY_BY_NAME[s.name]}.desc`) : s.description);
+
   return (
     <section id="services" className="py-14 sm:py-24 lg:py-28">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
-          eyebrow="خدماتنا"
-          title={<>حلول شحن <span className="text-gradient-red">متكاملة</span> لكل احتياجاتك</>}
-          subtitle="من الشحن العادي إلى التوصيل في نفس اليوم، نوفّر لك خيارات تناسب سرعتك وميزانيتك"
+          eyebrow={t("services.eyebrow")}
+          title={t("services.title")}
+          subtitle={t("services.subtitle")}
         />
 
         <StaggerGroup className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5" stagger={0.07}>
@@ -51,13 +68,13 @@ export function Services() {
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/15 via-primary/8 to-amber-500/10 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform icon-gold-ring relative">
                     <Icon className="w-6 h-6 text-primary" strokeWidth={2} />
                   </div>
-                  <h3 className="text-lg font-bold relative">{s.nameAr}</h3>
-                  <p className="mt-2 text-muted-foreground text-sm leading-relaxed relative">{s.description}</p>
+                  <h3 className="text-lg font-bold relative">{nameFor(s)}</h3>
+                  <p className="mt-2 text-muted-foreground text-sm leading-relaxed relative">{descFor(s)}</p>
                   <button
                     onClick={() => scrollTo("#contact")}
                     className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:gap-2 transition-all relative"
                   >
-                    اطلب الخدمة
+                    {t("services.cta")}
                     <ArrowLeft className="w-4 h-4" />
                   </button>
                 </div>

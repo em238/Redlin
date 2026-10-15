@@ -6,6 +6,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, Video, X, Clapperboard, Film, Filter } from "lucide-react";
 import { apiGet } from "@/lib/api";
+import { useT } from "@/lib/i18n";
 import { SectionHeading } from "@/components/shared/section-heading";
 
 interface VideoItem {
@@ -19,11 +20,15 @@ const FALLBACK_VIDEOS: VideoItem[] = [
   { id: "2", title: "شبكة التوصيل في 27 محافظة", description: "كيف نغطي كل محافظات مصر", url: "https://www.youtube.com/embed/dQw4w9WgXcQ", thumbnail: "/images/fleet.png", category: "logistics", active: true, featured: false },
 ];
 
-const CATEGORY_LABELS: Record<string, string> = {
+const CATEGORY_LABELS_AR: Record<string, string> = {
   promo: "ترويجي", logistics: "لوجستيات", tutorial: "شرح", testimonial: "آراء العملاء", other: "أخرى",
+};
+const CATEGORY_LABELS_EN: Record<string, string> = {
+  promo: "Promo", logistics: "Logistics", tutorial: "Tutorial", testimonial: "Testimonials", other: "Other",
 };
 
 export function VideoSection() {
+  const { t, isAr } = useT();
   const { data } = useQuery({
     queryKey: ["site-videos"],
     queryFn: () => apiGet<{ videos: VideoItem[] }>("/api/site"),
@@ -31,6 +36,9 @@ export function VideoSection() {
   const videos = data?.videos ?? FALLBACK_VIDEOS;
   const [active, setActive] = useState<VideoItem | null>(null);
   const [category, setCategory] = useState<string>("ALL");
+
+  const catLabel = (c: string) =>
+    isAr ? CATEGORY_LABELS_AR[c] || c : CATEGORY_LABELS_EN[c] || c;
 
   const categories = useMemo(() => {
     const set = new Set<string>();
@@ -47,9 +55,15 @@ export function VideoSection() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px]" />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
         <SectionHeading
-          eyebrow={<span className="flex items-center gap-1.5"><Clapperboard className="w-4 h-4" /> معرض الفيديو</span>}
-          title={<>شاهد <span className="text-gradient-red">Redline</span> أثناء العمل</>}
-          subtitle="مقاطع توثّق عملياتنا، شبكتنا، وقصص عملائنا في كل أنحاء مصر"
+          eyebrow={<span className="flex items-center gap-1.5"><Clapperboard className="w-4 h-4" /> {t("videos.eyebrow")}</span>}
+          title={
+            <>
+              {t("videos.title").split("Redline")[0]}
+              <span className="text-gradient-red">Redline</span>
+              {t("videos.title").split("Redline")[1]}
+            </>
+          }
+          subtitle={t("videos.subtitle")}
         />
 
         {/* Category filter */}
@@ -65,7 +79,7 @@ export function VideoSection() {
                     : "bg-card border-border hover:border-primary/40"
                 }`}
               >
-                {c === "ALL" ? "الكل" : CATEGORY_LABELS[c] || c}
+                {c === "ALL" ? (isAr ? "الكل" : "All") : catLabel(c)}
               </button>
             ))}
           </div>
@@ -97,7 +111,7 @@ export function VideoSection() {
                 <div className="absolute inset-0 rounded-full border-2 border-white/30 animate-slow-pulse" style={{ width: 96, height: 96, margin: "auto" }} />
               </div>
               <div className="absolute bottom-0 inset-x-0 p-6 text-right">
-                <span className="inline-block px-2 py-0.5 rounded bg-primary text-white text-xs font-bold mb-2">المميز</span>
+                <span className="inline-block px-2 py-0.5 rounded bg-primary text-white text-xs font-bold mb-2">{isAr ? "المميز" : "Featured"}</span>
                 <h3 className="text-2xl sm:text-3xl font-black text-white">{featured.title}</h3>
                 <p className="mt-1 text-white/75 text-sm max-w-xl">{featured.description}</p>
               </div>
@@ -130,7 +144,7 @@ export function VideoSection() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
                   <div className="absolute top-2 right-2">
                     <span className="px-2 py-0.5 rounded bg-black/60 text-white text-[10px] font-bold backdrop-blur-sm">
-                      {CATEGORY_LABELS[v.category] || v.category}
+                      {catLabel(v.category)}
                     </span>
                   </div>
                   <div className="absolute bottom-2 inset-x-2 flex items-center gap-2">
@@ -166,7 +180,7 @@ export function VideoSection() {
               <button
                 onClick={() => setActive(null)}
                 className="absolute top-3 left-3 z-10 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center text-white transition-colors"
-                aria-label="إغلاق"
+                aria-label={isAr ? "إغلاق" : "Close"}
               >
                 <X className="w-5 h-5" />
               </button>

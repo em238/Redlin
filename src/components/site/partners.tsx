@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { Building2, Briefcase, ShoppingBag, Shirt, Palette, Store, Truck, Cpu, Smartphone, Star, ExternalLink } from "lucide-react";
 import { apiGet } from "@/lib/api";
+import { useT } from "@/lib/i18n";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { StaggerGroup, StaggerItem } from "@/components/shared/section-reveal";
 
@@ -21,6 +22,7 @@ const FALLBACK = [
 ];
 
 export function Partners() {
+  const { t } = useT();
   const { data } = useQuery({
     queryKey: ["partners"],
     queryFn: () => apiGet<{ partners: typeof FALLBACK }>("/api/partners"),
@@ -33,9 +35,9 @@ export function Partners() {
     <section id="partners" className="py-14 sm:py-24 lg:py-28 bg-muted/30">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
-          eyebrow={<span className="flex items-center gap-1.5"><Star className="w-3.5 h-3.5" /> شركاء النجاح</span>}
-          title={<>شعارات <span className="text-gradient-red">شركائنا</span> وعملائنا</>}
-          subtitle="أكثر من 12,000 شركة وعلامة تجارية تثق في Redline لشحناتها يومياً"
+          eyebrow={<span className="flex items-center gap-1.5"><Star className="w-3.5 h-3.5" /> {t("partners.eyebrow")}</span>}
+          title={t("partners.title")}
+          subtitle={t("partners.subtitle")}
         />
 
         <StaggerGroup className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4" stagger={0.05}>
@@ -85,7 +87,7 @@ export function Partners() {
         >
           <span className="inline-flex items-center gap-3">
             <span className="h-px w-10 bg-border" />
-            موثوق به من قِبل أكبر العلامات التجارية في مصر
+            {t("partners.trust")}
             <span className="h-px w-10 bg-border" />
           </span>
         </motion.div>

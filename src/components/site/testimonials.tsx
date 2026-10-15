@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, Quote, ChevronLeft, ChevronRight } from "lucide-react";
 import { apiGet } from "@/lib/api";
+import { useT } from "@/lib/i18n";
 import { SectionHeading } from "@/components/shared/section-heading";
 
 const FALLBACK = [
@@ -14,6 +15,7 @@ const FALLBACK = [
 ];
 
 export function Testimonials() {
+  const { t, isAr } = useT();
   const { data } = useQuery({
     queryKey: ["site-testimonials"],
     queryFn: () => apiGet<{ testimonials: typeof FALLBACK }>("/api/site"),
@@ -38,9 +40,9 @@ export function Testimonials() {
     <section className="py-14 sm:py-24 lg:py-28">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
-          eyebrow="آراء العملاء"
-          title={<>عملاؤنا هم <span className="text-gradient-red">قوتنا</span></>}
-          subtitle="أكثر من 12,000 عميل يثقون في Redline لشحناتهم يومياً"
+          eyebrow={t("test.eyebrow")}
+          title={t("test.title")}
+          subtitle={t("test.subtitle")}
         />
 
         <div className="max-w-4xl mx-auto" onMouseEnter={() => setAuto(false)} onMouseLeave={() => setAuto(true)}>
@@ -87,15 +89,15 @@ export function Testimonials() {
           </div>
 
           <div className="mt-6 flex items-center justify-center gap-4">
-            <button onClick={prev} className="w-9 h-9 rounded-full border border-border bg-card hover:border-primary/40 hover:bg-muted flex items-center justify-center transition-colors" aria-label="السابق">
+            <button onClick={prev} className="w-9 h-9 rounded-full border border-border bg-card hover:border-primary/40 hover:bg-muted flex items-center justify-center transition-colors" aria-label={isAr ? "السابق" : "Previous"}>
               <ChevronRight className="w-4 h-4" />
             </button>
             <div className="flex gap-1.5">
               {items.map((_, i) => (
-                <button key={i} onClick={() => setIndex(i)} aria-label={`الرأي ${i + 1}`} className={`h-1.5 rounded-full transition-all ${i === index ? "w-6 bg-primary" : "w-1.5 bg-border hover:bg-muted-foreground"}`} />
+                <button key={i} onClick={() => setIndex(i)} aria-label={isAr ? `الرأي ${i + 1}` : `Testimonial ${i + 1}`} className={`h-1.5 rounded-full transition-all ${i === index ? "w-6 bg-primary" : "w-1.5 bg-border hover:bg-muted-foreground"}`} />
               ))}
             </div>
-            <button onClick={next} className="w-9 h-9 rounded-full border border-border bg-card hover:border-primary/40 hover:bg-muted flex items-center justify-center transition-colors" aria-label="التالي">
+            <button onClick={next} className="w-9 h-9 rounded-full border border-border bg-card hover:border-primary/40 hover:bg-muted flex items-center justify-center transition-colors" aria-label={isAr ? "التالي" : "Next"}>
               <ChevronLeft className="w-4 h-4" />
             </button>
           </div>
