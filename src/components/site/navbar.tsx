@@ -8,6 +8,7 @@ import { useAppStore } from "@/lib/store";
 import { useScrollSpy } from "@/hooks/use-scroll-spy";
 import { ScrollProgress } from "@/components/shared/scroll-progress";
 import { useT, useI18n } from "@/lib/i18n";
+import { Magnetic } from "@/components/shared/custom-cursor";
 
 const NAV_KEYS = [
   { href: "#home", key: "nav.home" },
@@ -111,14 +112,16 @@ export function Navbar() {
               >
                 {theme === "light" ? <Moon className="w-[18px] h-[18px]" /> : <Sun className="w-[18px] h-[18px]" />}
               </Button>
-              <Button
-                onClick={() => setView("dashboard")}
-                size="sm"
-                className="hidden sm:inline-flex bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 font-semibold"
-              >
-                <LayoutDashboard className="w-[18px] h-[18px]" />
-                {t("nav.dashboard")}
-              </Button>
+              <Magnetic strength={0.18} className="hidden sm:inline-flex">
+                <Button
+                  onClick={() => setView("dashboard")}
+                  size="sm"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 font-semibold"
+                >
+                  <LayoutDashboard className="w-[18px] h-[18px]" />
+                  {t("nav.dashboard")}
+                </Button>
+              </Magnetic>
               <Button
                 variant="ghost"
                 size="icon"

@@ -451,3 +451,91 @@
   to { stroke-dashoffset: -100; }
 }
 .border-shimmer { animation: border-shimmer 8s linear infinite; }
+
+/* === PREMIUM POLISH LAYER (refactor) === */
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Custom cursor: hide native cursor on devices that support fine pointers
+   (the React <CustomCursor /> component paints a premium dot + ring) */
+@media (pointer: fine) {
+  body { cursor: none; }
+  a, button, [role="button"], [data-magnetic] { cursor: none; }
+}
+
+/* Magnetic-button base: transition transform smoothly when JS shifts it */
+[data-magnetic] {
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+/* Premium ink-sheet reveal for page-load intro */
+@keyframes ink-wipe {
+  0% { transform: scaleY(1); transform-origin: top; }
+  100% { transform: scaleY(0); transform-origin: top; }
+}
+.ink-sheet-out {
+  animation: ink-wipe 0.9s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+}
+
+/* Slow gradient drift for section-divider ribbons */
+@keyframes ribbon-drift {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+.ribbon-drift {
+  background-size: 200% 100%;
+  animation: ribbon-drift 12s linear infinite;
+}
+
+/* Section-to-section gradient transition ribbon */
+.section-ribbon {
+  position: relative;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    oklch(0.55 0.2 28 / 0.25) 20%,
+    oklch(0.78 0.15 75 / 0.4) 50%,
+    oklch(0.55 0.2 28 / 0.25) 80%,
+    transparent);
+}
+
+/* Floating CTA pulse ring */
+@keyframes fab-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(0.55 0.2 28 / 0.4); }
+  50% { box-shadow: 0 0 0 12px oklch(0.55 0.2 28 / 0); }
+}
+.fab-pulse { animation: fab-pulse 2.4s ease-out infinite; }
+
+/* Trust badge marquee — same keyframe as governorates ticker, slower */
+@keyframes trust-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.trust-marquee { animation: trust-marquee 30s linear infinite; }
+.trust-marquee:hover { animation-play-state: paused; }
+
+/* Sparkline mini-chart stroke draw on inview */
+@keyframes spark-draw {
+  from { stroke-dashoffset: 200; }
+  to { stroke-dashoffset: 0; }
+}
+.spark-draw {
+  stroke-dasharray: 200;
+  animation: spark-draw 1.6s ease-out forwards;
+}
+
+/* Scroll-down indicator bob */
+@keyframes scroll-bob {
+  0%, 100% { transform: translateY(0); opacity: 0.4; }
+  50% { transform: translateY(8px); opacity: 1; }
+}
+.scroll-bob { animation: scroll-bob 2s ease-in-out infinite; }

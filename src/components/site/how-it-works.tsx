@@ -5,6 +5,7 @@ import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-mot
 import { ClipboardList, Truck, PackageCheck, ArrowLeft, ArrowRight } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { SectionHeading } from "@/components/shared/section-heading";
+import { Magnetic } from "@/components/shared/custom-cursor";
 
 export function HowItWorks() {
   const { t, isAr } = useT();
@@ -240,13 +241,15 @@ export function HowItWorks() {
 
         {/* CTA button */}
         <div className="mt-12 text-center">
-          <button
-            onClick={() => scrollTo("#contact")}
-            className="btn-glow inline-flex items-center gap-2 h-12 px-6 bg-gradient-to-r from-primary to-red-700 hover:from-red-600 hover:to-red-800 text-primary-foreground text-base font-semibold rounded-lg shadow-soft"
-          >
-            {t("how.cta")}
-            {isAr ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
-          </button>
+          <Magnetic strength={0.2} className="inline-block">
+            <button
+              onClick={() => scrollTo("#contact")}
+              className="btn-glow inline-flex items-center gap-2 h-12 px-6 bg-gradient-to-r from-primary to-red-700 hover:from-red-600 hover:to-red-800 text-primary-foreground text-base font-semibold rounded-lg shadow-soft"
+            >
+              {t("how.cta")}
+              {isAr ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+            </button>
+          </Magnetic>
         </div>
       </div>
     </section>

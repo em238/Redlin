@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
 import { apiGet } from "@/lib/api";
+import { Magnetic } from "@/components/shared/custom-cursor";
 
 const FALLBACK_IMAGES = [
   { id: "1", url: "/images/hero-truck.png", title: "شاحنة Redline على الطريق السريع", order: 0, active: true },
@@ -156,24 +157,28 @@ export function Hero() {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
           >
-            <Button
-              size="lg"
-              onClick={() => scrollTo("#contact")}
-              className="btn-glow bg-gradient-to-r from-primary to-red-700 hover:from-red-600 hover:to-red-800 text-primary-foreground gap-2 text-base h-12 px-6 font-semibold shadow-lg shadow-primary/30 hover:shadow-primary/40 transition-shadow w-full sm:w-auto justify-center"
-            >
-              <Zap className="w-4.5 h-4.5" />
-              {t("hero.cta1")}
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={() => scrollTo("#services")}
-              className="bg-white/15 backdrop-blur-md border-white/30 text-white hover:bg-white/25 hover:text-white gap-2 text-base h-12 px-6 w-full sm:w-auto justify-center font-medium"
-            >
-              <Truck className="w-4.5 h-4.5" />
-              {t("hero.cta2")}
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
+            <Magnetic strength={0.2} className="w-full sm:w-auto">
+              <Button
+                size="lg"
+                onClick={() => scrollTo("#contact")}
+                className="btn-glow bg-gradient-to-r from-primary to-red-700 hover:from-red-600 hover:to-red-800 text-primary-foreground gap-2 text-base h-12 px-6 font-semibold shadow-lg shadow-primary/30 hover:shadow-primary/40 transition-shadow w-full sm:w-auto justify-center"
+              >
+                <Zap className="w-4.5 h-4.5" />
+                {t("hero.cta1")}
+              </Button>
+            </Magnetic>
+            <Magnetic strength={0.2} className="w-full sm:w-auto">
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => scrollTo("#services")}
+                className="bg-white/15 backdrop-blur-md border-white/30 text-white hover:bg-white/25 hover:text-white gap-2 text-base h-12 px-6 w-full sm:w-auto justify-center font-medium"
+              >
+                <Truck className="w-4.5 h-4.5" />
+                {t("hero.cta2")}
+                <ArrowLeft className="w-4 h-4" />
+              </Button>
+            </Magnetic>
           </motion.div>
 
           {/* Mini features */}

@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Zap, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
+import { Magnetic } from "@/components/shared/custom-cursor";
 
 export function CtaBanner() {
   const { t } = useT();
@@ -36,21 +37,25 @@ export function CtaBanner() {
               {t("cta.subtitle")}
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <Button
-                size="lg"
-                onClick={() => scrollTo("#contact")}
-                className="bg-white text-primary hover:bg-white/90 gap-2 h-12 px-7 text-base font-semibold shadow-soft"
-              >
-                <Zap className="w-5 h-5" />
-                {t("cta.button")}
-                <ArrowLeft className="w-4 h-4" />
-              </Button>
-              <a href="tel:19999">
-                <Button size="lg" variant="outline" className="bg-white/10 border-white/25 text-white hover:bg-white/20 hover:text-white gap-2 h-12 px-7 text-base w-full sm:w-auto">
-                  <Phone className="w-5 h-5" />
-                  19999
+              <Magnetic strength={0.2} className="w-full sm:w-auto">
+                <Button
+                  size="lg"
+                  onClick={() => scrollTo("#contact")}
+                  className="bg-white text-primary hover:bg-white/90 gap-2 h-12 px-7 text-base font-semibold shadow-soft w-full sm:w-auto"
+                >
+                  <Zap className="w-5 h-5" />
+                  {t("cta.button")}
+                  <ArrowLeft className="w-4 h-4" />
                 </Button>
-              </a>
+              </Magnetic>
+              <Magnetic strength={0.2} className="w-full sm:w-auto">
+                <a href="tel:19999" className="block w-full sm:w-auto">
+                  <Button size="lg" variant="outline" className="bg-white/10 border-white/25 text-white hover:bg-white/20 hover:text-white gap-2 h-12 px-7 text-base w-full sm:w-auto">
+                    <Phone className="w-5 h-5" />
+                    19999
+                  </Button>
+                </a>
+              </Magnetic>
             </div>
           </div>
         </motion.div>
