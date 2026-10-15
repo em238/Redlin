@@ -55,7 +55,7 @@ export function Services() {
           subtitle={t("services.subtitle")}
         />
 
-        <StaggerGroup className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5" stagger={0.07}>
+        <StaggerGroup className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch" stagger={0.07}>
           {services.map((s, idx) => {
             const Icon = ICONS[s.icon] || Package;
             return (

@@ -1269,3 +1269,47 @@ Stage Summary:
 - أصلحت كل مشاكل التداخل على الموبايل: أرقام الخدمات، صور About، HUD الخريطة، play icon الفيديو، نصوص الهيدر
 - VLM: 8/10 موبايل مظبوط بدون تداخل
 - 0 errors
+
+---
+Task ID: responsive-fix-all
+Agent: Orchestrator (main)
+Task: Fix all responsive issues — eliminate horizontal overflow + pixel-perfect
+
+Work Log:
+1) Horizontal Overflow (CRITICAL):
+   - Added `overflow-x: hidden` + `max-width: 100%` to html/body in globals.css
+   - Added `box-sizing: border-box` to all elements
+   - Added `overflow-x-hidden` to PublicPage wrapper
+   - Verified: NO `w-screen` or fixed pixel widths causing overflow
+
+2) Services Grid:
+   - Changed to `grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch`
+   - Mobile: 1 column stacked; Tablet: 2 cols; Desktop: 3 cols
+   - Equal card heights via `items-stretch` + `h-full`
+   - All cards have same `overflow-hidden` + padding
+
+3) Map:
+   - Container has `overflow-hidden` + `aspect-[16/11] sm:aspect-[16/9]`
+   - Legend uses `flex flex-wrap` — wraps gracefully on mobile
+   - HUD header uses `flex-col sm:flex-row` — stacks on mobile
+
+4) Videos:
+   - Featured card: `overflow-hidden` + `relative` maintained
+   - Other video cards: `overflow-hidden` on each card
+   - Badges stay inside via `absolute` positioning within `overflow-hidden` parent
+
+5) Floating Elements (About):
+   - Operations image + "+15" badge: `hidden sm:block` — hidden on mobile
+   - Only main warehouse image shows on mobile — no overflow
+
+6) Containers & Typography:
+   - All sections use `container mx-auto px-4 sm:px-6 lg:px-8`
+   - Hero title: `text-3xl sm:text-5xl lg:text-6xl`
+   - Section headings: `text-3xl sm:text-4xl lg:text-[2.75rem]`
+
+VERIFICATION (Agent Browser):
+  - Mobile 375px: scrollWidth=375, clientWidth=375, overflow=false ✅
+  - Tablet 768px: scrollWidth=768, clientWidth=768, overflow=false ✅  
+  - Desktop 1440px: scrollWidth=1440, clientWidth=1440, overflow=false ✅
+  - VLM Mobile: "لا يوجد horizontal scroll ولا white gap. الأقسام مظبوطة. 9/10"
+  - ESLint: 0 errors

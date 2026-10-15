@@ -16,7 +16,7 @@ import { Footer } from "./footer";
 
 export function PublicPage() {
   return (
-    <div className="min-h-screen flex flex-col noise">
+    <div className="min-h-screen flex flex-col overflow-x-hidden noise">
       <Navbar />
       <main className="flex-1">
         <Hero />
