@@ -43,7 +43,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ar" dir="rtl" suppressHydrationWarning>
+    <html lang="ar" dir="rtl" suppressHydrationWarning className="dark" style={{ backgroundColor: "#0b0f17" }}>
       <body className={`${cairo.variable} ${tajawal.variable} antialiased bg-background text-foreground font-sans`}>
         <Providers>
           {children}

@@ -37,7 +37,7 @@ export function PageLoadReveal() {
 
     // Defer setState to next animation frame (avoids cascading render in effect body)
     const raf = requestAnimationFrame(() => setShow(true));
-    const hide = setTimeout(() => setShow(false), 1900);
+    const hide = setTimeout(() => setShow(false), 1400);
     return () => {
       cancelAnimationFrame(raf);
       clearTimeout(hide);
@@ -51,8 +51,8 @@ export function PageLoadReveal() {
           key="ink-sheet"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.3, delay: 1.4 }}
-          className="fixed inset-0 z-[200] bg-background"
+          transition={{ duration: 0.5, ease: "easeInOut" }}
+          className="fixed inset-0 z-[9999] bg-[#0b0f17] flex items-center justify-center pointer-events-none"
           aria-hidden
         >
           {/* Ink wipe layer (scales from 1 to 0 top-to-bottom) */}
@@ -60,7 +60,7 @@ export function PageLoadReveal() {
             initial={{ scaleY: 1 }}
             animate={{ scaleY: 0 }}
             transition={{ duration: 0.9, delay: 0.6, ease: [0.76, 0, 0.24, 1] }}
-            className="absolute inset-0 bg-zinc-950 origin-top"
+            className="absolute inset-0 bg-[#0b0f17] origin-top"
           >
             {/* Centered brand logo */}
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-6">
