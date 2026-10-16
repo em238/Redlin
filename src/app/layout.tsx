@@ -27,15 +27,16 @@ export const metadata: Metadata = {
   description: "شركة شحن احترافية تغطي جميع محافظات مصر — عادي، ممتاز، نفس اليوم، وشحن ثقيل مع تتبع مباشر.",
   keywords: ["شحن", "شحن مصر", "Redline", "RedLine Transport", "توصيل", "شحنات", "خدمات لوجستية", "مصر"],
   authors: [{ name: "Redline" }],
+  // Next.js App Router file-based metadata: src/app/icon.png is auto-detected
+  // and generates the <link rel="icon"> tag automatically. The public/ copies
+  // are referenced explicitly for legacy crawlers + shortcut icon.
+  // NOTE: src/app/favicon.ico was DELETED — Turbopack threw "The PNG is not
+  // in RGBA format" because it tried to decode a non-RGBA ICO internally.
+  // Now only src/app/icon.png (32-bit RGBA PNG) + public/favicon.ico exist.
   icons: {
-    icon: [
-      { url: "/icon.png?v=3", sizes: "512x512", type: "image/png" },
-      { url: "/favicon.ico?v=3", sizes: "any" },
-    ],
-    shortcut: "/favicon.ico?v=3",
-    apple: [
-      { url: "/apple-icon.png?v=3", sizes: "180x180", type: "image/png" },
-    ],
+    icon: "/icon.png",
+    shortcut: "/favicon.ico",
+    apple: "/apple-icon.png",
   },
   openGraph: {
     title: "Redline Transport | عصب الشحن في مصر",
