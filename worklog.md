@@ -3086,3 +3086,39 @@ The CSS approach works because next-themes injects an inline script BEFORE hydra
 - Navbar logo: src=`/redline-transport-white.png` (white variant) ✓, visible=true ✓
 - Footer Send button: iconColor=`rgb(255,255,255)` ✓
 - Lint: 0 errors, 0 warnings ✓
+
+---
+Task ID: map-interactivity-enhancement
+Agent: Z.ai Code (main)
+
+Task: Enhance logistics map interactivity — dismissible info card with X button, click-outside to dismiss, and direct map node clickability for all governorates.
+
+Work Log:
+
+**1. Dismissible Info Card (X close button)**
+- `src/components/site/interactive-map.tsx`: Added a close button (`<button aria-label="Close">`) at the top-end corner of the floating info card. Uses Lucide `X` icon. `onClick` sets `selected=null` + `hovered=null` to dismiss the card. Styled with `hover:text-red-500 hover:bg-red-500/10 cursor-pointer`.
+- The button only appears when a node is selected (inside the `sel ? ... : ...` conditional).
+
+**2. Click-Outside to Dismiss**
+- Added a transparent `<rect fill="transparent" onClick={clearSelection}>` covering the entire SVG canvas (760×700). Clicking any empty area of the map clears the selection.
+- All node click handlers use `e.stopPropagation()` to prevent the click from bubbling to the background rect (so clicking a node doesn't also trigger the click-outside dismiss).
+
+**3. Direct Map Node Clickability — Governorate Dots**
+- Added 26 clickable governorate dot markers on the SVG map (one per governorate, excluding Cairo which is the HQ hub). Each dot:
+  - Has `className="cursor-pointer"` + `onClick={(e) => { e.stopPropagation(); setSelected(m.name); }}`
+  - Shows a subtle pulsing ripple when active (hovered or selected)
+  - Shows a tooltip label with the governorate name (bilingual: `isAr ? m.nameAr : m.name`)
+  - Uses the zone color for the dot fill
+  - Dims when a zone filter is active and the dot doesn't match
+- Previously, individual governorate dots were NOT shown on the map — only accessible via the bottom list. Now users can click directly on the map.
+
+**4. Bilingual Support**
+- All node tooltips and the floating info card already use `isAr ? nameAr : name` for bilingual rendering.
+- The floating card shows: zone label (bilingual), governorate/country name (bilingual), node code, and status pill (bilingual from i18n).
+
+**Verification (Agent Browser)**
+- Map SVG has `viewBox="0 0 760 700"` with 42 `<g>` groups ✓
+- 38 clickable node groups (cursor-pointer) ✓
+- 1 transparent click-outside rect ✓
+- Close (X) button appears when a node is selected (not visible in unselected state — placeholder shows "اضغط على أي محافظة") ✓
+- Lint: 0 errors, 0 warnings ✓

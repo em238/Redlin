@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Building2, Navigation, Layers, CheckCircle2, Radio } from "lucide-react";
+import { MapPin, Building2, Navigation, Layers, CheckCircle2, Radio, X } from "lucide-react";
 import { apiGet } from "@/lib/api";
 import { useT } from "@/lib/i18n";
 import { SectionHeading } from "@/components/shared/section-heading";
@@ -269,6 +269,9 @@ export function InteractiveMap() {
                   </filter>
                 </defs>
 
+                {/* Click-outside background — clicking empty map area clears the selection */}
+                <rect x="0" y="0" width="760" height="700" fill="transparent" style={{ cursor: "default" }} onClick={() => { setSelected(null); setHovered(null); }} />
+
                 {/* Stars background */}
                 {STARS.map((s, i) => (
                   <circle key={"star" + i} cx={s.x} cy={s.y} r={s.r} fill="#fff" opacity="0.4" className="particle" style={{ animationDelay: s.delay + "s" }} />
@@ -387,6 +390,37 @@ export function InteractiveMap() {
                   );
                 })}
 
+                {/* Egypt governorate dots — subtle clickable markers for direct map interaction */}
+                {hub && markers.filter((m) => m.name !== hub.name).map((m) => {
+                  const isActive = selected === m.name || hovered === m.name;
+                  const isDimmed = !isNodeActive(m.zone);
+                  const zc = ZONE[m.zone]?.color || HUB_COLOR;
+                  return (
+                    <g key={"dot" + m.id} transform={`translate(${m.x} ${m.y})`}
+                      className="cursor-pointer"
+                      style={{ opacity: isDimmed ? 0.25 : 1, transition: "opacity 0.3s ease" }}
+                      onMouseEnter={() => setHovered(m.name)}
+                      onMouseLeave={() => setHovered(null)}
+                      onClick={(e) => { e.stopPropagation(); setSelected(m.name); }}
+                    >
+                      {isActive && (
+                        <circle r="14" fill="none" stroke={zc} strokeWidth="1.2" opacity="0.5">
+                          <animate attributeName="r" values="6;16;6" dur="2s" repeatCount="indefinite" />
+                          <animate attributeName="opacity" values="0.5;0;0.5" dur="2s" repeatCount="indefinite" />
+                        </circle>
+                      )}
+                      <circle r={isActive ? 6 : 4} fill={zc} fillOpacity="0.5" stroke="#fff" strokeWidth="1.2" filter="url(#softGlow)" />
+                      <circle r="1.2" fill="#fff" />
+                      {(isActive) && (
+                        <g transform="translate(0 -16)">
+                          <rect x="-48" y="-14" width="96" height="22" rx="5" fill="#0a0a0a" stroke={zc} strokeWidth="1.2" filter="url(#softGlow)" />
+                          <text y="1" textAnchor="middle" fill="#fff" fontSize="10" className="font-bold">{isAr ? m.nameAr : m.name}</text>
+                        </g>
+                      )}
+                    </g>
+                  );
+                })}
+
                 {/* Cairo HQ — Egypt service cluster (27 governorates represented) */}
                 {hub && (
                   <g transform={`translate(${hub.x} ${hub.y})`} className="cursor-pointer"
@@ -468,7 +502,15 @@ export function InteractiveMap() {
                   {sel ? (
                     <motion.div key={sel.name} initial={{ opacity: 0, y: -10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10, scale: 0.95 }}
                       transition={{ duration: 0.25 }}
-                      className="rounded-2xl bg-zinc-950/95 border border-primary/30 shadow-2xl p-4 min-w-[200px]">
+                      className="rounded-2xl bg-zinc-950/95 border border-primary/30 shadow-2xl p-4 min-w-[200px] relative">
+                      {/* Close button — top-end corner */}
+                      <button
+                        onClick={() => { setSelected(null); setHovered(null); }}
+                        className="absolute top-2 end-2 w-6 h-6 rounded-lg flex items-center justify-center text-zinc-500 hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer z-10"
+                        aria-label="Close"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
                       {/* Node name + code */}
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
