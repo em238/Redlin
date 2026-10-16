@@ -2721,3 +2721,36 @@ Verification (Agent Browser):
 - Arabic (RTL): contentCol=`flex flex-col items-start text-start`, h2 has no `dir` attr, h2 text="Redline — عصب الشحن في مصر", h2 textAlign="start" (right in RTL), paragraphs textAlign="start" ✓
 - English (LTR): same logical classes, h2 text="— Redline Egypt's shipping backbone" (dash first!), h2 textAlign="start" (left in LTR), paragraphs textAlign="start" ✓
 - Lint: 0 errors, 0 warnings.
+
+---
+Task ID: about-section-typography-redesign
+Agent: Z.ai Code (main)
+
+Task: Redesign and perfectly align typography in the "About Us" section for both Arabic and English. Fix: badge misalignment, BiDi layout breaking from the decorative line in the heading, elements not aligned on the same vertical grid line, and English title lines disconnected from the paragraph margin.
+
+Work Log:
+- `src/components/site/about.tsx` — rewrote the content column section:
+
+1. **Content column wrapper**: `flex flex-col items-start text-start gap-4` — added `gap-4` for consistent vertical rhythm (replaced per-element `mt-4`/`mb-4` margins with parent gap).
+
+2. **Badge**: Uses `self-start` to snap flush with the start edge. Removed `mb-4` (parent `gap-4` handles spacing).
+
+3. **Heading**: Unified for both languages (no more split AR/EN branches). Inline text flow (not flex). Uses `<bdi>` around "Redline" to prevent BiDi reordering in RTL. Same element order for both: Redline — subtitle.
+   - Class: `text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-tight mb-2`
+   - Redline span: `text-red-600 font-extrabold` with `<bdi>` wrapper
+   - Dash span: `mx-2 text-slate-400 font-normal`
+   - Subtitle span: plain
+
+4. **Removed the decorative divider** (the `<motion.div className="h-px w-16 divider-gradient">` element) — it was breaking the responsive flow and was redundant with the dash in the heading.
+
+5. **Paragraphs**: `text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed text-justify sm:text-start`
+   - Uses `text-slate-600 dark:text-slate-300` for richer color than `text-muted-foreground`
+   - `text-justify` on mobile, `sm:text-start` on larger screens
+   - Removed per-element `mt-4` (parent `gap-4` handles spacing)
+
+6. **Features grid**: Added `w-full` to ensure the grid spans the full column width.
+
+Verification (Agent Browser):
+- Arabic (RTL): col=`flex flex-col items-start text-start gap-4`, badge has `self-start`, h2 has `<bdi>`, h2 spans=["Redline","—","عصب الشحن في مصر"], h2 textAlign="start" (right in RTL), paragraphs textAlign="start", no divider line ✓
+- English (LTR): same structure, h2 spans=["Redline","—","Egypt's Shipping Backbone"], h2 textAlign="start" (left in LTR), **badge left=672px, h2 left=672px, p1 left=672px — ALL ALIGNED on the same left edge** ✓
+- Lint: 0 errors, 0 warnings.
