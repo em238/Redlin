@@ -35,6 +35,15 @@ const VIDEO_EN: Record<string, { title: string; desc: string }> = {
   "صورة تجريبية جديدة من اللوحة": { title: "New test video from the dashboard", desc: "Test video" },
 };
 
+// Detect whether a video URL is a directly-playable local file (uploaded
+// via /api/upload → /uploads/*.mp4 or *.webm). If true, the modal renders
+// a native <video> element; otherwise it falls back to a YouTube <iframe>
+// for backward-compat with legacy DB rows that still have YouTube URLs.
+function isDirectVideoFile(url: string): boolean {
+  if (!url) return false;
+  return /\.(mp4|webm)$/i.test(url);
+}
+
 export function VideoSection() {
   const { t, isAr } = useT();
   const { data } = useQuery({
@@ -216,13 +225,23 @@ export function VideoSection() {
                 <X className="w-5 h-5" />
               </button>
               <div className="aspect-video">
-                <iframe
-                  src={`${active.url}?autoplay=1`}
-                  title={active.title}
-                  className="w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
+                {isDirectVideoFile(active.url) ? (
+                  <video
+                    src={active.url}
+                    className="w-full h-full bg-black"
+                    controls
+                    autoPlay
+                    playsInline
+                  />
+                ) : (
+                  <iframe
+                    src={`${active.url}?autoplay=1`}
+                    title={active.title}
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                )}
               </div>
               <div className="p-5 bg-card">
                 <h3 className="text-lg font-bold flex items-center gap-2">

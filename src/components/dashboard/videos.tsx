@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useRef, type DragEvent } from "react";
+import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Loader2, Plus, Trash2, Pencil, Video, Star, Eye, EyeOff, Upload,
-  Youtube, Link2, X, Film, Check, Cloud, FileVideo
+  Link2, X, Film, Check, FileVideo
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,9 +23,11 @@ import { toast } from "sonner";
 import { FileUpload } from "@/components/shared/file-upload";
 import { useDashboardT } from "@/lib/i18n";
 
+// Title/description suggestion templates (the actual video file is now
+// uploaded directly from desktop — no external URLs anymore).
 const TEMPLATE_VIDEOS = [
-  { title: "Redline — رحلة شحنة", url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", description: "وثائقي قصير يوثّق رحلة شحنة من المخزن حتى باب العميل", category: "promo" },
-  { title: "شبكة الفروع في 27 محافظة", url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", description: "جولة في فروع ومستودعات Redline عبر كل محافظات مصر", category: "logistics" },
+  { title: "Redline — رحلة شحنة", description: "وثائقي قصير يوثّق رحلة شحنة من المخزن حتى باب العميل", category: "promo" },
+  { title: "شبكة الفروع في 27 محافظة", description: "جولة في فروع ومستودعات Redline عبر كل محافظات مصر", category: "logistics" },
 ];
 
 export function DashboardVideos() {
@@ -35,7 +37,6 @@ export function DashboardVideos() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [saving, setSaving] = useState(false);
-  const [dragOver, setDragOver] = useState(false);
   const [form, setForm] = useState<any>({
     title: "", titleAr: "",
     description: "", descriptionAr: "",
@@ -80,6 +81,8 @@ export function DashboardVideos() {
   };
 
   const normalizeUrl = (url: string) => {
+    // Backward-compat: if an existing DB row has a YouTube URL, still normalize
+    // it. New rows will have /uploads/... paths that pass through unchanged.
     const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([\w-]{11})/);
     if (yt) return `https://www.youtube.com/embed/${yt[1]}`;
     const ytShorts = url.match(/youtube\.com\/shorts\/([\w-]+)/);
@@ -143,31 +146,13 @@ export function DashboardVideos() {
     } catch (e: any) { toast.error(e.message); }
   };
 
-  // Drag-drop handling: we accept a text/URL drop into the URL field
-  const handleDrop = (e: DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    const text = e.dataTransfer.getData("text/plain") || e.dataTransfer.getData("text/uri-list") || "";
-    const url = text.trim();
-    if (url) {
-      setForm((f: any) => ({
-        ...f,
-        url,
-        title: f.title || t("d.videos.newTitle"),
-        titleAr: f.titleAr || "",
-        descriptionAr: f.descriptionAr || "",
-      }));
-      toast.success(t("d.videos.toastUrlAdded"));
-    } else {
-      toast.error(t("d.videos.toastInvalidUrl"));
-    }
-  };
+  // (drag-and-drop for files is handled inside <FileUpload> now — no external URLs accepted)
 
   const applyTemplate = (tp: typeof TEMPLATE_VIDEOS[0]) => {
     setForm({
       title: tp.title, titleAr: "",
       description: tp.description, descriptionAr: "",
-      url: tp.url, thumbnail: thumbOptions[Math.floor(Math.random() * thumbOptions.length)],
+      url: "", thumbnail: thumbOptions[Math.floor(Math.random() * thumbOptions.length)],
       category: tp.category, featured: false, active: true,
     });
     setEditing(null);
@@ -223,15 +208,13 @@ export function DashboardVideos() {
 
       {/* Drag-drop hint when empty */}
       {videos.length === 0 && !isLoading && (
-        <Card
-          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-          onDragLeave={() => setDragOver(false)}
-          onDrop={handleDrop}
-          className={`p-12 border-2 border-dashed text-center transition-colors ${dragOver ? "border-primary bg-primary/5" : "border-border"}`}
-        >
-          <Cloud className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
+        <Card className="p-12 border-2 border-dashed text-center transition-colors border-border">
+          <FileVideo className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
           <p className="font-bold">{t("d.videos.emptyTitle")}</p>
           <p className="text-sm text-muted-foreground mt-1">{t("d.videos.emptySub")}</p>
+          <Button onClick={openCreate} className="mt-4 bg-gradient-to-r from-primary to-red-700 text-white gap-2">
+            <Upload className="w-4 h-4" /> {t("d.videos.uploadNew")}
+          </Button>
         </Card>
       )}
 
@@ -305,7 +288,7 @@ export function DashboardVideos() {
                   <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
                     <span className="flex items-center gap-1"><Link2 className="w-3 h-3" /> {formatDate(v.createdAt)}</span>
                     <span className="flex items-center gap-1 truncate max-w-[140px]" dir="ltr">
-                      <Youtube className="w-3 h-3" /> {v.url.replace("https://www.youtube.com/embed/", "yt/")}
+                      <FileVideo className="w-3 h-3" /> {v.url.split("/").pop() || v.url}
                     </span>
                   </div>
                   <div className="mt-3 flex gap-1.5">
@@ -339,28 +322,14 @@ export function DashboardVideos() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            {/* Drag-drop URL field */}
-            <div
-              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-              onDragLeave={() => setDragOver(false)}
-              onDrop={handleDrop}
-              className={`space-y-1 rounded-xl border-2 border-dashed p-3 transition-colors ${dragOver ? "border-primary bg-primary/5" : "border-border"}`}
-            >
-              <Label className="text-xs flex items-center gap-1.5">
-                <FileVideo className="w-3.5 h-3.5 text-primary" /> {t("d.videos.modal.urlLabel")}
-              </Label>
-              <div className="relative">
-                <Youtube className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  value={form.url}
-                  onChange={(e) => setForm({ ...form, url: e.target.value })}
-                  placeholder="https://www.youtube.com/watch?v=..."
-                  className="h-10 pr-9"
-                  dir="ltr"
-                />
-              </div>
-              <p className="text-[11px] text-muted-foreground">{t("d.videos.modal.urlHint")}</p>
-            </div>
+            {/* Direct video file upload from desktop (no external URLs accepted) */}
+            <FileUpload
+              label={L("ارفع ملف الفيديو من جهازك (.mp4 / .webm)", "Upload the video file from your device (.mp4 / .webm)")}
+              accept="video/mp4,video/webm"
+              currentUrl={form.url}
+              onUploaded={(url) => setForm({ ...form, url })}
+              type="video"
+            />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
@@ -422,13 +391,6 @@ export function DashboardVideos() {
                   </button>
                 ))}
               </div>
-              <Input
-                value={form.thumbnail || ""}
-                onChange={(e) => setForm({ ...form, thumbnail: e.target.value })}
-                placeholder={t("d.videos.modal.customUrl")}
-                className="h-9 text-xs"
-                dir="ltr"
-              />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -467,14 +429,7 @@ export function DashboardVideos() {
               </div>
             )}
 
-            {/* Preview */}
-            {form.url && (
-              <div className="rounded-xl border border-border overflow-hidden">
-                <div className="aspect-video bg-muted">
-                  <iframe src={normalizeUrl(form.url)} className="w-full h-full" title="preview" />
-                </div>
-              </div>
-            )}
+            {/* Preview handled inside <FileUpload> — no separate iframe preview needed */}
 
             <div className="flex gap-2 pt-2">
               <Button onClick={save} disabled={saving} className="flex-1 bg-gradient-to-r from-primary to-red-700 text-white gap-2">

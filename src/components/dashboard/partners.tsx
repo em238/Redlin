@@ -246,13 +246,6 @@ export function DashboardPartners() {
               onUploaded={(url) => setForm({ ...form, logo: url })}
               type="image"
             />
-            <Input
-              value={form.logo || ""}
-              onChange={(e) => setForm({ ...form, logo: e.target.value })}
-              placeholder={t("d.partners.modal.logoPlaceholder")}
-              className="h-9 text-xs"
-              dir="ltr"
-            />
 
             <div className="space-y-1">
               <Label className="text-xs">{t("d.partners.modal.websiteLabel")}</Label>

@@ -418,16 +418,9 @@ export function DashboardServices() {
               </div>
             </div>
 
-            {/* Icon picker */}
+            {/* Icon picker — lucide grid + optional custom image upload (no URL typing) */}
             <div className="space-y-2">
-              <Label className="text-xs">{L("أيقونة الخدمة (lucide name أو صورة مخصصة)", "Service icon (lucide name or custom image)")}</Label>
-              <Input
-                value={form.icon}
-                onChange={(e) => setForm({ ...form, icon: e.target.value })}
-                placeholder="truck / zap / rocket / package"
-                className="h-10"
-                dir="ltr"
-              />
+              <Label className="text-xs">{L("أيقونة الخدمة — اختر من المجموعة أو ارفع صورة مخصصة بالأسفل", "Service icon — pick from the set or upload a custom image below")}</Label>
               <div className="flex flex-wrap gap-2">
                 {ICON_CHOICES.map((name) => {
                   const Icon = LUCIDE_ICONS[name];

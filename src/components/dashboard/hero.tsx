@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, type DragEvent } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -46,7 +46,6 @@ export function DashboardHero() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<HeroImage | null>(null);
   const [saving, setSaving] = useState(false);
-  const [dragOver, setDragOver] = useState(false);
   const [form, setForm] = useState<any>({ ...emptyForm });
 
   const L = (ar: string, en: string) => (isAr ? ar : en);
@@ -158,16 +157,7 @@ export function DashboardHero() {
     }
   };
 
-  const handleDrop = (e: DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    const text = e.dataTransfer.getData("text/plain") || e.dataTransfer.getData("text/uri-list") || "";
-    const url = text.trim();
-    if (url) {
-      setForm((f: any) => ({ ...f, url }));
-      toast.success(L("تم إضافة الرابط", "URL added"));
-    }
-  };
+  // (drag-and-drop for files is handled inside <FileUpload> now — no external URLs accepted)
 
   // Extract filename from a URL for the per-card "filename" display
   const filenameFromUrl = (url: string) => {
@@ -354,37 +344,7 @@ export function DashboardHero() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            {/* Drag-drop URL */}
-            <div
-              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-              onDragLeave={() => setDragOver(false)}
-              onDrop={handleDrop}
-              className={`space-y-1 rounded-xl border-2 border-dashed p-3 transition-colors ${dragOver ? "border-primary bg-primary/5" : "border-border"}`}
-            >
-              <Label className="text-xs flex items-center gap-1.5">
-                <ImageIcon className="w-3.5 h-3.5 text-primary" />
-                {L("رابط الصورة — اسحب رابط صورة هنا", "Image URL — drag an image URL here")}
-              </Label>
-              <Input
-                value={form.url}
-                onChange={(e) => setForm({ ...form, url: e.target.value })}
-                placeholder="/images/hero-truck.png أو https://..."
-                className="h-10"
-                dir="ltr"
-              />
-            </div>
-
-            {/* Preview */}
-            {form.url && (
-              <div className="rounded-xl border border-border overflow-hidden">
-                <div className="relative aspect-video bg-muted">
-                  <img src={form.url} alt="preview" className="w-full h-full object-cover"
-                    onError={(e) => { (e.target as HTMLImageElement).style.opacity = "0.2"; }} />
-                </div>
-              </div>
-            )}
-
-            {/* Upload from desktop */}
+            {/* Direct desktop upload (no external image URLs accepted) */}
             <FileUpload
               label={L("ارفع صورة من جهازك", "Upload an image from your device")}
               accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"

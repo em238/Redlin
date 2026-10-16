@@ -2012,3 +2012,113 @@ Stage Summary:
 - Removed theme state from the Zustand store — next-themes is now the single source of truth. All 4 components that read/toggle theme (topbar, settings, navbar, login) use `useTheme()` from next-themes.
 - The default theme is now LIGHT. The first visit shows light mode. Refreshing on light stays light. Refreshing on dark stays dark. No flash in either direction.
 - 0 lint errors, 0 warnings. No runtime errors. No regressions to the tab persistence or auth session fixes from the previous tasks.
+
+---
+Task ID: eliminate-url-inputs-desktop-uploads
+Agent: Z.ai Code (main)
+
+Task: Eliminate ALL image & video URL text inputs across the entire Admin Dashboard and replace them with direct local file upload from desktop. ZERO external links/URLs. Admin must upload images and videos directly from their computer. Updated modules: Hero Carousel, Video Gallery, Services & Icons, Partners & Clients logos, User Avatars. Public site must render /uploads/... paths via <video> and <Image> tags without requiring external domain whitelisting.
+
+Work Log:
+
+**Investigation findings**
+- `src/app/api/upload/route.ts` already existed but: (a) had no admin auth check, (b) used flat 50MB limit for all types (user spec wants 10MB images / 50MB videos), (c) used `randomUUID()` for filenames (user spec wants `Date.now() + '-' + sanitized-name`).
+- `src/components/shared/file-upload.tsx` already existed as a basic drag-drop + click-to-pick component, but: (a) preview was a tiny 12x12 thumbnail, (b) no real upload progress (just a spinner), (c) no video player preview, (d) only had an X clear button (no explicit "تغيير/Change" button).
+- 6 dashboard modules already imported `<FileUpload>` but ALSO had a redundant URL text input next to it for typing external URLs:
+  - `hero.tsx`: URL text input + drag-URL handler + manual `<img>` preview
+  - `videos.tsx`: YouTube URL text input + drag-URL handler + iframe preview + custom thumbnail URL input
+  - `services.tsx`: icon name/URL text input (also acts as lucide-name picker)
+  - `how-it-works.tsx`: icon name/URL text input (same pattern)
+  - `partners.tsx`: logo URL text input alongside FileUpload
+  - `users.tsx`: already clean — FileUpload only, no URL input
+  - `about.tsx`: already clean — FileUpload for image, stat-icon input is lucide-name only (not URL)
+- Public `src/components/site/video-section.tsx` modal always used `<iframe>` for the video — would not render a direct `/uploads/foo.mp4` file as a playable video.
+
+**Files updated**
+
+1. `src/app/api/upload/route.ts` — rewrote with:
+   - `requireAdmin()` auth check (returns 401 "غير مصرح" if no session).
+   - Two separate size limits: 10MB for images, 50MB for videos.
+   - `sanitizeFileName()` helper that strips path components, replaces non-alphanumeric (except `.-_`) with dashes, lowercases, and prefixes with `Date.now()`. Returns e.g. `1792164949023-fleet-photo.png`.
+   - Same allowed MIME types as before (png/jpeg/jpg/webp/gif/svg+xml + mp4/webm).
+   - Bilingual error messages (AR/EN).
+
+2. `src/components/shared/file-upload.tsx` — rewrote with:
+   - Real upload progress via `XMLHttpRequest.upload.progress` event — shows a progress bar with `%` and byte count.
+   - Larger preview (aspect-video for normal, aspect-4/3 for compact mode).
+   - Video player preview via `<video controls>` for video files.
+   - Explicit "تغيير / Change" button (replaces file) and "حذف / Delete" button (clears).
+   - Error state with "إعادة المحاولة / Retry" button.
+   - "تم الرفع" (Uploaded) success badge on the preview.
+   - File size helper (`formatBytes()`).
+   - Auto-detects image vs video by file extension (not just `type` prop) so e.g. a `.png` uploaded to a `type=video` field still renders as an image preview.
+
+3. `src/components/dashboard/hero.tsx`:
+   - Removed `type DragEvent` from React imports (no longer needed).
+   - Removed `dragOver` state.
+   - Removed `handleDrop` function (was for URL-drag).
+   - Removed the URL text input `<Input value={form.url} ... placeholder="/images/hero-truck.png أو https://..." />` and the surrounding drag-URL wrapper + the manual `<img>` preview block.
+   - Kept the FileUpload component (which now has its own built-in preview) + the gallery picker for pre-existing images.
+
+4. `src/components/dashboard/videos.tsx` — biggest change:
+   - Removed `useRef, type DragEvent` from imports; removed `Youtube, Cloud` from lucide imports.
+   - Removed `url` field from `TEMPLATE_VIDEOS` (was a YouTube URL — now templates only seed title/description; the actual video file must be uploaded).
+   - Removed `dragOver` state + `handleDrop` function.
+   - Removed the YouTube URL text input + drag-drop wrapper + the YouTube icon overlay.
+   - Replaced with a `<FileUpload type="video" accept="video/mp4,video/webm" />` for direct video file upload.
+   - Removed the custom thumbnail URL text input (`<Input value={form.thumbnail} placeholder={customUrl} />`).
+   - Kept the thumbnail FileUpload + gallery picker (pre-existing thumbnails).
+   - Updated empty-state card: replaced `Cloud` icon + URL-drag handlers with `FileVideo` icon + a click-to-upload button.
+   - Updated the per-card URL display: was `v.url.replace("https://www.youtube.com/embed/", "yt/")` (YouTube-specific), now `v.url.split("/").pop()` (shows the filename for direct files, still works for legacy YouTube URLs).
+   - Removed the iframe preview block from the modal — preview is now handled inside `<FileUpload>` (which renders a `<video>` for video files).
+   - Kept `normalizeUrl()` for backward-compat (legacy YouTube URLs in the DB still get normalized; new `/uploads/...` paths pass through unchanged).
+
+5. `src/components/dashboard/services.tsx` — removed the icon text input (`<Input value={form.icon} placeholder="truck / zap / rocket / package" />`). The lucide icon picker grid + the FileUpload for custom icon images remain. Updated the label to clarify "pick from the set or upload a custom image below".
+
+6. `src/components/dashboard/how-it-works.tsx` — same change as services.tsx: removed the icon text input, kept the lucide picker grid + FileUpload.
+
+7. `src/components/dashboard/partners.tsx` — removed the logo URL text input that sat between the FileUpload and the website field. The FileUpload for logo + the website field (partner's actual website URL — not media) remain.
+
+8. `src/components/site/video-section.tsx` — public video gallery:
+   - Added `isDirectVideoFile()` helper that returns true for URLs ending in `.mp4` or `.webm`.
+   - The modal player now conditionally renders: `<video src={active.url} controls autoPlay>` for direct file uploads, OR `<iframe src={...}?autoplay=1>` for legacy YouTube URLs.
+   - This preserves backward compatibility with any existing YouTube videos in the DB while supporting the new direct uploads.
+
+**Verification**
+
+- `bun run lint` → **0 errors, 0 warnings** (the previously-existing warning about an unused eslint-disable directive in file-upload.tsx was also fixed by removing the directive).
+- Dev log: clean — no compile errors.
+
+Agent Browser end-to-end verification (all passed):
+
+1. **Upload API validation** (via curl with auth cookie):
+   - Image upload (PNG, 59KB) → 200, returns `{"url":"/uploads/1792164949023-upload-1792051325590-juhhfx.png"}` ✓ (Date.now() + sanitized name format).
+   - Text file (package.json, text/plain) → 400 `{"error":"نوع الملف غير مسموح. مسموح فقط: PNG, JPG, WebP, SVG, GIF, MP4, WebM"}` ✓ (rejected with bilingual error).
+   - SVG upload (image/svg+xml, 111 bytes) → 200, returns `{"url":"/uploads/1792164961733-test.svg"}` ✓.
+   - Video upload (MP4, 1.9KB test file via ffmpeg) → 200, returns `{"url":"/uploads/1792165018892-test-red.mp4"}` ✓.
+   - Unauthenticated upload (no cookie) → 401 `{"error":"غير مصرح"}` ✓ (admin auth enforced).
+   - Uploaded files accessible at the returned `/uploads/...` path: HTTP 200, correct byte size ✓.
+
+2. **Dashboard UI** (via Agent Browser as logged-in admin):
+   - Opened the video create modal — confirmed the YouTube URL text input is GONE. Only a drop zone "اسحب ملف هنا أو اضغط للاختيار من جهازك / MP4, WebM — حد أقصى 50MB" remains ✓.
+   - Thumbnail section: FileUpload with "تغيير / Change" + "حذف / Delete" buttons, NO custom URL text input ✓.
+   - Uploaded a PNG via the FileUpload drop zone — upload succeeded, preview image rendered with `src="/uploads/..."`, form state auto-filled ✓.
+   - Uploaded an MP4 via the video FileUpload — upload succeeded, `<video>` preview rendered with `src="/uploads/..."`, form state auto-filled ✓.
+   - Saved the video — appeared in the dashboard video list with the filename displayed ✓.
+
+3. **All 12 dashboard modules scanned for URL inputs** — Agent Browser iterated through every nav tab and checked all `input[type=text]` and `textarea` elements for placeholders containing `http://`, `https://`, `youtube`, or `.com`. Result: **0 URL inputs found across all 12 modules** (Hero, About, Services, How-It-Works, Videos, Partners, Map, Contact, Reviews, Users, Roles, Settings) ✓.
+
+4. **Public site compatibility**:
+   - Visited `http://localhost:3000/`, scrolled to the videos section, clicked the newly-uploaded "Redline Test Video" — modal opened with `<video src="/uploads/1792165099090-test-red.mp4" controls autoPlay>` ✓ (NOT an iframe).
+   - Clicked a legacy YouTube video ("Redline — قصة شحن") — modal opened with `<iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1">` ✓ (backward compat preserved).
+   - `next.config.ts` already has `images: { unoptimized: true }` — so `<Image src="/uploads/...">` works without domain whitelisting ✓.
+
+5. **Test data cleanup**: deleted the "Redline Test Video" DB entry via DELETE /api/videos/<id> (returned `{"ok":true}`) and removed all test files from `public/uploads/` and `/tmp/`.
+
+Stage Summary:
+- The Admin Dashboard no longer accepts ANY external image/video URLs. All media (hero slides, video gallery, service icons, partner logos, user avatars, about images, how-it-works icons) is now uploaded directly from the admin's desktop via the upgraded `<FileUpload>` component.
+- The `/api/upload` route now requires admin auth, enforces 10MB image / 50MB video size limits, validates MIME types, sanitizes filenames (Date.now() + cleaned-original-name), and saves to `public/uploads/`.
+- The `<FileUpload>` component was rewritten with real upload progress %, larger preview, `<video>` player preview for video files, and explicit "تغيير/Change" + "حذف/Delete" buttons.
+- The public video gallery modal intelligently renders `<video>` for direct file uploads (`.mp4`/`.webm`) and falls back to `<iframe>` for legacy YouTube URLs — preserving backward compatibility.
+- 7 dashboard modules updated (hero, videos, services, how-it-works, partners; users + about were already clean).
+- 0 lint errors, 0 warnings. No runtime errors. Backward compatibility with existing YouTube URLs preserved.
