@@ -175,6 +175,31 @@ model HeroImage {
   createdAt DateTime @default(now())
 }
 
+model HeroContent {
+  id              String   @id @default(cuid())
+  badgeAr         String   @default("نشحن لكل محافظات مصر — 27 محافظة بنفس السرعة")
+  badgeEn         String   @default("We Ship Across All Egypt — 27 Governorates with Equal Speed")
+  titleAr         String   @default("شحن يصل لكل مصر بسرعة Redline")
+  titleEn         String   @default("Shipping Across Egypt at Redline Speed")
+  subtitleAr      String   @default("")
+  subtitleEn      String   @default("")
+  cta1TextAr      String   @default("اطلب شحن الآن")
+  cta1TextEn      String   @default("Order Shipment Now")
+  cta1Link        String   @default("#contact")
+  cta2TextAr      String   @default("خدماتنا")
+  cta2TextEn      String   @default("Our Services")
+  cta2Link        String   @default("#services")
+  feature1Ar      String   @default("توصيل نفس اليوم في القاهرة الكبرى")
+  feature1En      String   @default("Same-day delivery in Greater Cairo")
+  feature2Ar      String   @default("ضمان كامل على كل شحنة")
+  feature2En      String   @default("Full guarantee on every shipment")
+  feature3Ar      String   @default("27 محافظة بتغطية كاملة")
+  feature3En      String   @default("Full coverage across 27 governorates")
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
 model Partner {
   id        String   @id @default(cuid())
   name      String

@@ -43,6 +43,21 @@ export function Hero() {
   });
   const images = data?.images ?? FALLBACK_IMAGES;
 
+  // Fetch hero content from DB (falls back to i18n if not available)
+  const { data: heroContent } = useQuery({
+    queryKey: ["hero-content"],
+    queryFn: () => apiGet<any>("/api/hero-content"),
+  });
+  const hc = heroContent;
+  const badge = hc ? (isAr ? hc.badgeAr : hc.badgeEn) : t("hero.badge");
+  const title1 = hc ? (isAr ? hc.titleAr : hc.titleEn) : t("hero.title1");
+  const subtitle = hc ? (isAr ? hc.subtitleAr : hc.subtitleEn) : t("hero.subtitle");
+  const cta1 = hc ? (isAr ? hc.cta1TextAr : hc.cta1TextEn) : t("hero.cta1");
+  const cta2 = hc ? (isAr ? hc.cta2TextAr : hc.cta2TextEn) : t("hero.cta2");
+  const feat1 = hc ? (isAr ? hc.feature1Ar : hc.feature1En) : t("hero.feat1");
+  const feat2 = hc ? (isAr ? hc.feature2Ar : hc.feature2En) : t("hero.feat2");
+  const feat3 = hc ? (isAr ? hc.feature3Ar : hc.feature3En) : t("hero.feat3");
+
   const [current, setCurrent] = useState(0);
   const [manualPause, setManualPause] = useState(false);
   const [hoverPaused, setHoverPaused] = useState(false);
@@ -120,7 +135,7 @@ export function Hero() {
             className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-white/90 text-xs font-medium mb-6"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-            {t("hero.badge")}
+            {badge}
           </motion.div>
 
           <motion.h1
@@ -129,9 +144,7 @@ export function Hero() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] text-white tracking-tight"
           >
-            {t("hero.title1")}
-            <br />
-            {t("hero.title2")} <span className="text-gradient-red" style={{ textShadow: "0 2px 30px oklch(0.55 0.2 28 / 0.3)" }}>Redline</span>
+            {title1} <span className="text-gradient-red" style={{ textShadow: "0 2px 30px oklch(0.55 0.2 28 / 0.3)" }}>Redline</span>
           </motion.h1>
 
           {/* Decorative gradient divider */}
@@ -148,7 +161,7 @@ export function Hero() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="mt-6 text-sm sm:text-lg text-white/80 max-w-2xl leading-relaxed"
           >
-            {t("hero.subtitle")}
+            {subtitle}
           </motion.p>
 
           <motion.div
@@ -164,7 +177,7 @@ export function Hero() {
                 className="btn-glow bg-gradient-to-r from-primary to-red-700 hover:from-red-600 hover:to-red-800 text-primary-foreground gap-2 text-base h-12 px-6 font-semibold shadow-lg shadow-primary/30 hover:shadow-primary/40 transition-shadow w-full sm:w-auto justify-center"
               >
                 <Zap className="w-4.5 h-4.5" />
-                {t("hero.cta1")}
+                {cta1}
               </Button>
             </Magnetic>
             <Magnetic strength={0.2} className="w-full sm:w-auto">
@@ -175,7 +188,7 @@ export function Hero() {
                 className="group bg-white/15 backdrop-blur-md border-white/30 text-white hover:bg-white/25 hover:text-white gap-2 text-base h-12 px-6 w-full sm:w-auto justify-center font-medium"
               >
                 <Truck className="w-4.5 h-4.5" />
-                {t("hero.cta2")}
+                {cta2}
                 {isAr
                   ? <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
                   : <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />}
@@ -191,9 +204,9 @@ export function Hero() {
             className="mt-8 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap gap-x-6 text-white/70 relative z-10"
           >
             {[
-              { icon: Zap, text: t("hero.feat1") },
-              { icon: ShieldCheck, text: t("hero.feat2") },
-              { icon: MapPin, text: t("hero.feat3") },
+              { icon: Zap, text: feat1 },
+              { icon: ShieldCheck, text: feat2 },
+              { icon: MapPin, text: feat3 },
             ].map((f, i) => (
               <div key={i} className="flex items-center gap-1.5 text-xs sm:text-sm">
                 <f.icon className="w-[18px] h-[18px] text-amber-400 shrink-0" />

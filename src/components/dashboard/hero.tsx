@@ -1,16 +1,17 @@
 "use client";
 
-import { useState, type DragEvent } from "react";
+import { useState, useEffect, type DragEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Loader2, Plus, Trash2, ImageIcon, Upload, Eye, EyeOff,
-  Check, MoveUp, MoveDown, Pencil,
+  Check, MoveUp, MoveDown, Pencil, Save, Type,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
@@ -195,6 +196,9 @@ export function DashboardHero() {
           {L("عرض في الموقع", "Preview on Site")} ↗
         </a>
       </div>
+
+      {/* === Hero Text & CTA Settings === */}
+      <HeroTextSettings />
 
       {/* Header */}
       <Card className="p-5 bg-gradient-to-l from-primary/10 to-red-700/5 border-primary/30 relative overflow-hidden">
@@ -482,5 +486,144 @@ export function DashboardHero() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+// === Hero Text & CTA Settings Component ===
+function HeroTextSettings() {
+  const { isAr } = useDashboardT();
+  const L = (ar: string, en: string) => (isAr ? ar : en);
+  const qc = useQueryClient();
+  const [saving, setSaving] = useState(false);
+
+  const { data } = useQuery({
+    queryKey: ["hero-content"],
+    queryFn: () => apiGet<any>("/api/hero-content"),
+  });
+
+  const [form, setForm] = useState<any>({
+    badgeAr: "", badgeEn: "",
+    titleAr: "", titleEn: "",
+    subtitleAr: "", subtitleEn: "",
+    cta1TextAr: "اطلب شحن الآن", cta1TextEn: "Order Shipment Now", cta1Link: "#contact",
+    cta2TextAr: "خدماتنا", cta2TextEn: "Our Services", cta2Link: "#services",
+    feature1Ar: "توصيل نفس اليوم في القاهرة الكبرى", feature1En: "Same-day delivery in Greater Cairo",
+    feature2Ar: "ضمان كامل على كل شحنة", feature2En: "Full guarantee on every shipment",
+    feature3Ar: "27 محافظة بتغطية كاملة", feature3En: "Full coverage across 27 governorates",
+  });
+
+  // Sync form when data loads
+  useEffect(() => {
+    if (data?.id) {
+      setForm({
+        badgeAr: data.badgeAr ?? "", badgeEn: data.badgeEn ?? "",
+        titleAr: data.titleAr ?? "", titleEn: data.titleEn ?? "",
+        subtitleAr: data.subtitleAr ?? "", subtitleEn: data.subtitleEn ?? "",
+        cta1TextAr: data.cta1TextAr ?? "اطلب شحن الآن", cta1TextEn: data.cta1TextEn ?? "Order Shipment Now", cta1Link: data.cta1Link ?? "#contact",
+        cta2TextAr: data.cta2TextAr ?? "خدماتنا", cta2TextEn: data.cta2TextEn ?? "Our Services", cta2Link: data.cta2Link ?? "#services",
+        feature1Ar: data.feature1Ar ?? "", feature1En: data.feature1En ?? "",
+        feature2Ar: data.feature2Ar ?? "", feature2En: data.feature2En ?? "",
+        feature3Ar: data.feature3Ar ?? "", feature3En: data.feature3En ?? "",
+      });
+    }
+  }, [data]);
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      await apiPost("/api/hero-content", form);
+      toast.success(L("تم حفظ التغييرات", "Changes saved"));
+      qc.invalidateQueries({ queryKey: ["hero-content"] });
+    } catch (e: any) {
+      toast.error(e.message || L("خطأ", "Error"));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const set = (key: string, val: string) => setForm((f: any) => ({ ...f, [key]: val }));
+
+  const DualField = ({ labelAr, labelEn, fieldAr, fieldEn, area = false }: any) => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="space-y-1">
+        <Label className="text-xs flex items-center gap-1.5">
+          <span className="px-1.5 py-0.5 rounded bg-red-50 text-red-600 text-[10px] font-bold dark:bg-red-950/50 dark:text-red-400">AR</span>
+          {labelAr}
+        </Label>
+        {area ? (
+          <Textarea value={form[fieldAr] ?? ""} onChange={(e) => set(fieldAr, e.target.value)} dir="rtl" rows={2} className="bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white" />
+        ) : (
+          <Input value={form[fieldAr] ?? ""} onChange={(e) => set(fieldAr, e.target.value)} dir="rtl" className="h-10 bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white" />
+        )}
+      </div>
+      <div className="space-y-1">
+        <Label className="text-xs flex items-center gap-1.5">
+          <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 text-[10px] font-bold">EN</span>
+          {labelEn}
+        </Label>
+        {area ? (
+          <Textarea value={form[fieldEn] ?? ""} onChange={(e) => set(fieldEn, e.target.value)} dir="ltr" rows={2} className="bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white" />
+        ) : (
+          <Input value={form[fieldEn] ?? ""} onChange={(e) => set(fieldEn, e.target.value)} dir="ltr" className="h-10 bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white" />
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <Card className="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-950/30 flex items-center justify-center shrink-0">
+            <Type className="w-4 h-4 text-red-600 dark:text-red-400" />
+          </div>
+          <div>
+            <h3 className="font-bold text-sm text-slate-900 dark:text-white">{L("إعدادات نصوص وعناوين الهيرو", "Hero Text & CTA Settings")}</h3>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">{L("تحكم في كل النصوص الظاهرة في الهيرو", "Control all hero texts")}</p>
+          </div>
+        </div>
+        <Button onClick={save} disabled={saving} size="sm" className="bg-red-600 hover:bg-red-700 text-white gap-1.5 shrink-0">
+          {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+          {L("حفظ التغييرات", "Save Changes")}
+        </Button>
+      </div>
+
+      <div className="space-y-4">
+        {/* Badge */}
+        <DualField labelAr="الشارة / الـ Badge" labelEn="Badge / Tag" fieldAr="badgeAr" fieldEn="badgeEn" />
+
+        {/* Title */}
+        <DualField labelAr="العنوان الرئيسي" labelEn="Main Heading" fieldAr="titleAr" fieldEn="titleEn" />
+
+        {/* Subtitle */}
+        <DualField labelAr="الوصف" labelEn="Subtitle" fieldAr="subtitleAr" fieldEn="subtitleEn" area />
+
+        {/* CTA Buttons */}
+        <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
+          <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3">{L("أزرار الإجراء (CTA)", "CTA Buttons")}</p>
+          <DualField labelAr="زر ١ - نص" labelEn="Button 1 - Text" fieldAr="cta1TextAr" fieldEn="cta1TextEn" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
+            <div className="space-y-1">
+              <Label className="text-xs text-slate-600 dark:text-slate-300">{L("زر ١ - رابط", "Button 1 - Link")}</Label>
+              <Input value={form.cta1Link ?? ""} onChange={(e) => set("cta1Link", e.target.value)} dir="ltr" className="h-10 bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white" />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs text-slate-600 dark:text-slate-300">{L("زر ٢ - رابط", "Button 2 - Link")}</Label>
+              <Input value={form.cta2Link ?? ""} onChange={(e) => set("cta2Link", e.target.value)} dir="ltr" className="h-10 bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white" />
+            </div>
+          </div>
+          <div className="mt-2"><DualField labelAr="زر ٢ - نص" labelEn="Button 2 - Text" fieldAr="cta2TextAr" fieldEn="cta2TextEn" /></div>
+        </div>
+
+        {/* Features */}
+        <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
+          <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3">{L("المزايا / الـ Badges", "Key Highlights / Badges")}</p>
+          <DualField labelAr="ميزة ١" labelEn="Feature 1" fieldAr="feature1Ar" fieldEn="feature1En" />
+          <div className="mt-3"><DualField labelAr="ميزة ٢" labelEn="Feature 2" fieldAr="feature2Ar" fieldEn="feature2En" /></div>
+          <div className="mt-3"><DualField labelAr="ميزة ٣" labelEn="Feature 3" fieldAr="feature3Ar" fieldEn="feature3En" /></div>
+        </div>
+      </div>
+    </Card>
   );
 }
