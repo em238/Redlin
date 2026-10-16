@@ -315,6 +315,8 @@
 }
 .animate-marquee {
   animation: marquee 40s linear infinite;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 /* Slow pulse */
@@ -324,6 +326,17 @@
 }
 .animate-slow-pulse {
   animation: slow-pulse 4s ease-in-out infinite;
+}
+
+/* Aurora animated background */
+@keyframes aurora {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -30px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.95); }
+}
+.animate-aurora {
+  animation: aurora 12s ease-in-out infinite;
+  will-change: transform;
 }
 
 /* Shine on hover */
@@ -477,6 +490,25 @@ textarea::placeholder {
 @media (pointer: fine) {
   body { cursor: none; }
   a, button, [role="button"], [data-magnetic] { cursor: none; }
+}
+
+/* Custom cursor hover states — uses `scale` CSS property (independent of transform)
+   so position (transform: translate3d) and hover effect (scale) compose cleanly */
+.cursor-ring {
+  transition: scale 0.2s ease, opacity 0.2s ease;
+  opacity: 0.5;
+  will-change: transform;
+}
+.cursor-ring.cursor-active {
+  scale: 1.6;
+  opacity: 1;
+}
+.cursor-dot {
+  transition: scale 0.2s ease;
+  will-change: transform;
+}
+.cursor-dot.cursor-active {
+  scale: 0.5;
 }
 
 /* Magnetic-button base: transition transform smoothly when JS shifts it */

@@ -252,7 +252,7 @@ export function Hero() {
         )}
 
         {/* Marquee — twin-track infinite scroll */}
-        <div className="border-t border-white/10 bg-black/40 backdrop-blur-md py-3 overflow-hidden" dir="ltr">
+        <div className="border-t border-white/10 bg-black/60 py-3 overflow-hidden" dir="ltr">
           <div className="flex animate-marquee whitespace-nowrap will-change-transform">
             {(isAr ? GOV_MARQUEE_AR : GOV_MARQUEE_EN).map((g, i) => (
               <span key={`t1-${i}`} className="mx-4 text-sm text-white/80 font-medium inline-flex items-center gap-1.5 shrink-0 leading-none">

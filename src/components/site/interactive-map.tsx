@@ -198,7 +198,7 @@ export function InteractiveMap() {
 
             {/* SVG holographic map — wide */}
             <div className="relative w-full aspect-[16/11] sm:aspect-[16/9] bg-gradient-to-b from-black via-zinc-950 to-black">
-              <svg viewBox="0 0 760 700" preserveAspectRatio="xMidYMid meet" className="w-full h-full" style={{ touchAction: "none" }}>
+              <svg viewBox="0 0 760 700" preserveAspectRatio="xMidYMid meet" className="w-full h-full" style={{ touchAction: "none", willChange: "transform", transform: "translateZ(0)" }}>
                 <defs>
                   {/* beam gradients (vertical: transparent top → bright base) */}
                   {Object.entries(ZONE).map(([k, v]) => (
@@ -385,8 +385,8 @@ export function InteractiveMap() {
                     onMouseLeave={() => setHovered(null)}
                     onClick={() => setSelected(hub.name)}
                   >
-                    {/* radar sweep */}
-                    <g>
+                    {/* radar sweep — GPU accelerated */}
+                    <g style={{ willChange: "transform", transform: "translateZ(0)" }}>
                       <path d="M 0 0 L 110 0 A 110 110 0 0 0 78 -78 Z" fill="url(#radarGrad)" opacity="0.4">
                         <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="4s" repeatCount="indefinite" />
                       </path>
@@ -459,7 +459,7 @@ export function InteractiveMap() {
                   {sel ? (
                     <motion.div key={sel.name} initial={{ opacity: 0, y: -10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10, scale: 0.95 }}
                       transition={{ duration: 0.25 }}
-                      className="rounded-2xl bg-zinc-950/90 backdrop-blur-md border border-primary/30 shadow-2xl p-4 min-w-[200px]">
+                      className="rounded-2xl bg-zinc-950/95 border border-primary/30 shadow-2xl p-4 min-w-[200px]">
                       {/* Node name + code */}
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
@@ -487,7 +487,7 @@ export function InteractiveMap() {
                     </motion.div>
                   ) : (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                      className="rounded-2xl bg-zinc-950/85 backdrop-blur-md border border-white/10 shadow-lg p-3 flex items-center gap-2">
+                      className="rounded-2xl bg-zinc-950/90 border border-white/10 shadow-lg p-3 flex items-center gap-2">
                       <Radio className="w-4 h-4 text-primary animate-slow-pulse shrink-0" />
                       <span className="text-xs text-zinc-300">{t("map.placeholder")}</span>
                     </motion.div>
