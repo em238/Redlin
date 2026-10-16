@@ -29,7 +29,7 @@ export function DashboardTopbar() {
   const current = TITLES[dashboardSection] || { title: "", subtitle: "" };
 
   return (
-    <header className="sticky top-0 z-30 h-16 border-b border-slate-200 dark:border-slate-800 bg-background/95 w-full">
+    <header className="sticky top-0 z-30 h-16 shrink-0 border-b border-slate-200 dark:border-slate-800 bg-background/95 w-full">
       <div className="h-full px-4 sm:px-6 flex items-center gap-4 w-full">
         <Button variant="ghost" size="icon" className="lg:hidden rounded-full" onClick={() => setSidebarOpen(true)}>
           <Menu className="w-5 h-5" />

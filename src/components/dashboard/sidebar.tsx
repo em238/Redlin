@@ -55,7 +55,7 @@ export function DashboardSidebar() {
   const sidebarContent = (
     <div className="flex flex-col h-full w-full bg-sidebar text-sidebar-foreground p-0 m-0">
       {/* === TOP: Logo + Collapse toggle === */}
-      <div className="flex items-center justify-between px-3 py-3 border-b border-slate-200 dark:border-slate-800 shrink-0">
+      <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200 dark:border-slate-800 shrink-0">
         <button onClick={() => setView("public")} className="flex items-center group focus:outline-none overflow-hidden">
           <Image
             src="/redline-transport-logo.png"
