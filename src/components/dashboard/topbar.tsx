@@ -20,6 +20,8 @@ export function DashboardTopbar() {
     map: { title: t("d.nav.map"), subtitle: t("d.topbar.mapSub") },
     contact: { title: t("d.nav.contact"), subtitle: t("d.topbar.contactSub") },
     reviews: { title: t("d.nav.reviews"), subtitle: t("d.topbar.reviewsSub") },
+    users: { title: t("d.nav.users"), subtitle: t("d.topbar.usersSub") },
+    roles: { title: t("d.nav.roles"), subtitle: t("d.topbar.rolesSub") },
     settings: { title: t("d.nav.settings"), subtitle: t("d.topbar.settingsSub") },
   };
 

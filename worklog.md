@@ -1426,3 +1426,83 @@ Stage Summary:
 - Zone color system: A=emerald (Greater Cairo), B=blue (Delta), C=amber (Upper Egypt), D=rose (Borders) — applied to both filter pills and table badges
 - All mutations invalidate both admin query AND public /api/site (plus related read keys) so live site updates immediately
 - 0 lint errors introduced
+
+---
+Task ID: dashboard-security-modules
+Agent: Fullstack Developer (security modules)
+Task: Build User Management + Roles & Permissions dashboard modules with their API routes for the Redline admin dashboard.
+
+Work Log:
+- Read existing patterns: src/components/dashboard/partners.tsx (CRUD), src/components/dashboard/services.tsx & reviews.tsx (table + tabs + badges), src/lib/api.ts (apiGet/apiPost/apiPatch/apiDelete), src/lib/db.ts (Prisma client), src/lib/auth.ts (requireAdmin, jsonError, sessions), prisma/schema.prisma (User + Role models), src/app/api/partners/route.ts & [id]/route.ts (API route pattern), src/components/shared/file-upload.tsx (avatar upload), src/components/dashboard/dashboard-app.tsx (already wires DashboardUsers + DashboardRoles — confirmed clean).
+- Verified db.ts has the singleton Prisma client with query logging.
+- Discovered no existing Role records and admin user.roleId was null — ran a one-off seed (inline script via `bun`) to create 3 system roles via upsert: super-admin (المدير العام, full perms), editor (محرر, content edit + read-only users/roles), viewer (مشاهد, read-only all). Linked existing admin@redline.eg user to super-admin (roleId + role string synced). All roles marked isSystemRole=true.
+
+Files created:
+
+API Routes (4 files):
+
+1. src/app/api/users/route.ts
+   - GET: requireAdmin → list all users with roleRef included, mapped to safe payload (id/email/name/role/roleId/roleName/roleNameAr/isSystemRole/status/avatar/lastLoginAt/createdAt/updatedAt) — no password leak.
+   - POST: requireAdmin → validates name/email/password required; lowercases & trims email; checks email uniqueness (400 if taken); resolves roleId to Role record (400 if missing); creates user with synced role string (roleRef.name), default status="active"; returns safe user payload.
+
+2. src/app/api/users/[id]/route.ts
+   - GET: fetch single user with roleRef → safe payload; 404 if missing.
+   - PATCH: updates name/email (with uniqueness check on change)/password (only if provided)/status (validated to active|inactive|suspended)/avatar/roleId (re-syncs role string from roleRef); 404 if missing.
+   - DELETE: blocks self-deletion (currentUser.id === id → 400 "لا يمكنك حذف حسابك الخاص"); 404 if missing; otherwise delete + ok:true.
+
+3. src/app/api/roles/route.ts
+   - GET: requireAdmin → list all roles ordered isSystemRole desc then createdAt asc, includes _count.users, parses permissions JSON string → safe payload (id/name/nameAr/description/isSystemRole/permissions/userCount/createdAt/updatedAt).
+   - POST: validates name required + unique (400 if taken); normalizes permissions object (filters non-string actions); creates role with isSystemRole=false (never allow creating system roles from API); returns safe role payload.
+
+4. src/app/api/roles/[id]/route.ts
+   - GET: fetch single role with user count.
+   - PATCH: updates name (with uniqueness check), nameAr, description, permissions — for system roles, blocks setting permissions to empty (400 "لا يمكن إزالة جميع الصلاحيات من دور النظام"); never allows changing isSystemRole (always inherited from existing record).
+   - DELETE: blocks deletion of system roles (400 "لا يمكن حذف أدوار النظام") + blocks deletion of roles with users assigned (400 "لا يمكن حذف دور مرتبط بمستخدمين"); otherwise delete + ok:true.
+
+Dashboard Components (2 files):
+
+5. src/components/dashboard/users.tsx — Export DashboardUsers
+   - Dark theme throughout: bg-slate-900/60 border-slate-800 rounded-2xl for cards/table/dialog (per task spec).
+   - Header card (gradient red) with UserCog icon + "Add User" button.
+   - 4 stats cards: Total / Active / Suspended / Roles count.
+   - Filters bar: search input (name/email), role Select (all + "none" + each role with 🔒 for system), status Select (all/active/inactive/suspended).
+   - Users table inside bg-slate-900/60 dark container with sticky header (bg-slate-950/80):
+     - User column: 40px circular avatar (image or initial fallback), name (with "You" badge for current user), email with Mail icon.
+     - Role column: colored Badge (red=admin/amber=manager/emerald=editor/sky=viewer/slate=default), with Lock icon for system roles.
+     - Status column: Switch toggle (active↔inactive, disabled for self) + status Badge (active=emerald/ inactive=slate/ suspended=rose).
+     - Last Active column: Clock icon + formatted lastLoginAt or "Never logged in".
+     - Actions column: Edit button + Delete icon button (disabled + tooltip "cannot delete your own account" for self).
+   - Framer Motion AnimatePresence on table rows (layout + opacity transitions).
+   - Add/Edit Dialog (max-w-2xl, dark): name + email (2 cols), password (label "leave blank to keep" when editing), avatar FileUpload + URL fallback input, role Select (with 🔒 for system + "no role (default admin)" option), status Select (active/inactive/suspended), Save + Cancel buttons.
+   - Self-protection: uses useAppStore().user.id to block self-deletion & self-status-toggle in the UI (server-side also enforces).
+   - Bilingual via inline L(ar, en) helper using isAr from useT().
+
+6. src/components/dashboard/roles.tsx — Export DashboardRoles
+   - Header card with KeyRound icon + "Create Role" button.
+   - 4 stats cards: Total Roles / System Roles (amber) / Total Assignments / Modules (11).
+   - Roles grid (sm:2 / lg:3 cols) of cards using bg-slate-900/60 border-slate-800:
+     - Top row: icon (Lock for system, KeyRound for custom) + role name (with system badge if applicable) + EN name in mono + user count badge (Users icon).
+     - Description line (line-clamp-2).
+     - Permissions summary panel (bg-slate-950/60): "X/11 modules • Y/totalActions actions" with gradient progress bar (red gradient), module chips (first 4 + overflow +N).
+     - Action buttons: Edit (full width) + Delete (icon, disabled when system or has users — with tooltip explaining why).
+   - Framer Motion AnimatePresence with hover y:-4 lift.
+   - Create/Edit Dialog (max-w-3xl, dark): name EN (ltr) + nameAr AR side-by-side, description Textarea, permission matrix panel:
+     - Header: ShieldCheck icon + "Permission Matrix" + "Select All" + "Clear All" buttons (Clear All blocked for system roles via toast).
+     - Accordion (type="multiple") with 11 module sections — each AccordionTrigger shows: module icon, bilingual module name (Hero/About/Services/How-It-Works/Videos/Partners/Map/Contact/Reviews/Users/Roles), "selected/total" badge, inline "Select All"/"Unselect All" pill, chevron.
+     - AccordionContent: grid of action checkboxes per module (Create/Read/Edit/Delete or Create/Read/Edit/Delete + Approve/Reject for reviews) — each checkbox in a styled label with primary highlight when checked + mono action code.
+   - System role guards in UI: lock icon shown on cards, system badge in dialog title, "Cannot delete system role" tooltip on disabled delete button, clear-all blocked via toast + API also blocks empty perms for system roles.
+
+Verification:
+- bun run lint: 0 errors, 3 warnings (all pre-existing Unused eslint-disable directives in page.tsx & dashboard-app.tsx — NOT from this task).
+- dev.log: clean — no compile errors after new files added; Next.js dev server is up and serving / (200).
+- dashboard-app.tsx: already imports DashboardUsers from "./users" and DashboardRoles from "./roles" in the sections map → both resolve cleanly to the new files.
+- DB seeded with 3 system roles (super-admin, editor, viewer) + admin@redline.eg linked to super-admin → users grid will show 1 user with the red admin badge + lock icon; roles grid will show 3 system role cards with 1 assignment on super-admin.
+
+Stage Summary:
+- 4 new API route files (users CRUD + roles CRUD with system-role & self-deletion guards) + 2 dashboard components (Users table + Roles grid with permission matrix accordion).
+- All API routes follow exact existing pattern: runtime="nodejs", NextRequest typed, requireAdmin guard with UNAUTHORIZED→401 mapping, jsonError helper for client errors, JSON-string permissions parsed on read & stringified on write.
+- All UI follows existing pattern: TanStack Query + apiGet/apiPost/apiPatch/apiDelete + useQueryClient().invalidateQueries + useT()+isAr L() inline + shadcn/ui (Card/Button/Input/Textarea/Label/Switch/Badge/Dialog/Select/Checkbox/Accordion) + Framer Motion AnimatePresence + sonner toasts + lucide-react icons.
+- Permission structure matches task spec exactly (11 modules with their action sets; reviews module has read/approve/reject/delete per spec).
+- Bilingual UI via inline L(ar, en) helper — no new i18n keys added.
+- Dark theme (bg-slate-900/60 border-slate-800 rounded-2xl) applied to Users table, Roles grid cards, and both dialogs for visual consistency with a security-focused admin panel.
+- 0 lint errors introduced.

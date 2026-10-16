@@ -16,6 +16,8 @@ import { DashboardPartners } from "./partners";
 import { DashboardMapHubs } from "./map-hubs";
 import { DashboardContactInfo } from "./contact-info";
 import { DashboardReviews } from "./reviews";
+import { DashboardUsers } from "./users";
+import { DashboardRoles } from "./roles";
 import { DashboardSettings } from "./settings";
 import { Loader2 } from "lucide-react";
 import { useT } from "@/lib/i18n";
@@ -68,6 +70,8 @@ export function DashboardApp() {
     map: <DashboardMapHubs />,
     contact: <DashboardContactInfo />,
     reviews: <DashboardReviews />,
+    users: <DashboardUsers />,
+    roles: <DashboardRoles />,
     settings: <DashboardSettings />,
   };
 

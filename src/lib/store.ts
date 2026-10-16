@@ -11,6 +11,8 @@ export type DashboardSection =
   | "map"
   | "contact"
   | "reviews"
+  | "users"
+  | "roles"
   | "settings";
 
 interface AppState {

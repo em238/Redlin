@@ -10,13 +10,30 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String
-  password  String
-  role      String   @default("admin")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String    @id @default(cuid())
+  email       String    @unique
+  name        String
+  password    String
+  role        String    @default("admin")
+  roleId      String?
+  roleRef     Role?     @relation(fields: [roleId], references: [id])
+  status      String    @default("active") // active | inactive | suspended
+  avatar      String?
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Role {
+  id            String   @id @default(cuid())
+  name          String   @unique
+  nameAr        String   @default("")
+  description   String   @default("")
+  isSystemRole  Boolean  @default(false)
+  permissions   String   @default("") // JSON: { module: [action, ...] }
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  users         User[]
 }
 
 model Governorate {
