@@ -2754,3 +2754,53 @@ Verification (Agent Browser):
 - Arabic (RTL): col=`flex flex-col items-start text-start gap-4`, badge has `self-start`, h2 has `<bdi>`, h2 spans=["Redline","—","عصب الشحن في مصر"], h2 textAlign="start" (right in RTL), paragraphs textAlign="start", no divider line ✓
 - English (LTR): same structure, h2 spans=["Redline","—","Egypt's Shipping Backbone"], h2 textAlign="start" (left in LTR), **badge left=672px, h2 left=672px, p1 left=672px — ALL ALIGNED on the same left edge** ✓
 - Lint: 0 errors, 0 warnings.
+
+---
+Task ID: social-media-links-crud
+Agent: Z.ai Code (main)
+
+Task: Add full dynamic management for Social Media links (Facebook, Instagram, Twitter/X, LinkedIn, WhatsApp, Telegram) in the Admin Dashboard + public footer rendering.
+
+Work Log:
+
+**1. Schema (`prisma/schema.prisma`)**
+- Added 6 social URL fields to `FooterContent` model:
+  `facebookUrl`, `instagramUrl`, `twitterUrl`, `linkedinUrl`, `whatsappUrl`, `telegramUrl` — all with defaults matching the user's spec.
+- Ran `bun run db:push` to sync schema + regenerate Prisma client.
+
+**2. Seed (`prisma/seed.ts`)**
+- Updated the `footerContent` constant to include all 6 social URL defaults.
+- Ran `bun run db:seed` → social URLs populated.
+
+**3. API (`src/app/api/footer-content/route.ts`)**
+- Added the 6 social URL fields to the DEFAULTS object.
+- Added them to the POST allowlist so admins can update them.
+- GET returns the social URLs as part of the footer object.
+
+**4. Dashboard UI (`src/components/dashboard/footer-links.tsx`)**
+- Added imports: `Facebook, Instagram, Twitter, Linkedin, MessageCircle, Send` from lucide-react.
+- Added 6 fields to the `FooterContent` type: `facebookUrl` through `telegramUrl`.
+- Added them to `defaultFooterContent` with the spec defaults.
+- Added them to the `useEffect` sync (reads from API response).
+- Added them to `saveFooterContent()` payload.
+- Created a `SOCIAL_CHANNELS` config array that maps each field to its icon, color, label (AR+EN), and placeholder.
+- Added a new **"روابط التواصل الاجتماعي / Social Media Channels"** card (sky-tinted gradient) with:
+  - 6 URL inputs in a 2-column grid, each with its brand icon + color
+  - "حفظ التغييرات / Save Changes" button
+  - Pre-fills from DB data
+  - Toast feedback on save
+
+**5. Public Footer (`src/components/site/footer.tsx`)**
+- Added `MessageCircle` import for the WhatsApp icon.
+- Replaced the old hardcoded `SOCIALS` array (4 channels, all `href="#"`) with a `SOCIAL_CHANNELS` config that maps DB fields to icons + labels.
+- Added the 6 social URL fields to the `FooterContent` type.
+- Renders social icons dynamically from the DB:
+  - Iterates `SOCIAL_CHANNELS`, reads the URL from `fc[field]`
+  - **Only renders icons whose URL is non-empty** (admin can hide a channel by clearing its field)
+  - Each link: `target="_blank" rel="noopener noreferrer"` ✓
+  - Styling: `rounded-xl p-2.5 bg-slate-900 border border-slate-800 text-slate-400 hover:text-red-500 hover:border-red-500/30 transition-all duration-300` ✓
+
+**Verification**
+- API: GET /api/footer-content returns all 6 social URLs ✓
+- Public footer: all 6 icons render with correct URLs, target=_blank, rel=noopener, correct styling ✓
+- Lint: 0 errors, 0 warnings ✓

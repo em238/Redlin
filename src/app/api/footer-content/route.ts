@@ -15,6 +15,12 @@ const DEFAULTS = {
   dashboardLinkEn: "Admin Login",
   addressAr: "التجمع الخامس، القاهرة الجديدة",
   addressEn: "Fifth Settlement, New Cairo",
+  facebookUrl: "https://facebook.com",
+  instagramUrl: "https://instagram.com",
+  twitterUrl: "https://x.com",
+  linkedinUrl: "https://linkedin.com",
+  whatsappUrl: "https://wa.me/201000000000",
+  telegramUrl: "https://t.me/redline",
   active: true,
 };
 
@@ -48,6 +54,12 @@ export async function POST(req: NextRequest) {
       "dashboardLinkEn",
       "addressAr",
       "addressEn",
+      "facebookUrl",
+      "instagramUrl",
+      "twitterUrl",
+      "linkedinUrl",
+      "whatsappUrl",
+      "telegramUrl",
       "active",
     ]) {
       if (body[key] !== undefined) data[key] = body[key];

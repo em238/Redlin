@@ -1,6 +1,6 @@
 "use client";
 
-import { Truck, MapPin, Phone, Mail, Facebook, Instagram, Twitter, Linkedin, Send, ArrowUp } from "lucide-react";
+import { Truck, MapPin, Phone, Mail, Facebook, Instagram, Twitter, Linkedin, Send, MessageCircle, ArrowUp } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -11,11 +11,16 @@ import { apiGet } from "@/lib/api";
 import { toast } from "sonner";
 import { useState } from "react";
 
-const SOCIALS = [
-  { icon: Facebook, label: "Facebook" },
-  { icon: Instagram, label: "Instagram" },
-  { icon: Twitter, label: "Twitter" },
-  { icon: Linkedin, label: "LinkedIn" },
+// Social media channel config — each entry maps a DB field to its Lucide icon + label.
+// The footer only renders icons whose URL is non-empty (admin can remove a channel
+// by clearing its field in the dashboard).
+const SOCIAL_CHANNELS = [
+  { field: "facebookUrl"  as const, icon: Facebook,       label: "Facebook" },
+  { field: "instagramUrl" as const, icon: Instagram,      label: "Instagram" },
+  { field: "twitterUrl"   as const, icon: Twitter,        label: "Twitter / X" },
+  { field: "linkedinUrl"  as const, icon: Linkedin,        label: "LinkedIn" },
+  { field: "whatsappUrl"  as const, icon: MessageCircle,  label: "WhatsApp" },
+  { field: "telegramUrl"  as const, icon: Send,           label: "Telegram" },
 ];
 
 const LINKS_AR = {
@@ -59,6 +64,12 @@ type FooterContent = {
   dashboardLinkEn: string;
   addressAr: string;
   addressEn: string;
+  facebookUrl: string;
+  instagramUrl: string;
+  twitterUrl: string;
+  linkedinUrl: string;
+  whatsappUrl: string;
+  telegramUrl: string;
 };
 
 export function Footer() {
@@ -144,12 +155,24 @@ export function Footer() {
                 <Mail className="w-4 h-4 text-primary" /> support@redline.eg
               </a>
             </div>
-            <div className="mt-5 flex gap-2">
-              {SOCIALS.map((s, i) => (
-                <a key={i} href="#" aria-label={s.label} className="w-9 h-9 rounded-lg bg-white/5 hover:bg-primary flex items-center justify-center transition-colors">
-                  <s.icon className="w-4 h-4 text-zinc-300" />
-                </a>
-              ))}
+            <div className="mt-5 flex flex-wrap gap-2">
+              {SOCIAL_CHANNELS.map((ch) => {
+                const url = (fc as any)?.[ch.field] as string | undefined;
+                if (!url || !url.trim()) return null; // don't render if admin cleared the URL
+                const Icon = ch.icon;
+                return (
+                  <a
+                    key={ch.field}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={ch.label}
+                    className="rounded-xl p-2.5 bg-slate-900 border border-slate-800 text-slate-400 hover:text-red-500 hover:border-red-500/30 transition-all duration-300"
+                  >
+                    <Icon className="w-4 h-4" />
+                  </a>
+                );
+              })}
             </div>
           </div>
 

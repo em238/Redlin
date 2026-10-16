@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Loader2, Plus, Trash2, Pencil, Save, Link2, Building2, LifeBuoy,
   ArrowUp, ArrowDown, ExternalLink, Type, FileText, MapPin,
+  Facebook, Instagram, Twitter, Linkedin, MessageCircle, Send,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,12 @@ type FooterContent = {
   dashboardLinkEn: string;
   addressAr: string;
   addressEn: string;
+  facebookUrl: string;
+  instagramUrl: string;
+  twitterUrl: string;
+  linkedinUrl: string;
+  whatsappUrl: string;
+  telegramUrl: string;
   active: boolean;
 };
 
@@ -68,6 +75,12 @@ const defaultFooterContent: FooterContent = {
   dashboardLinkEn: "Admin Login",
   addressAr: "التجمع الخامس، القاهرة الجديدة",
   addressEn: "Fifth Settlement, New Cairo",
+  facebookUrl: "https://facebook.com",
+  instagramUrl: "https://instagram.com",
+  twitterUrl: "https://x.com",
+  linkedinUrl: "https://linkedin.com",
+  whatsappUrl: "https://wa.me/201000000000",
+  telegramUrl: "https://t.me/redline",
   active: true,
 };
 
@@ -102,6 +115,16 @@ const CATEGORIES = [
 ];
 
 const catMeta = (c: string) => CATEGORIES.find((x) => x.id === c) ?? CATEGORIES[0];
+
+// Social media channel config — drives the dashboard inputs AND the public footer icons
+const SOCIAL_CHANNELS = [
+  { field: "facebookUrl",  labelAr: "فيسبوك",       labelEn: "Facebook",    icon: Facebook,      color: "text-blue-600",     placeholder: "https://facebook.com/RedlineTransport" },
+  { field: "instagramUrl", labelAr: "إنستجرام",     labelEn: "Instagram",   icon: Instagram,     color: "text-pink-600",     placeholder: "https://instagram.com/redline.transport" },
+  { field: "twitterUrl",   labelAr: "إكس / تويتر",  labelEn: "Twitter / X", icon: Twitter,       color: "text-slate-700 dark:text-slate-300", placeholder: "https://x.com/RedlineTransport" },
+  { field: "linkedinUrl",  labelAr: "لينكد إن",     labelEn: "LinkedIn",     icon: Linkedin,      color: "text-blue-700",     placeholder: "https://linkedin.com/company/redline-transport" },
+  { field: "whatsappUrl",   labelAr: "واتساب",       labelEn: "WhatsApp",    icon: MessageCircle, color: "text-emerald-600",  placeholder: "https://wa.me/201000000000" },
+  { field: "telegramUrl",  labelAr: "تيليجرام",     labelEn: "Telegram",     icon: Send,          color: "text-sky-500",      placeholder: "https://t.me/redline" },
+] as const;
 
 export function DashboardFooterLinks() {
   const { isAr } = useDashboardT();
@@ -145,6 +168,12 @@ export function DashboardFooterLinks() {
         dashboardLinkEn: f.dashboardLinkEn || "Admin Login",
         addressAr: f.addressAr || "التجمع الخامس، القاهرة الجديدة",
         addressEn: f.addressEn || "Fifth Settlement, New Cairo",
+        facebookUrl: (f as any).facebookUrl || "https://facebook.com",
+        instagramUrl: (f as any).instagramUrl || "https://instagram.com",
+        twitterUrl: (f as any).twitterUrl || "https://x.com",
+        linkedinUrl: (f as any).linkedinUrl || "https://linkedin.com",
+        whatsappUrl: (f as any).whatsappUrl || "https://wa.me/201000000000",
+        telegramUrl: (f as any).telegramUrl || "https://t.me/redline",
         active: f.active !== false,
       });
     }
@@ -257,6 +286,12 @@ export function DashboardFooterLinks() {
         dashboardLinkEn: footerContent.dashboardLinkEn || "",
         addressAr: footerContent.addressAr || "",
         addressEn: footerContent.addressEn || "",
+        facebookUrl: footerContent.facebookUrl || "",
+        instagramUrl: footerContent.instagramUrl || "",
+        twitterUrl: footerContent.twitterUrl || "",
+        linkedinUrl: footerContent.linkedinUrl || "",
+        whatsappUrl: footerContent.whatsappUrl || "",
+        telegramUrl: footerContent.telegramUrl || "",
         active: !!footerContent.active,
       });
       toast.success(L("تم حفظ محتوى الفوتر", "Footer content saved"));
@@ -537,6 +572,54 @@ export function DashboardFooterLinks() {
                 <span>{L("تفعيل الفوتر بالموقع", "Show footer on site")}</span>
               </label>
             </div>
+          </div>
+        )}
+      </Card>
+
+      {/* Social Media Channels editor */}
+      <Card className="p-5 sm:p-6 space-y-4 bg-gradient-to-br from-sky-500/5 to-indigo-700/0 border-sky-500/20">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-2">
+            <div className="w-9 h-9 rounded-lg bg-sky-500/15 flex items-center justify-center">
+              <Send className="w-4 h-4 text-sky-600" />
+            </div>
+            <div>
+              <h4 className="font-bold">{L("روابط التواصل الاجتماعي", "Social Media Channels")}</h4>
+              <p className="text-xs text-muted-foreground">
+                {L("أدر روابط منصات التواصل الاجتماعي الظاهرة في الفوتر", "Manage social media channel links shown in the footer")}
+              </p>
+            </div>
+          </div>
+          <Button onClick={saveFooterContent} disabled={savingContent || fcLoading}
+            className="bg-gradient-to-r from-sky-600 to-indigo-700 text-white gap-2">
+            {savingContent ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            {L("حفظ التغييرات", "Save Changes")}
+          </Button>
+        </div>
+
+        {fcLoading ? (
+          <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-sky-600" /></div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {SOCIAL_CHANNELS.map((ch) => {
+              const Icon = ch.icon;
+              const value = (footerContent as any)[ch.field] || "";
+              return (
+                <div key={ch.field} className="space-y-1">
+                  <Label className="text-xs flex items-center gap-1.5">
+                    <Icon className={`w-3.5 h-3.5 ${ch.color}`} />
+                    {isAr ? ch.labelAr : ch.labelEn}
+                  </Label>
+                  <Input
+                    value={value}
+                    onChange={(e) => setFooterContent({ ...footerContent, [ch.field]: e.target.value })}
+                    placeholder={ch.placeholder}
+                    className="h-10"
+                    dir="ltr"
+                  />
+                </div>
+              );
+            })}
           </div>
         )}
       </Card>

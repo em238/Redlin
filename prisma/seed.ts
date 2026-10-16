@@ -662,6 +662,12 @@ const footerContent = {
   dashboardLinkEn: "Admin Login",
   addressAr: "التجمع الخامس، القاهرة الجديدة",
   addressEn: "Fifth Settlement, New Cairo",
+  facebookUrl: "https://facebook.com",
+  instagramUrl: "https://instagram.com",
+  twitterUrl: "https://x.com",
+  linkedinUrl: "https://linkedin.com",
+  whatsappUrl: "https://wa.me/201000000000",
+  telegramUrl: "https://t.me/redline",
   active: true,
 };
 

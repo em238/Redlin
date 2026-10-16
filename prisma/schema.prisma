@@ -320,6 +320,13 @@ model FooterContent {
   dashboardLinkEn    String   @default("")
   addressAr          String   @default("")
   addressEn          String   @default("")
+  // Social media channel URLs — managed from the dashboard
+  facebookUrl        String   @default("https://facebook.com")
+  instagramUrl       String   @default("https://instagram.com")
+  twitterUrl         String   @default("https://x.com")
+  linkedinUrl        String   @default("https://linkedin.com")
+  whatsappUrl        String   @default("https://wa.me/201000000000")
+  telegramUrl        String   @default("https://t.me/redline")
   active             Boolean  @default(true)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
