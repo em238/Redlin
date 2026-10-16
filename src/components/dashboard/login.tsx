@@ -2,9 +2,9 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useTheme } from "next-themes";
-import { Lock, Mail, ArrowLeft, ArrowRight, Loader2, ShieldCheck, LayoutDashboard } from "lucide-react";
+import { Lock, Mail, ArrowLeft, ArrowRight, Loader2, ShieldCheck, LayoutDashboard, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,15 +12,15 @@ import { useState } from "react";
 import { apiPost } from "@/lib/api";
 import { toast } from "sonner";
 import { useAppStore } from "@/lib/store";
-import { useDashboardT } from "@/lib/i18n";
+import { useDashboardT, useI18n } from "@/lib/i18n";
 
 export function DashboardLogin() {
-  const router = useRouter();
   const { setUser } = useAppStore();
-  const { theme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const { t, isAr } = useDashboardT();
-  const [email, setEmail] = useState("admin@redline.eg");
-  const [password, setPassword] = useState("admin123");
+  const { dashboardLocale, setDashboardLocale } = useI18n();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const login = async () => {
@@ -38,8 +38,8 @@ export function DashboardLogin() {
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left visual panel */}
+    <div className="min-h-screen flex" dir={isAr ? "rtl" : "ltr"}>
+      {/* Left visual panel (right in RTL) */}
       <div className="hidden lg:flex lg:w-1/2 relative bg-zinc-950 overflow-hidden">
         <Image src="/images/fleet.png" alt="Redline" fill sizes="50vw" className="object-cover opacity-40" />
         <div className="absolute inset-0 bg-gradient-to-l from-zinc-950 via-zinc-950/70 to-transparent" />
@@ -68,8 +68,18 @@ export function DashboardLogin() {
         </div>
       </div>
 
-      {/* Right form panel */}
-      <div className="flex-1 flex items-center justify-center p-6 bg-background">
+      {/* Right form panel (left in RTL) */}
+      <div className="flex-1 flex items-center justify-center p-6 bg-background relative">
+        {/* Language switcher — top-start corner */}
+        <button
+          onClick={() => setDashboardLocale(dashboardLocale === "ar" ? "en" : "ar")}
+          className="absolute top-4 start-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-card hover:bg-muted transition-colors text-xs font-semibold text-muted-foreground hover:text-foreground z-10"
+          aria-label="Language"
+        >
+          <Globe className="w-3.5 h-3.5" />
+          {dashboardLocale === "ar" ? "English" : "عربي"}
+        </button>
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -96,27 +106,29 @@ export function DashboardLogin() {
             <div className="space-y-1.5">
               <Label className="text-sm">{t("d.login.emailLabel")}</Label>
               <div className="relative">
-                <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Mail className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="h-12 pr-10"
+                  className="h-12 ps-10"
                   placeholder="admin@redline.eg"
+                  dir="ltr"
                 />
               </div>
             </div>
             <div className="space-y-1.5">
               <Label className="text-sm">{t("d.login.passwordLabel")}</Label>
               <div className="relative">
-                <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Lock className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && login()}
-                  className="h-12 pr-10"
+                  className="h-12 ps-10"
                   placeholder="••••••••"
+                  dir="ltr"
                 />
               </div>
             </div>
@@ -142,12 +154,14 @@ export function DashboardLogin() {
               )}
             </Button>
 
-            <button
-              onClick={() => router.push("/admin")}
-              className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors"
-            >
-              {t("d.login.back")}
-            </button>
+            <div className="text-center mt-4">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-red-600 transition-colors duration-200 cursor-pointer"
+              >
+                <span>{t("d.login.back")}</span>
+              </Link>
+            </div>
           </div>
         </motion.div>
       </div>

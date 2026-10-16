@@ -3001,3 +3001,55 @@ Work Log:
   - Background changed to `rgb(0, 0, 0)` (pure black) ✓
   - Live preview instant ✓
 - Lint: 0 errors, 0 warnings ✓
+
+---
+Task ID: admin-login-finalize
+Agent: Z.ai Code (main)
+
+Task: Finalize Admin Login Page (/admin) — fix the "العودة للموقع" back link, add language switcher (AR/EN), clear default inputs, and support full bilingual rendering.
+
+Work Log:
+
+**1. Login Component (`src/components/dashboard/login.tsx`)** — rewrote:
+- Cleared default input values: `email=""`, `password=""` (was pre-filled with admin@redline.eg / admin123). Now uses them only as placeholders.
+- Added `import Link from "next/link"` — the back link is now `<Link href="/">` (was a non-functional `<button onClick={() => router.push("/admin")}>`). The link navigates to `/` (public homepage) and has `cursor-pointer` + `hover:text-red-600` transition.
+- Removed `useRouter` (no longer needed — Link handles navigation).
+- Added language switcher button in the top-start corner: `<button onClick={() => setDashboardLocale(...)}>` with a Globe icon. Shows "English" in AR mode, "عربي" in EN mode.
+- Added `dir={isAr ? "rtl" : "ltr"}` on the root div — the login form's layout direction adapts to the selected language.
+- Switched input icon positioning from physical (`right-3`, `pr-10`) to logical (`end-3`, `ps-10`) so icons appear on the correct side in both RTL and LTR.
+- Used `useI18n()` from the i18n store to get/set `dashboardLocale` — toggling the language switcher changes all `t()` text instantly.
+
+**2. i18n English Translations (`src/lib/i18n.ts`)** — updated to match user's exact spec:
+- `d.login.brand` EN: "Admin Dashboard" (was "Dashboard")
+- `d.login.header` EN: "Sign In" (already correct)
+- `d.login.subheader` EN: "Enter your credentials to access Redline Dashboard" (was "...the Redline dashboard")
+- `d.login.emailLabel` EN: "Email Address" (was "Email")
+- `d.login.button` EN: "Sign In to Dashboard" (was "Enter Dashboard")
+- `d.login.back` EN: "← Back to Website" (was "← Back to site")
+- `d.login.secure` EN: "Secure & Encrypted Connection — All Data Protected" (was "Encrypted secure connection — all data protected")
+- `d.login.title1` EN: "Manage Shipping Operations" (was "Manage shipping operations")
+- `d.login.title2` EN: "from One Place" (was "in one place")
+- `d.login.subtitle` EN: updated to match user's exact wording ("clients", "rates", "all performance metrics", "integrated, professional dashboard")
+
+**Verification (Agent Browser)**
+
+Arabic (RTL) mode:
+- `dir: "rtl"` ✓
+- `emailValue: ""`, `passValue: ""` ✓ — empty inputs
+- `emailPlaceholder: "admin@redline.eg"` ✓ — used as placeholder only
+- `hasLangBtn: true`, `langBtnText: "English"` ✓
+- `hasBackLink: true`, `backLinkHref: "/"` ✓
+- `backText: "← العودة للموقع"` ✓
+- Badge: "لوحة التحكم" ✓, Heading: "تسجيل الدخول" ✓
+
+English (LTR) mode (after clicking the language switcher):
+- `langBtnText: "عربي"` ✓ (shows "عربي" to switch back)
+- `backText: "← Back to Website"` ✓
+- `badge: "Admin Dashboard"` ✓
+- `heading: "Sign In"` ✓
+- `emailLabel: "Email Address"` ✓
+- `passLabel: "Password"` ✓
+- `submitBtnText: "Sign In to Dashboard"` ✓
+- `bannerHeading: "Manage Shipping Operations from One Place"` ✓
+
+- Lint: 0 errors, 0 warnings.
