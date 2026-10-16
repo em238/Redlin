@@ -382,7 +382,7 @@ export function InteractiveMap() {
                       {(isActive) && (
                         <g transform="translate(0 -18)">
                           <path d="M -3 8 L 3 8 L 0 12 Z" fill="#0a0a0a" stroke="#fbbf24" strokeWidth="1.4" />
-                          <rect x="-54" y="-16" width="108" height="24" rx="6" fill="#0a0a0a" stroke="#fbbf24" strokeWidth="1.4" filter="url(#softGlow)" />
+                          <rect x="-70" y="-16" width="140" height="24" rx="6" fill="#0a0a0a" stroke="#fbbf24" strokeWidth="1.4" filter="url(#softGlow)" />
                           <text y="0" textAnchor="middle" fill="#fde68a" fontSize="11" className="font-bold">{(isAr ? r.nameAr : r.name)} · {nodeCode(r.name)}</text>
                         </g>
                       )}
@@ -413,7 +413,7 @@ export function InteractiveMap() {
                       <circle r="1.2" fill="#fff" />
                       {(isActive) && (
                         <g transform="translate(0 -16)">
-                          <rect x="-48" y="-14" width="96" height="22" rx="5" fill="#0a0a0a" stroke={zc} strokeWidth="1.2" filter="url(#softGlow)" />
+                          <rect x="-60" y="-14" width="120" height="22" rx="5" fill="#0a0a0a" stroke={zc} strokeWidth="1.2" filter="url(#softGlow)" />
                           <text y="1" textAnchor="middle" fill="#fff" fontSize="10" className="font-bold">{isAr ? m.nameAr : m.name}</text>
                         </g>
                       )}
@@ -450,9 +450,9 @@ export function InteractiveMap() {
                     </g>
                     {/* label */}
                     {(hovered === hub.name || selected === hub.name) && (
-                      <g transform="translate(0 -34)">
+                      <g transform="translate(0 -34)" style={{ pointerEvents: "none" }}>
                         <path d="M -3 8 L 3 8 L 0 13 Z" fill="#dc2626" />
-                        <rect x="-62" y="-16" width="124" height="26" rx="6" fill="#0a0a0a" stroke={HUB_COLOR} strokeWidth="1.5" filter="url(#softGlow)" />
+                        <rect x="-110" y="-16" width="220" height="26" rx="7" fill="#0a0a0a" stroke={HUB_COLOR} strokeWidth="1.5" filter="url(#softGlow)" />
                         <text y="0" textAnchor="middle" fill="#fff" fontSize="12" className="font-bold">★ {isAr ? hub.nameAr : hub.name} — {isAr ? "مصر (27 محافظة)" : "Egypt (27 governorates)"}</text>
                       </g>
                     )}
@@ -481,7 +481,7 @@ export function InteractiveMap() {
                       <circle r="1.8" fill="#fff" />
                       <g transform="translate(0 -24)">
                         <path d="M -3 8 L 3 8 L 0 13 Z" fill="#0a0a0a" stroke={ZONE[selGov.zone]?.color} strokeWidth="1.4" />
-                        <rect x="-54" y="-16" width="108" height="24" rx="6" fill="#0a0a0a" stroke={ZONE[selGov.zone]?.color} strokeWidth="1.4" filter="url(#softGlow)" />
+                        <rect x="-70" y="-16" width="140" height="24" rx="6" fill="#0a0a0a" stroke={ZONE[selGov.zone]?.color} strokeWidth="1.4" filter="url(#softGlow)" />
                         <text y="0" textAnchor="middle" fill="#fff" fontSize="11" className="font-bold">{govName(selGov)} · {nodeCode(selGov.name)}</text>
                       </g>
                     </motion.g>
@@ -503,16 +503,17 @@ export function InteractiveMap() {
                     <motion.div key={sel.name} initial={{ opacity: 0, y: -10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10, scale: 0.95 }}
                       transition={{ duration: 0.25 }}
                       className="rounded-2xl bg-zinc-950/95 border border-primary/30 shadow-2xl p-4 min-w-[200px] relative">
-                      {/* Close button — top-end corner */}
+                      {/* Close button — top-end corner, circular, high-contrast */}
                       <button
+                        type="button"
                         onClick={() => { setSelected(null); setHovered(null); }}
-                        className="absolute top-2 end-2 w-6 h-6 rounded-lg flex items-center justify-center text-zinc-500 hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer z-10"
                         aria-label="Close"
+                        className="absolute top-3.5 end-3.5 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-slate-800/80 text-slate-300 hover:bg-red-600 hover:text-white border border-slate-700/60 shadow-md transition-all duration-200 cursor-pointer"
                       >
-                        <X className="w-3.5 h-3.5" />
+                        <X className="h-4 w-4" />
                       </button>
-                      {/* Node name + code */}
-                      <div className="flex items-start justify-between gap-2">
+                      {/* Node name + code — pe-8 ensures text doesn't collide with the close button */}
+                      <div className="flex items-start justify-between gap-2 pe-8">
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5 text-[11px] text-zinc-300">
                             <MapPin className="w-3 h-3" style={{ color: ZONE[sel.zone]?.color }} />

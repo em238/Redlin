@@ -3122,3 +3122,38 @@ Work Log:
 - 1 transparent click-outside rect ✓
 - Close (X) button appears when a node is selected (not visible in unselected state — placeholder shows "اضغط على أي محافظة") ✓
 - Lint: 0 errors, 0 warnings ✓
+
+---
+Task ID: map-label-overflow-close-button-fix
+Agent: Z.ai Code (main)
+
+Task: Fix two map UI bugs: (1) Cairo HQ label badge text overflows its container, (2) close button (X) overlaps the zone badge and has poor contrast.
+
+Work Log:
+
+**1. Cairo HQ Label Badge — Text Overflow Fix**
+- `src/components/site/interactive-map.tsx` line 455: widened the SVG `<rect>` from `width="124" x="-62"` to `width="220" x="-110"` — now fits both "★ القاهره — مصر (27 محافظة)" (Arabic) and "★ Cairo — Egypt (27 governorates)" (English) comfortably.
+- Added `pointerEvents: "none"` to the label group so it doesn't intercept clicks meant for the Cairo node underneath.
+- Also widened all other label rects:
+  - Regional city labels: `width=108` → `width=140` (x=-70)
+  - Governorate dot labels: `width=96` → `width=120` (x=-60)
+  - Selected governorate marker label: `width=108` → `width=140` (x=-70)
+
+**2. Close Button (X) — Position & Contrast Fix**
+- Changed from `absolute top-2 end-2 w-6 h-6 rounded-lg text-zinc-500 hover:text-red-500 hover:bg-red-500/10` to:
+  `absolute top-3.5 end-3.5 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-slate-800/80 text-slate-300 hover:bg-red-600 hover:text-white border border-slate-700/60 shadow-md transition-all duration-200 cursor-pointer`
+- Key changes:
+  - `rounded-full` (was `rounded-lg`) — distinct circular button
+  - `h-7 w-7` (was `w-6 h-6`) — slightly bigger, easier to click
+  - `bg-slate-800/80 border border-slate-700/60 shadow-md` — visible background + border + shadow
+  - `hover:bg-red-600 hover:text-white` — high-contrast hover state
+  - `z-20` (was `z-10`) — higher z-index so it's always on top
+  - `top-3.5 end-3.5` (was `top-2 end-2`) — more spacing from card edge
+  - Added `type="button"` for proper HTML semantics
+- Card content: added `pe-8` (padding-end: 2rem) to the header row `<div>` so text never collides with the close button.
+
+**3. Bilingual Adaptation**
+- The wider rects now accommodate both Arabic and English text without clipping.
+- The close button uses `end-3.5` (Tailwind logical property) which automatically positions at top-right in LTR and top-left in RTL.
+
+Lint: 0 errors, 0 warnings.
