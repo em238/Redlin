@@ -20,23 +20,24 @@ const tajawal = Tajawal({
 });
 
 export const metadata: Metadata = {
-  title: "Redline | شركة الشحن الأولى في مصر",
-  description: "Redline - شركة شحن احترافية تغطي جميع محافظات مصر بسرعة وأمان. شحن عادي، ممتاز، نفس اليوم، وشحن ثقيل مع تتبع مباشر لشحناتك.",
-  keywords: ["شحن", "شحن مصر", "Redline", "توصيل", "شحنات", "خدمات لوجستية", "مصر"],
+  title: "RedLine Transport — شحن يصل لكل مصر",
+  description: "شركة شحن احترافية تغطي جميع محافظات مصر — عادي، ممتاز، نفس اليوم، وشحن ثقيل مع تتبع مباشر.",
+  keywords: ["شحن", "شحن مصر", "Redline", "RedLine Transport", "توصيل", "شحنات", "خدمات لوجستية", "مصر"],
   authors: [{ name: "Redline" }],
   icons: {
     icon: [
+      { url: "/icon.png", sizes: "512x512", type: "image/png" },
       { url: "/favicon.ico", sizes: "any" },
-      { url: "/icon.png", type: "image/png", sizes: "192x192" },
     ],
+    shortcut: "/favicon.ico",
     apple: [
-      { url: "/apple-touch-icon.png", sizes: "180x180" },
+      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
     ],
   },
   openGraph: {
-    title: "Redline | شركة الشحن الأولى في مصر",
-    description: "شحن احترافي لجميع محافظات مصر بسرعة وأمان",
-    siteName: "Redline",
+    title: "RedLine Transport — شحن يصل لكل مصر",
+    description: "شركة شحن احترافية تغطي جميع محافظات مصر — عادي، ممتاز، نفس اليوم، وشحن ثقيل مع تتبع مباشر.",
+    siteName: "RedLine Transport",
     type: "website",
   },
 };

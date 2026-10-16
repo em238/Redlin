@@ -2600,3 +2600,65 @@ Stage Summary:
 - ✅ `.env` exists with DATABASE_URL, `package.json` has the prisma seed config, DB file is populated.
 - ✅ Lint: 0 errors, 0 warnings.
 - The project is fully preserved and ready for export/deployment.
+
+---
+Task ID: favicon-and-search-icon-setup
+Agent: Z.ai Code (main)
+
+Task: Set up the official Favicon and Google Search result icon using the uploaded RedLine Transport icon (1920x1920 PNG).
+
+Work Log:
+
+**1. Assets Placement**
+- Source image: `/home/z/my-project/upload/pasted_image_1792174444397.png` (1920x1920 PNG, 2.4MB)
+- Used Python Pillow to resize + convert to the required formats:
+
+| File | Size | Location(s) |
+|------|------|-------------|
+| icon.png | 512x512 PNG (254KB) | `src/app/icon.png` + `public/icon.png` |
+| apple-icon.png | 180x180 PNG (36KB) | `src/app/apple-icon.png` + `public/apple-icon.png` |
+| favicon.ico | 16/32/48/64 multi-size ICO (755B) | `src/app/favicon.ico` + `public/favicon.ico` |
+| apple-touch-icon.png | 180x180 PNG (36KB) | `public/apple-touch-icon.png` (updated for auto-discovery) |
+
+**2. Metadata Configuration (`src/app/layout.tsx`)**
+Updated the `metadata` export with:
+- Title: "RedLine Transport — شحن يصل لكل مصر"
+- Description: "شركة شحن احترافية تغطي جميع محافظات مصر — عادي، ممتاز، نفس اليوم، وشحن ثقيل مع تتبع مباشر."
+- `icons.icon`: [{ url: "/icon.png", sizes: "512x512", type: "image/png" }, { url: "/favicon.ico", sizes: "any" }]
+- `icons.shortcut`: "/favicon.ico"
+- `icons.apple`: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }]
+- Updated OpenGraph title/description/siteName to match
+- Added "RedLine Transport" to keywords
+
+**3. Verification**
+
+HTTP accessibility (all return 200):
+- `/icon.png` → HTTP 200 ✓
+- `/favicon.ico` → HTTP 200 ✓
+- `/apple-icon.png` → HTTP 200 ✓
+- `/apple-touch-icon.png` → HTTP 200 ✓
+
+HTML `<head>` link tags (verified via curl + Agent Browser):
+- `<link rel="shortcut icon" href="/favicon.ico"/>` ✓
+- `<link rel="icon" href="/favicon.ico" sizes="16x16" type="image/x-icon"/>` (Next.js auto-generated from src/app/favicon.ico) ✓
+- `<link rel="icon" href="/icon.png" sizes="512x512" type="image/png"/>` ✓
+- `<link rel="icon" href="/favicon.ico" sizes="any"/>` ✓
+- `<link rel="apple-touch-icon" href="/apple-icon.png" sizes="180x180" type="image/png"/>` ✓
+
+Browser tab title: "RedLine Transport — شحن يصل لكل مصر" ✓
+
+Google Favicon guidelines compliance:
+- Square aspect ratio (1:1): ✓ all icons are square (512x512, 180x180, 16/32/48/64)
+- Accessible public URL: ✓ all return HTTP 200
+- Multiple sizes: ✓ 16, 32, 48, 64 (ICO), 180 (apple), 512 (PNG)
+- PNG + ICO formats provided: ✓
+
+Lint: 0 errors, 0 warnings.
+
+Stage Summary:
+- The official RedLine Transport icon is now set up as the favicon, Apple touch icon, and Google search result icon across all required locations (src/app/ + public/).
+- The Next.js metadata configuration explicitly declares all icon variants (512x512 PNG, multi-size ICO, 180x180 Apple icon, shortcut icon).
+- All 5 `<link>` tags render correctly in the document `<head>`, verified via both curl and Agent Browser.
+- The browser tab shows the new title "RedLine Transport — شحن يصل لكل مصر" with the RedLine icon.
+- Meets Google's Favicon guidelines: square 1:1 format, accessible public URL, multiple sizes.
+- 0 lint errors, 0 warnings.
