@@ -19,8 +19,8 @@ export function DashboardLogin() {
   const { setUser } = useAppStore();
   const { theme } = useTheme();
   const { t, isAr } = useDashboardT();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("admin@redline.eg");
+  const [password, setPassword] = useState("admin123");
   const [loading, setLoading] = useState(false);
 
   const login = async () => {
