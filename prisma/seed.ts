@@ -529,6 +529,31 @@ const whatsappSetting = {
 };
 
 // ====================================================================
+// 11b. HERO CONTENT (text & CTA settings — single record)
+// ====================================================================
+const heroContent = {
+  badgeAr: "نشحن لكل محافظات مصر — 27 محافظة بنفس السرعة",
+  badgeEn: "We Ship Across All Egypt — 27 Governorates with Equal Speed",
+  titleAr: "شحن يصل لكل مصر بسرعة Redline",
+  titleEn: "Shipping Across Egypt at Redline Speed",
+  subtitleAr: "شركة شحن احترافية تغطي جميع محافظات مصر بخدمات متنوعة — عادي، ممتاز، نفس اليوم، وشحن ثقيل — مع تتبع مباشر وأسعار منافسة وضمان التسليم.",
+  subtitleEn: "A professional shipping company covering all Egyptian governorates with versatile services — Standard, Express, Same-Day, and Heavy Freight — with live tracking, competitive rates, and guaranteed delivery.",
+  cta1TextAr: "اطلب شحن الآن",
+  cta1TextEn: "Order Shipment Now",
+  cta1Link: "#contact",
+  cta2TextAr: "خدماتنا",
+  cta2TextEn: "Our Services",
+  cta2Link: "#services",
+  feature1Ar: "توصيل نفس اليوم في القاهرة الكبرى",
+  feature1En: "Same-day delivery in Greater Cairo",
+  feature2Ar: "ضمان كامل على كل شحنة",
+  feature2En: "Full guarantee on every shipment",
+  feature3Ar: "27 محافظة بتغطية كاملة",
+  feature3En: "Full coverage across 27 governorates",
+  active: true,
+};
+
+// ====================================================================
 // 12. ROLES (3 system roles with permission matrices)
 //     permissions stored as JSON string per schema
 // ====================================================================
@@ -762,10 +787,15 @@ async function main() {
 
   // --- 13. WHATSAPP SETTING (upsert single record) ---
   console.log(`→ WhatsAppSetting (1 record)...`);
-  // WhatsAppSetting table — use upsert-like pattern: delete + create
   await prisma.whatsAppSetting.deleteMany();
   await prisma.whatsAppSetting.create({ data: whatsappSetting });
   console.log(`  ✓ WhatsApp setting seeded (phone: ${whatsappSetting.phoneNumber})`);
+
+  // --- 14. HERO CONTENT (text & CTA settings — single record) ---
+  console.log(`→ HeroContent (text & CTA settings)...`);
+  await prisma.heroContent.deleteMany();
+  await prisma.heroContent.create({ data: heroContent });
+  console.log(`  ✓ Hero content seeded (badge, title, subtitle, CTAs, features)`);
 
   console.log("✅ Comprehensive seed complete!");
   console.log("");
