@@ -219,7 +219,7 @@ export function VideoSection() {
             >
               <button
                 onClick={() => setActive(null)}
-                className="absolute top-3 left-3 z-10 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center text-white transition-colors"
+                className="absolute top-3 end-3 z-10 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center text-white transition-colors"
                 aria-label={isAr ? "إغلاق" : "Close"}
               >
                 <X className="w-5 h-5" />

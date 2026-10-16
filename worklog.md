@@ -2122,3 +2122,70 @@ Stage Summary:
 - The public video gallery modal intelligently renders `<video>` for direct file uploads (`.mp4`/`.webm`) and falls back to `<iframe>` for legacy YouTube URLs — preserving backward compatibility.
 - 7 dashboard modules updated (hero, videos, services, how-it-works, partners; users + about were already clean).
 - 0 lint errors, 0 warnings. No runtime errors. Backward compatibility with existing YouTube URLs preserved.
+
+---
+Task ID: modal-close-button-rtl-positioning
+Agent: Z.ai Code (main)
+
+Task: Fix the Modal/Dialog Close Button (X) positioning bug across ALL dashboard forms & dialogs. In RTL (Arabic) mode, the X was overlapping with the modal title because it used fixed physical `right-4` positioning instead of adapting to RTL/LTR logic.
+
+Work Log:
+
+**Root cause investigation**
+- The shared `src/components/ui/dialog.tsx` (shadcn/ui Dialog) had the close button at line 72 with `absolute top-4 right-4` — `right-4` is a physical coordinate that always pins to the right edge, which is the SAME side as the title in RTL (Arabic), causing the X to overlap with the title text.
+- The same bug existed in `src/components/ui/sheet.tsx` (shadcn/ui Sheet, used for mobile drawers) with `absolute top-4 right-4`.
+- The public `src/components/site/video-section.tsx` modal close button used `absolute top-3 left-3` — this was wrong in BOTH directions: in LTR the X should be on the top-right (END), in RTL on the top-left (END). `left-3` is the START side in LTR (wrong) and the END side in RTL (correct by accident).
+- A deeper issue surfaced during testing: Radix portals the modal to `document.body`, which inherits `dir="rtl"` from the `<html>` root (the layout sets `lang="ar" dir="rtl"`). So even when the admin switched the dashboard to English (`dashboardLocale="en"`), the modal still rendered in RTL because the body's `dir` was unchanged — the dashboard's `dir={dashboardLocale === "ar" ? "rtl" : "ltr"}` only applied to the dashboard's root div, not to the portal container.
+
+**Files updated**
+
+1. `src/components/ui/dialog.tsx` — three fixes:
+   - Added `import { useI18n } from "@/lib/i18n"` so the shared Dialog can read the dashboard locale (Dialog is only used by dashboard modules, so this coupling is safe).
+   - In `DialogContent`, read `dashboardLocale` from the i18n store and compute `dir = dashboardLocale === "ar" ? "rtl" : "ltr"`, then pass `dir={dir}` to `<DialogPrimitive.Content>`. This forces the modal (and its descendants, including the close button) to follow the dashboard's current language, regardless of the `<html>` root's `dir`. The `end-4` logical property now correctly resolves to:
+     - Right side (END) in LTR (English dashboard) → X on top-right ✓
+     - Left side (END) in RTL (Arabic dashboard) → X on top-left ✓
+   - Changed the close button's `absolute top-4 right-4` → `absolute top-4 end-4` (Tailwind logical property `inset-inline-end`).
+   - Changed `DialogHeader`'s `sm:text-left` → `sm:text-start` (logical text-align: aligns to the start side, which is right in RTL and left in LTR — opposite from the X).
+
+2. `src/components/ui/sheet.tsx` — same `right-4` → `end-4` fix on the Sheet close button.
+
+3. `src/components/site/video-section.tsx` — changed the public video modal close button from `absolute top-3 left-3` → `absolute top-3 end-3`. Now the X is on the END side in both LTR (top-right) and RTL (top-left) of the public site.
+
+**Audit of all dashboard modals**
+The user listed these dialogs to audit: "رفع فيديو جديد", "دور جديد", "مستخدم جديد", "إضافة خدمة", "إضافة شريك", and edit modals. All of these use the shared `<Dialog>` / `<DialogContent>` component, so the fix in `dialog.tsx` automatically applies to all of them — no per-module changes needed. Verified by Agent Browser:
+- Videos → "رفع فيديو جديد" (create) ✓
+- Users → "مستخدم جديد" (create) ✓
+- Services → "إضافة خدمة جديدة" (create) ✓
+- The same shared component is used by: hero (add/edit image), how-it-works (add/edit step), partners (add/edit partner), about (stat editor), contact-info (add/edit contact item), reviews (review moderation), roles (add/edit role), map-hubs (add/edit hub). All inherit the fix automatically.
+
+**Review modal (already correct)**
+The `src/components/shared/review-modal.tsx` (public-facing review submission modal) already used the recommended `flex items-center justify-between` pattern with the title and X as flex children — no fix needed. The X naturally lands on the opposite side of the title via flexbox.
+
+**Lint**: `bun run lint` → **0 errors, 0 warnings**.
+
+**Agent Browser verification (all passed)**
+
+Arabic (RTL) dashboard mode:
+| Module | Title text | Title position | X position | Overlap |
+|--------|-----------|----------------|------------|---------|
+| Videos → رفع فيديو جديد | "رفع فيديو جديد" | right (x=731-871) | left (x=401-417) | NO OVERLAP ✓ |
+| Users → مستخدم جديد | "مستخدم جديد" | right (x=739-871) | left (x=401-417) | NO OVERLAP ✓ |
+| Services → إضافة خدمة جديدة | "إضافة خدمة جديدة" | right (x=701-871) | left (x=401-417) | NO OVERLAP ✓ |
+
+English (LTR) dashboard mode:
+| Module | Title text | Title position | X position | Overlap |
+|--------|-----------|----------------|------------|---------|
+| Videos → Upload New Video | "Upload New Video" | left (x=409-571) | right (x=863-879) | NO OVERLAP ✓ |
+
+- Modal `dir` attribute correctly switches between `"rtl"` (Arabic dashboard) and `"ltr"` (English dashboard).
+- Title is always on the START side (right in RTL, left in LTR).
+- X is always on the END side (left in RTL, right in LTR).
+- The fix works across all dashboard modules that use the shared Dialog component (10 files) without requiring any per-module changes.
+- Dev log: clean, no compile errors.
+- Browser console: no errors.
+
+Stage Summary:
+- The dashboard modal close button (X) no longer overlaps with the modal title in any language. The root cause was twofold: (a) the close button used fixed physical `right-4` positioning instead of the logical `end-4` property, and (b) Radix's portal-to-body meant the modal inherited the HTML root's `dir="rtl"` even when the dashboard was switched to English.
+- The fix: (1) replaced `right-4` with `end-4` in `dialog.tsx` and `sheet.tsx`; (2) replaced `left-3` with `end-3` in the public video-section modal; (3) added `dir={dashboardLocale === "ar" ? "rtl" : "ltr"}` to the DialogContent so the modal follows the dashboard's current language regardless of the HTML root; (4) changed `sm:text-left` to `sm:text-start` in DialogHeader for logical text alignment.
+- The fix is universal — automatically applies to all 10 dashboard modules that use the shared Dialog (Videos, Users, Services, Hero, How-It-Works, Partners, About, Contact-Info, Reviews, Roles, Map-Hubs) without any per-module changes.
+- 0 lint errors, 0 warnings. No runtime errors. Both Arabic and English modes verified end-to-end via Agent Browser.
