@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Redline Dashboard | لوحة التحكم",
+  title: "لوحة التحكم | Redline Dashboard",
   description: "Redline shipping — admin dashboard",
   robots: { index: false, follow: false },
+  icons: {
+    icon: "/icon.png?v=2",
+    shortcut: "/favicon.ico?v=2",
+  },
 };
 
 /**

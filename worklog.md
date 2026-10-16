@@ -2804,3 +2804,46 @@ Work Log:
 - API: GET /api/footer-content returns all 6 social URLs ✓
 - Public footer: all 6 icons render with correct URLs, target=_blank, rel=noopener, correct styling ✓
 - Lint: 0 errors, 0 warnings ✓
+
+---
+Task ID: favicon-red-badge-update
+Agent: Z.ai Code (main)
+
+Task: Replace the browser tab favicon and app icon with the provided Redline Transport square red badge (1920x1920 PNG, red background with white truck + typography). Fix the outdated, stretched, dark, pixelated icon.
+
+Work Log:
+
+**1. Assets**
+- Source: `/home/z/my-project/upload/pasted_image_1792177834108.png` (1920x1920, RGBA, red square badge with white elements)
+- Processed with Pillow (Lanczos resize) to all required formats:
+  - `icon.png` (512x512, 252KB) → `src/app/` + `public/`
+  - `apple-icon.png` (180x180, 36KB) → `src/app/` + `public/` + `public/apple-touch-icon.png`
+  - `favicon.ico` (16/32/48/64 multi-size, 772B) → `public/` + `src/app/`
+- All icons accessible: HTTP 200 ✓
+
+**2. Root Layout Metadata (`src/app/layout.tsx`)**
+- Updated `title` to use template pattern: `{ default: "Redline Transport | عصب الشحن في مصر", template: "%s | Redline Transport" }`
+- Added `?v=2` cache busters to all icon URLs:
+  - icon: `/icon.png?v=2` (512x512) + `/favicon.ico?v=2` (any)
+  - shortcut: `/favicon.ico?v=2`
+  - apple: `/apple-icon.png?v=2` (180x180)
+- Updated OpenGraph title to match.
+
+**3. Dashboard Layout Metadata (`src/app/dashboard/layout.tsx`)**
+- Updated title: `"لوحة التحكم | Redline Dashboard"`
+- Added explicit icons: `{ icon: "/icon.png?v=2", shortcut: "/favicon.ico?v=2" }`
+- The dashboard title uses the root template → renders as: `"لوحة التحكم | Redline Dashboard | Redline Transport"` ✓
+
+**4. Cache Busting**
+- All icon URLs include `?v=2` so browsers don't use the old cached dark icon.
+
+**Verification**
+- Public homepage title: "Redline Transport | عصب الشحن في مصر" ✓
+- Dashboard title: "لوحة التحكم | Redline Dashboard | Redline Transport" ✓ (template pattern working)
+- HTML `<head>` link tags (verified via curl):
+  - `<link rel="shortcut icon" href="/favicon.ico?v=2"/>` ✓
+  - `<link rel="icon" href="/icon.png?v=2" sizes="512x512" type="image/png"/>` ✓
+  - `<link rel="icon" href="/favicon.ico?v=2" sizes="any"/>` ✓
+  - `<link rel="apple-touch-icon" href="/apple-icon.png?v=2" sizes="180x180" type="image/png"/>` ✓
+- Browser tab shows the red Redline Transport badge (verified via Agent Browser) ✓
+- Lint: 0 errors, 0 warnings.

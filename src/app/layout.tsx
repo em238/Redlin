@@ -20,24 +20,27 @@ const tajawal = Tajawal({
 });
 
 export const metadata: Metadata = {
-  title: "RedLine Transport — شحن يصل لكل مصر",
+  title: {
+    default: "Redline Transport | عصب الشحن في مصر",
+    template: "%s | Redline Transport",
+  },
   description: "شركة شحن احترافية تغطي جميع محافظات مصر — عادي، ممتاز، نفس اليوم، وشحن ثقيل مع تتبع مباشر.",
   keywords: ["شحن", "شحن مصر", "Redline", "RedLine Transport", "توصيل", "شحنات", "خدمات لوجستية", "مصر"],
   authors: [{ name: "Redline" }],
   icons: {
     icon: [
-      { url: "/icon.png", sizes: "512x512", type: "image/png" },
-      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.png?v=2", sizes: "512x512", type: "image/png" },
+      { url: "/favicon.ico?v=2", sizes: "any" },
     ],
-    shortcut: "/favicon.ico",
+    shortcut: "/favicon.ico?v=2",
     apple: [
-      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+      { url: "/apple-icon.png?v=2", sizes: "180x180", type: "image/png" },
     ],
   },
   openGraph: {
-    title: "RedLine Transport — شحن يصل لكل مصر",
+    title: "Redline Transport | عصب الشحن في مصر",
     description: "شركة شحن احترافية تغطي جميع محافظات مصر — عادي، ممتاز، نفس اليوم، وشحن ثقيل مع تتبع مباشر.",
-    siteName: "RedLine Transport",
+    siteName: "Redline Transport",
     type: "website",
   },
 };
