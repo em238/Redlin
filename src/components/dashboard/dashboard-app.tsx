@@ -78,12 +78,12 @@ export function DashboardApp() {
 
   return (
     <div
-      className="h-screen flex bg-background overflow-hidden"
+      className="flex h-screen w-full overflow-hidden bg-background"
       dir={dashboardLocale === "ar" ? "rtl" : "ltr"}
       lang={dashboardLocale}
     >
       <DashboardSidebar />
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden min-w-0">
         <DashboardTopbar />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <AnimatePresence mode="wait">
