@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { MapPin, Phone, Mail, Clock, Send, Loader2, MessageSquare, User, AtSign, Tag, MessageCircle, ShieldCheck } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa6";
@@ -9,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { apiPost } from "@/lib/api";
+import { apiGet, apiPost } from "@/lib/api";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 import { SectionHeading } from "@/components/shared/section-heading";
@@ -40,6 +41,16 @@ export function Contact() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Fetch section content from /api/site for DB-managed bilingual heading
+  const { data: siteData } = useQuery({
+    queryKey: ["site-data"],
+    queryFn: () => apiGet<any>("/api/site"),
+  });
+  const sc = siteData?.sectionContent?.find((s: any) => s.section === "contact");
+  const eyebrow = isAr ? (sc?.badgeAr || t("contact.eyebrow")) : (sc?.badgeEn || t("contact.eyebrow"));
+  const title = isAr ? (sc?.titleAr || t("contact.title")) : (sc?.titleEn || t("contact.title"));
+  const subtitle = isAr ? (sc?.descriptionAr || t("contact.subtitle")) : (sc?.descriptionEn || t("contact.subtitle"));
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -75,9 +86,9 @@ export function Contact() {
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
         <SectionHeading
-          eyebrow={t("contact.eyebrow")}
-          title={t("contact.title")}
-          subtitle={t("contact.subtitle")}
+          eyebrow={eyebrow}
+          title={title}
+          subtitle={subtitle}
         />
 
         <div className="max-w-5xl mx-auto flex flex-col gap-8">

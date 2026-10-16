@@ -1,8 +1,10 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
 import { ClipboardList, Truck, PackageCheck, ArrowLeft, ArrowRight } from "lucide-react";
+import { apiGet } from "@/lib/api";
 import { useT } from "@/lib/i18n";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { Magnetic } from "@/components/shared/custom-cursor";
@@ -11,6 +13,16 @@ export function HowItWorks() {
   const { t, isAr } = useT();
   const sectionRef = useRef<HTMLElement>(null);
   const [progress, setProgress] = useState(0);
+
+  // Fetch section content from /api/site for DB-managed bilingual heading
+  const { data: siteData } = useQuery({
+    queryKey: ["site-data"],
+    queryFn: () => apiGet<any>("/api/site"),
+  });
+  const sc = siteData?.sectionContent?.find((s: any) => s.section === "how-it-works");
+  const eyebrow = isAr ? (sc?.badgeAr || t("how.eyebrow")) : (sc?.badgeEn || t("how.eyebrow"));
+  const titleText = isAr ? (sc?.titleAr || t("how.title")) : (sc?.titleEn || t("how.title"));
+  const subtitle = isAr ? (sc?.descriptionAr || t("how.subtitle")) : (sc?.descriptionEn || t("how.subtitle"));
 
   // Scroll progress 0..1 across the section (0 = section enters viewport bottom, 1 = section exits viewport top)
   const { scrollYProgress } = useScroll({
@@ -55,15 +67,15 @@ export function HowItWorks() {
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
         <SectionHeading
-          eyebrow={t("how.eyebrow")}
+          eyebrow={eyebrow}
           title={
             <>
-              {t("how.title").split("Redline")[0]}
+              {titleText.split("Redline")[0]}
               <span className="text-gradient-red">Redline</span>
-              {t("how.title").split("Redline")[1]}
+              {titleText.split("Redline")[1]}
             </>
           }
-          subtitle={t("how.subtitle")}
+          subtitle={subtitle}
         />
 
         {/* ============ DESKTOP: Horizontal layout (md+) ============ */}

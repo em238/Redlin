@@ -16,12 +16,22 @@ const FALLBACK = [
 ];
 
 export function Partners() {
-  const { t } = useT();
+  const { t, isAr } = useT();
   const { data } = useQuery({
     queryKey: ["partners"],
     queryFn: () => apiGet<{ partners: typeof FALLBACK }>("/api/partners"),
   });
   const partners = data?.partners ?? FALLBACK;
+
+  // Fetch section content from /api/site for DB-managed bilingual heading
+  const { data: siteData } = useQuery({
+    queryKey: ["site-data"],
+    queryFn: () => apiGet<any>("/api/site"),
+  });
+  const sc = siteData?.sectionContent?.find((s: any) => s.section === "partners");
+  const eyebrow = isAr ? (sc?.badgeAr || t("partners.eyebrow")) : (sc?.badgeEn || t("partners.eyebrow"));
+  const title = isAr ? (sc?.titleAr || t("partners.title")) : (sc?.titleEn || t("partners.title"));
+  const subtitle = isAr ? (sc?.descriptionAr || t("partners.subtitle")) : (sc?.descriptionEn || t("partners.subtitle"));
 
   if (partners.length === 0) return null;
 
@@ -29,9 +39,9 @@ export function Partners() {
     <section id="partners" className="py-14 sm:py-24 lg:py-28 bg-muted/30">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
-          eyebrow={<span className="flex items-center gap-1.5"><Star className="w-3.5 h-3.5" /> {t("partners.eyebrow")}</span>}
-          title={t("partners.title")}
-          subtitle={t("partners.subtitle")}
+          eyebrow={<span className="flex items-center gap-1.5"><Star className="w-3.5 h-3.5" /> {eyebrow}</span>}
+          title={title}
+          subtitle={subtitle}
         />
 
         <StaggerGroup className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4" stagger={0.05}>

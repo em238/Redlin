@@ -279,3 +279,48 @@ model CtaBanner {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 }
+
+// Section-level text (badge, title, description) for public site sections — DB-managed + bilingual
+model SectionContent {
+  id             String   @id @default(cuid())
+  section        String   @unique // "services" | "how-it-works" | "videos" | "partners" | "testimonials" | "contact" | "map" | "footer"
+  badgeAr        String   @default("")
+  badgeEn        String   @default("")
+  titleAr        String   @default("")
+  titleEn        String   @default("")
+  descriptionAr  String   @default("")
+  descriptionEn  String   @default("")
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// Footer link lists (Company / Services / Support)
+model FooterLink {
+  id        String   @id @default(cuid())
+  category  String   // "company" | "services" | "support"
+  labelAr   String
+  labelEn   String
+  href      String   @default("#")
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+// Footer-level content (bio, newsletter text, dashboard link text, address)
+model FooterContent {
+  id                 String   @id @default(cuid())
+  bioAr              String   @default("")
+  bioEn              String   @default("")
+  newsletterTitleAr  String   @default("")
+  newsletterTitleEn  String   @default("")
+  newsletterDescAr   String   @default("")
+  newsletterDescEn   String   @default("")
+  dashboardLinkAr    String   @default("")
+  dashboardLinkEn    String   @default("")
+  addressAr          String   @default("")
+  addressEn          String   @default("")
+  active             Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}

@@ -1,0 +1,846 @@
+     1→"use client";
+     2→
+     3→import { useEffect, useState } from "react";
+     4→import { useQuery, useQueryClient } from "@tanstack/react-query";
+     5→import { motion, AnimatePresence } from "framer-motion";
+     6→import {
+     7→  Loader2, Plus, Trash2, Phone, Mail, MapPin, Pencil, MessageCircle,
+     8→  Save, MapPinned, ExternalLink, Megaphone, Zap,
+     9→} from "lucide-react";
+    10→import { Card } from "@/components/ui/card";
+    11→import { Button } from "@/components/ui/button";
+    12→import { Input } from "@/components/ui/input";
+    13→import { Label } from "@/components/ui/label";
+    14→import { Textarea } from "@/components/ui/textarea";
+    15→import { Switch } from "@/components/ui/switch";
+    16→import { Badge } from "@/components/ui/badge";
+    17→import {
+    18→  Dialog, DialogContent, DialogHeader, DialogTitle,
+    19→} from "@/components/ui/dialog";
+    20→import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
+    21→import { toast } from "sonner";
+    22→import { useDashboardT } from "@/lib/i18n";
+    23→
+    24→type ContactInfo = {
+    25→  id: string;
+    26→  type: "address" | "phone" | "email";
+    27→  labelAr: string;
+    28→  labelEn: string;
+    29→  value: string;
+    30→  href: string | null;
+    31→  order: number;
+    32→  active: boolean;
+    33→  createdAt: string;
+    34→};
+    35→
+    36→type WhatsAppSetting = {
+    37→  id: string;
+    38→  phoneNumber: string;
+    39→  defaultMessageAr: string;
+    40→  defaultMessageEn: string;
+    41→  active: boolean;
+    42→  createdAt: string;
+    43→  updatedAt: string;
+    44→};
+    45→
+    46→type CtaBannerSetting = {
+    47→  id: string;
+    48→  headingAr: string;
+    49→  headingEn: string;
+    50→  subAr: string;
+    51→  subEn: string;
+    52→  btnTextAr: string;
+    53→  btnTextEn: string;
+    54→  btnLink: string;
+    55→  phone: string;
+    56→  active: boolean;
+    57→  createdAt: string;
+    58→  updatedAt: string;
+    59→};
+    60→
+    61→const TYPES = [
+    62→  { id: "address" as const, ar: "عنوان", en: "Address", icon: MapPin, color: "from-emerald-500/15 to-emerald-500/5", iconColor: "text-emerald-600", accent: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400" },
+    63→  { id: "phone" as const, ar: "رقم هاتف", en: "Phone Number", icon: Phone, color: "from-blue-500/15 to-blue-500/5", iconColor: "text-blue-600", accent: "bg-blue-500/10 text-blue-700 dark:text-blue-400" },
+    64→  { id: "email" as const, ar: "بريد إلكتروني", en: "Email", icon: Mail, color: "from-amber-500/15 to-amber-500/5", iconColor: "text-amber-600", accent: "bg-amber-500/10 text-amber-700 dark:text-amber-400" },
+    65→];
+    66→
+    67→const typeMeta = (t: string) => TYPES.find((x) => x.id === t) ?? TYPES[0];
+    68→
+    69→const emptyContactForm = {
+    70→  type: "address" as const,
+    71→  labelAr: "", labelEn: "", value: "", href: "", order: 0, active: true,
+    72→};
+    73→
+    74→export function DashboardContactInfo() {
+    75→  const { isAr } = useDashboardT();
+    76→  const qc = useQueryClient();
+    77→  const L = (ar: string, en: string) => (isAr ? ar : en);
+    78→
+    79→  // ContactInfo CRUD state
+    80→  const [modalOpen, setModalOpen] = useState(false);
+    81→  const [editing, setEditing] = useState<ContactInfo | null>(null);
+    82→  const [saving, setSaving] = useState(false);
+    83→  const [contactForm, setContactForm] = useState<any>({ ...emptyContactForm });
+    84→
+    85→  // WhatsApp settings state
+    86→  const [whatsapp, setWhatsapp] = useState<any>({
+    87→    phoneNumber: "", defaultMessageAr: "", defaultMessageEn: "", active: true,
+    88→  });
+    89→  const [savingWhatsapp, setSavingWhatsapp] = useState(false);
+    90→
+    91→  // Pre-Footer CTA Banner state
+    92→  const [ctaBanner, setCtaBanner] = useState<any>({
+    93→    headingAr: "جاهز تبدأ شحن مع Redline؟",
+    94→    headingEn: "Ready to Start Shipping with Redline?",
+    95→    subAr: "انضم لأكثر من 12,000 عميل يثقون بنا يومياً. تواصل معنا الآن واحصل على عرض سعر مخصص لشحناتك.",
+    96→    subEn: "Join over 12,000 clients who trust us daily. Contact us now and get a custom quote for your shipments.",
+    97→    btnTextAr: "اطلب عرض سعر",
+    98→    btnTextEn: "Request a Quote",
+    99→    btnLink: "#contact",
+   100→    phone: "19999",
+   101→    active: true,
+   102→  });
+   103→  const [savingCta, setSavingCta] = useState(false);
+   104→
+   105→  // Fetch contact info list
+   106→  const { data, isLoading } = useQuery({
+   107→    queryKey: ["contact-info-admin"],
+   108→    queryFn: () => apiGet<{ items: ContactInfo[] }>("/api/contact-info?all=1"),
+   109→  });
+   110→  const items = data?.items ?? [];
+   111→  const addresses = items.filter((i) => i.type === "address");
+   112→  const phones = items.filter((i) => i.type === "phone");
+   113→  const emails = items.filter((i) => i.type === "email");
+   114→
+   115→  // Fetch WhatsApp settings
+   116→  const { data: waData, isLoading: waLoading } = useQuery({
+   117→    queryKey: ["whatsapp-settings"],
+   118→    queryFn: () => apiGet<{ setting: WhatsAppSetting }>("/api/whatsapp-settings"),
+   119→  });
+   120→
+   121→  // Fetch Pre-Footer CTA Banner settings
+   122→  const { data: ctaData, isLoading: ctaLoading } = useQuery({
+   123→    queryKey: ["cta-banner"],
+   124→    queryFn: () => apiGet<{ banner: CtaBannerSetting }>("/api/cta-banner"),
+   125→  });
+   126→
+   127→  // Sync WhatsApp state with fetched data once loaded
+   128→  useEffect(() => {
+   129→    if (waData?.setting) {
+   130→      const s = waData.setting;
+   131→      setWhatsapp({
+   132→        phoneNumber: s.phoneNumber || "",
+   133→        defaultMessageAr: s.defaultMessageAr || "",
+   134→        defaultMessageEn: s.defaultMessageEn || "",
+   135→        active: s.active,
+   136→      });
+   137→    }
+   138→  }, [waData]);
+   139→
+   140→  // Sync CTA Banner state with fetched data once loaded (pre-fills fields from DB)
+   141→  useEffect(() => {
+   142→    if (ctaData?.banner) {
+   143→      const b = ctaData.banner;
+   144→      setCtaBanner({
+   145→        headingAr: b.headingAr || "جاهز تبدأ شحن مع Redline؟",
+   146→        headingEn: b.headingEn || "Ready to Start Shipping with Redline?",
+   147→        subAr: b.subAr || "انضم لأكثر من 12,000 عميل يثقون بنا يومياً. تواصل معنا الآن واحصل على عرض سعر مخصص لشحناتك.",
+   148→        subEn: b.subEn || "Join over 12,000 clients who trust us daily. Contact us now and get a custom quote for your shipments.",
+   149→        btnTextAr: b.btnTextAr || "اطلب عرض سعر",
+   150→        btnTextEn: b.btnTextEn || "Request a Quote",
+   151→        btnLink: b.btnLink || "#contact",
+   152→        phone: b.phone || "19999",
+   153→        active: b.active,
+   154→      });
+   155→    }
+   156→  }, [ctaData]);
+   157→
+   158→  const openCreate = (type: "address" | "phone" | "email") => {
+   159→    setEditing(null);
+   160→    const nextOrder = items.filter((i) => i.type === type).length;
+   161→    setContactForm({ ...emptyContactForm, type, order: nextOrder });
+   162→    setModalOpen(true);
+   163→  };
+   164→
+   165→  const openEdit = (item: ContactInfo) => {
+   166→    setEditing(item);
+   167→    setContactForm({
+   168→      type: item.type,
+   169→      labelAr: item.labelAr, labelEn: item.labelEn,
+   170→      value: item.value, href: item.href || "",
+   171→      order: item.order ?? 0, active: item.active,
+   172→    });
+   173→    setModalOpen(true);
+   174→  };
+   175→
+   176→  const invalidate = () => {
+   177→    qc.invalidateQueries({ queryKey: ["contact-info-admin"] });
+   178→    qc.invalidateQueries({ queryKey: ["whatsapp-settings"] });
+   179→    qc.invalidateQueries({ queryKey: ["cta-banner"] });
+   180→    qc.invalidateQueries({ queryKey: ["site-data"] });
+   181→    qc.invalidateQueries({ queryKey: ["site"] });
+   182→  };
+   183→
+   184→  const saveContact = async () => {
+   185→    if (!contactForm.labelAr || !contactForm.labelEn) {
+   186→      toast.error(L("الوصف بالعربي والإنجليزي مطلوب", "Both Arabic and English labels are required"));
+   187→      return;
+   188→    }
+   189→    if (!contactForm.value) {
+   190→      toast.error(L("القيمة مطلوبة", "Value is required"));
+   191→      return;
+   192→    }
+   193→    setSaving(true);
+   194→    try {
+   195→      // Auto-build href if empty
+   196→      let href = contactForm.href;
+   197→      if (!href) {
+   198→        if (contactForm.type === "phone") href = `tel:${contactForm.value.replace(/\s+/g, "")}`;
+   199→        else if (contactForm.type === "email") href = `mailto:${contactForm.value.trim()}`;
+   200→      }
+   201→      const payload = {
+   202→        type: contactForm.type,
+   203→        labelAr: contactForm.labelAr,
+   204→        labelEn: contactForm.labelEn,
+   205→        value: contactForm.value,
+   206→        href: href || null,
+   207→        order: Number(contactForm.order) || 0,
+   208→        active: !!contactForm.active,
+   209→      };
+   210→      if (editing) {
+   211→        await apiPatch(`/api/contact-info/${editing.id}`, payload);
+   212→        toast.success(L("تم تحديث العنصر", "Item updated"));
+   213→      } else {
+   214→        await apiPost("/api/contact-info", payload);
+   215→        toast.success(L("تمت الإضافة", "Item added"));
+   216→      }
+   217→      setModalOpen(false);
+   218→      invalidate();
+   219→    } catch (e: any) {
+   220→      toast.error(e.message || L("خطأ", "Error"));
+   221→    } finally {
+   222→      setSaving(false);
+   223→    }
+   224→  };
+   225→
+   226→  const removeContact = async (id: string) => {
+   227→    if (!confirm(L("حذف هذا العنصر؟", "Delete this item?"))) return;
+   228→    try {
+   229→      await apiDelete(`/api/contact-info/${id}`);
+   230→      toast.success(L("تم الحذف", "Deleted"));
+   231→      invalidate();
+   232→    } catch (e: any) {
+   233→      toast.error(e.message);
+   234→    }
+   235→  };
+   236→
+   237→  const toggleContactActive = async (item: ContactInfo) => {
+   238→    try {
+   239→      await apiPatch(`/api/contact-info/${item.id}`, { active: !item.active });
+   240→      invalidate();
+   241→    } catch (e: any) {
+   242→      toast.error(e.message);
+   243→    }
+   244→  };
+   245→
+   246→  const saveCtaBanner = async () => {
+   247→    if (!ctaBanner.headingAr || !ctaBanner.headingEn) {
+   248→      toast.error(L("العنوان بالعربي والإنجليزي مطلوب", "Both Arabic and English headings are required"));
+   249→      return;
+   250→    }
+   251→    if (!ctaBanner.btnTextAr || !ctaBanner.btnTextEn) {
+   252→      toast.error(L("نص الزر بالعربي والإنجليزي مطلوب", "Both Arabic and English button labels are required"));
+   253→      return;
+   254→    }
+   255→    setSavingCta(true);
+   256→    try {
+   257→      await apiPost("/api/cta-banner", {
+   258→        headingAr: ctaBanner.headingAr,
+   259→        headingEn: ctaBanner.headingEn,
+   260→        subAr: ctaBanner.subAr,
+   261→        subEn: ctaBanner.subEn,
+   262→        btnTextAr: ctaBanner.btnTextAr,
+   263→        btnTextEn: ctaBanner.btnTextEn,
+   264→        btnLink: ctaBanner.btnLink || "#contact",
+   265→        phone: ctaBanner.phone || "19999",
+   266→        active: !!ctaBanner.active,
+   267→      });
+   268→      toast.success(L("تم حفظ بانر التحفيز والتواصل السريع", "CTA banner saved successfully"));
+   269→      invalidate();
+   270→    } catch (e: any) {
+   271→      toast.error(e.message || L("خطأ", "Error"));
+   272→    } finally {
+   273→      setSavingCta(false);
+   274→    }
+   275→  };
+   276→
+   277→  const saveWhatsapp = async () => {
+   278→    if (!whatsapp.phoneNumber) {
+   279→      toast.error(L("رقم الواتساب مطلوب", "WhatsApp number is required"));
+   280→      return;
+   281→    }
+   282→    setSavingWhatsapp(true);
+   283→    try {
+   284→      await apiPost("/api/whatsapp-settings", {
+   285→        phoneNumber: whatsapp.phoneNumber,
+   286→        defaultMessageAr: whatsapp.defaultMessageAr || "مرحباً، أريد الاستفسار عن خدمات الشحن",
+   287→        defaultMessageEn: whatsapp.defaultMessageEn || "Hello, I'd like to inquire about shipping services",
+   288→        active: !!whatsapp.active,
+   289→      });
+   290→      toast.success(L("تم حفظ إعدادات الواتساب", "WhatsApp settings saved"));
+   291→      invalidate();
+   292→    } catch (e: any) {
+   293→      toast.error(e.message || L("خطأ", "Error"));
+   294→    } finally {
+   295→      setSavingWhatsapp(false);
+   296→    }
+   297→  };
+   298→
+   299→  // Render a single contact section (address / phone / email)
+   300→  const renderSection = (type: "address" | "phone" | "email") => {
+   301→    const meta = typeMeta(type);
+   302→    const Icon = meta.icon;
+   303→    const list = type === "address" ? addresses : type === "phone" ? phones : emails;
+   304→    return (
+   305→      <Card className="p-5 sm:p-6 space-y-4">
+   306→        <div className="flex items-center justify-between gap-3 flex-wrap">
+   307→          <div className="flex items-center gap-2">
+   308→            <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${meta.color} flex items-center justify-center`}>
+   309→              <Icon className={`w-4 h-4 ${meta.iconColor}`} />
+   310→            </div>
+   311→            <div>
+   312→              <h4 className="font-bold flex items-center gap-2">
+   313→                {isAr ? meta.ar : meta.en}
+   314→                <Badge variant="outline" className={`text-[10px] ${meta.accent}`}>{list.length}</Badge>
+   315→              </h4>
+   316→              <p className="text-xs text-muted-foreground">
+   317→                {L(
+   318→                  type === "address" ? "عناوين المكاتب والمراكز" : type === "phone" ? "أرقام التواصل الهاتفي" : "عناوين البريد الإلكتروني",
+   319→                  type === "address" ? "Office and center addresses" : type === "phone" ? "Phone contact numbers" : "Email addresses"
+   320→                )}
+   321→              </p>
+   322→            </div>
+   323→          </div>
+   324→          <Button onClick={() => openCreate(type)} size="sm"
+   325→            className="bg-gradient-to-r from-primary to-red-700 text-white gap-2 h-9">
+   326→            <Plus className="w-3.5 h-3.5" /> {L("إضافة", "Add")}
+   327→          </Button>
+   328→        </div>
+   329→
+   330→        {list.length === 0 ? (
+   331→          <div className="p-6 text-center border-2 border-dashed border-border rounded-xl">
+   332→            <Icon className="w-8 h-8 mx-auto text-muted-foreground/40 mb-2" />
+   333→            <p className="text-sm text-muted-foreground">{L("لا توجد عناصر بعد", "No items yet")}</p>
+   334→          </div>
+   335→        ) : (
+   336→          <div className="space-y-2">
+   337→            <AnimatePresence>
+   338→              {list.map((item) => (
+   339→                <motion.div
+   340→                  key={item.id}
+   341→                  layout
+   342→                  initial={{ opacity: 0, y: 8 }}
+   343→                  animate={{ opacity: 1, y: 0 }}
+   344→                  exit={{ opacity: 0, y: -8 }}
+   345→                  className={`flex items-start gap-3 rounded-xl border border-border p-3 hover:shadow-sm transition-all ${!item.active ? "opacity-60" : ""}`}
+   346→                >
+   347→                  <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${meta.color} flex items-center justify-center shrink-0`}>
+   348→                    <Icon className={`w-4 h-4 ${meta.iconColor}`} />
+   349→                  </div>
+   350→                  <div className="flex-1 min-w-0">
+   351→                    <div className="flex items-baseline gap-2 flex-wrap">
+   352→                      <div className="font-semibold text-sm" dir="rtl">{item.labelAr}</div>
+   353→                      <div className="text-xs text-muted-foreground" dir="ltr">{item.labelEn}</div>
+   354→                    </div>
+   355→                    {item.href ? (
+   356→                      <a
+   357→                        href={item.href}
+   358→                        target={item.href.startsWith("http") ? "_blank" : undefined}
+   359→                        rel="noopener noreferrer"
+   360→                        className="text-sm text-primary hover:underline flex items-center gap-1 mt-0.5 truncate"
+   361→                        dir="ltr"
+   362→                      >
+   363→                        <ExternalLink className="w-3 h-3 shrink-0" />
+   364→                        <span className="truncate">{item.value}</span>
+   365→                      </a>
+   366→                    ) : (
+   367→                      <div className="text-sm text-foreground/80 mt-0.5" dir="ltr">{item.value}</div>
+   368→                    )}
+   369→                  </div>
+   370→                  <div className="flex items-center gap-1.5 shrink-0">
+   371→                    <Switch checked={item.active} onCheckedChange={() => toggleContactActive(item)} />
+   372→                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => openEdit(item)} title={L("تعديل", "Edit")}>
+   373→                      <Pencil className="w-3.5 h-3.5" />
+   374→                    </Button>
+   375→                    <Button variant="outline" size="icon" className="h-8 w-8 text-rose-600 hover:text-rose-700" onClick={() => removeContact(item.id)} title={L("حذف", "Delete")}>
+   376→                      <Trash2 className="w-3.5 h-3.5" />
+   377→                    </Button>
+   378→                  </div>
+   379→                </motion.div>
+   380→              ))}
+   381→            </AnimatePresence>
+   382→          </div>
+   383→        )}
+   384→      </Card>
+   385→    );
+   386→  };
+   387→
+   388→  return (
+   389→    <div className="space-y-5">
+   390→      {/* Section Context Banner */}
+   391→      <div className="flex items-center justify-between gap-2 p-3 rounded-xl bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 mb-4">
+   392→        <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+   393→          📍 {L("مكان الظهور: ", "Appears at: ")}{L("قسم تواصل مباشر في أسفل الصفحة", "Direct Contact section at the bottom")}
+   394→        </span>
+   395→        <a href="/#contact" target="_blank" className="text-xs font-semibold text-red-600 dark:text-red-400 hover:underline flex items-center gap-1">
+   396→          {L("عرض في الموقع", "Preview on Site")} ↗
+   397→        </a>
+   398→      </div>
+   399→
+   400→      {/* Header */}
+   401→      <Card className="p-5 bg-gradient-to-l from-primary/10 to-red-700/5 border-primary/30 relative overflow-hidden">
+   402→        <div className="absolute top-0 left-0 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
+   403→        <div className="relative flex items-center gap-3">
+   404→          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-red-700 flex items-center justify-center shadow-lg shadow-primary/25">
+   405→            <MapPinned className="w-6 h-6 text-white" />
+   406→          </div>
+   407→          <div>
+   408→            <h3 className="font-bold text-lg">{L("معلومات التواصل والواتساب", "Contact Info & WhatsApp")}</h3>
+   409→            <p className="text-sm text-muted-foreground">
+   410→              {L("أدر العناوين وأرقام الهاتف والبريد وإعدادات الواتساب", "Manage addresses, phones, emails and WhatsApp settings")}
+   411→            </p>
+   412→          </div>
+   413→        </div>
+   414→      </Card>
+   415→
+   416→      {/* Sections */}
+   417→      {isLoading ? (
+   418→        <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+   419→      ) : (
+   420→        <>
+   421→          {renderSection("address")}
+   422→          {renderSection("phone")}
+   423→          {renderSection("email")}
+   424→        </>
+   425→      )}
+   426→
+   427→      {/* Pre-Footer CTA Banner Management */}
+   428→      <Card className="p-5 sm:p-6 space-y-5 bg-gradient-to-br from-primary/5 to-red-700/0 border-primary/20">
+   429→        <div className="flex items-center justify-between gap-3 flex-wrap">
+   430→          <div className="flex items-center gap-2">
+   431→            <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center">
+   432→              <Megaphone className="w-4 h-4 text-primary" />
+   433→            </div>
+   434→            <div>
+   435→              <h4 className="font-bold">
+   436→                {L("بانر التحفيز والتواصل السريع", "Bottom CTA Banner")}
+   437→              </h4>
+   438→              <p className="text-xs text-muted-foreground">
+   439→                {L(
+   440→                  "العنوان والوصف والزر ورقم الخط الساخن — يظهر قبل الفوتر بالصفحة الرئيسية",
+   441→                  "Heading, subtitle, button label & hotline — shown above the footer on the homepage"
+   442→                )}
+   443→              </p>
+   444→            </div>
+   445→          </div>
+   446→          <Button onClick={saveCtaBanner} disabled={savingCta || ctaLoading}
+   447→            className="bg-gradient-to-r from-primary to-red-700 text-white gap-2">
+   448→            {savingCta ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+   449→            {L("حفظ التغييرات", "Save Changes")}
+   450→          </Button>
+   451→        </div>
+   452→
+   453→        {ctaLoading ? (
+   454→          <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
+   455→        ) : (
+   456→          <div className="space-y-4">
+   457→            {/* Heading (AR / EN) */}
+   458→            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+   459→              <div className="space-y-1">
+   460→                <Label className="text-xs flex items-center gap-1.5">
+   461→                  <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold">AR</span>
+   462→                  {L("العنوان (عربي)", "Heading (Arabic)")}
+   463→                </Label>
+   464→                <Input
+   465→                  value={ctaBanner.headingAr}
+   466→                  onChange={(e) => setCtaBanner({ ...ctaBanner, headingAr: e.target.value })}
+   467→                  placeholder="جاهز تبدأ شحن مع Redline؟"
+   468→                  dir="rtl"
+   469→                  className="h-10"
+   470→                />
+   471→              </div>
+   472→              <div className="space-y-1">
+   473→                <Label className="text-xs flex items-center gap-1.5">
+   474→                  <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 text-[10px] font-bold">EN</span>
+   475→                  {L("العنوان (إنجليزي)", "Heading (English)")}
+   476→                </Label>
+   477→                <Input
+   478→                  value={ctaBanner.headingEn}
+   479→                  onChange={(e) => setCtaBanner({ ...ctaBanner, headingEn: e.target.value })}
+   480→                  placeholder="Ready to Start Shipping with Redline?"
+   481→                  dir="ltr"
+   482→                  className="h-10"
+   483→                />
+   484→              </div>
+   485→            </div>
+   486→
+   487→            {/* Subtitle (AR / EN) */}
+   488→            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+   489→              <div className="space-y-1">
+   490→                <Label className="text-xs flex items-center gap-1.5">
+   491→                  <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold">AR</span>
+   492→                  {L("الوصف (عربي)", "Subtitle (Arabic)")}
+   493→                </Label>
+   494→                <Textarea
+   495→                  value={ctaBanner.subAr}
+   496→                  onChange={(e) => setCtaBanner({ ...ctaBanner, subAr: e.target.value })}
+   497→                  rows={3}
+   498→                  dir="rtl"
+   499→                  placeholder="انضم لأكثر من 12,000 عميل يثقون بنا يومياً. تواصل معنا الآن واحصل على عرض سعر مخصص لشحناتك."
+   500→                />
+   501→              </div>
+   502→              <div className="space-y-1">
+   503→                <Label className="text-xs flex items-center gap-1.5">
+   504→                  <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 text-[10px] font-bold">EN</span>
+   505→                  {L("الوصف (إنجليزي)", "Subtitle (English)")}
+   506→                </Label>
+   507→                <Textarea
+   508→                  value={ctaBanner.subEn}
+   509→                  onChange={(e) => setCtaBanner({ ...ctaBanner, subEn: e.target.value })}
+   510→                  rows={3}
+   511→                  dir="ltr"
+   512→                  placeholder="Join over 12,000 clients who trust us daily. Contact us now and get a custom quote for your shipments."
+   513→                />
+   514→              </div>
+   515→            </div>
+   516→
+   517→            {/* Button text (AR / EN) + Button link */}
+   518→            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+   519→              <div className="space-y-1">
+   520→                <Label className="text-xs flex items-center gap-1.5">
+   521→                  <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold">AR</span>
+   522→                  {L("نص الزر (عربي)", "Button label (Arabic)")}
+   523→                </Label>
+   524→                <Input
+   525→                  value={ctaBanner.btnTextAr}
+   526→                  onChange={(e) => setCtaBanner({ ...ctaBanner, btnTextAr: e.target.value })}
+   527→                  placeholder="اطلب عرض سعر"
+   528→                  dir="rtl"
+   529→                  className="h-10"
+   530→                />
+   531→              </div>
+   532→              <div className="space-y-1">
+   533→                <Label className="text-xs flex items-center gap-1.5">
+   534→                  <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 text-[10px] font-bold">EN</span>
+   535→                  {L("نص الزر (إنجليزي)", "Button label (English)")}
+   536→                </Label>
+   537→                <Input
+   538→                  value={ctaBanner.btnTextEn}
+   539→                  onChange={(e) => setCtaBanner({ ...ctaBanner, btnTextEn: e.target.value })}
+   540→                  placeholder="Request a Quote"
+   541→                  dir="ltr"
+   542→                  className="h-10"
+   543→                />
+   544→              </div>
+   545→              <div className="space-y-1">
+   546→                <Label className="text-xs flex items-center gap-1.5">
+   547→                  <span className="px-1.5 py-0.5 rounded bg-zinc-500/10 text-zinc-700 dark:text-zinc-300 text-[10px] font-bold">URL</span>
+   548→                  {L("رابط الزر", "Button link")}
+   549→                </Label>
+   550→                <Input
+   551→                  value={ctaBanner.btnLink}
+   552→                  onChange={(e) => setCtaBanner({ ...ctaBanner, btnLink: e.target.value })}
+   553→                  placeholder="#contact"
+   554→                  dir="ltr"
+   555→                  className="h-10 font-mono text-xs"
+   556→                />
+   557→                <p className="text-[11px] text-muted-foreground">
+   558→                  {L("استخدم #معرّف للتمرير لقسم (مثال: #contact) أو مسار /quote", "Use #anchor to scroll to a section (e.g. #contact) or a path like /quote")}
+   559→                </p>
+   560→              </div>
+   561→            </div>
+   562→
+   563→            {/* Hotline phone number */}
+   564→            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+   565→              <div className="space-y-1">
+   566→                <Label className="text-xs flex items-center gap-1.5">
+   567→                  <Phone className="w-3.5 h-3.5 text-primary" />
+   568→                  {L("رقم الخط الساخن", "Hotline phone number")}
+   569→                </Label>
+   570→                <Input
+   571→                  value={ctaBanner.phone}
+   572→                  onChange={(e) => setCtaBanner({ ...ctaBanner, phone: e.target.value })}
+   573→                  placeholder="19999"
+   574→                  dir="ltr"
+   575→                  className="h-10 font-mono"
+   576→                />
+   577→                <p className="text-[11px] text-muted-foreground">
+   578→                  {L("يظهر كزر اتصال مباشر في البانر (tel:)", "Shown as a direct call button in the banner (tel:)")}
+   579→                </p>
+   580→              </div>
+   581→              <div className="flex items-end pb-1">
+   582→                <label className="flex items-center gap-2 text-sm cursor-pointer">
+   583→                  <Switch checked={!!ctaBanner.active} onCheckedChange={(v) => setCtaBanner({ ...ctaBanner, active: v })} />
+   584→                  <span>{L("إظهار البانر بالموقع", "Show banner on site")}</span>
+   585→                </label>
+   586→              </div>
+   587→            </div>
+   588→
+   589→            {/* Live preview */}
+   590→            <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
+   591→              <div className="text-[11px] text-muted-foreground mb-2">{L("معاينة البانر:", "Banner preview:")}</div>
+   592→              <div
+   593→                className="relative overflow-hidden rounded-xl p-5 text-center"
+   594→                style={{ background: "linear-gradient(135deg, oklch(0.45 0.22 28), oklch(0.38 0.18 18))" }}
+   595→              >
+   596→                <h5 className="text-base font-bold text-white leading-tight" dir="rtl">
+   597→                  {(ctaBanner.headingAr || "جاهز تبدأ شحن مع Redline؟").split("Redline")[0]}
+   598→                  {ctaBanner.headingAr?.includes("Redline") && <span className="text-amber-300">Redline</span>}
+   599→                  {ctaBanner.headingAr?.split("Redline")[1] || ""}
+   600→                </h5>
+   601→                <p className="mt-1.5 text-white/85 text-xs max-w-md mx-auto line-clamp-2" dir="rtl">
+   602→                  {ctaBanner.subAr || "انضم لأكثر من 12,000 عميل يثقون بنا يومياً. تواصل معنا الآن واحصل على عرض سعر مخصص لشحناتك."}
+   603→                </p>
+   604→                <div className="mt-3 flex flex-wrap justify-center gap-2">
+   605→                  <span className="inline-flex items-center gap-1 bg-white text-primary px-3 py-1.5 rounded-md text-xs font-semibold">
+   606→                    <Zap className="w-3.5 h-3.5" />
+   607→                    {ctaBanner.btnTextAr || "اطلب عرض سعر"}
+   608→                  </span>
+   609→                  <span className="inline-flex items-center gap-1 bg-white/10 border border-white/25 text-white px-3 py-1.5 rounded-md text-xs font-semibold" dir="ltr">
+   610→                    <Phone className="w-3.5 h-3.5" />
+   611→                    {ctaBanner.phone || "19999"}
+   612→                  </span>
+   613→                </div>
+   614→              </div>
+   615→            </div>
+   616→          </div>
+   617→        )}
+   618→      </Card>
+   619→
+   620→      {/* WhatsApp Settings */}
+   621→      <Card className="p-5 sm:p-6 space-y-5 bg-gradient-to-br from-emerald-500/5 to-emerald-700/0 border-emerald-500/20">
+   622→        <div className="flex items-center justify-between gap-3 flex-wrap">
+   623→          <div className="flex items-center gap-2">
+   624→            <div className="w-9 h-9 rounded-lg bg-emerald-500/15 flex items-center justify-center">
+   625→              <MessageCircle className="w-4 h-4 text-emerald-600" />
+   626→            </div>
+   627→            <div>
+   628→              <h4 className="font-bold">{L("إعدادات الواتساب", "WhatsApp Settings")}</h4>
+   629→              <p className="text-xs text-muted-foreground">
+   630→                {L("رقم الواتساب + الرسالة الافتراضية ثنائية اللغة", "WhatsApp number + bilingual default message")}
+   631→              </p>
+   632→            </div>
+   633→          </div>
+   634→          <Button onClick={saveWhatsapp} disabled={savingWhatsapp || waLoading}
+   635→            className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white gap-2">
+   636→            {savingWhatsapp ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+   637→            {L("حفظ الإعدادات", "Save settings")}
+   638→          </Button>
+   639→        </div>
+   640→
+   641→        {waLoading ? (
+   642→          <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-emerald-600" /></div>
+   643→        ) : (
+   644→          <div className="space-y-4">
+   645→            <div className="space-y-1">
+   646→              <Label className="text-xs flex items-center gap-1.5">
+   647→                <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-700 text-[10px] font-bold">EN/AR</span>
+   648→                {L("رقم الواتساب (بصيغة دولية بدون +)", "WhatsApp number (international format, no +)")}
+   649→              </Label>
+   650→              <Input
+   651→                value={whatsapp.phoneNumber}
+   652→                onChange={(e) => setWhatsapp({ ...whatsapp, phoneNumber: e.target.value })}
+   653→                placeholder="201000000000"
+   654→                className="h-10 font-mono"
+   655→                dir="ltr"
+   656→              />
+   657→              <p className="text-[11px] text-muted-foreground">
+   658→                {L("مثال: 201000000000 — صيغة دولية كاملة بدون رمز + أو مسافات", "Example: 201000000000 — full international format without + or spaces")}
+   659→              </p>
+   660→            </div>
+   661→
+   662→            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+   663→              <div className="space-y-1">
+   664→                <Label className="text-xs flex items-center gap-1.5">
+   665→                  <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold">AR</span>
+   666→                  {L("الرسالة الافتراضية (عربي)", "Default message (Arabic)")}
+   667→                </Label>
+   668→                <Textarea
+   669→                  value={whatsapp.defaultMessageAr}
+   670→                  onChange={(e) => setWhatsapp({ ...whatsapp, defaultMessageAr: e.target.value })}
+   671→                  rows={3}
+   672→                  dir="rtl"
+   673→                  placeholder="مرحباً، أريد الاستفسار عن خدمات الشحن"
+   674→                />
+   675→              </div>
+   676→              <div className="space-y-1">
+   677→                <Label className="text-xs flex items-center gap-1.5">
+   678→                  <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 text-[10px] font-bold">EN</span>
+   679→                  {L("الرسالة الافتراضية (إنجليزي)", "Default message (English)")}
+   680→                </Label>
+   681→                <Textarea
+   682→                  value={whatsapp.defaultMessageEn}
+   683→                  onChange={(e) => setWhatsapp({ ...whatsapp, defaultMessageEn: e.target.value })}
+   684→                  rows={3}
+   685→                  dir="ltr"
+   686→                  placeholder="Hello, I'd like to inquire about shipping services"
+   687→                />
+   688→              </div>
+   689→            </div>
+   690→
+   691→            <div className="flex items-center gap-3 pt-1">
+   692→              <label className="flex items-center gap-2 text-sm cursor-pointer">
+   693→                <Switch checked={!!whatsapp.active} onCheckedChange={(v) => setWhatsapp({ ...whatsapp, active: v })} />
+   694→                <span>{L("تفعيل زر الواتساب العائم بالموقع", "Enable floating WhatsApp button on site")}</span>
+   695→              </label>
+   696→            </div>
+   697→
+   698→            {/* Live preview link */}
+   699→            <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
+   700→              <div className="text-[11px] text-muted-foreground mb-1">{L("معاينة الرابط:", "Link preview:")}</div>
+   701→              <a
+   702→                href={`https://wa.me/${whatsapp.phoneNumber?.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(whatsapp.defaultMessageAr || "")}`}
+   703→                target="_blank"
+   704→                rel="noopener noreferrer"
+   705→                className="text-sm text-emerald-700 dark:text-emerald-400 hover:underline break-all font-mono"
+   706→                dir="ltr"
+   707→              >
+   708→                https://wa.me/{whatsapp.phoneNumber?.replace(/[^0-9]/g, "") || "..."}
+   709→              </a>
+   710→            </div>
+   711→          </div>
+   712→        )}
+   713→      </Card>
+   714→
+   715→      {/* Add / Edit Contact Item Modal */}
+   716→      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+   717→        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+   718→          <DialogHeader>
+   719→            <DialogTitle className="flex items-center gap-2">
+   720→              {(() => {
+   721→                const meta = typeMeta(contactForm.type);
+   722→                const Icon = meta.icon;
+   723→                return <Icon className={`w-5 h-5 ${meta.iconColor}`} />;
+   724→              })()}
+   725→              {editing
+   726→                ? L(`تعديل ${typeMeta(contactForm.type).ar}`, `Edit ${typeMeta(contactForm.type).en}`)
+   727→                : L(`إضافة ${typeMeta(contactForm.type).ar}`, `Add ${typeMeta(contactForm.type).en}`)}
+   728→            </DialogTitle>
+   729→          </DialogHeader>
+   730→          <div className="space-y-4">
+   731→            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+   732→              <div className="space-y-1">
+   733→                <Label className="text-xs flex items-center gap-1.5">
+   734→                  <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold">AR</span>
+   735→                  {L("الوصف (عربي)", "Label (Arabic)")}
+   736→                </Label>
+   737→                <Input
+   738→                  value={contactForm.labelAr}
+   739→                  onChange={(e) => setContactForm({ ...contactForm, labelAr: e.target.value })}
+   740→                  placeholder={
+   741→                    contactForm.type === "address"
+   742→                      ? "المقر الرئيسي"
+   743→                      : contactForm.type === "phone"
+   744→                      ? "خدمة العملاء"
+   745→                      : "الاستفسارات"
+   746→                  }
+   747→                  dir="rtl"
+   748→                  className="h-10"
+   749→                />
+   750→              </div>
+   751→              <div className="space-y-1">
+   752→                <Label className="text-xs flex items-center gap-1.5">
+   753→                  <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 text-[10px] font-bold">EN</span>
+   754→                  {L("الوصف (إنجليزي)", "Label (English)")}
+   755→                </Label>
+   756→                <Input
+   757→                  value={contactForm.labelEn}
+   758→                  onChange={(e) => setContactForm({ ...contactForm, labelEn: e.target.value })}
+   759→                  placeholder={
+   760→                    contactForm.type === "address"
+   761→                      ? "Headquarters"
+   762→                      : contactForm.type === "phone"
+   763→                      ? "Customer Service"
+   764→                      : "Inquiries"
+   765→                  }
+   766→                  dir="ltr"
+   767→                  className="h-10"
+   768→                />
+   769→              </div>
+   770→            </div>
+   771→
+   772→            <div className="space-y-1">
+   773→              <Label className="text-xs">
+   774→                {contactForm.type === "address"
+   775→                  ? L("العنوان الكامل", "Full address")
+   776→                  : contactForm.type === "phone"
+   777→                  ? L("رقم الهاتف", "Phone number")
+   778→                  : L("البريد الإلكتروني", "Email")}
+   779→              </Label>
+   780→              <Textarea
+   781→                value={contactForm.value}
+   782→                onChange={(e) => setContactForm({ ...contactForm, value: e.target.value })}
+   783→                rows={contactForm.type === "address" ? 3 : 2}
+   784→                dir={contactForm.type === "address" ? "rtl" : "ltr"}
+   785→                placeholder={
+   786→                  contactForm.type === "address"
+   787→                    ? "شارع التحرير، وسط البلد، القاهرة"
+   788→                    : contactForm.type === "phone"
+   789→                    ? "+20 100 000 0000"
+   790→                    : "info@redline.eg"
+   791→                }
+   792→              />
+   793→            </div>
+   794→
+   795→            <div className="space-y-1">
+   796→              <Label className="text-xs">
+   797→                {L("رابط مخصص (اختياري — يُولّد تلقائياً للهاتف/البريد إذا تُرك فارغاً)", "Custom link (optional — auto-generated for phone/email if empty)")}
+   798→              </Label>
+   799→              <Input
+   800→                value={contactForm.href}
+   801→                onChange={(e) => setContactForm({ ...contactForm, href: e.target.value })}
+   802→                placeholder={
+   803→                  contactForm.type === "phone"
+   804→                    ? "tel:+201000000000"
+   805→                    : contactForm.type === "email"
+   806→                    ? "mailto:info@redline.eg"
+   807→                    : "https://maps.google.com/?q=..."
+   808→                }
+   809→                className="h-10 font-mono text-xs"
+   810→                dir="ltr"
+   811→              />
+   812→            </div>
+   813→
+   814→            <div className="grid grid-cols-2 gap-3">
+   815→              <div className="space-y-1">
+   816→                <Label className="text-xs">{L("الترتيب", "Order")}</Label>
+   817→                <Input
+   818→                  type="number"
+   819→                  value={contactForm.order}
+   820→                  onChange={(e) => setContactForm({ ...contactForm, order: Number(e.target.value) })}
+   821→                  className="h-10"
+   822→                  dir="ltr"
+   823→                />
+   824→              </div>
+   825→              <div className="flex items-end pb-1">
+   826→                <label className="flex items-center gap-2 text-sm cursor-pointer">
+   827→                  <Switch checked={!!contactForm.active} onCheckedChange={(v) => setContactForm({ ...contactForm, active: v })} />
+   828→                  <span>{L("نشطة", "Active")}</span>
+   829→                </label>
+   830→              </div>
+   831→            </div>
+   832→
+   833→            <div className="flex gap-2 pt-2">
+   834→              <Button onClick={saveContact} disabled={saving} className="flex-1 bg-gradient-to-r from-primary to-red-700 text-white gap-2">
+   835→                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+   836→                {editing ? L("حفظ التعديلات", "Save changes") : L("إضافة", "Add")}
+   837→              </Button>
+   838→              <Button variant="outline" onClick={() => setModalOpen(false)}>{L("إلغاء", "Cancel")}</Button>
+   839→            </div>
+   840→          </div>
+   841→        </DialogContent>
+   842→      </Dialog>
+   843→    </div>
+   844→  );
+   845→}
+   846→

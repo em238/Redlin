@@ -18,13 +18,14 @@ import { DashboardContactInfo } from "./contact-info";
 import { DashboardReviews } from "./reviews";
 import { DashboardUsers } from "./users";
 import { DashboardRoles } from "./roles";
+import { DashboardFooterLinks } from "./footer-links";
 import { DashboardSettings } from "./settings";
 import { Loader2 } from "lucide-react";
 import { useT, useDashboardT, useI18n } from "@/lib/i18n";
 
 const VALID_TABS: DashboardSection[] = [
   "hero", "about", "services", "how-it-works", "videos", "partners",
-  "map", "contact", "reviews", "users", "roles", "settings",
+  "map", "contact", "reviews", "footer", "users", "roles", "settings",
 ];
 const TAB_STORAGE_KEY = "redline_dashboard_active_tab";
 
@@ -124,6 +125,7 @@ export function DashboardApp() {
     map: <DashboardMapHubs />,
     contact: <DashboardContactInfo />,
     reviews: <DashboardReviews />,
+    footer: <DashboardFooterLinks />,
     users: <DashboardUsers />,
     roles: <DashboardRoles />,
     settings: <DashboardSettings />,

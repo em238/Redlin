@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 import { toast } from "sonner";
+import { SectionContentEditor } from "@/components/shared/section-content-editor";
 import { useDashboardT } from "@/lib/i18n";
 
 type Governorate = {
@@ -147,6 +148,7 @@ export function DashboardMapHubs() {
 
   return (
     <div className="space-y-5">
+      <SectionContentEditor section="map" />
       {/* Section Context Banner */}
       <div className="flex items-center justify-between gap-2 p-3 rounded-xl bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 mb-4">
         <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">

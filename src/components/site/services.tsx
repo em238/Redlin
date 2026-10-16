@@ -38,6 +38,16 @@ export function Services() {
   });
   const services = data?.services ?? FALLBACK;
 
+  // Fetch section content from /api/site for DB-managed bilingual heading
+  const { data: siteData } = useQuery({
+    queryKey: ["site-data"],
+    queryFn: () => apiGet<any>("/api/site"),
+  });
+  const sc = siteData?.sectionContent?.find((s: any) => s.section === "services");
+  const eyebrow = isAr ? (sc?.badgeAr || t("services.eyebrow")) : (sc?.badgeEn || t("services.eyebrow"));
+  const title = isAr ? (sc?.titleAr || t("services.title")) : (sc?.titleEn || t("services.title"));
+  const subtitle = isAr ? (sc?.descriptionAr || t("services.subtitle")) : (sc?.descriptionEn || t("services.subtitle"));
+
   const scrollTo = (id: string) => document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });
 
   // Localize service name/description. Arabic uses DB Arabic fields; English uses t() lookup by name.
@@ -50,9 +60,9 @@ export function Services() {
     <section id="services" className="py-14 sm:py-24 lg:py-28">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
-          eyebrow={t("services.eyebrow")}
-          title={t("services.title")}
-          subtitle={t("services.subtitle")}
+          eyebrow={eyebrow}
+          title={title}
+          subtitle={subtitle}
         />
 
         <StaggerGroup className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch" stagger={0.07}>

@@ -49,9 +49,13 @@ export function VideoSection() {
   const { t, isAr } = useT();
   const { data } = useQuery({
     queryKey: ["site-videos"],
-    queryFn: () => apiGet<{ videos: VideoItem[] }>("/api/site"),
+    queryFn: () => apiGet<{ videos: VideoItem[]; sectionContent?: any[] }>("/api/site"),
   });
   const videos = data?.videos ?? FALLBACK_VIDEOS;
+  const sc = data?.sectionContent?.find((s: any) => s.section === "videos");
+  const eyebrowText = isAr ? (sc?.badgeAr || t("videos.eyebrow")) : (sc?.badgeEn || t("videos.eyebrow"));
+  const titleText = isAr ? (sc?.titleAr || t("videos.title")) : (sc?.titleEn || t("videos.title"));
+  const subtitleText = isAr ? (sc?.descriptionAr || t("videos.subtitle")) : (sc?.descriptionEn || t("videos.subtitle"));
   const [active, setActive] = useState<VideoItem | null>(null);
   const [category, setCategory] = useState<string>("ALL");
 
@@ -81,15 +85,15 @@ export function VideoSection() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
         <SectionHeading
-          eyebrow={<span className="flex items-center gap-1.5"><Clapperboard className="w-4 h-4" /> {t("videos.eyebrow")}</span>}
+          eyebrow={<span className="flex items-center gap-1.5"><Clapperboard className="w-4 h-4" /> {eyebrowText}</span>}
           title={
             <>
-              {t("videos.title").split("Redline")[0]}
+              {titleText.split("Redline")[0]}
               <span className="text-gradient-red">Redline</span>
-              {t("videos.title").split("Redline")[1]}
+              {titleText.split("Redline")[1]}
             </>
           }
-          subtitle={t("videos.subtitle")}
+          subtitle={subtitleText}
         />
 
         {/* Category filter */}

@@ -7,6 +7,7 @@ import {
   LayoutDashboard, Boxes, ListChecks, Video, DollarSign,
   MessageSquare, Settings, LogOut, X, Globe, ChevronLeft, ChevronRight,
   ImageIcon, Handshake, Users, ShieldCheck, PanelLeftClose, PanelLeftOpen,
+  Link as LinkIcon,
 } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,7 @@ export function DashboardSidebar() {
     { id: "map", label: t("d.nav.map"), icon: Globe },
     { id: "contact", label: t("d.nav.contact"), icon: MessageSquare },
     { id: "reviews", label: t("d.nav.reviews"), icon: DollarSign },
+    { id: "footer", label: t("d.nav.footer"), icon: LinkIcon },
     { id: "users", label: t("d.nav.users"), icon: Users },
     { id: "roles", label: t("d.nav.roles"), icon: ShieldCheck },
     { id: "settings", label: t("d.nav.settings"), icon: Settings },

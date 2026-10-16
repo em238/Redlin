@@ -67,6 +67,15 @@ export function InteractiveMap() {
     queryFn: () => apiGet<{ governorates: Gov[] }>("/api/governorates"),
   });
   const govs = data?.governorates ?? FALLBACK;
+  // Fetch section content from /api/site for DB-managed bilingual heading
+  const { data: siteData } = useQuery({
+    queryKey: ["site-data"],
+    queryFn: () => apiGet<any>("/api/site"),
+  });
+  const sc = siteData?.sectionContent?.find((s: any) => s.section === "map");
+  const eyebrowText = isAr ? (sc?.badgeAr || t("map.eyebrow")) : (sc?.badgeEn || t("map.eyebrow"));
+  const titleText = isAr ? (sc?.titleAr || t("map.title")) : (sc?.titleEn || t("map.title"));
+  const subtitleText = isAr ? (sc?.descriptionAr || t("map.subtitle")) : (sc?.descriptionEn || t("map.subtitle"));
   const [selected, setSelected] = useState<string | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>("ALL");
@@ -150,7 +159,7 @@ export function InteractiveMap() {
             className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-primary/20 text-primary text-sm font-bold mb-4 border border-primary/40"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-slow-pulse" />
-            <Radio className="w-4 h-4" /> {t("map.eyebrow")}
+            <Radio className="w-4 h-4" /> {eyebrowText}
           </motion.span>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -158,9 +167,9 @@ export function InteractiveMap() {
             viewport={{ once: true }}
             className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-[1.15] text-white"
           >
-            {t("map.title").split("Redline")[0]}
+            {titleText.split("Redline")[0]}
             <span className="text-gradient-red">Redline</span>
-            {t("map.title").split("Redline")[1]}
+            {titleText.split("Redline")[1]}
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -169,7 +178,7 @@ export function InteractiveMap() {
             transition={{ delay: 0.1 }}
             className="mt-4 text-zinc-300 text-lg"
           >
-            {totalNodes} {isAr ? "نقطة لوجستية نشطة" : "Nodes Active"}
+            {subtitleText}
           </motion.p>
         </div>
 

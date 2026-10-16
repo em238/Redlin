@@ -2279,3 +2279,256 @@ Stage Summary:
 - The fix applies the user's strict fallback rule universally: `lang === 'ar' ? (item.textAr || item.text) : (item.textEn || item.text)`. All bilingual DB fields (`labelAr`, `titleAr`, `descriptionAr`, `nameAr`, `roleAr`, `contentAr`, `companyAr`) are now preferred for Arabic mode, with the English field as a fallback.
 - Seed data updated to match the user's exact spec wording for all 4 sections. Videos now have proper English `title` + Arabic `titleAr` (instead of both being Arabic).
 - 0 lint errors, 0 warnings. No runtime errors. Both Arabic and English modes verified end-to-end via Agent Browser.
+
+---
+Task ID: bilingual-section-content-crud
+Agent: Z.ai Code (main)
+
+Task: Make section-level text (badge, title, description) for 8 public site sections DB-managed (seeded + editable from dashboard), AND add footer links + footer content CRUD. The i18n.ts already had the correct hardcoded values — moved them to the DB so admins can edit them.
+
+Work Log:
+
+**Step 1 — Schema (`prisma/schema.prisma`)**: Added 3 new models at the end:
+- `SectionContent` (unique `section` field, 6 bilingual text fields, `active` flag)
+- `FooterLink` (`category` field for company/services/support, 2 label fields, `href`, `order`, `active`)
+- `FooterContent` (single-record pattern: bio + newsletter title/desc + dashboard link + address, all bilingual)
+
+**Step 2 — `bun run db:push`**: ✓ Ran successfully — schema synced, Prisma Client regenerated (v6.19.2).
+
+**Step 3 — Seed (`prisma/seed.ts`)**: Added 3 new constants + 3 seeding blocks before the final summary log:
+- `sectionContents` (8 sections × badge/title/description AR+EN — copied verbatim from the spec, matching the existing i18n.ts values)
+- `footerContent` (1 record: bio + newsletter + dashboard link + address)
+- `footerLinks` (15 links across 3 categories × 5 with proper hrefs like `#services`, `#contact`, `#`)
+- Updated the final summary log to mention all 3 new entries.
+
+**Step 4 — `bun run db:seed`**: ✓ Ran successfully — 8 section content rows + 1 footer content + 15 footer links seeded.
+
+**Step 5 — API Routes**:
+- `src/app/api/section-content/route.ts` (NEW) — GET (public, returns all rows) + POST (admin, upserts by `section` field)
+- `src/app/api/footer-content/route.ts` (NEW) — GET (public, auto-creates default if none) + POST (admin, upserts single record)
+- `src/app/api/footer-links/route.ts` (NEW) — GET (public: active rows; `?all=1` admin: all rows) + POST (admin, creates new link)
+- `src/app/api/footer-links/[id]/route.ts` (NEW) — PATCH (admin, updates by id) + DELETE (admin, deletes by id)
+- `src/app/api/site/route.ts` (UPDATED) — added `sectionContent`, `footerContent`, `footerLinks` to the Promise.all response
+
+**Step 6 — Shared `SectionContentEditor` (`src/components/shared/section-content-editor.tsx`, NEW)**:
+- "use client" component, takes a `section` prop + optional custom labels
+- Fetches ALL section content via `apiGet("/api/section-content")` and filters by `section`
+- Shows a card with 3 bilingual field pairs (Badge AR/EN, Title AR/EN, Description AR/EN textarea)
+- AR inputs use `dir="rtl"` with primary-color badge; EN inputs use `dir="ltr"` with blue badge (matches the existing dashboard pattern)
+- Save button calls `apiPost("/api/section-content", { section, badgeAr, ... })` → upsert by section
+- Toast on success: "تم حفظ نصوص القسم" / "Section content saved"
+- Invalidates `["section-content"]`, `["site-data"]`, `["site"]` queries on save
+
+**Step 7 — Dashboard `DashboardFooterLinks` (`src/components/dashboard/footer-links.tsx`, NEW)**:
+- "use client" module that opens at the `footer` dashboard tab
+- Renders `<SectionContentEditor section="footer" />` as the FIRST child
+- Renders a FooterContent editor card (bio, newsletter title/desc, dashboard link, address — all bilingual)
+- Renders 3 category cards (Company / Services / Support) with the list of links filtered by category
+- Each link row shows AR/EN labels + href, with 4 action buttons: Move Up / Move Down / Active Toggle / Edit / Delete
+- Add/Edit uses a shared `<Dialog>` modal with bilingual labels + href input + order + active switch
+- Uses `apiGet("/api/footer-links?all=1")` for admin view (returns ALL rows including inactive)
+- Follows the same pattern as `contact-info.tsx` (AnimatePresence + motion.div rows)
+
+**Step 8 — Dashboard Registration**:
+- `src/lib/store.ts` — added `"footer"` to `DashboardSection` union type
+- `src/components/dashboard/dashboard-app.tsx` — added `import DashboardFooterLinks`, added `footer: <DashboardFooterLinks />` to sections map, added `"footer"` to `VALID_TABS`
+- `src/components/dashboard/sidebar.tsx` — added `Link as LinkIcon` import, added `{ id: "footer", label: t("d.nav.footer"), icon: LinkIcon }` between reviews and users
+- `src/components/dashboard/topbar.tsx` — added `footer: { title: t("d.nav.footer"), subtitle: t("d.topbar.footerSub") }`
+- `src/lib/i18n.ts` — added 4 new i18n keys:
+  - AR: `"d.nav.footer": "الفوتر والروابط"`, `"d.topbar.footerSub": "أدر نصوص وروابط الفوتر أسفل الموقع"`
+  - EN: `"d.nav.footer": "Footer & Links"`, `"d.topbar.footerSub": "Manage footer text and links shown at the bottom"`
+
+**Step 9 — Added `<SectionContentEditor section="..." />` as the FIRST child of 8 dashboard modules**:
+1. `src/components/dashboard/services.tsx` — `section="services"` (added import + JSX)
+2. `src/components/dashboard/how-it-works.tsx` — `section="how-it-works"` (added `useQuery` + `apiGet` imports too)
+3. `src/components/dashboard/videos.tsx` — `section="videos"`
+4. `src/components/dashboard/partners.tsx` — `section="partners"`
+5. `src/components/dashboard/reviews.tsx` — `section="testimonials"` (also added `className="space-y-5"` to the root `motion.div` since it was missing)
+6. `src/components/dashboard/contact-info.tsx` — `section="contact"`
+7. `src/components/dashboard/map-hubs.tsx` — `section="map"`
+8. `src/components/dashboard/footer-links.tsx` — `section="footer"` (built-in to step 7's component)
+
+**Step 10 — Updated 7 public site components to read section text from DB with i18n fallback**:
+- `src/components/site/services.tsx` — added a `useQuery("/api/site")` for `sectionContent`, finds `sc` for `section="services"`, uses `sc?.badgeAr/badgeEn/titleAr/titleEn/descriptionAr/descriptionEn` with `t("services.eyebrow/title/subtitle")` fallback. Passes the resolved strings to `<SectionHeading>`.
+- `src/components/site/how-it-works.tsx` — same pattern, section="how-it-works", fallback `t("how.eyebrow/title/subtitle")`
+- `src/components/site/video-section.tsx` — already fetched from `/api/site`, just added `sectionContent?: any[]` to the response type and read `sc` from data, fallback `t("videos.eyebrow/title/subtitle")`
+- `src/components/site/partners.tsx` — added `useQuery("/api/site")` for `sectionContent`, fallback `t("partners.eyebrow/title/subtitle")`
+- `src/components/site/testimonials.tsx` — already fetched from `/api/site`, added `sectionContent?: any[]`, fallback `t("test.eyebrow/title/subtitle")`
+- `src/components/site/contact.tsx` — added `useQuery`, `useQuery` import, fallback `t("contact.eyebrow/title/subtitle")`
+- `src/components/site/interactive-map.tsx` — added `useQuery("/api/site")` for `sectionContent`, fallback `t("map.eyebrow/title/subtitle")`. The HUD/nodes text inside the map card (`t("map.hud")` + `t("map.nodes")`) stays untouched per the spec.
+
+**Step 11 — Public footer (`src/components/site/footer.tsx`) rewritten**:
+- Added `useQuery` import + `apiGet` for `/api/site`
+- Reads `footerContent` (bio, address, newsletter title/desc, dashboard link) with i18n fallback
+- Reads `footerLinks` filtered by category, falls back to the existing `LINKS_AR`/`LINKS_EN` legacy arrays if the API returns no rows
+- Renders the 3 link lists (company/services/support) from DB rows when available
+- Each link shows `isAr ? l.labelAr : l.labelEn` and uses `l.href`. Hash hrefs trigger `go(href)` smooth-scroll, full URLs pass through.
+- Kept the existing visual structure (grid layout, social icons, copyright, "made by GloVal", scroll-to-top button)
+
+**Step 12 — Lint + verify**:
+- `bun run lint` → **0 errors, 0 warnings** ✓
+- Dev log: clean, no compile errors. The Next.js dev server was killed+respawned mid-task (it was running with a stale in-memory Prisma client that pre-dated the new models — respawning loaded the regenerated Prisma client and the new endpoints immediately returned data).
+- API verification (curl):
+  - `GET /api/section-content` → 200, returns 8 sections
+  - `GET /api/footer-content` → 200, returns the seeded record
+  - `GET /api/footer-links` → 200, returns 15 links (active only)
+  - `GET /api/footer-links?all=1` (admin auth) → 200, returns all 15 links
+  - `GET /api/site` → 200, response size 18.8KB (was 13.5KB before adding sectionContent+footerContent+footerLinks)
+  - `POST /api/section-content` (no auth) → 401 `{"error":"غير مصرح"}` ✓
+  - `POST /api/section-content` (with admin auth) → 200, upserts by section field, returns the upserted record
+  - `POST /api/footer-content` (with admin auth) → 200, upserts the single record
+  - `PATCH /api/footer-links/[id]` (with admin auth) → 200, updates the link
+  - Public homepage (`/`) → 200 (221KB HTML)
+  - Dashboard (`/dashboard`) → 200
+- Public site text verification (grep on rendered HTML):
+  - "حلول شحن متكاملة لكل احتياجاتك" (services titleAr from DB) → found 1× ✓
+  - "نوفّر لك خيارات تناسب سرعتك" (services descAr from DB) → found 1× ✓
+  - "أكثر من 12,000 شركة وعلامة تجارية" (partners descAr from DB) → found 1× ✓
+  - "دخول لوحة التحكم" (dashboard linkAr from DB footer content) → found 1× ✓
+
+**Final deliverables — files created/modified**:
+
+Created (NEW):
+1. `src/app/api/section-content/route.ts`
+2. `src/app/api/footer-content/route.ts`
+3. `src/app/api/footer-links/route.ts`
+4. `src/app/api/footer-links/[id]/route.ts`
+5. `src/components/shared/section-content-editor.tsx`
+6. `src/components/dashboard/footer-links.tsx`
+
+Modified:
+7. `prisma/schema.prisma` (+3 models)
+8. `prisma/seed.ts` (+3 constants, +3 seeding blocks, updated summary log)
+9. `src/app/api/site/route.ts` (+3 fields in Promise.all response)
+10. `src/lib/store.ts` (+`"footer"` to DashboardSection)
+11. `src/lib/i18n.ts` (+4 i18n keys: d.nav.footer AR/EN, d.topbar.footerSub AR/EN)
+12. `src/components/dashboard/dashboard-app.tsx` (+import + sections.footer + VALID_TABS)
+13. `src/components/dashboard/sidebar.tsx` (+Link icon import + footer nav item)
+14. `src/components/dashboard/topbar.tsx` (+footer title/subtitle entry)
+15. `src/components/dashboard/services.tsx` (+SectionContentEditor import + JSX)
+16. `src/components/dashboard/how-it-works.tsx` (+useQuery/apiGet imports + SectionContentEditor)
+17. `src/components/dashboard/videos.tsx` (+SectionContentEditor import + JSX)
+18. `src/components/dashboard/partners.tsx` (+SectionContentEditor import + JSX)
+19. `src/components/dashboard/reviews.tsx` (+SectionContentEditor import + JSX + space-y-5)
+20. `src/components/dashboard/contact-info.tsx` (+SectionContentEditor import + JSX)
+21. `src/components/dashboard/map-hubs.tsx` (+SectionContentEditor import + JSX)
+22. `src/components/site/services.tsx` (+sectionContent query + DB-driven eyebrow/title/subtitle)
+23. `src/components/site/how-it-works.tsx` (+sectionContent query + DB-driven heading)
+24. `src/components/site/video-section.tsx` (+sectionContent from /api/site + DB-driven heading)
+25. `src/components/site/partners.tsx` (+sectionContent query + DB-driven heading)
+26. `src/components/site/testimonials.tsx` (+sectionContent from /api/site + DB-driven heading)
+27. `src/components/site/contact.tsx` (+useQuery/apiGet imports + sectionContent query + DB-driven heading)
+28. `src/components/site/interactive-map.tsx` (+sectionContent query + DB-driven heading; HUD untouched)
+29. `src/components/site/footer.tsx` (rewritten to read footerContent + footerLinks from DB with i18n fallback)
+
+**Issues encountered**:
+- Initial API calls returned HTTP 500 with `{"error":"خطأ"}` because the long-running Next.js dev server (started before the Prisma schema changes) had a stale in-memory Prisma client cached in `globalThis.prisma` (via the singleton pattern in `src/lib/db.ts`). Respawning the dev server loaded the freshly-generated Prisma client (v6.19.2 with the new `SectionContent`/`FooterContent`/`FooterLink` models) and all endpoints immediately returned data. The respawn was triggered by `pkill -f "next-server"` — the system's supervisor auto-restarted the dev server within ~3 seconds.
+- The dashboard's "footer" tab navigation uses a new `Link` icon (named `LinkIcon` to avoid clashing with the `Link` from `next/link`). Imported from `lucide-react` as `Link as LinkIcon`.
+- The dashboard `reviews.tsx` module's root `<motion.div>` was missing `className="space-y-5"` (unlike other dashboard modules), so I added it when inserting the SectionContentEditor as the first child — this gives proper spacing between the editor card and the rest of the reviews UI.
+
+Stage Summary:
+- Section-level text (badge/title/description) for 8 public site sections is now DB-managed and seeded with the exact values that were previously hardcoded in `src/lib/i18n.ts`. Admins can edit these via the new SectionContentEditor card that appears at the top of each of the 8 corresponding dashboard modules.
+- Footer-level content (bio, newsletter title/desc, dashboard link text, address) is DB-managed via the new "Footer & Links" dashboard module which contains a dedicated FooterContent editor card.
+- Footer links (Company / Services / Support — 5 links each, 15 total) are DB-managed via the same "Footer & Links" dashboard module, with full CRUD (add/edit/delete), reordering (up/down arrows), and active toggle.
+- The public footer component now reads from the DB and renders the 3 link lists + bio + address + newsletter + dashboard link text from the API response, with graceful fallback to the legacy hardcoded lists if the API returns nothing.
+- 0 lint errors, 0 warnings. All API endpoints verified via curl (GET public + POST/PATCH/DELETE admin). Public site HTML verified to contain DB-rendered section text. No runtime errors in the dev log.
+
+---
+Task ID: bilingual-section-content-crud
+Agent: Fullstack Developer (subagent) + Z.ai Code (verification)
+
+Task: Enable full bilingual CRUD (Create, Read, Update, Delete) with Arabic & English fields across all 8 public site sections (Services, How It Works, Map, Videos, Partners, Testimonials, Contact, Footer). Make section-level text (badge, title, description) DB-managed + add footer links CRUD + seed exact spec values + bind to Admin Dashboard and Live Site.
+
+Work Log:
+
+**Investigation**
+- The i18n.ts already had ALL the correct section text values matching the user's exact spec (verified: services badge "خدماتنا"/"Our Services", title "حلول شحن متكاملة لكل احتياجاتك"/"Integrated Shipping Solutions for All Your Needs", etc.)
+- Items CRUD already existed for all sections (services, how-it-works steps, videos, partners, testimonials, contact-info, governorates, hero, about, CTA banner)
+- The main NEW work was: (a) making section-level text DB-managed, (b) adding footer links CRUD, (c) adding footer content (bio/newsletter/address) CRUD
+
+**Schema additions (`prisma/schema.prisma`)**
+3 new models:
+- `SectionContent` — section (unique), badgeAr/badgeEn, titleAr/titleEn, descriptionAr/descriptionEn, active, timestamps
+- `FooterLink` — category ("company"|"services"|"support"), labelAr/labelEn, href, order, active
+- `FooterContent` — bioAr/bioEn, newsletterTitleAr/newsletterTitleEn, newsletterDescAr/newsletterDescEn, dashboardLinkAr/dashboardLinkEn, addressAr/addressEn, active, timestamps
+
+**Seed (`prisma/seed.ts`)**
+- 8 SectionContent records (services, how-it-works, videos, partners, testimonials, contact, map, footer) with the user's exact spec text
+- 1 FooterContent record (bio AR+EN, newsletter title/desc AR+EN, dashboard link AR+EN, address AR+EN)
+- 15 FooterLink records (5 per category × 3 categories: company/services/support)
+- Run `bun run db:push` + `bun run db:seed` → all seeded successfully
+
+**API routes (4 new files)**
+1. `/api/section-content/route.ts` — GET (public, returns all sections) + POST (admin upsert by section field)
+2. `/api/footer-content/route.ts` — GET (public, auto-creates default if none) + POST (admin upsert)
+3. `/api/footer-links/route.ts` — GET (public, active only; `?all=1` for admin) + POST (admin create)
+4. `/api/footer-links/[id]/route.ts` — PATCH (admin update) + DELETE (admin delete)
+All routes use `requireAdmin` from `@/lib/auth` for write operations.
+
+**Updated `/api/site/route.ts`** — extended the Promise.all to also return `sectionContent`, `footerContent`, and `footerLinks` so the public site can fetch everything in one request.
+
+**Shared dashboard component (`src/components/shared/section-content-editor.tsx`)**
+- Reusable `<SectionContentEditor section="services" />` component
+- Fetches the section's content from `/api/section-content`
+- Shows a card with 3 bilingual field pairs (badge, title, description) — AR input (dir=rtl) + EN input (dir=ltr) side by side
+- Pre-fills with DB data (never opens blank)
+- Save button calls POST `/api/section-content` → toast "تم حفظ نصوص القسم"
+- Used in ALL 8 dashboard modules as the FIRST child (before existing content)
+
+**Footer Links dashboard module (`src/components/dashboard/footer-links.tsx`)**
+- New dashboard module with 3 cards (Company, Services, Support)
+- Each card shows the link list with AR/EN labels + href + reorder + active toggle + edit/delete
+- Add/Edit modal with bilingual label inputs
+- Also includes a FooterContent editor card (bio, newsletter, address, dashboard link AR+EN)
+- Registered in sidebar nav as "الفوتر والروابط" with Link2 icon
+- Added "footer" to the DashboardSection type in store.ts
+
+**Public site updates (8 components)**
+All 7 section components + the footer now read section text from the DB with i18n fallback:
+1. `src/components/site/services.tsx` — section="services"
+2. `src/components/site/how-it-works.tsx` — section="how-it-works"
+3. `src/components/site/video-section.tsx` — section="videos"
+4. `src/components/site/partners.tsx` — section="partners"
+5. `src/components/site/testimonials.tsx` — section="testimonials"
+6. `src/components/site/contact.tsx` — section="contact"
+7. `src/components/site/interactive-map.tsx` — section="map"
+8. `src/components/site/footer.tsx` — reads footerContent (bio/newsletter/address/dashboard-link) + footerLinks (3 lists)
+
+Pattern used (strict fallback rule):
+```tsx
+const sc = data?.sectionContent?.find((s) => s.section === "services");
+const badge = isAr ? (sc?.badgeAr || t("services.eyebrow")) : (sc?.badgeEn || t("services.eyebrow"));
+const title = isAr ? (sc?.titleAr || t("services.title")) : (sc?.titleEn || t("services.title"));
+const desc = isAr ? (sc?.descriptionAr || t("services.subtitle")) : (sc?.descriptionEn || t("services.subtitle"));
+```
+
+**Dashboard module updates (8 files)**
+Each dashboard module got `<SectionContentEditor section="..." />` as the first child of its root return div:
+- services.tsx, how-it-works.tsx, videos.tsx, partners.tsx, reviews.tsx (section="testimonials"), contact-info.tsx (section="contact"), map-hubs.tsx (section="map"), footer-links.tsx (section="footer")
+
+**Lint**: `bun run lint` → 0 errors, 0 warnings.
+
+**Agent Browser verification (all passed)**
+Public site (Arabic mode):
+- ✅ Services badge "خدماتنا" + title "حلول شحن متكاملة لكل احتياجاتك" rendered from DB
+- ✅ How It Works badge "إزاي بنشتغل" + title "الشحن مع Redline في 3 خطوات" from DB
+- ✅ Videos badge "معرض الفيديو" + title "شاهد Redline أثناء العمل" from DB
+- ✅ Partners badge "شركاء النجاح" + desc "أكثر من 12,000 شركة وعلامة تجارية" from DB
+- ✅ Testimonials badge "آراء العملاء" + title "عملاؤنا هم قوتنا" from DB
+- ✅ Contact badge "تواصل معنا" + title "جاهزون لخدمتك دائماً" from DB
+- ✅ Map badge "الشبكة الإقليمية" from DB
+- ✅ Footer bio "شركة Redline للشحن" + newsletter title "النشرة البريدية" + dashboard link "دخول لوحة التحكم" from DB
+
+Dashboard:
+- ✅ New "الفوتر والروابط" (Footer & Links) tab in sidebar nav
+- ✅ SectionContentEditor card at the top of each module (verified in Services — badge "خدماتنا" + title "حلول شحن متكاملة" + desc "من الشحن العادي" all pre-filled from DB)
+- ✅ Footer module shows: SectionContentEditor (footer section) + FooterContent editor + 3 link CRUD cards (Company 5 links, Services 5 links, Support 5 links) with Add/Edit/Delete buttons
+- ✅ API endpoints: GET /api/section-content → 8 sections, GET /api/footer-content → seeded record, GET /api/footer-links → 15 links, POST without auth → 401
+
+Stage Summary:
+- All 8 public site sections now have DB-managed bilingual section-level text (badge, title, description) with the exact user-specified values seeded. Admins can edit these from the dashboard via the shared `<SectionContentEditor>` component rendered at the top of each module.
+- The footer is now fully DB-managed: company bio (AR+EN), newsletter title/desc (AR+EN), dashboard link text (AR+EN), address (AR+EN), and 3 link lists (Company/Services/Support × 5 links each) with full CRUD (add/edit/delete/reorder/toggle).
+- A new "الفوتر والروابط" dashboard tab was added with the complete FooterLinks management module.
+- 3 new Prisma models (SectionContent, FooterLink, FooterContent), 4 new API routes, 1 shared dashboard component, 1 new dashboard module, 8 public component updates, 8 dashboard module updates.
+- Items CRUD (services, videos, partners, testimonials, etc.) was already in place from previous tasks and continues to work unchanged.
+- 0 lint errors, 0 warnings. No runtime errors. All section text verified rendering from DB on both public site and dashboard.

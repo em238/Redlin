@@ -31,9 +31,13 @@ export function Testimonials() {
   const queryClient = useQueryClient();
   const { data } = useQuery({
     queryKey: ["site-testimonials"],
-    queryFn: () => apiGet<{ testimonials: typeof FALLBACK }>("/api/site"),
+    queryFn: () => apiGet<{ testimonials: typeof FALLBACK; sectionContent?: any[] }>("/api/site"),
   });
   const items = data?.testimonials ?? FALLBACK;
+  const sc = data?.sectionContent?.find((s: any) => s.section === "testimonials");
+  const eyebrow = isAr ? (sc?.badgeAr || t("test.eyebrow")) : (sc?.badgeEn || t("test.eyebrow"));
+  const title = isAr ? (sc?.titleAr || t("test.title")) : (sc?.titleEn || t("test.title"));
+  const subtitle = isAr ? (sc?.descriptionAr || t("test.subtitle")) : (sc?.descriptionEn || t("test.subtitle"));
   const [index, setIndex] = useState(0);
   const [auto, setAuto] = useState(true);
   const [reviewOpen, setReviewOpen] = useState(false);
@@ -69,9 +73,9 @@ export function Testimonials() {
     <section className="py-14 sm:py-24 lg:py-28">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
-          eyebrow={t("test.eyebrow")}
-          title={t("test.title")}
-          subtitle={t("test.subtitle")}
+          eyebrow={eyebrow}
+          title={title}
+          subtitle={subtitle}
         />
 
         {/* Leave a Review button */}

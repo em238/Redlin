@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { apiGet, apiPatch, apiDelete } from "@/lib/api";
 import { useDashboardT } from "@/lib/i18n";
 import { toast } from "sonner";
+import { SectionContentEditor } from "@/components/shared/section-content-editor";
 
 type Review = {
   id: string;
@@ -99,7 +100,8 @@ export function DashboardReviews() {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+      <SectionContentEditor section="testimonials" />
       {/* Section Context Banner */}
       <div className="flex items-center justify-between gap-2 p-3 rounded-xl bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 mb-4">
         <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">

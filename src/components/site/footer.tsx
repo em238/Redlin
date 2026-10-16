@@ -3,9 +3,11 @@
 import { Truck, MapPin, Phone, Mail, Facebook, Instagram, Twitter, Linkedin, Send, ArrowUp } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
+import { apiGet } from "@/lib/api";
 import { toast } from "sonner";
 import { useState } from "react";
 
@@ -27,11 +29,74 @@ const LINKS_EN = {
   help: ["Track Shipment", "FAQ", "Return Policy", "Terms & Conditions", "Privacy Policy"],
 };
 
+// Default HREFs for the fallback (legacy) hardcoded link lists — these map by
+// index to the LINKS_AR/LINKS_EN arrays. They mirror the seeded DB hrefs so
+// the behavior is identical whether the API returns data or not.
+const LINK_HREFS_BY_CATEGORY: Record<string, string[]> = {
+  company: ["#", "#", "#", "#", "#"],
+  services: ["#services", "#services", "#services", "#services", "#services"],
+  help: ["#contact", "#", "#", "#", "#"],
+};
+
+type FooterLink = {
+  id: string;
+  category: string;
+  labelAr: string;
+  labelEn: string;
+  href: string;
+  order: number;
+  active: boolean;
+};
+
+type FooterContent = {
+  bioAr: string;
+  bioEn: string;
+  newsletterTitleAr: string;
+  newsletterTitleEn: string;
+  newsletterDescAr: string;
+  newsletterDescEn: string;
+  dashboardLinkAr: string;
+  dashboardLinkEn: string;
+  addressAr: string;
+  addressEn: string;
+};
+
 export function Footer() {
   const router = useRouter();
   const { t, isAr } = useT();
   const [email, setEmail] = useState("");
   const LINKS = isAr ? LINKS_AR : LINKS_EN;
+
+  // Fetch footer content + footer links from /api/site
+  const { data } = useQuery({
+    queryKey: ["site-data"],
+    queryFn: () => apiGet<any>("/api/site"),
+  });
+  const fc: FooterContent | undefined = data?.footerContent;
+  const footerLinks: FooterLink[] = data?.footerLinks ?? [];
+
+  const bio = isAr ? (fc?.bioAr || t("footer.desc")) : (fc?.bioEn || t("footer.desc"));
+  const address = isAr ? (fc?.addressAr || (isAr ? "التجمع الخامس، القاهرة الجديدة" : "5th Settlement, New Cairo")) : (fc?.addressEn || (isAr ? "التجمع الخامس، القاهرة الجديدة" : "5th Settlement, New Cairo"));
+  const newsletterTitle = isAr ? (fc?.newsletterTitleAr || t("footer.newsletter")) : (fc?.newsletterTitleEn || t("footer.newsletter"));
+  const newsletterDesc = isAr ? (fc?.newsletterDescAr || t("footer.newsletterDesc")) : (fc?.newsletterDescEn || t("footer.newsletterDesc"));
+  const dashboardLink = isAr ? (fc?.dashboardLinkAr || t("footer.dashboard")) : (fc?.dashboardLinkEn || t("footer.dashboard"));
+
+  // Build the 3 link lists from DB rows (fallback to legacy hardcoded lists if API returns nothing)
+  const linksByCategory = (cat: string) => {
+    const dbRows = footerLinks.filter((l) => l.category === cat).sort((a, b) => a.order - b.order);
+    if (dbRows.length > 0) {
+      return dbRows.map((l) => ({ label: isAr ? l.labelAr : l.labelEn, href: l.href }));
+    }
+    const legacyList = (LINKS as any)[cat] as string[];
+    const legacyHrefs = LINK_HREFS_BY_CATEGORY[cat] ?? [];
+    return legacyList.map((label, i) => ({ label, href: legacyHrefs[i] ?? "#" }));
+  };
+  const companyLinks = linksByCategory("company");
+  const servicesLinks = linksByCategory("services");
+  const helpLinks = linksByCategory("help");
+
+  // Match the help list item used to jump to the contact section (track shipment).
+  const trackItem = isAr ? LINKS_AR.help[0] : LINKS_EN.help[0];
 
   const subscribe = () => {
     if (!email) { toast.error(isAr ? "أدخل بريدك الإلكتروني" : "Please enter your email"); return; }
@@ -41,8 +106,13 @@ export function Footer() {
 
   const go = (id: string) => document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });
 
-  // Match the help list item used to jump to the contact section (track shipment).
-  const trackItem = isAr ? LINKS_AR.help[0] : LINKS_EN.help[0];
+  const handleLinkClick = (href: string, label: string) => {
+    if (href && href.startsWith("#") && href.length > 1) {
+      go(href);
+    } else if (label === trackItem) {
+      go("#contact");
+    }
+  };
 
   return (
     <footer className="mt-auto bg-zinc-950 text-zinc-300">
@@ -61,11 +131,11 @@ export function Footer() {
               />
             </div>
             <p className="text-sm text-zinc-400 leading-relaxed max-w-sm">
-              {t("footer.desc")}
+              {bio}
             </p>
             <div className="mt-5 space-y-2 text-sm">
               <div className="flex items-center gap-2 text-zinc-400">
-                <MapPin className="w-4 h-4 text-primary" /> {isAr ? "التجمع الخامس، القاهرة الجديدة" : "5th Settlement, New Cairo"}
+                <MapPin className="w-4 h-4 text-primary" /> {address}
               </div>
               <a href="tel:19999" className="flex items-center gap-2 text-zinc-400 hover:text-white">
                 <Phone className="w-4 h-4 text-primary" /> {isAr ? "19999 (موحد)" : "19999 (nationwide)"}
@@ -83,29 +153,37 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Links */}
+          {/* Links — Company */}
           <div className="lg:col-span-2">
             <h4 className="font-bold text-white text-sm mb-4">{t("footer.company")}</h4>
             <ul className="space-y-2 text-sm">
-              {LINKS.company.map((l, i) => (
-                <li key={i}><a href="#" className="text-zinc-400 hover:text-primary transition-colors">{l}</a></li>
+              {companyLinks.map((l, i) => (
+                <li key={i}>
+                  <a href={l.href} onClick={(e) => { if (l.href.startsWith("#")) { e.preventDefault(); handleLinkClick(l.href, l.label); } }} className="text-zinc-400 hover:text-primary transition-colors cursor-pointer">{l.label}</a>
+                </li>
               ))}
             </ul>
           </div>
+
+          {/* Links — Services */}
           <div className="lg:col-span-2">
             <h4 className="font-bold text-white text-sm mb-4">{t("footer.services")}</h4>
             <ul className="space-y-2 text-sm">
-              {LINKS.services.map((l, i) => (
-                <li key={i}><button onClick={() => go("#services")} className="text-zinc-400 hover:text-primary transition-colors">{l}</button></li>
+              {servicesLinks.map((l, i) => (
+                <li key={i}>
+                  <a href={l.href} onClick={(e) => { if (l.href.startsWith("#")) { e.preventDefault(); handleLinkClick(l.href, l.label); } }} className="text-zinc-400 hover:text-primary transition-colors cursor-pointer">{l.label}</a>
+                </li>
               ))}
             </ul>
           </div>
+
+          {/* Links — Help / Support */}
           <div className="lg:col-span-2">
             <h4 className="font-bold text-white text-sm mb-4">{t("footer.help")}</h4>
             <ul className="space-y-2 text-sm">
-              {LINKS.help.map((l, i) => (
+              {helpLinks.map((l, i) => (
                 <li key={i}>
-                  <button onClick={() => l === trackItem ? go("#contact") : undefined} className="text-zinc-400 hover:text-primary transition-colors">{l}</button>
+                  <a href={l.href} onClick={(e) => { if (l.href.startsWith("#")) { e.preventDefault(); handleLinkClick(l.href, l.label); } }} className="text-zinc-400 hover:text-primary transition-colors cursor-pointer">{l.label}</a>
                 </li>
               ))}
             </ul>
@@ -113,8 +191,8 @@ export function Footer() {
 
           {/* Newsletter */}
           <div className="lg:col-span-3">
-            <h4 className="font-bold text-white text-sm mb-4">{t("footer.newsletter")}</h4>
-            <p className="text-xs text-zinc-400 mb-3">{t("footer.newsletterDesc")}</p>
+            <h4 className="font-bold text-white text-sm mb-4">{newsletterTitle}</h4>
+            <p className="text-xs text-zinc-400 mb-3">{newsletterDesc}</p>
             <div className="flex gap-2 items-stretch">
               <Input
                 type="email"
@@ -131,7 +209,7 @@ export function Footer() {
               onClick={() => router.push("/dashboard")}
               className="mt-4 text-xs text-zinc-500 hover:text-primary transition-colors"
             >
-              {t("footer.dashboard")} ←
+              {dashboardLink} ←
             </button>
           </div>
         </div>

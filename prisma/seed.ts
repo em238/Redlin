@@ -569,6 +569,127 @@ const ctaBanner = {
 };
 
 // ====================================================================
+// 11b. SECTION CONTENT (8 sections × badge/title/description AR+EN)
+//      DB-managed section-level text for the public site sections.
+//      Replaces the i18n.ts hardcoded values with editable DB rows.
+// ====================================================================
+const sectionContents = [
+  {
+    section: "services",
+    badgeAr: "خدماتنا",
+    badgeEn: "Our Services",
+    titleAr: "حلول شحن متكاملة لكل احتياجاتك",
+    titleEn: "Integrated Shipping Solutions for All Your Needs",
+    descriptionAr: "من الشحن العادي إلى التوصيل في نفس اليوم، نوفّر لك خيارات تناسب سرعتك وميزانيتك",
+    descriptionEn: "From standard shipping to same-day delivery, we offer options tailored to your speed and budget.",
+  },
+  {
+    section: "how-it-works",
+    badgeAr: "إزاي بنشتغل",
+    badgeEn: "How It Works",
+    titleAr: "الشحن مع Redline في 3 خطوات",
+    titleEn: "Shipping with Redline in 3 Steps",
+    descriptionAr: "من الحجز للتسليم — عملية بسيطة وسريعة من البداية للنهاية",
+    descriptionEn: "From booking to delivery — a simple and fast process from start to finish.",
+  },
+  {
+    section: "videos",
+    badgeAr: "معرض الفيديو",
+    badgeEn: "Video Gallery",
+    titleAr: "شاهد Redline أثناء العمل",
+    titleEn: "Watch Redline in Action",
+    descriptionAr: "مقاطع توثّق عملياتنا، شبكتنا، وقصص عملائنا في كل أنحاء مصر",
+    descriptionEn: "Footage documenting our operations, network, and client stories across Egypt.",
+  },
+  {
+    section: "partners",
+    badgeAr: "شركاء النجاح",
+    badgeEn: "Partners in Success",
+    titleAr: "شعارات شركائنا وعملائنا",
+    titleEn: "Our Partners and Clients",
+    descriptionAr: "أكثر من 12,000 شركة وعلامة تجارية تثق في Redline لشحناتها يومياً",
+    descriptionEn: "Over 12,000 companies and brands trust Redline for their daily shipments.",
+  },
+  {
+    section: "testimonials",
+    badgeAr: "آراء العملاء",
+    badgeEn: "Customer Reviews",
+    titleAr: "عملاؤنا هم قوتنا",
+    titleEn: "Our Customers Are Our Strength",
+    descriptionAr: "أكثر من 12,000 عميل يثقون في Redline لشحناتهم يومياً",
+    descriptionEn: "Over 12,000 customers trust Redline for their daily shipments.",
+  },
+  {
+    section: "contact",
+    badgeAr: "تواصل معنا",
+    badgeEn: "Contact Us",
+    titleAr: "جاهزون لخدمتك دائماً",
+    titleEn: "Always Ready to Serve You",
+    descriptionAr: "لديك استفسار أو طلب خاص؟ فريقنا بانتظارك على مدار الساعة",
+    descriptionEn: "Have an inquiry or special request? Our team is available around the clock.",
+  },
+  {
+    section: "map",
+    badgeAr: "الشبكة الإقليمية — أفريقيا والخليج",
+    badgeEn: "Regional Network — Africa & Gulf",
+    titleAr: "شبكة Redline على خريطة أفريقيا والخليج",
+    titleEn: "Redline Network Across Africa & Gulf",
+    descriptionAr: "محافظة مصرية + مركز إقليمي — جرّب الضغط على أي نقطة",
+    descriptionEn: "Egyptian governorates + regional centers — try clicking any point",
+  },
+  {
+    section: "footer",
+    badgeAr: "النشرة البريدية",
+    badgeEn: "Newsletter",
+    titleAr: "اشترك لتصلك آخر العروض والأخبار",
+    titleEn: "Subscribe to get the latest offers and updates.",
+    descriptionAr: "دخول لوحة التحكم",
+    descriptionEn: "Admin Login",
+  },
+];
+
+// ====================================================================
+// 11c. FOOTER CONTENT (1 record — bio, newsletter text, dashboard link, address)
+// ====================================================================
+const footerContent = {
+  bioAr: "شركة Redline للشحن — شريكك اللوجستي الموثوق في مصر. نغطي 27 محافظة بأكثر من 40 فرعاً ومستودعاً، بأسرع خدمة وأفضل الأسعار وضمان التسليم.",
+  bioEn: "Redline Transport — Your trusted logistics partner in Egypt. Covering 27 governorates with 40+ branches and warehouses, fast service, competitive rates, and guaranteed delivery.",
+  newsletterTitleAr: "النشرة البريدية",
+  newsletterTitleEn: "Newsletter",
+  newsletterDescAr: "اشترك لتصلك آخر العروض والأخبار",
+  newsletterDescEn: "Subscribe to get the latest offers and updates.",
+  dashboardLinkAr: "دخول لوحة التحكم",
+  dashboardLinkEn: "Admin Login",
+  addressAr: "التجمع الخامس، القاهرة الجديدة",
+  addressEn: "Fifth Settlement, New Cairo",
+  active: true,
+};
+
+// ====================================================================
+// 11d. FOOTER LINKS (15 links across 3 categories: company / services / support)
+// ====================================================================
+const footerLinks = [
+  // Company
+  { category: "company", labelAr: "من نحن", labelEn: "About", href: "#", order: 0 },
+  { category: "company", labelAr: "فريق العمل", labelEn: "Team", href: "#", order: 1 },
+  { category: "company", labelAr: "الوظائف", labelEn: "Careers", href: "#", order: 2 },
+  { category: "company", labelAr: "المدونة", labelEn: "Blog", href: "#", order: 3 },
+  { category: "company", labelAr: "الأخبار", labelEn: "News", href: "#", order: 4 },
+  // Services
+  { category: "services", labelAr: "شحن عادي", labelEn: "Standard", href: "#services", order: 0 },
+  { category: "services", labelAr: "شحن ممتاز", labelEn: "Express", href: "#services", order: 1 },
+  { category: "services", labelAr: "نفس اليوم", labelEn: "Same Day", href: "#services", order: 2 },
+  { category: "services", labelAr: "شحن ثقيل", labelEn: "Freight", href: "#services", order: 3 },
+  { category: "services", labelAr: "دفع عند الاستلام", labelEn: "Cash on Delivery", href: "#services", order: 4 },
+  // Support
+  { category: "support", labelAr: "تتبع الشحنة", labelEn: "Track Shipment", href: "#contact", order: 0 },
+  { category: "support", labelAr: "الأسئلة الشائعة", labelEn: "FAQ", href: "#", order: 1 },
+  { category: "support", labelAr: "سياسة الإرجاع", labelEn: "Return Policy", href: "#", order: 2 },
+  { category: "support", labelAr: "الشروط والأحكام", labelEn: "Terms & Conditions", href: "#", order: 3 },
+  { category: "support", labelAr: "سياسة الخصوصية", labelEn: "Privacy Policy", href: "#", order: 4 },
+];
+
+// ====================================================================
 // 12. ROLES (3 system roles with permission matrices)
 //     permissions stored as JSON string per schema
 // ====================================================================
@@ -818,6 +939,28 @@ async function main() {
   await prisma.ctaBanner.create({ data: ctaBanner });
   console.log(`  ✓ CTA banner seeded (heading, subtitle, button, hotline: ${ctaBanner.phone})`);
 
+  // --- 16. SECTION CONTENT (8 sections × badge/title/description AR+EN) ---
+  console.log(`→ SectionContent (${sectionContents.length} sections)...`);
+  await prisma.sectionContent.deleteMany();
+  for (const sc of sectionContents) {
+    await prisma.sectionContent.create({ data: sc });
+  }
+  console.log(`  ✓ ${sectionContents.length} section content records seeded`);
+
+  // --- 17. FOOTER CONTENT (1 record) ---
+  console.log(`→ FooterContent (1 record)...`);
+  await prisma.footerContent.deleteMany();
+  await prisma.footerContent.create({ data: footerContent });
+  console.log(`  ✓ Footer content seeded`);
+
+  // --- 18. FOOTER LINKS (15 links across 3 categories) ---
+  console.log(`→ FooterLinks (${footerLinks.length} links)...`);
+  await prisma.footerLink.deleteMany();
+  for (const fl of footerLinks) {
+    await prisma.footerLink.create({ data: fl });
+  }
+  console.log(`  ✓ ${footerLinks.length} footer links seeded`);
+
   console.log("✅ Comprehensive seed complete!");
   console.log("");
   console.log("Summary:");
@@ -835,6 +978,9 @@ async function main() {
   console.log(`  - About content + features JSON`);
   console.log(`  - WhatsApp default setting`);
   console.log(`  - Pre-footer CTA banner (heading, subtitle, button, hotline)`);
+  console.log(`  - ${sectionContents.length} section content rows (badge/title/desc AR+EN)`);
+  console.log(`  - Footer content (bio, newsletter, dashboard link, address)`);
+  console.log(`  - ${footerLinks.length} footer links (3 categories × 5)`);
 }
 
 main()

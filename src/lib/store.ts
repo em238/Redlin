@@ -10,6 +10,7 @@ export type DashboardSection =
   | "map"
   | "contact"
   | "reviews"
+  | "footer"
   | "users"
   | "roles"
   | "settings";
