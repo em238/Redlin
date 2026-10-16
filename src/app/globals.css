@@ -492,24 +492,9 @@ textarea::placeholder {
   a, button, [role="button"], [data-magnetic] { cursor: none; }
 }
 
-/* Custom cursor hover states — uses `scale` CSS property (independent of transform)
-   so position (transform: translate3d) and hover effect (scale) compose cleanly */
-.cursor-ring {
-  transition: scale 0.2s ease, opacity 0.2s ease;
-  opacity: 0.5;
-  will-change: transform;
-}
-.cursor-ring.cursor-active {
-  scale: 1.6;
-  opacity: 1;
-}
-.cursor-dot {
-  transition: scale 0.2s ease;
-  will-change: transform;
-}
-.cursor-dot.cursor-active {
-  scale: 0.5;
-}
+/* Custom cursor hover states — handled entirely via JS transform string
+   (translate3d + translate(-50%,-50%) + scale all in ONE transform property
+   to ensure single GPU layer with zero drift between dot and ring) */
 
 /* Magnetic-button base: transition transform smoothly when JS shifts it */
 [data-magnetic] {

@@ -3,12 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * Premium custom cursor — fully optimized for 60fps:
+ * Premium custom cursor — fully optimized for 60fps with perfect sync:
  *
- * - Position tracking: direct DOM `style.transform = translate3d()` via rAF
- *   (zero React re-renders on mousemove)
- * - Hover detection: `mouseover` event (fires only on element enter/leave,
- *   not every pixel) + CSS class toggle (no React state for hover)
+ * - Position + centering + scale ALL in one `transform` property (single GPU layer)
+ * - `translate3d(x, y, 0) translate(-50%, -50%) scale(n)` — no drift, no separation
+ * - rAF-throttled direct DOM manipulation (zero React re-renders on mousemove)
+ * - `mouseover` for hover detection (fires on element enter/leave, not every pixel)
  * - `will-change: transform` for GPU compositing hint
  * - Desktop-only: `hidden md:block` + `pointer: fine` media query
  * - Respects `prefers-reduced-motion`
@@ -18,7 +18,6 @@ export function CustomCursor() {
   const dotRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
 
-  // Enable check — rAF-deferred to avoid hydration mismatch
   useEffect(() => {
     const fine = window.matchMedia("(pointer: fine)").matches;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -27,13 +26,23 @@ export function CustomCursor() {
     return () => cancelAnimationFrame(raf);
   }, []);
 
-  // Mouse tracking + hover detection — zero React re-renders
   useEffect(() => {
     if (!enabled) return;
 
     let mx = -100, my = -100;
     let rafId: number | null = null;
     let isHovering = false;
+
+    // Build the transform string with position + centering + scale in ONE transform
+    const applyTransform = () => {
+      const pos = `translate3d(${mx}px, ${my}px, 0) translate(-50%, -50%)`;
+      if (ringRef.current) {
+        ringRef.current.style.transform = `${pos} scale(${isHovering ? 1.6 : 1})`;
+      }
+      if (dotRef.current) {
+        dotRef.current.style.transform = `${pos} scale(${isHovering ? 0.5 : 1})`;
+      }
+    };
 
     // Position: rAF-throttled, direct DOM transform (no React state)
     const onMove = (e: MouseEvent) => {
@@ -42,14 +51,12 @@ export function CustomCursor() {
       if (!rafId) {
         rafId = requestAnimationFrame(() => {
           rafId = null;
-          const tf = `translate3d(${mx}px, ${my}px, 0)`;
-          if (dotRef.current) dotRef.current.style.transform = tf;
-          if (ringRef.current) ringRef.current.style.transform = tf;
+          applyTransform();
         });
       }
     };
 
-    // Hover: mouseover fires only on element enter/leave (not every pixel)
+    // Hover: mouseover fires only on element enter/leave
     const onOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;
       const interactive = !!target?.closest(
@@ -57,8 +64,7 @@ export function CustomCursor() {
       );
       if (interactive !== isHovering) {
         isHovering = interactive;
-        ringRef.current?.classList.toggle("cursor-active", interactive);
-        dotRef.current?.classList.toggle("cursor-active", interactive);
+        applyTransform();
       }
     };
 
@@ -80,17 +86,24 @@ export function CustomCursor() {
       aria-hidden
       style={{ width: 0, height: 0 }}
     >
-      {/* Outer ring (lags slightly via CSS transition for spring effect) */}
+      {/* Outer ring — center + scale ALL via transform (single GPU layer) */}
       <div
         ref={ringRef}
-        className="cursor-ring absolute left-0 top-0 -ml-4 -mt-4 w-8 h-8 rounded-full border border-primary/60"
-        style={{ willChange: "transform", transform: "translate3d(-100px, -100px, 0)" }}
+        className="absolute left-0 top-0 w-8 h-8 rounded-full border border-primary/60 transition-opacity duration-200"
+        style={{
+          willChange: "transform",
+          transform: "translate3d(-100px, -100px, 0) translate(-50%, -50%) scale(1)",
+          opacity: 0.5,
+        }}
       />
-      {/* Inner dot (1:1 tracking, no transition) */}
+      {/* Inner dot — center + scale ALL via transform (single GPU layer) */}
       <div
         ref={dotRef}
-        className="cursor-dot absolute left-0 top-0 -ml-1 -mt-1 w-2 h-2 rounded-full bg-primary"
-        style={{ willChange: "transform", transform: "translate3d(-100px, -100px, 0)" }}
+        className="absolute left-0 top-0 w-2 h-2 rounded-full bg-primary"
+        style={{
+          willChange: "transform",
+          transform: "translate3d(-100px, -100px, 0) translate(-50%, -50%) scale(1)",
+        }}
       />
     </div>
   );
@@ -98,7 +111,7 @@ export function CustomCursor() {
 
 /**
  * Wrap any element to make it "magnetic" — shifts slightly towards the cursor.
- * Uses rAF throttling + direct MotionValue (no React re-renders).
+ * Uses rAF throttling + direct DOM transform (no React re-renders).
  */
 export function Magnetic({
   children,
