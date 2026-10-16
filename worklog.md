@@ -2684,3 +2684,20 @@ Work Log:
 - Browser tab title: "RedLine Transport — شحن يصل لكل مصر" ✓
 - Lint: 0 errors, 0 warnings.
 - The metadata in layout.tsx was already configured from the previous task (title, description, icons config) and continues to work with the new icon files.
+
+---
+Task ID: scroll-progress-bar-direction-fix
+Agent: Z.ai Code (main)
+
+Task: Fix the top scroll progress bar direction — it was hardcoded with `origin-right` (always expanding from the right), which is correct for Arabic (RTL) but reversed for English (LTR). In English mode, the bar should expand from left to right.
+
+Work Log:
+- `src/components/shared/scroll-progress.tsx` line 11 had `origin-right bg-gradient-to-l` hardcoded.
+- Fix: imported `useT` from `@/lib/i18n` to get `isAr`, then conditionally apply:
+  - Arabic (RTL): `origin-right bg-gradient-to-l` (bar fills right→left)
+  - English (LTR): `origin-left bg-gradient-to-r` (bar fills left→right)
+- Lint: 0 errors, 0 warnings.
+
+Verification (Agent Browser):
+- Arabic (RTL): className includes `origin-right bg-gradient-to-l`, computed `transformOrigin: "1280px 2px"` (right edge) ✓
+- English (LTR): className includes `origin-left bg-gradient-to-r`, computed `transformOrigin: "0px 2px"` (left edge) ✓
