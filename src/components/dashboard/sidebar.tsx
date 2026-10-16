@@ -53,9 +53,9 @@ export function DashboardSidebar() {
   };
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-sidebar text-sidebar-foreground">
+    <div className="flex flex-col h-full bg-sidebar text-sidebar-foreground p-0 m-0">
       {/* === TOP: Logo + Collapse toggle === */}
-      <div className="flex items-center justify-between p-3 border-b border-slate-200 dark:border-slate-800 shrink-0">
+      <div className="flex items-center justify-between px-3 py-3 border-b border-slate-200 dark:border-slate-800 shrink-0">
         <button onClick={() => setView("public")} className="flex items-center group focus:outline-none overflow-hidden">
           <Image
             src="/redline-transport-logo.png"
@@ -84,7 +84,7 @@ export function DashboardSidebar() {
       </div>
 
       {/* === MIDDLE: Navigation (flex-1, scrollable) === */}
-      <nav className="flex-1 overflow-y-auto no-scrollbar p-2 space-y-1">
+      <nav className="flex-1 overflow-y-auto no-scrollbar px-3 py-2 space-y-1">
         {NAV.map((item) => {
           const isActive = dashboardSection === item.id;
           return (
@@ -92,8 +92,8 @@ export function DashboardSidebar() {
               key={item.id}
               onClick={() => { setDashboardSection(item.id); setSidebarOpen(false); }}
               title={collapsed ? item.label : undefined}
-              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200 ${
-                collapsed ? "justify-center" : ""
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-200 ${
+                collapsed ? "justify-center" : "justify-start"
               } ${
                 isActive
                   ? "bg-gradient-to-l from-primary to-red-700 text-white shadow-md shadow-primary/25"
@@ -109,11 +109,11 @@ export function DashboardSidebar() {
       </nav>
 
       {/* === BOTTOM: User profile + Footer actions === */}
-      <div className="border-t border-slate-200 dark:border-slate-800 p-2 space-y-2 shrink-0">
+      <div className="border-t border-slate-200 dark:border-slate-800 px-3 py-2 space-y-1 shrink-0">
         {/* User profile card */}
         {user && (
           <div
-            className={`flex items-center ${collapsed ? "justify-center" : "gap-2.5 px-2 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/50"}`}
+            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800/50 ${collapsed ? "justify-center" : ""}`}
             title={collapsed ? `${user.name}\n${user.email}` : undefined}
           >
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-red-700 flex items-center justify-center text-white font-bold text-xs shrink-0">
@@ -121,8 +121,8 @@ export function DashboardSidebar() {
             </div>
             {!collapsed && (
               <div className="min-w-0 flex-1">
-                <div className="text-xs font-semibold truncate">{user.name}</div>
-                <div className="text-[10px] text-muted-foreground truncate">{user.email}</div>
+                <div className="text-xs font-semibold truncate text-start">{user.name}</div>
+                <div className="text-[10px] text-muted-foreground truncate text-start">{user.email}</div>
               </div>
             )}
           </div>
@@ -132,22 +132,22 @@ export function DashboardSidebar() {
         <button
           onClick={() => setView("public")}
           title={collapsed ? t("d.sidebar.viewSite") : undefined}
-          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent transition-colors whitespace-nowrap ${
-            collapsed ? "justify-center" : ""
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent transition-colors whitespace-nowrap ${
+            collapsed ? "justify-center" : "justify-start"
           }`}
         >
           <LayoutDashboard className="w-5 h-5 shrink-0" strokeWidth={1.8} />
-          {!collapsed && t("d.sidebar.viewSite")}
+          {!collapsed && <span className="text-start">{t("d.sidebar.viewSite")}</span>}
         </button>
         <button
           onClick={logout}
           title={collapsed ? t("d.sidebar.logout") : undefined}
-          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors whitespace-nowrap ${
-            collapsed ? "justify-center" : ""
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors whitespace-nowrap ${
+            collapsed ? "justify-center" : "justify-start"
           }`}
         >
           <LogOut className="w-5 h-5 shrink-0" strokeWidth={1.8} />
-          {!collapsed && t("d.sidebar.logout")}
+          {!collapsed && <span className="text-start">{t("d.sidebar.logout")}</span>}
         </button>
       </div>
     </div>
@@ -155,9 +155,9 @@ export function DashboardSidebar() {
 
   return (
     <>
-      {/* Desktop sidebar — collapsible, seamless border */}
+      {/* Desktop sidebar — collapsible, flush to edge, seamless border */}
       <aside
-        className={`hidden lg:flex shrink-0 h-screen sticky top-0 transition-all duration-300 ease-in-out border-e border-slate-200 dark:border-slate-800 ${
+        className={`hidden lg:flex shrink-0 h-screen sticky top-0 p-0 m-0 transition-all duration-300 ease-in-out border-e border-slate-200 dark:border-slate-800 ${
           collapsed ? "w-[72px]" : "w-64 md:w-72"
         }`}
       >
@@ -180,7 +180,7 @@ export function DashboardSidebar() {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="lg:hidden fixed top-0 start-0 bottom-0 w-64 z-50 h-screen border-e border-slate-200 dark:border-slate-800"
+              className="lg:hidden fixed top-0 start-0 bottom-0 w-64 z-50 h-screen p-0 m-0 border-e border-slate-200 dark:border-slate-800"
             >
               {sidebarContent}
             </motion.aside>
