@@ -87,11 +87,12 @@ export function About() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
-              className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight"
+              className="text-3xl md:text-5xl font-bold flex flex-wrap items-center gap-2"
+              dir="rtl"
             >
-              {t("about.title").split("Redline")[0]}
-              <span className="text-gradient-red">Redline</span>
-              {t("about.title").split("Redline")[1]}
+              <bdi className="text-gradient-red font-extrabold tracking-wide">Redline</bdi>
+              <span className="text-slate-400 select-none">—</span>
+              <span>{isAr ? "عصب الشحن في مصر" : "Egypt's shipping backbone"}</span>
             </motion.h2>
 
             {/* Decorative divider */}
