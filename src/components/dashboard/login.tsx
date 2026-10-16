@@ -151,7 +151,7 @@ export function DashboardLogin() {
             </div>
 
             <button
-              onClick={() => router.push("/")}
+              onClick={() => router.push("/admin")}
               className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors"
             >
               {t("d.login.back")}

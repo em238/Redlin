@@ -52,8 +52,9 @@ export function DashboardSidebar() {
 
   const logout = async () => {
     try { await apiPost("/api/auth/logout", {}); } catch {}
-    setUser(null); setAuthChecked(false);
-    router.push("/");
+    setUser(null); setAuthChecked(true);
+    // Stay on /admin — DashboardApp will show the login form because user=null.
+    // Do NOT redirect to / (public site).
     toast.success(t("d.sidebar.logoutSuccess"));
   };
 
@@ -61,7 +62,7 @@ export function DashboardSidebar() {
     <div className="flex flex-col h-full w-full bg-sidebar text-sidebar-foreground p-0 m-0">
       {/* === TOP: Logo + Collapse toggle === */}
       <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200 dark:border-slate-800 shrink-0">
-        <button onClick={() => router.push("/")} className="flex items-center group focus:outline-none overflow-hidden">
+        <button onClick={() => router.push("/admin")} className="flex items-center group focus:outline-none overflow-hidden">
           <Image
             src="/redline-transport-logo.png"
             alt="RedLine Transport"

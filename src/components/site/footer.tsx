@@ -228,12 +228,8 @@ export function Footer() {
                 <Send className="w-4 h-4" />
               </Button>
             </div>
-            <button
-              onClick={() => router.push("/dashboard")}
-              className="mt-4 text-xs text-zinc-500 hover:text-primary transition-colors"
-            >
-              {dashboardLink} ←
-            </button>
+            {/* Dashboard login link removed — the admin dashboard is only
+                accessible by typing the direct URL /admin. No public link. */}
           </div>
         </div>
 

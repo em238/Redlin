@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useAppStore } from "@/lib/store";
 import { User, Bell, Globe, Shield, Palette, Save, Moon, Sun, LogOut, Truck } from "lucide-react";
@@ -16,7 +15,6 @@ import { toast } from "sonner";
 import { useDashboardT } from "@/lib/i18n";
 
 export function DashboardSettings() {
-  const router = useRouter();
   const { user, setUser, setAuthChecked } = useAppStore();
   const { theme, setTheme } = useTheme();
   const { t, isAr } = useDashboardT();
@@ -28,7 +26,8 @@ export function DashboardSettings() {
     try { await apiPost("/api/auth/logout"); } catch {}
     setUser(null);
     setAuthChecked(true);
-    router.push("/");
+    // Stay on /admin — DashboardApp will show the login form because user=null.
+    // Do NOT redirect to / (public site).
     toast.success(t("d.settings.toastLogout"));
   };
 

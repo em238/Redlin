@@ -1,16 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useTheme } from "next-themes";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
-import { Menu, X, LayoutDashboard, Moon, Sun, Globe } from "lucide-react";
+import { useTheme } from "next-themes";
+import { Menu, X, Moon, Sun, Globe } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useScrollSpy } from "@/hooks/use-scroll-spy";
 import { ScrollProgress } from "@/components/shared/scroll-progress";
 import { useT, useI18n } from "@/lib/i18n";
-import { Magnetic } from "@/components/shared/custom-cursor";
 
 const NAV_KEYS = [
   { href: "#home", key: "nav.home" },
@@ -23,7 +21,6 @@ const NAV_KEYS = [
 ];
 
 export function Navbar() {
-  const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -112,16 +109,8 @@ export function Navbar() {
               >
                 {theme === "dark" ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
               </Button>
-              <Magnetic strength={0.18} className="hidden sm:inline-flex">
-                <Button
-                  onClick={() => router.push("/dashboard")}
-                  size="sm"
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 font-semibold"
-                >
-                  <LayoutDashboard className="w-[18px] h-[18px]" />
-                  {t("nav.dashboard")}
-                </Button>
-              </Magnetic>
+              {/* Dashboard button removed — the admin dashboard is only accessible
+                  by typing the direct URL /admin. No public link to the dashboard. */}
               <Button
                 variant="ghost"
                 size="icon"
@@ -159,13 +148,6 @@ export function Navbar() {
                   </button>
                 );
               })}
-              <Button
-                onClick={() => { setMobileOpen(false); router.push("/dashboard"); }}
-                className="mt-2 bg-primary text-primary-foreground gap-2 w-full justify-center"
-              >
-                <LayoutDashboard className="w-[18px] h-[18px]" />
-                {t("nav.dashboard")}
-              </Button>
               </nav>
             </motion.div>
           )}

@@ -45,7 +45,7 @@ function writeUrlTab(tab: DashboardSection) {
   // Path uses a trailing slash to match Next.js's `trailingSlash: true`
   // config + the chat preview gateway's URL normalization — this prevents
   // an extra 308 redirect on refresh.
-  window.history.replaceState({}, "", `/dashboard/?${params.toString()}`);
+  window.history.replaceState({}, "", `/admin/?${params.toString()}`);
 }
 
 export function DashboardApp() {

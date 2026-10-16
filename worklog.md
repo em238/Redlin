@@ -2847,3 +2847,60 @@ Work Log:
   - `<link rel="apple-touch-icon" href="/apple-icon.png?v=2" sizes="180x180" type="image/png"/>` ✓
 - Browser tab shows the red Redline Transport badge (verified via Agent Browser) ✓
 - Lint: 0 errors, 0 warnings.
+
+---
+Task ID: admin-routing-auth-refactor
+Agent: Z.ai Code (main)
+
+Task: Refactor admin routing and authentication flow. Remove public links to the dashboard from the navbar and footer. Make `/admin` the only entry point. Fix logout to stay on `/admin` showing the login form (never redirect to `/`).
+
+Work Log:
+
+**1. Created `/admin` route**
+- `src/app/admin/page.tsx` — renders `<DashboardApp />` (same as `/dashboard`)
+- `src/app/admin/layout.tsx` — same metadata + no redirect (shows login or dashboard)
+- Both `/admin` and `/dashboard` routes work (both render DashboardApp)
+
+**2. Updated middleware (`middleware.ts`)**
+- Matcher now covers both `/admin` and `/dashboard` paths
+- Never redirects to `/` — always allows through so the client-side auth check shows login on the admin URL
+
+**3. Removed Dashboard button from navbar (`src/components/site/navbar.tsx`)**
+- Removed the desktop "لوحة التحكم / Dashboard" button (was `<Magnetic><Button onClick={() => router.push("/dashboard")}>`)
+- Removed the mobile "Dashboard" button from the mobile menu
+- Cleaned up unused imports: `LayoutDashboard`, `Magnetic`, `useRouter`
+- Removed the unused `router` variable
+
+**4. Removed dashboard login link from footer (`src/components/site/footer.tsx`)**
+- Removed the "دخول لوحة التحكم ←" button that called `router.push("/dashboard")`
+- Replaced with a comment explaining the dashboard is only accessible via direct URL
+
+**5. Fixed logout behavior — stays on `/admin` (never redirects to `/`)**
+
+- `src/components/dashboard/sidebar.tsx`:
+  - `logout()`: changed `setAuthChecked(false)` → `setAuthChecked(true)` + removed `router.push("/")`
+  - Now: `setUser(null); setAuthChecked(true)` → DashboardApp shows login form immediately (no redirect)
+
+- `src/components/dashboard/settings.tsx`:
+  - Same fix: removed `router.push("/")`, kept `setAuthChecked(true)`
+  - Cleaned up unused `useRouter` import + `router` variable
+
+- `src/components/dashboard/login.tsx`:
+  - Back button: changed `router.push("/")` → `router.push("/admin")` (stays on admin page)
+
+- `src/components/dashboard/sidebar.tsx` logo click:
+  - Changed `router.push("/")` → `router.push("/admin")` (goes to admin page, not public site)
+
+- `src/components/dashboard/dashboard-app.tsx`:
+  - Changed URL tab sync from `/dashboard/?tab=...` → `/admin/?tab=...`
+
+**Verification (Agent Browser)**
+
+| Step | URL | Result |
+|------|-----|--------|
+| Visit `/admin` (no auth) | `http://localhost:3000/admin/` | Login screen "تسجيل الدخول" shown — NO redirect to `/` ✓ |
+| Login (admin@redline.eg) | `http://localhost:3000/admin/` | Dashboard renders with Hero section ✓ |
+| Click "تسجيل الخروج" (Logout) | `http://localhost:3000/admin/` | Login screen "أدر عمليات الشحن من مكان واحد" shown — stays on `/admin/` ✓ |
+
+- Public site HTML: zero dashboard navigation links/buttons ✓
+- Lint: 0 errors, 0 warnings ✓
