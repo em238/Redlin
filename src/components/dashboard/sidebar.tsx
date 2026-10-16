@@ -130,16 +130,6 @@ export function DashboardSidebar() {
 
         {/* Action buttons */}
         <button
-          onClick={() => setView("public")}
-          title={collapsed ? t("d.sidebar.viewSite") : undefined}
-          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent transition-colors whitespace-nowrap ${
-            collapsed ? "justify-center" : "justify-start"
-          }`}
-        >
-          <LayoutDashboard className="w-5 h-5 shrink-0" strokeWidth={1.8} />
-          {!collapsed && <span className="text-start">{t("d.sidebar.viewSite")}</span>}
-        </button>
-        <button
           onClick={logout}
           title={collapsed ? t("d.sidebar.logout") : undefined}
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors whitespace-nowrap ${
