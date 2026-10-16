@@ -31,7 +31,6 @@ export function About() {
   const y1 = useTransform(scrollYProgress, [0, 1], [40, -40]);
   const y2 = useTransform(scrollYProgress, [0, 1], [-30, 30]);
   const FEATURES = isAr ? FEATURES_AR : FEATURES_EN;
-  const textAlign = isAr ? "text-right items-end" : "text-left items-start";
 
   return (
     <section id="about" className="py-14 sm:py-24 lg:py-28 overflow-hidden">
@@ -68,7 +67,8 @@ export function About() {
           </motion.div>
 
           {/* Right Column — Content */}
-          <div className={`flex flex-col ${textAlign}`}>
+          {/* Uses logical classes: text-start = left in LTR, right in RTL */}
+          <div className="flex flex-col items-start text-start">
             {/* 1. Pill Badge */}
             <motion.span
               initial={{ opacity: 0, y: 8 }}
@@ -81,18 +81,29 @@ export function About() {
               {t("about.eyebrow")}
             </motion.span>
 
-            {/* 2. Main Heading */}
+            {/* 2. Main Heading — no hardcoded dir, element order adapts to language */}
             <motion.h2
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
-              className="text-3xl md:text-5xl font-bold flex flex-wrap items-center gap-2"
-              dir="rtl"
+              className="text-3xl md:text-5xl font-bold flex flex-wrap items-center gap-2 text-start"
             >
-              <bdi className="text-gradient-red font-extrabold tracking-wide">Redline</bdi>
-              <span className="text-slate-400 select-none">—</span>
-              <span>{isAr ? "عصب الشحن في مصر" : "Egypt's shipping backbone"}</span>
+              {isAr ? (
+                <>
+                  {/* Arabic (RTL): Redline (right) — عصب الشحن في مصر (left) */}
+                  <bdi className="text-gradient-red font-extrabold tracking-wide">Redline</bdi>
+                  <span className="text-slate-400 select-none">—</span>
+                  <span>عصب الشحن في مصر</span>
+                </>
+              ) : (
+                <>
+                  {/* English (LTR): — (left) Redline Egypt's shipping backbone (right) */}
+                  <span className="text-slate-400 select-none">—</span>
+                  <bdi className="text-gradient-red font-extrabold tracking-wide">Redline</bdi>
+                  <span>Egypt's shipping backbone</span>
+                </>
+              )}
             </motion.h2>
 
             {/* Decorative divider */}
@@ -110,7 +121,7 @@ export function About() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="mt-4 text-muted-foreground text-base sm:text-lg leading-relaxed"
+              className="mt-4 text-muted-foreground text-base sm:text-lg leading-relaxed text-start"
             >
               {t("about.p1")}
             </motion.p>
@@ -119,7 +130,7 @@ export function About() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.15 }}
-              className="mt-4 text-muted-foreground leading-relaxed"
+              className="mt-4 text-muted-foreground leading-relaxed text-start"
             >
               {t("about.p2")}
             </motion.p>

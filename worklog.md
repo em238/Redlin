@@ -2701,3 +2701,23 @@ Work Log:
 Verification (Agent Browser):
 - Arabic (RTL): className includes `origin-right bg-gradient-to-l`, computed `transformOrigin: "1280px 2px"` (right edge) ✓
 - English (LTR): className includes `origin-left bg-gradient-to-r`, computed `transformOrigin: "0px 2px"` (left edge) ✓
+
+---
+Task ID: about-section-typography-alignment-fix
+Agent: Z.ai Code (main)
+
+Task: Fix typography and layout alignment in the "About Us" section — in English (LTR) mode the content was still right-aligned (RTL layout), the badge was misplaced, and the decorative accent line was inverted before the title.
+
+Work Log:
+- `src/components/site/about.tsx` had 3 bugs:
+  1. Line 34: `textAlign = isAr ? "text-right items-end" : "text-left items-start"` — used physical alignment classes that require conditional switching. Replaced with logical `items-start text-start` that automatically adapts (text-start = left in LTR, right in RTL).
+  2. Line 91: `<motion.h2 dir="rtl">` — had `dir="rtl"` HARDCODED, forcing RTL layout even in English mode. Removed the `dir` attribute entirely so the heading inherits from the document.
+  3. Heading element order was fixed (Redline → — → subtitle) which is correct for Arabic but wrong for English (where the dash should come before Redline). Made the order conditional: Arabic = Redline, —, subtitle; English = —, Redline, subtitle.
+
+- Also added `text-start` explicitly to the `<h2>` and both `<motion.p>` paragraphs for robustness.
+- The badge already had `self-start` (correct). The decorative divider already had `self-start` (correct).
+
+Verification (Agent Browser):
+- Arabic (RTL): contentCol=`flex flex-col items-start text-start`, h2 has no `dir` attr, h2 text="Redline — عصب الشحن في مصر", h2 textAlign="start" (right in RTL), paragraphs textAlign="start" ✓
+- English (LTR): same logical classes, h2 text="— Redline Egypt's shipping backbone" (dash first!), h2 textAlign="start" (left in LTR), paragraphs textAlign="start" ✓
+- Lint: 0 errors, 0 warnings.
