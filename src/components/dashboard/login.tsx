@@ -33,12 +33,6 @@ export function DashboardLogin() {
     }
   };
 
-  const stats = [
-    { v: "850K+", l: t("d.login.stat1") },
-    { v: "27", l: t("d.login.stat2") },
-    { v: "12K+", l: t("d.login.stat3") },
-  ];
-
   return (
     <div className="min-h-screen flex">
       {/* Left visual panel */}
@@ -61,14 +55,6 @@ export function DashboardLogin() {
               {t("d.login.title1")} <span className="text-gradient-red">{t("d.login.title2")}</span>
             </h1>
             <p className="mt-4 text-zinc-300 leading-relaxed">{t("d.login.subtitle")}</p>
-            <div className="mt-8 grid grid-cols-3 gap-4">
-              {stats.map((s, i) => (
-                <div key={i} className="glass rounded-xl border border-white/10 p-3 text-center">
-                  <div className="text-2xl font-black text-primary">{s.v}</div>
-                  <div className="text-[11px] text-zinc-400">{s.l}</div>
-                </div>
-              ))}
-            </div>
           </div>
 
           <div className="flex items-center gap-2 text-sm text-zinc-400">
