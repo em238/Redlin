@@ -29,14 +29,17 @@ const TEMPLATE_VIDEOS = [
 ];
 
 export function DashboardVideos() {
-  const { t } = useDashboardT();
+  const { t, isAr } = useDashboardT();
+  const L = (ar: string, en: string) => (isAr ? ar : en);
   const qc = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [saving, setSaving] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [form, setForm] = useState<any>({
-    title: "", description: "", url: "", thumbnail: "",
+    title: "", titleAr: "",
+    description: "", descriptionAr: "",
+    url: "", thumbnail: "",
     category: "promo", featured: false, active: true,
   });
 
@@ -61,8 +64,12 @@ export function DashboardVideos() {
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ title: "", description: "", url: "", thumbnail: thumbOptions[0],
-      category: "promo", featured: false, active: true });
+    setForm({
+      title: "", titleAr: "",
+      description: "", descriptionAr: "",
+      url: "", thumbnail: thumbOptions[0],
+      category: "promo", featured: false, active: true,
+    });
     setModalOpen(true);
   };
 
@@ -84,7 +91,12 @@ export function DashboardVideos() {
     if (!form.title || !form.url) { toast.error(t("d.videos.toastMissing")); return; }
     setSaving(true);
     try {
-      const payload = { ...form, url: normalizeUrl(form.url) };
+      const payload = {
+        ...form,
+        titleAr: form.titleAr || "",
+        descriptionAr: form.descriptionAr || "",
+        url: normalizeUrl(form.url),
+      };
       if (editing) {
         await apiPatch(`/api/videos/${editing.id}`, payload);
         toast.success(t("d.videos.toastUpdated"));
@@ -138,7 +150,13 @@ export function DashboardVideos() {
     const text = e.dataTransfer.getData("text/plain") || e.dataTransfer.getData("text/uri-list") || "";
     const url = text.trim();
     if (url) {
-      setForm((f: any) => ({ ...f, url, title: f.title || t("d.videos.newTitle") }));
+      setForm((f: any) => ({
+        ...f,
+        url,
+        title: f.title || t("d.videos.newTitle"),
+        titleAr: f.titleAr || "",
+        descriptionAr: f.descriptionAr || "",
+      }));
       toast.success(t("d.videos.toastUrlAdded"));
     } else {
       toast.error(t("d.videos.toastInvalidUrl"));
@@ -146,7 +164,12 @@ export function DashboardVideos() {
   };
 
   const applyTemplate = (tp: typeof TEMPLATE_VIDEOS[0]) => {
-    setForm({ title: tp.title, description: tp.description, url: tp.url, thumbnail: thumbOptions[Math.floor(Math.random() * thumbOptions.length)], category: tp.category, featured: false, active: true });
+    setForm({
+      title: tp.title, titleAr: "",
+      description: tp.description, descriptionAr: "",
+      url: tp.url, thumbnail: thumbOptions[Math.floor(Math.random() * thumbOptions.length)],
+      category: tp.category, featured: false, active: true,
+    });
     setEditing(null);
     setModalOpen(true);
   };
@@ -246,8 +269,29 @@ export function DashboardVideos() {
                   </div>
                 </div>
                 <div className="p-4">
-                  <h4 className="font-bold text-sm line-clamp-1">{v.title}</h4>
-                  {v.description && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{v.description}</p>}
+                  <div className="space-y-1">
+                    <h4 className="font-bold text-sm line-clamp-1 flex items-center gap-1.5">
+                      {v.titleAr && (
+                        <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold shrink-0">AR</span>
+                      )}
+                      <span className="truncate">{v.title}</span>
+                    </h4>
+                    {v.titleAr && (
+                      <p className="text-xs text-muted-foreground line-clamp-1 flex items-center gap-1.5" dir="rtl">
+                        <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold shrink-0">AR</span>
+                        <span className="truncate">{v.titleAr}</span>
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-1 mt-1">
+                    {v.descriptionAr && (
+                      <p className="text-xs text-muted-foreground line-clamp-2 flex items-start gap-1.5" dir="rtl">
+                        <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold shrink-0 mt-0.5">AR</span>
+                        <span>{v.descriptionAr}</span>
+                      </p>
+                    )}
+                    {v.description && <p className="text-xs text-muted-foreground line-clamp-2">{v.description}</p>}
+                  </div>
                   <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
                     <span className="flex items-center gap-1"><Link2 className="w-3 h-3" /> {formatDate(v.createdAt)}</span>
                     <span className="flex items-center gap-1 truncate max-w-[140px]" dir="ltr">
@@ -308,14 +352,38 @@ export function DashboardVideos() {
               <p className="text-[11px] text-muted-foreground">{t("d.videos.modal.urlHint")}</p>
             </div>
 
-            <div className="space-y-1">
-              <Label className="text-xs">{t("d.videos.modal.titleLabel")}</Label>
-              <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder={t("d.videos.modal.titlePlaceholder")} className="h-10" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs flex items-center gap-1.5">
+                  <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 text-[10px] font-bold">EN</span>
+                  {L("العنوان (إنجليزي)", "Title (English)")}
+                </Label>
+                <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder={t("d.videos.modal.titlePlaceholder")} className="h-10 bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-700" dir="ltr" />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs flex items-center gap-1.5">
+                  <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold">AR</span>
+                  {L("العنوان (عربي)", "Title (Arabic)")}
+                </Label>
+                <Input value={form.titleAr || ""} onChange={(e) => setForm({ ...form, titleAr: e.target.value })} placeholder={L("أدخل العنوان بالعربية", "Enter title in Arabic")} className="h-10 bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-700" dir="rtl" />
+              </div>
             </div>
 
-            <div className="space-y-1">
-              <Label className="text-xs">{t("d.videos.modal.descLabel")}</Label>
-              <Textarea value={form.description || ""} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} placeholder={t("d.videos.modal.descPlaceholder")} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs flex items-center gap-1.5">
+                  <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 text-[10px] font-bold">EN</span>
+                  {L("الوصف (إنجليزي)", "Description (English)")}
+                </Label>
+                <Textarea value={form.description || ""} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} placeholder={t("d.videos.modal.descPlaceholder")} className="bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-700" dir="ltr" />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs flex items-center gap-1.5">
+                  <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold">AR</span>
+                  {L("الوصف (عربي)", "Description (Arabic)")}
+                </Label>
+                <Textarea value={form.descriptionAr || ""} onChange={(e) => setForm({ ...form, descriptionAr: e.target.value })} rows={3} placeholder={L("أدخل الوصف بالعربية", "Enter description in Arabic")} className="bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-700" dir="rtl" />
+              </div>
             </div>
 
             <FileUpload

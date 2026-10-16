@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, role, company, content, rating, avatar } = body;
+    const { name, nameAr, role, roleAr, company, companyAr, content, contentAr, rating, avatar } = body;
 
     if (!name?.trim() || !content?.trim()) {
       return Response.json({ error: "Name and content are required" }, { status: 400 });
@@ -46,9 +46,13 @@ export async function POST(req: NextRequest) {
     const testimonial = await db.testimonial.create({
       data: {
         name: name.trim(),
+        nameAr: nameAr?.trim() || "",
         role: role?.trim() || "",
+        roleAr: roleAr?.trim() || "",
         company: company?.trim() || null,
+        companyAr: companyAr?.trim() || null,
         content: content.trim(),
+        contentAr: contentAr?.trim() || "",
         rating: rating ? Math.min(5, Math.max(1, Number(rating))) : 5,
         avatar: avatar || null,
         status: "pending", // NEVER visible on public site until admin approves

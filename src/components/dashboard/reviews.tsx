@@ -12,9 +12,13 @@ import { toast } from "sonner";
 type Review = {
   id: string;
   name: string;
+  nameAr: string;
   role: string;
+  roleAr: string;
   company?: string | null;
+  companyAr?: string | null;
   content: string;
+  contentAr: string;
   rating: number;
   avatar?: string | null;
   status: string;
@@ -160,10 +164,10 @@ export function DashboardReviews() {
                   {/* Avatar */}
                   <div className="shrink-0">
                     {review.avatar ? (
-                      <img src={review.avatar} alt={review.name} className="w-12 h-12 rounded-full object-cover border-2 border-border/40" />
+                      <img src={review.avatar} alt={isAr ? (review.nameAr || review.name) : review.name} className="w-12 h-12 rounded-full object-cover border-2 border-border/40" />
                     ) : (
                       <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/15 to-amber-500/10 flex items-center justify-center font-bold text-primary text-lg">
-                        {review.name.charAt(0).toUpperCase()}
+                        {(isAr ? (review.nameAr || review.name) : review.name).charAt(0).toUpperCase()}
                       </div>
                     )}
                   </div>
@@ -172,12 +176,22 @@ export function DashboardReviews() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
                       <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-bold text-sm">{review.name}</h4>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="font-bold text-sm" dir={isAr && review.nameAr ? "rtl" : "ltr"}>
+                            {isAr && review.nameAr ? review.nameAr : review.name}
+                          </h4>
+                          {/* Bilingual badges if AR variant exists */}
+                          {review.nameAr && (
+                            <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold">AR</span>
+                          )}
+                          {review.nameAr && review.name && (
+                            <span className="text-[10px] text-muted-foreground" dir="ltr">{review.name}</span>
+                          )}
                           {statusBadge(review.status)}
                         </div>
-                        <div className="text-xs text-muted-foreground mt-0.5">
-                          {review.role}{review.company ? ` · ${review.company}` : ""}
+                        <div className="text-xs text-muted-foreground mt-0.5" dir={isAr && review.roleAr ? "rtl" : "ltr"}>
+                          {isAr && review.roleAr ? review.roleAr : review.role}
+                          {((isAr && review.companyAr) ? ` · ${review.companyAr}` : (review.company ? ` · ${review.company}` : ""))}
                         </div>
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
@@ -189,7 +203,19 @@ export function DashboardReviews() {
                         ))}
                       </div>
                     </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed mt-2 mb-3">{review.content}</p>
+                    {/* Show both AR + EN content if AR exists; otherwise just EN */}
+                    {review.contentAr && (
+                      <p className="text-sm text-muted-foreground leading-relaxed mt-2 mb-1 flex items-start gap-1.5" dir="rtl">
+                        <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold shrink-0 mt-0.5">AR</span>
+                        <span>{review.contentAr}</span>
+                      </p>
+                    )}
+                    <p className="text-sm text-muted-foreground leading-relaxed mt-2 mb-3 flex items-start gap-1.5" dir="ltr">
+                      {review.contentAr && (
+                        <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 text-[10px] font-bold shrink-0 mt-0.5">EN</span>
+                      )}
+                      <span>{review.content}</span>
+                    </p>
                     <div className="text-[11px] text-muted-foreground/60">
                       {new Date(review.createdAt).toLocaleDateString(isAr ? "ar-EG" : "en-US", { year: "numeric", month: "short", day: "numeric" })}
                     </div>

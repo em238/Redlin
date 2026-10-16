@@ -34,6 +34,7 @@ type About = {
 type SiteStat = {
   id: string;
   label: string;
+  labelAr: string;
   value: string;
   icon: string;
   createdAt: string;
@@ -65,7 +66,7 @@ export function DashboardAbout() {
   const [statModalOpen, setStatModalOpen] = useState(false);
   const [editingStat, setEditingStat] = useState<SiteStat | null>(null);
   const [savingStat, setSavingStat] = useState(false);
-  const [statForm, setStatForm] = useState<any>({ label: "", value: "", icon: "package" });
+  const [statForm, setStatForm] = useState<any>({ label: "", labelAr: "", value: "", icon: "package" });
 
   // Fetch About record (GET /api/about — auto-creates on first call)
   const { data: aboutData, isLoading: aboutLoading } = useQuery({
@@ -119,13 +120,13 @@ export function DashboardAbout() {
 
   const openCreateStat = () => {
     setEditingStat(null);
-    setStatForm({ label: "", value: "", icon: "package" });
+    setStatForm({ label: "", labelAr: "", value: "", icon: "package" });
     setStatModalOpen(true);
   };
 
   const openEditStat = (s: SiteStat) => {
     setEditingStat(s);
-    setStatForm({ label: s.label, value: s.value, icon: s.icon || "package" });
+    setStatForm({ label: s.label, labelAr: s.labelAr || "", value: s.value, icon: s.icon || "package" });
     setStatModalOpen(true);
   };
 
@@ -138,12 +139,12 @@ export function DashboardAbout() {
     try {
       if (editingStat) {
         await apiPatch(`/api/stats/${editingStat.id}`, {
-          label: statForm.label, value: statForm.value, icon: statForm.icon || "package",
+          label: statForm.label, labelAr: statForm.labelAr || "", value: statForm.value, icon: statForm.icon || "package",
         });
         toast.success(L("تم تحديث المؤشر", "Metric updated"));
       } else {
         await apiPost("/api/stats", {
-          label: statForm.label, value: statForm.value, icon: statForm.icon || "package",
+          label: statForm.label, labelAr: statForm.labelAr || "", value: statForm.value, icon: statForm.icon || "package",
         });
         toast.success(L("تمت إضافة المؤشر", "Metric added"));
       }
@@ -374,7 +375,15 @@ export function DashboardAbout() {
                         <div className="text-2xl font-black text-gradient-red tabular-nums leading-none">
                           {s.value}
                         </div>
-                        <div className="text-xs text-muted-foreground mt-1 truncate">{s.label}</div>
+                        <div className="text-xs text-muted-foreground mt-1 truncate" dir="rtl">
+                          {s.labelAr || s.label}
+                        </div>
+                        {s.labelAr && (
+                          <div className="text-[10px] text-muted-foreground/70 mt-0.5 flex items-center gap-1" dir="ltr">
+                            <span className="px-1 py-0 rounded bg-blue-500/10 text-blue-600 text-[9px] font-bold">EN</span>
+                            <span className="truncate">{s.label}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="flex gap-1.5 mt-3 pt-3 border-t border-border/40">
@@ -415,14 +424,34 @@ export function DashboardAbout() {
               />
             </div>
 
-            <div className="space-y-1">
-              <Label className="text-xs">{L("الوصف/العنوان", "Label")}</Label>
-              <Input
-                value={statForm.label}
-                onChange={(e) => setStatForm({ ...statForm, label: e.target.value })}
-                placeholder={L("مثال: سنة خبرة / محافظة / عميل سعيد", "E.g. years of experience / governorates / happy clients")}
-                className="h-10"
-              />
+            {/* Bilingual labels AR | EN */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs flex items-center gap-1.5">
+                  <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold">AR</span>
+                  {L("الوصف (عربي)", "Label (Arabic)")}
+                </Label>
+                <Input
+                  value={statForm.labelAr || ""}
+                  onChange={(e) => setStatForm({ ...statForm, labelAr: e.target.value })}
+                  placeholder={L("مثال: سنة خبرة / محافظة", "E.g. years / governorates")}
+                  dir="rtl"
+                  className="h-10 bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-700"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs flex items-center gap-1.5">
+                  <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 text-[10px] font-bold">EN</span>
+                  {L("الوصف (إنجليزي)", "Label (English)")}
+                </Label>
+                <Input
+                  value={statForm.label}
+                  onChange={(e) => setStatForm({ ...statForm, label: e.target.value })}
+                  placeholder={L("مثال: years / governorates / clients", "E.g. years / governorates / clients")}
+                  dir="ltr"
+                  className="h-10 bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-700"
+                />
+              </div>
             </div>
 
             <div className="space-y-2">

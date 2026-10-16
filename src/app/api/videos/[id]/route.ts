@@ -12,7 +12,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (body.featured === true) {
       await db.video.updateMany({ where: { featured: true }, data: { featured: false } });
     }
-    const video = await db.video.update({ where: { id }, data: { ...body } });
+    // Allowlist fields that may be updated
+    const data: Record<string, unknown> = {};
+    for (const key of [
+      "title", "titleAr", "description", "descriptionAr",
+      "url", "thumbnail", "category", "featured", "active",
+    ]) {
+      if (body[key] !== undefined) data[key] = body[key];
+    }
+    const video = await db.video.update({ where: { id }, data });
     return Response.json({ video });
   } catch (e: any) {
     if (e?.message === "UNAUTHORIZED") return jsonError("غير مصرح", 401);

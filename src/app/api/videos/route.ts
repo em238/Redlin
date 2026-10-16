@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
   try {
     await requireAdmin();
     const body = await req.json();
-    const { title, description, url, thumbnail, category, featured, active } = body;
+    const { title, titleAr, description, descriptionAr, url, thumbnail, category, featured, active } = body;
     if (!title || !url) return jsonError("العنوان والرابط مطلوبان", 400);
 
     // If featured, un-feature others
@@ -38,7 +38,11 @@ export async function POST(req: NextRequest) {
     }
     const video = await db.video.create({
       data: {
-        title, description: description || null, url,
+        title,
+        titleAr: titleAr || "",
+        description: description || null,
+        descriptionAr: descriptionAr || "",
+        url,
         thumbnail: thumbnail || null,
         category: category || "promo",
         featured: !!featured,

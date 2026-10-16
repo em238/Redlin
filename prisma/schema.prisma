@@ -29,8 +29,10 @@ model Role {
   name          String   @unique
   nameAr        String   @default("")
   description   String   @default("")
+  descriptionAr String   @default("")
+  descriptionEn String   @default("")
   isSystemRole  Boolean  @default(false)
-  permissions   String   @default("") // JSON: { module: [action, ...] }
+  permissions   String   @default("")
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   users         User[]
@@ -48,14 +50,16 @@ model Governorate {
 }
 
 model Service {
-  id          String  @id @default(cuid())
-  name        String  @unique
-  nameAr      String
-  description String
-  icon        String  @default("truck")
-  multiplier  Float   @default(1.0)
-  active      Boolean @default(true)
-  createdAt   DateTime @default(now())
+  id             String  @id @default(cuid())
+  name           String  @unique
+  nameAr         String
+  description    String  @default("")
+  descriptionAr  String  @default("")
+  descriptionEn  String  @default("")
+  icon           String  @default("truck")
+  multiplier     Float   @default(1.0)
+  active         Boolean @default(true)
+  createdAt      DateTime @default(now())
 }
 
 model Customer {
@@ -93,28 +97,34 @@ model Shipment {
 }
 
 model Video {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  url         String
-  thumbnail   String?
-  category    String   @default("promo")
-  active      Boolean  @default(true)
-  featured    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(cuid())
+  title          String
+  titleAr        String   @default("")
+  description    String?
+  descriptionAr  String   @default("")
+  url            String
+  thumbnail      String?
+  category       String   @default("promo")
+  active         Boolean  @default(true)
+  featured       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model Testimonial {
   id        String   @id @default(cuid())
   name      String
+  nameAr    String   @default("")
   role      String
+  roleAr    String   @default("")
   company   String?
+  companyAr String?
   content   String
+  contentAr String   @default("")
   rating    Int      @default(5)
   avatar    String?
   active    Boolean  @default(true)
-  status    String   @default("approved") // approved | pending | rejected
+  status    String   @default("approved")
   createdAt DateTime @default(now())
 }
 
@@ -146,6 +156,7 @@ model Order {
 model SiteStat {
   id        String   @id @default(cuid())
   label     String
+  labelAr   String   @default("")
   value     String
   icon      String   @default("package")
   createdAt DateTime @default(now())
@@ -155,6 +166,8 @@ model HeroImage {
   id        String   @id @default(cuid())
   url       String
   title     String?
+  titleAr   String   @default("")
+  titleEn   String   @default("")
   order     Int      @default(0)
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
@@ -163,6 +176,7 @@ model HeroImage {
 model Partner {
   id        String   @id @default(cuid())
   name      String
+  nameAr    String   @default("")
   logo      String?
   icon      String   @default("building")
   color     String   @default("#dc2626")

@@ -9,7 +9,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     await requireAdmin();
     const { id } = await params;
     const body = await req.json();
-    const partner = await db.partner.update({ where: { id }, data: { ...body } });
+    const data: Record<string, unknown> = {};
+    for (const key of ["name", "nameAr", "logo", "icon", "color", "website", "order", "active"]) {
+      if (body[key] !== undefined) data[key] = body[key];
+    }
+    const partner = await db.partner.update({ where: { id }, data });
     return Response.json({ partner });
   } catch (e: any) {
     if (e?.message === "UNAUTHORIZED") return jsonError("غير مصرح", 401);

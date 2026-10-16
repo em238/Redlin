@@ -26,6 +26,8 @@ type Service = {
   name: string;
   nameAr: string;
   description: string;
+  descriptionAr: string;
+  descriptionEn: string;
   icon: string;
   multiplier: number;
   active: boolean;
@@ -44,7 +46,9 @@ const isImageUrl = (v: string) =>
   typeof v === "string" && (v.startsWith("/") || v.startsWith("http://") || v.startsWith("https://"));
 
 const emptyForm = {
-  name: "", nameAr: "", description: "", icon: "truck", multiplier: 1.0, active: true,
+  name: "", nameAr: "",
+  description: "", descriptionAr: "", descriptionEn: "",
+  icon: "truck", multiplier: 1.0, active: true,
 };
 
 export function DashboardServices() {
@@ -72,7 +76,10 @@ export function DashboardServices() {
   const openEdit = (s: Service) => {
     setEditing(s);
     setForm({
-      name: s.name, nameAr: s.nameAr, description: s.description,
+      name: s.name, nameAr: s.nameAr,
+      description: s.description,
+      descriptionAr: s.descriptionAr || "",
+      descriptionEn: s.descriptionEn || "",
       icon: s.icon || "truck", multiplier: s.multiplier ?? 1.0, active: s.active,
     });
     setModalOpen(true);
@@ -93,6 +100,8 @@ export function DashboardServices() {
         name: form.name,
         nameAr: form.nameAr,
         description: form.description,
+        descriptionAr: form.descriptionAr || "",
+        descriptionEn: form.descriptionEn || "",
         icon: form.icon || "truck",
         multiplier: Number(form.multiplier) || 1.0,
         active: !!form.active,
@@ -221,7 +230,26 @@ export function DashboardServices() {
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-3 line-clamp-2 leading-relaxed">{s.description}</p>
+                  <div className="space-y-1.5">
+                    {s.descriptionAr || s.descriptionEn ? (
+                      <>
+                        {s.descriptionAr && (
+                          <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 flex items-start gap-1.5" dir="rtl">
+                            <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold shrink-0 mt-0.5">AR</span>
+                            <span>{s.descriptionAr}</span>
+                          </p>
+                        )}
+                        {s.descriptionEn && (
+                          <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 flex items-start gap-1.5" dir="ltr">
+                            <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 text-[10px] font-bold shrink-0 mt-0.5">EN</span>
+                            <span>{s.descriptionEn}</span>
+                          </p>
+                        )}
+                      </>
+                    ) : (
+                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">{s.description}</p>
+                    )}
+                  </div>
                   <div className="mt-2 flex items-center gap-3 text-[11px] text-muted-foreground">
                     <span dir="ltr">×{s.multiplier ?? 1}</span>
                     <span className="font-mono truncate" dir="ltr">icon: {s.icon}</span>
@@ -287,13 +315,44 @@ export function DashboardServices() {
               </div>
             </div>
 
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs flex items-center gap-1.5">
+                  <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold">AR</span>
+                  {L("الوصف (عربي)", "Description (Arabic)")}
+                </Label>
+                <Textarea
+                  value={form.descriptionAr || ""}
+                  onChange={(e) => setForm({ ...form, descriptionAr: e.target.value })}
+                  rows={3}
+                  dir="rtl"
+                  placeholder="توصيل خلال 48-96 ساعة بأفضل الأسعار"
+                  className="bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-700"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs flex items-center gap-1.5">
+                  <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 text-[10px] font-bold">EN</span>
+                  {L("الوصف (إنجليزي)", "Description (English)")}
+                </Label>
+                <Textarea
+                  value={form.descriptionEn || ""}
+                  onChange={(e) => setForm({ ...form, descriptionEn: e.target.value })}
+                  rows={3}
+                  dir="ltr"
+                  placeholder="Delivery in 48-96 hours at the best prices"
+                  className="bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-700"
+                />
+              </div>
+            </div>
+
             <div className="space-y-1">
-              <Label className="text-xs">{L("الوصف", "Description")}</Label>
+              <Label className="text-xs text-muted-foreground">{L("الوصف الافتراضي (احتياطي)", "Default description (fallback)")}</Label>
               <Textarea
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
-                rows={3}
-                placeholder={L("توصيل خلال 48-96 ساعة بأفضل الأسعار", "Delivery in 48-96 hours at the best prices")}
+                rows={2}
+                placeholder={L("يُستخدم إذا كانت الحقول الثنائية فارغة", "Used when bilingual fields are empty")}
               />
             </div>
 

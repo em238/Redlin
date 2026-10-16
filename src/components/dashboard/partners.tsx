@@ -26,13 +26,14 @@ const LOGO_OPTIONS = [
 ];
 
 export function DashboardPartners() {
-  const { t } = useDashboardT();
+  const { t, isAr } = useDashboardT();
+  const L = (ar: string, en: string) => (isAr ? ar : en);
   const qc = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<any>({
-    name: "", logo: "", icon: "building", color: "#dc2626", website: "", order: 0, active: true,
+    name: "", nameAr: "", logo: "", icon: "building", color: "#dc2626", website: "", order: 0, active: true,
   });
 
   const { data, isLoading } = useQuery({
@@ -43,7 +44,7 @@ export function DashboardPartners() {
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ name: "", logo: "", icon: "building", color: "#dc2626", website: "", order: partners.length, active: true });
+    setForm({ name: "", nameAr: "", logo: "", icon: "building", color: "#dc2626", website: "", order: partners.length, active: true });
     setModalOpen(true);
   };
 
@@ -57,11 +58,15 @@ export function DashboardPartners() {
     if (!form.name) { toast.error(t("d.partners.toastMissingName")); return; }
     setSaving(true);
     try {
+      const payload = {
+        ...form,
+        nameAr: form.nameAr || "",
+      };
       if (editing) {
-        await apiPatch(`/api/partners/${editing.id}`, form);
+        await apiPatch(`/api/partners/${editing.id}`, payload);
         toast.success(t("d.partners.toastUpdated"));
       } else {
-        await apiPost("/api/partners", form);
+        await apiPost("/api/partners", payload);
         toast.success(t("d.partners.toastCreated"));
       }
       setModalOpen(false);
@@ -160,7 +165,10 @@ export function DashboardPartners() {
                           <span className="text-lg font-bold text-muted-foreground">{p.name?.charAt(0)}</span>
                         </div>
                       )}
-                      <div className="text-sm font-bold text-foreground/80">{p.name}</div>
+                      <div className="text-sm font-bold text-foreground/80 text-center">{p.name}</div>
+                      {p.nameAr && (
+                        <div className="text-xs text-muted-foreground text-center" dir="rtl">{p.nameAr}</div>
+                      )}
                       {!p.active && (
                         <span className="absolute top-2 left-2 px-2 py-0.5 rounded bg-zinc-800 text-white text-[10px] font-bold flex items-center gap-1">
                           <EyeOff className="w-3 h-3" /> {t("d.partners.hidden")}
@@ -203,9 +211,22 @@ export function DashboardPartners() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-1">
-              <Label className="text-xs">{t("d.partners.modal.nameLabel")}</Label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t("d.partners.modal.namePlaceholder")} className="h-10" />
+            {/* Names side by side — EN + AR */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs flex items-center gap-1.5">
+                  <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 text-[10px] font-bold">EN</span>
+                  {t("d.partners.modal.nameLabel")}
+                </Label>
+                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t("d.partners.modal.namePlaceholder")} className="h-10 bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-700" dir="ltr" />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs flex items-center gap-1.5">
+                  <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold">AR</span>
+                  {L("الاسم (عربي)", "Name (Arabic)")}
+                </Label>
+                <Input value={form.nameAr || ""} onChange={(e) => setForm({ ...form, nameAr: e.target.value })} placeholder={L("أدخل الاسم بالعربية", "Enter name in Arabic")} className="h-10 bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-700" dir="rtl" />
+              </div>
             </div>
 
             <FileUpload

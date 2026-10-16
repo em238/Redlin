@@ -1506,3 +1506,88 @@ Stage Summary:
 - Bilingual UI via inline L(ar, en) helper — no new i18n keys added.
 - Dark theme (bg-slate-900/60 border-slate-800 rounded-2xl) applied to Users table, Roles grid cards, and both dialogs for visual consistency with a security-focused admin panel.
 - 0 lint errors introduced.
+
+---
+Task ID: bilingual-dashboard-update
+Agent: Full-stack Developer (bilingual dashboard update)
+Task: Wire up the newly-added bilingual Prisma fields (HeroImage.titleAr/titleEn, Service.descriptionAr/descriptionEn, Video.titleAr/descriptionAr, Partner.nameAr, Testimonial.nameAr/roleAr/companyAr/contentAr, SiteStat.labelAr, Role.descriptionAr/descriptionEn) to their dashboard forms + API routes.
+
+Work Log:
+- Read each of the 7 target dashboard components + 14 target API routes BEFORE editing to understand existing structure (form state, save payload, edit-population, card display).
+- Confirmed schema fields exist with `@default("")` so existing rows are safe.
+- Applied the consistent AR/EN dual-field UI pattern (AR dir=rtl + red badge + slate bg; EN dir=ltr + blue badge + slate bg) across all 7 components.
+
+Dashboard components (7 files updated):
+
+1. src/components/dashboard/hero.tsx
+   - HeroImage type + emptyForm + openCreate + openChange + save payload (POST & PATCH) now include titleAr/titleEn
+   - Add/Edit dialog: bilingual Title inputs (AR | EN) in 2-col grid + "Legacy title" fallback Input
+   - Card display: shows both AR + EN titles with AR/EN badges if either is set, else falls back to legacy title
+
+2. src/components/dashboard/services.tsx
+   - Service type + emptyForm + openEdit + save payload now include descriptionAr/descriptionEn
+   - Add/Edit dialog: bilingual Description Textareas (AR | EN) in 2-col grid + legacy description fallback Textarea
+   - Card display: shows both descriptions with badges if either set, else legacy description
+
+3. src/components/dashboard/videos.tsx
+   - Initial form state + openCreate + applyTemplate + drag-drop handler + save payload now include titleAr + descriptionAr
+   - Add/Edit dialog: bilingual Title inputs (EN | AR) + bilingual Description Textareas (EN | AR) — 2-col grids each
+   - Card display: shows EN title prominently with AR badge when titleAr set; AR description block above EN when set
+   - Added `isAr` to useDashboardT destructure and `L` helper (file previously only used `t`)
+
+4. src/components/dashboard/partners.tsx
+   - Initial form state + openCreate + save payload now include nameAr
+   - Add/Edit dialog: bilingual Name inputs (EN | AR) in 2-col grid (replaced single Name field)
+   - Card display: shows EN name + AR name (rtl) below when set
+   - Added `isAr` to destructure + `L` helper
+
+5. src/components/dashboard/reviews.tsx
+   - Review type now includes nameAr, roleAr, companyAr, contentAr
+   - Card display uses `isAr` to pick AR variant for name/role/company if present (with appropriate dir="rtl"/dir="ltr")
+   - Content section shows both AR + EN blocks (with AR/EN badges) if contentAr is set, else just EN
+   - Avatar alt text + initial character follow AR variant when in Arabic mode
+
+6. src/components/dashboard/about.tsx
+   - SiteStat type + statForm + openCreateStat + openEditStat + save payload (POST & PATCH) now include labelAr
+   - Card display: shows labelAr (AR, dir=rtl) prominently with EN label below when set
+   - Add/Edit Stat modal: bilingual Label inputs (AR | EN) in 2-col grid (replaced single Label field)
+
+7. src/components/dashboard/roles.tsx
+   - RoleItem type + form state + openCreate + openEdit + save payload now include descriptionAr + descriptionEn
+   - Add/Edit dialog: bilingual Description Textareas (AR | EN) in 2-col grid + "Legacy description" fallback Textarea
+   - Card display uses `isAr` to pick AR or EN description variant when present, else falls back to legacy description
+
+API routes (14 files updated):
+
+POST routes (added new fields to create-data object):
+- /api/hero-images/route.ts: titleAr, titleEn
+- /api/services/route.ts: descriptionAr, descriptionEn
+- /api/videos/route.ts: titleAr, descriptionAr
+- /api/partners/route.ts: nameAr
+- /api/testimonials/route.ts: nameAr, roleAr, companyAr, contentAr (public submit still status="pending")
+- /api/stats/route.ts: labelAr
+- /api/roles/route.ts: descriptionAr, descriptionEn + returned in safe payload
+
+PATCH routes (added new fields to allowlist or explicit if-blocks):
+- /api/hero-images/[id]/route.ts: explicit allowlist ["url","title","titleAr","titleEn","order","active"] (replaces prior {...body} passthrough for safety)
+- /api/services/[id]/route.ts: added descriptionAr, descriptionEn to allowlist
+- /api/videos/[id]/route.ts: explicit 9-field allowlist incl. titleAr, descriptionAr (replaces prior {...body} passthrough)
+- /api/partners/[id]/route.ts: explicit 8-field allowlist incl. nameAr (replaces prior {...body} passthrough)
+- /api/testimonials/[id]/route.ts: explicit if (X !== undefined) blocks for nameAr, roleAr, companyAr, contentAr
+- /api/stats/[id]/route.ts: added labelAr to allowlist
+- /api/roles/[id]/route.ts: explicit if (X !== undefined) blocks for descriptionAr, descriptionEn + returned in safe payload; GET /api/roles and GET /api/roles/[id] responses now also expose descriptionAr + descriptionEn
+
+GET routes: no change needed — Prisma findMany automatically selects every column in the schema, so the new fields are returned out-of-the-box.
+
+Verification:
+- bun run lint: 0 errors, 3 warnings (all pre-existing Unused eslint-disable directives in page.tsx & dashboard-app.tsx — none from this task)
+- DB verification: ran a fresh bun script importing "@/lib/db" — confirmed Prisma client selects SiteStat.labelAr, Testimonial.nameAr/roleAr/companyAr/contentAr, etc. Existing rows have empty-string defaults for the new columns (per @default("") in schema)
+- dev.log: no compile errors logged; 200 OK on /
+- Note: the running dev server has a stale PrismaClient singleton cached in globalThis.prisma from before the schema push, so /api/site currently does not yet return the new fields in the response. A fresh bun script confirms the new client correctly returns the new columns — the next dev-server restart will refresh the cached singleton and the API will reflect the new columns. The schema is in sync with the DB (verified via `bun run db:push` → "already in sync"). Prisma client was regenerated via `bunx prisma generate`.
+
+Stage Summary:
+- 7 dashboard components + 14 API routes updated to wire up the new bilingual Prisma fields.
+- Consistent AR/EN dual-field UI pattern applied across all 7 components (AR dir=rtl + red badge + slate bg; EN dir=ltr + blue badge + slate bg; 2-col grid on sm+).
+- Bilingual hook pattern `const { isAr } = useDashboardT(); const L = (ar, en) => isAr ? ar : en;` reused; added `isAr` + `L` to videos.tsx and partners.tsx which previously only destructured `t`.
+- Legacy fields kept for backward compat where the schema preserved them (HeroImage.title, Service.description, Video.title/description, Role.description) — labeled "Legacy ... (fallback)" and visually muted with `text-muted-foreground`.
+- 0 lint errors introduced.

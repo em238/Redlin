@@ -27,10 +27,17 @@ export async function POST(req: NextRequest) {
   try {
     await requireAdmin();
     const body = await req.json();
-    const { url, title, order, active } = body;
+    const { url, title, titleAr, titleEn, order, active } = body;
     if (!url) return jsonError("الرابط مطلوب", 400);
     const image = await db.heroImage.create({
-      data: { url, title: title || null, order: order ?? 0, active: active !== false },
+      data: {
+        url,
+        title: title || null,
+        titleAr: titleAr || "",
+        titleEn: titleEn || "",
+        order: order ?? 0,
+        active: active !== false,
+      },
     });
     return Response.json({ image });
   } catch (e: any) {

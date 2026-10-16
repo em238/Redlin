@@ -74,12 +74,12 @@ export async function POST(req: NextRequest) {
   try {
     await requireAdmin();
     const body = await req.json();
-    const { label, value, icon } = body;
+    const { label, labelAr, value, icon } = body;
     if (!label || value === undefined || value === null) {
       return jsonError("القيمة والوصف مطلوبان", 400);
     }
     const stat = await db.siteStat.create({
-      data: { label, value: String(value), icon: icon || "package" },
+      data: { label, labelAr: labelAr || "", value: String(value), icon: icon || "package" },
     });
     return Response.json({ stat });
   } catch (e: any) {

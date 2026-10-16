@@ -13,7 +13,7 @@ import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 import { toast } from "sonner";
 import { useDashboardT } from "@/lib/i18n";
 
-type RoleItem = { id: string; name: string; nameAr: string; description: string; isSystemRole: boolean; permissions: string; userCount: number };
+type RoleItem = { id: string; name: string; nameAr: string; description: string; descriptionAr: string; descriptionEn: string; isSystemRole: boolean; permissions: string; userCount: number };
 
 const MODULES = [
   { key: "hero", labelAr: "الهيرو", labelEn: "Hero", actions: ["read", "edit"] },
@@ -36,7 +36,7 @@ export function DashboardRoles() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<RoleItem | null>(null);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ name: "", nameAr: "", description: "", permissions: {} as Record<string, string[]> });
+  const [form, setForm] = useState({ name: "", nameAr: "", description: "", descriptionAr: "", descriptionEn: "", permissions: {} as Record<string, string[]> });
 
   const { data, isLoading } = useQuery({
     queryKey: ["admin-roles"],
@@ -44,12 +44,12 @@ export function DashboardRoles() {
   });
   const roles = data?.roles ?? [];
 
-  const openCreate = () => { setEditing(null); setForm({ name: "", nameAr: "", description: "", permissions: {} }); setModalOpen(true); };
+  const openCreate = () => { setEditing(null); setForm({ name: "", nameAr: "", description: "", descriptionAr: "", descriptionEn: "", permissions: {} }); setModalOpen(true); };
   const openEdit = (r: RoleItem) => {
     setEditing(r);
     let perms = {};
     try { perms = JSON.parse(r.permissions || "{}"); } catch {}
-    setForm({ name: r.name, nameAr: r.nameAr, description: r.description, permissions: perms });
+    setForm({ name: r.name, nameAr: r.nameAr, description: r.description, descriptionAr: r.descriptionAr || "", descriptionEn: r.descriptionEn || "", permissions: perms });
     setModalOpen(true);
   };
 
@@ -74,7 +74,14 @@ export function DashboardRoles() {
     if (!form.name) { toast.error(L("الاسم مطلوب", "Name required")); return; }
     setSaving(true);
     try {
-      const payload = { name: form.name, nameAr: form.nameAr, description: form.description, permissions: JSON.stringify(form.permissions) };
+      const payload = {
+        name: form.name,
+        nameAr: form.nameAr,
+        description: form.description,
+        descriptionAr: form.descriptionAr || "",
+        descriptionEn: form.descriptionEn || "",
+        permissions: JSON.stringify(form.permissions),
+      };
       if (editing) { await apiPatch(`/api/roles/${editing.id}`, payload); toast.success(L("تم التحديث", "Updated")); }
       else { await apiPost("/api/roles", payload); toast.success(L("تم الإنشاء", "Created")); }
       setModalOpen(false); qc.invalidateQueries({ queryKey: ["admin-roles"] });
@@ -121,7 +128,13 @@ export function DashboardRoles() {
                     {isAr ? (r.nameAr || r.name) : r.name}
                     {r.isSystemRole && <Badge variant="outline" className="text-[9px] py-0 h-3.5 bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-400 dark:border-amber-900 gap-0.5"><Lock className="w-2.5 h-2.5" />{L("نظام", "System")}</Badge>}
                   </div>
-                  {r.description && <div className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">{r.description}</div>}
+                  {(isAr ? (r.descriptionAr || r.description) : (r.descriptionEn || r.description)) ? (
+                    <div className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                      {isAr ? (r.descriptionAr || r.description) : (r.descriptionEn || r.description)}
+                    </div>
+                  ) : r.description ? (
+                    <div className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">{r.description}</div>
+                  ) : null}
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   <Badge variant="outline" className="text-[10px] bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700">{r.userCount} {L("مستخدم", "users")}</Badge>
@@ -152,12 +165,46 @@ export function DashboardRoles() {
               </div>
               <div className="space-y-1">
                 <Label className="text-xs text-slate-600 dark:text-slate-300">{L("الاسم (AR)", "Name (AR)")}</Label>
-                <Input value={form.nameAr} onChange={(e) => setForm({ ...form, nameAr: e.target.value })} placeholder="مدير محتوى" className="h-10 bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white" />
+                <Input value={form.nameAr} onChange={(e) => setForm({ ...form, nameAr: e.target.value })} placeholder="مدير محتوى" className="h-10 bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white" dir="rtl" />
               </div>
             </div>
+
+            {/* Bilingual description AR | EN */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
+                  <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold">AR</span>
+                  {L("الوصف (عربي)", "Description (Arabic)")}
+                </Label>
+                <Textarea
+                  value={form.descriptionAr}
+                  onChange={(e) => setForm({ ...form, descriptionAr: e.target.value })}
+                  rows={2}
+                  dir="rtl"
+                  placeholder={L("مدير محتوى بمسؤولية كاملة", "Content manager with full responsibility")}
+                  className="bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
+                  <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 text-[10px] font-bold">EN</span>
+                  {L("الوصف (إنجليزي)", "Description (English)")}
+                </Label>
+                <Textarea
+                  value={form.descriptionEn}
+                  onChange={(e) => setForm({ ...form, descriptionEn: e.target.value })}
+                  rows={2}
+                  dir="ltr"
+                  placeholder="Content manager with full responsibility"
+                  className="bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white"
+                />
+              </div>
+            </div>
+
+            {/* Legacy description */}
             <div className="space-y-1">
-              <Label className="text-xs text-slate-600 dark:text-slate-300">{L("الوصف", "Description")}</Label>
-              <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} className="bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white" />
+              <Label className="text-xs text-slate-600 dark:text-slate-300">{L("الوصف الافتراضي (احتياطي)", "Legacy description (fallback)")}</Label>
+              <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={1} className="bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white" />
             </div>
 
             {/* Permissions */}

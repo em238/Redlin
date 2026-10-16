@@ -20,6 +20,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
         name: r.name,
         nameAr: r.nameAr,
         description: r.description,
+        descriptionAr: r.descriptionAr,
+        descriptionEn: r.descriptionEn,
         isSystemRole: r.isSystemRole,
         permissions: r.permissions ? JSON.parse(r.permissions) : {},
         userCount: r._count?.users ?? 0,
@@ -38,7 +40,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     await requireAdmin();
     const { id } = await params;
     const body = await req.json();
-    const { name, nameAr, description, permissions } = body;
+    const { name, nameAr, description, descriptionAr, descriptionEn, permissions } = body;
 
     const existing = await db.role.findUnique({ where: { id } });
     if (!existing) return jsonError("الدور غير موجود", 404);
@@ -56,6 +58,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     if (nameAr !== undefined) data.nameAr = String(nameAr);
     if (description !== undefined) data.description = String(description);
+    if (descriptionAr !== undefined) data.descriptionAr = String(descriptionAr);
+    if (descriptionEn !== undefined) data.descriptionEn = String(descriptionEn);
 
     // Permissions — system roles cannot have empty perms
     if (permissions !== undefined) {
@@ -82,6 +86,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         name: updated.name,
         nameAr: updated.nameAr,
         description: updated.description,
+        descriptionAr: updated.descriptionAr,
+        descriptionEn: updated.descriptionEn,
         isSystemRole: updated.isSystemRole,
         permissions: JSON.parse(updated.permissions || "{}"),
         userCount: updated._count?.users ?? 0,

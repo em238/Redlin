@@ -16,14 +16,18 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   try {
     const { id } = await params;
     const body = await req.json();
-    const { status, name, role, company, content, rating, avatar, active } = body;
+    const { status, name, nameAr, role, roleAr, company, companyAr, content, contentAr, rating, avatar, active } = body;
 
     const data: Record<string, unknown> = {};
     if (status) data.status = status;
     if (name !== undefined) data.name = name;
+    if (nameAr !== undefined) data.nameAr = nameAr;
     if (role !== undefined) data.role = role;
+    if (roleAr !== undefined) data.roleAr = roleAr;
     if (company !== undefined) data.company = company;
+    if (companyAr !== undefined) data.companyAr = companyAr;
     if (content !== undefined) data.content = content;
+    if (contentAr !== undefined) data.contentAr = contentAr;
     if (rating !== undefined) data.rating = rating;
     if (avatar !== undefined) data.avatar = avatar;
     if (active !== undefined) data.active = active;

@@ -30,12 +30,14 @@ type HeroImage = {
   id: string;
   url: string;
   title?: string | null;
+  titleAr?: string;
+  titleEn?: string;
   order: number;
   active: boolean;
   createdAt: string;
 };
 
-const emptyForm = { url: "", title: "", order: 0, active: true };
+const emptyForm = { url: "", title: "", titleAr: "", titleEn: "", order: 0, active: true };
 
 export function DashboardHero() {
   const { isAr } = useDashboardT();
@@ -58,13 +60,20 @@ export function DashboardHero() {
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ url: "", title: "", order: images.length, active: true });
+    setForm({ url: "", title: "", titleAr: "", titleEn: "", order: images.length, active: true });
     setModalOpen(true);
   };
 
   const openChange = (img: HeroImage) => {
     setEditing(img);
-    setForm({ url: img.url, title: img.title || "", order: img.order, active: img.active });
+    setForm({
+      url: img.url,
+      title: img.title || "",
+      titleAr: img.titleAr || "",
+      titleEn: img.titleEn || "",
+      order: img.order,
+      active: img.active,
+    });
     setModalOpen(true);
   };
 
@@ -76,6 +85,8 @@ export function DashboardHero() {
         await apiPatch(`/api/hero-images/${editing.id}`, {
           url: form.url,
           title: form.title || null,
+          titleAr: form.titleAr || "",
+          titleEn: form.titleEn || "",
           order: form.order,
           active: form.active,
         });
@@ -84,6 +95,8 @@ export function DashboardHero() {
         await apiPost("/api/hero-images", {
           url: form.url,
           title: form.title || null,
+          titleAr: form.titleAr || "",
+          titleEn: form.titleEn || "",
           order: form.order,
           active: form.active,
         });
@@ -259,9 +272,28 @@ export function DashboardHero() {
                   </div>
 
                   <div className="p-4 space-y-2">
-                    {/* Title */}
-                    <div className="font-bold text-sm truncate">
-                      {img.title || L("بدون عنوان", "Untitled")}
+                    {/* Titles — show both AR + EN if present, fallback to legacy title */}
+                    <div className="space-y-1">
+                      {(img.titleAr || img.titleEn) ? (
+                        <>
+                          {img.titleAr && (
+                            <div className="font-bold text-sm truncate flex items-center gap-1.5" dir="rtl">
+                              <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold shrink-0">AR</span>
+                              <span className="truncate">{img.titleAr}</span>
+                            </div>
+                          )}
+                          {img.titleEn && (
+                            <div className="font-bold text-sm truncate flex items-center gap-1.5" dir="ltr">
+                              <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 text-[10px] font-bold shrink-0">EN</span>
+                              <span className="truncate">{img.titleEn}</span>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="font-bold text-sm truncate">
+                          {img.title || L("بدون عنوان", "Untitled")}
+                        </div>
+                      )}
                     </div>
                     {/* Filename */}
                     <div className="text-xs text-muted-foreground font-mono truncate" dir="ltr" title={img.url}>
@@ -368,12 +400,45 @@ export function DashboardHero() {
               </div>
             </div>
 
+            {/* Bilingual titles AR | EN */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs flex items-center gap-1.5">
+                  <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold">AR</span>
+                  {L("العنوان (عربي)", "Title (Arabic)")}
+                </Label>
+                <Input
+                  value={form.titleAr || ""}
+                  onChange={(e) => setForm({ ...form, titleAr: e.target.value })}
+                  placeholder={L("مثال: شاحنة Redline على الطريق السريع", "Example: Redline truck on the highway")}
+                  dir="rtl"
+                  className="h-10 bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-700"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs flex items-center gap-1.5">
+                  <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 text-[10px] font-bold">EN</span>
+                  {L("العنوان (إنجليزي)", "Title (English)")}
+                </Label>
+                <Input
+                  value={form.titleEn || ""}
+                  onChange={(e) => setForm({ ...form, titleEn: e.target.value })}
+                  placeholder="Redline truck on the highway"
+                  dir="ltr"
+                  className="h-10 bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-700"
+                />
+              </div>
+            </div>
+
+            {/* Legacy title (kept for backward compat / fallback) */}
             <div className="space-y-1">
-              <Label className="text-xs">{L("عنوان/وصف الصورة (اختياري)", "Image title/description (optional)")}</Label>
+              <Label className="text-xs text-muted-foreground">
+                {L("عنوان قديم (احتياطي)", "Legacy title (fallback)")}
+              </Label>
               <Input
                 value={form.title || ""}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
-                placeholder={L("مثال: شاحنة Redline على الطريق السريع", "Example: Redline truck on the highway")}
+                placeholder={L("يُستخدم فقط إذا كانت الحقول الثنائية فارغة", "Used only if bilingual fields are empty")}
                 className="h-10"
               />
             </div>

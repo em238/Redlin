@@ -17,6 +17,8 @@ export async function GET() {
       name: r.name,
       nameAr: r.nameAr,
       description: r.description,
+      descriptionAr: r.descriptionAr,
+      descriptionEn: r.descriptionEn,
       isSystemRole: r.isSystemRole,
       permissions: r.permissions ? JSON.parse(r.permissions) : {},
       userCount: r._count?.users ?? 0,
@@ -34,7 +36,7 @@ export async function POST(req: NextRequest) {
   try {
     await requireAdmin();
     const body = await req.json();
-    const { name, nameAr, description, permissions } = body;
+    const { name, nameAr, description, descriptionAr, descriptionEn, permissions } = body;
     if (!name) return jsonError("اسم الدور مطلوب", 400);
 
     const existing = await db.role.findUnique({ where: { name: String(name).trim() } });
@@ -55,6 +57,8 @@ export async function POST(req: NextRequest) {
         name: String(name).trim(),
         nameAr: nameAr ? String(nameAr) : "",
         description: description ? String(description) : "",
+        descriptionAr: descriptionAr ? String(descriptionAr) : "",
+        descriptionEn: descriptionEn ? String(descriptionEn) : "",
         isSystemRole: false, // never allow creating system roles
         permissions: JSON.stringify(perms),
       },
@@ -67,6 +71,8 @@ export async function POST(req: NextRequest) {
         name: role.name,
         nameAr: role.nameAr,
         description: role.description,
+        descriptionAr: role.descriptionAr,
+        descriptionEn: role.descriptionEn,
         isSystemRole: role.isSystemRole,
         permissions: JSON.parse(role.permissions || "{}"),
         userCount: role._count?.users ?? 0,

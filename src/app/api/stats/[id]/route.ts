@@ -10,7 +10,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const { id } = await params;
     const body = await req.json();
     const data: Record<string, unknown> = {};
-    for (const key of ["label", "value", "icon"]) {
+    for (const key of ["label", "labelAr", "value", "icon"]) {
       if (body[key] !== undefined) data[key] = body[key];
     }
     if (data.value !== undefined) data.value = String(data.value);

@@ -27,10 +27,19 @@ export async function POST(req: NextRequest) {
   try {
     await requireAdmin();
     const body = await req.json();
-    const { name, logo, icon, color, website, order, active } = body;
+    const { name, nameAr, logo, icon, color, website, order, active } = body;
     if (!name) return jsonError("الاسم مطلوب", 400);
     const partner = await db.partner.create({
-      data: { name, logo: logo || null, icon: icon || "building", color: color || "#dc2626", website: website || null, order: order ?? 0, active: active !== false },
+      data: {
+        name,
+        nameAr: nameAr || "",
+        logo: logo || null,
+        icon: icon || "building",
+        color: color || "#dc2626",
+        website: website || null,
+        order: order ?? 0,
+        active: active !== false,
+      },
     });
     return Response.json({ partner });
   } catch (e: any) {
