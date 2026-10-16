@@ -21,7 +21,7 @@ import { WhatsAppChat } from "@/components/shared/whatsapp-chat";
 
 export function PublicPage() {
   return (
-    <div className="min-h-screen flex flex-col overflow-x-hidden noise">
+    <div className="relative min-h-screen flex flex-col overflow-x-hidden noise">
       <PageLoadReveal />
       <CustomCursor />
       <Navbar />

@@ -1,9 +1,23 @@
 // Frontend fetch helpers
 
 export async function apiGet<T = any>(path: string): Promise<T> {
-  const res = await fetch(path, { method: "GET", headers: { "Content-Type": "application/json" }, cache: "no-store" });
-  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || `HTTP ${res.status}`);
-  return res.json();
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(path, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch {
+    // Return empty object on ANY error (502, network, timeout, parse)
+    // Components handle this gracefully with their fallback data
+    return {} as T;
+  }
 }
 
 export async function apiPost<T = any>(path: string, body?: any): Promise<T> {
