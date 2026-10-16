@@ -155,7 +155,7 @@ export function Navbar() {
                   <button
                     key={link.href}
                     onClick={() => go(link.href)}
-                    className={`px-3 py-2.5 text-right text-sm font-medium rounded-lg transition-colors ${
+                    className={`px-4 py-2.5 text-start text-sm font-medium rounded-lg transition-colors flex items-center justify-start ${
                       activeSection === link.href ? "bg-primary/10 text-primary" : "hover:bg-muted"
                     }`}
                   >
@@ -165,7 +165,7 @@ export function Navbar() {
               })}
               <Button
                 onClick={() => { setMobileOpen(false); setView("dashboard"); }}
-                className="mt-2 bg-primary text-primary-foreground gap-2"
+                className="mt-2 bg-primary text-primary-foreground gap-2 w-full justify-center"
               >
                 <LayoutDashboard className="w-[18px] h-[18px]" />
                 {t("nav.dashboard")}
