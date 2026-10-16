@@ -1,9 +1,11 @@
 "use client";
 
+import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  LayoutDashboard, Package, Boxes, ListChecks, Video, DollarSign,
-  MessageSquare, Settings, LogOut, X, Globe, ChevronLeft, ImageIcon, Handshake, Users, ShieldCheck
+  LayoutDashboard, Boxes, ListChecks, Video, DollarSign,
+  MessageSquare, Settings, LogOut, X, Globe, ChevronLeft,
+  ImageIcon, Handshake, Users, ShieldCheck, PanelLeftClose, PanelLeftOpen,
 } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -15,6 +17,19 @@ import { useDashboardT } from "@/lib/i18n";
 export function DashboardSidebar() {
   const { dashboardSection, setDashboardSection, sidebarOpen, setSidebarOpen, user, setUser, setView, setAuthChecked } = useAppStore();
   const { t } = useDashboardT();
+
+  // Collapsed state — lazy init from localStorage (no setState in effect)
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try { return localStorage.getItem("dashboard_sidebar_collapsed") === "true"; } catch { return false; }
+  });
+  const toggleCollapsed = useCallback(() => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      try { localStorage.setItem("dashboard_sidebar_collapsed", String(next)); } catch {}
+      return next;
+    });
+  }, []);
 
   const NAV: { id: DashboardSection; label: string; icon: any }[] = [
     { id: "hero", label: t("d.nav.hero"), icon: ImageIcon },
@@ -32,88 +47,104 @@ export function DashboardSidebar() {
   ];
 
   const logout = async () => {
-    try {
-      await apiPost("/api/auth/logout", {});
-    } catch {}
-    setUser(null);
-    setAuthChecked(false);
-    setView("public");
+    try { await apiPost("/api/auth/logout", {}); } catch {}
+    setUser(null); setAuthChecked(false); setView("public");
     toast.success(t("d.sidebar.logoutSuccess"));
   };
 
-  const content = (
+  // Shared nav button renderer (used in both expanded + collapsed)
+  const NavButton = ({ item }: { item: { id: DashboardSection; label: string; icon: any } }) => {
+    const isActive = dashboardSection === item.id;
+    return (
+      <button
+        onClick={() => { setDashboardSection(item.id); setSidebarOpen(false); }}
+        title={collapsed ? item.label : undefined}
+        className={`w-full flex items-center ${collapsed ? "justify-center" : "gap-3 px-3"} py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+          isActive
+            ? "bg-gradient-to-l from-primary to-red-700 text-white shadow-md shadow-primary/25"
+            : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+        }`}
+      >
+        <item.icon className="w-5 h-5 shrink-0" strokeWidth={1.8} />
+        {!collapsed && <span className="flex-1 text-start truncate">{item.label}</span>}
+        {!collapsed && isActive && <ChevronLeft className="w-4 h-4 shrink-0" />}
+      </button>
+    );
+  };
+
+  // Sidebar inner content
+  const sidebarContent = (
     <div className="flex flex-col h-full bg-sidebar text-sidebar-foreground">
-      {/* Logo */}
-      <div className="flex items-center justify-between p-5 border-b border-sidebar-border">
-        <button onClick={() => setView("public")} className="flex items-center group focus:outline-none">
+      {/* Header: Logo + collapse toggle */}
+      <div className="flex items-center justify-between p-3 border-b border-sidebar-border shrink-0">
+        <button onClick={() => setView("public")} className="flex items-center group focus:outline-none overflow-hidden">
           <Image
             src="/redline-transport-logo.png"
             alt="RedLine Transport"
             width={1200}
             height={514}
-            className="h-9 w-auto max-w-none object-contain transition-transform group-hover:scale-105"
+            className={`transition-all duration-300 ${collapsed ? "h-0 w-0 opacity-0" : "h-8 w-auto opacity-100"}`}
           />
         </button>
-        <Button variant="ghost" size="icon" className="lg:hidden rounded-full" onClick={() => setSidebarOpen(false)}>
+        {/* Collapse toggle (desktop only) */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="hidden lg:flex rounded-lg shrink-0 h-8 w-8"
+          onClick={toggleCollapsed}
+        >
+          {collapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
+        </Button>
+        {/* Close button (mobile only) */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="lg:hidden rounded-lg shrink-0 h-8 w-8"
+          onClick={() => setSidebarOpen(false)}
+        >
           <X className="w-5 h-5" />
         </Button>
       </div>
 
-      {/* User chip */}
+      {/* User chip — compact */}
       {user && (
-        <div className="px-5 py-3 border-b border-sidebar-border">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-red-700 flex items-center justify-center text-white font-bold text-sm shrink-0">
+        <div className="px-3 py-2.5 border-b border-sidebar-border shrink-0">
+          <div className={`flex items-center ${collapsed ? "justify-center" : "gap-2.5"}`}>
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-red-700 flex items-center justify-center text-white font-bold text-xs shrink-0">
               {user.name?.charAt(0).toUpperCase() || "A"}
             </div>
-            <div className="min-w-0">
-              <div className="text-sm font-semibold truncate">{user.name}</div>
-              <div className="text-[11px] text-muted-foreground truncate">{user.email}</div>
-            </div>
+            {!collapsed && (
+              <div className="min-w-0">
+                <div className="text-xs font-semibold truncate">{user.name}</div>
+                <div className="text-[10px] text-muted-foreground truncate">{user.email}</div>
+              </div>
+            )}
           </div>
         </div>
       )}
 
-      {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto p-3 space-y-0.5">
-        {NAV.map((item) => {
-          const isActive = dashboardSection === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => {
-                setDashboardSection(item.id);
-                setSidebarOpen(false);
-              }}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                isActive
-                  ? "bg-gradient-to-l from-primary to-red-700 text-white shadow-md shadow-primary/25"
-                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-              }`}
-            >
-              <item.icon className="w-5 h-5 shrink-0" strokeWidth={1.8} />
-              <span className="flex-1 text-start">{item.label}</span>
-              {isActive && <ChevronLeft className="w-4 h-4" />}
-            </button>
-          );
-        })}
+      {/* Navigation — scrollable if needed */}
+      <nav className="flex-1 overflow-y-auto no-scrollbar p-2 space-y-1">
+        {NAV.map((item) => <NavButton key={item.id} item={item} />)}
       </nav>
 
-      {/* Footer */}
-      <div className="p-3 border-t border-sidebar-border space-y-1">
+      {/* Footer — anchored bottom */}
+      <div className="p-2 border-t border-sidebar-border space-y-1 shrink-0">
         <button
           onClick={() => setView("public")}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
+          title={collapsed ? t("d.sidebar.viewSite") : undefined}
+          className={`w-full flex items-center ${collapsed ? "justify-center" : "gap-3 px-3"} py-2.5 rounded-xl text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent transition-colors`}
         >
           <LayoutDashboard className="w-5 h-5 shrink-0" strokeWidth={1.8} />
-          {t("d.sidebar.viewSite")}
+          {!collapsed && t("d.sidebar.viewSite")}
         </button>
         <button
           onClick={logout}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors"
+          title={collapsed ? t("d.sidebar.logout") : undefined}
+          className={`w-full flex items-center ${collapsed ? "justify-center" : "gap-3 px-3"} py-2.5 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors`}
         >
           <LogOut className="w-5 h-5 shrink-0" strokeWidth={1.8} />
-          {t("d.sidebar.logout")}
+          {!collapsed && t("d.sidebar.logout")}
         </button>
       </div>
     </div>
@@ -121,9 +152,13 @@ export function DashboardSidebar() {
 
   return (
     <>
-      {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-64 shrink-0 border-r border-sidebar-border">
-        {content}
+      {/* Desktop sidebar — collapsible */}
+      <aside
+        className={`hidden lg:flex shrink-0 border-r border-sidebar-border h-screen sticky top-0 transition-all duration-300 ease-in-out ${
+          collapsed ? "w-[72px]" : "w-64"
+        }`}
+      >
+        {sidebarContent}
       </aside>
 
       {/* Mobile drawer */}
@@ -135,16 +170,16 @@ export function DashboardSidebar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+              className="lg:hidden fixed inset-0 z-40 bg-black/50"
             />
             <motion.aside
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="lg:hidden fixed top-0 start-0 bottom-0 w-72 z-50"
+              className="lg:hidden fixed top-0 start-0 bottom-0 w-64 z-50 h-screen"
             >
-              {content}
+              {sidebarContent}
             </motion.aside>
           </>
         )}

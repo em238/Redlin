@@ -78,14 +78,14 @@ export function DashboardApp() {
 
   return (
     <div
-      className="min-h-screen flex bg-background"
+      className="h-screen flex bg-background overflow-hidden"
       dir={dashboardLocale === "ar" ? "rtl" : "ltr"}
       lang={dashboardLocale}
     >
       <DashboardSidebar />
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         <DashboardTopbar />
-        <main className="flex-1 p-4 sm:p-6 overflow-x-hidden">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <AnimatePresence mode="wait">
             <motion.div
               key={dashboardSection}
