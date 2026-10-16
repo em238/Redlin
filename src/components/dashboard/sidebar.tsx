@@ -53,7 +53,7 @@ export function DashboardSidebar() {
   };
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-sidebar text-sidebar-foreground p-0 m-0">
+    <div className="flex flex-col h-full w-full bg-sidebar text-sidebar-foreground p-0 m-0">
       {/* === TOP: Logo + Collapse toggle === */}
       <div className="flex items-center justify-between px-3 py-3 border-b border-slate-200 dark:border-slate-800 shrink-0">
         <button onClick={() => setView("public")} className="flex items-center group focus:outline-none overflow-hidden">
@@ -147,8 +147,8 @@ export function DashboardSidebar() {
     <>
       {/* Desktop sidebar — collapsible, flush to edge, seamless border */}
       <aside
-        className={`hidden lg:flex shrink-0 h-screen sticky top-0 p-0 m-0 transition-all duration-300 ease-in-out border-e border-slate-200 dark:border-slate-800 ${
-          collapsed ? "w-[72px]" : "w-64 md:w-72"
+        className={`hidden lg:flex shrink-0 h-screen sticky top-0 p-0 m-0 overflow-hidden transition-all duration-300 ease-in-out border-e border-slate-200 dark:border-slate-800 ${
+          collapsed ? "w-[64px]" : "w-60"
         }`}
       >
         {sidebarContent}
@@ -170,7 +170,7 @@ export function DashboardSidebar() {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="lg:hidden fixed top-0 start-0 bottom-0 w-64 z-50 h-screen p-0 m-0 border-e border-slate-200 dark:border-slate-800"
+              className="lg:hidden fixed top-0 start-0 bottom-0 w-60 z-50 h-screen p-0 m-0 overflow-hidden border-e border-slate-200 dark:border-slate-800"
             >
               {sidebarContent}
             </motion.aside>
