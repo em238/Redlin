@@ -1810,3 +1810,78 @@ Stage Summary:
 - Dashboard card includes a live preview block so admins see exactly how the banner will look before saving.
 - Save Changes flow: form → apiPost /api/cta-banner → DB upsert → toast notification → query invalidation propagates to public site immediately.
 - Zero lint errors introduced (only 3 pre-existing warnings untouched). No runtime errors in dev.log or browser console.
+
+---
+Task ID: dashboard-refresh-bug-fix
+Agent: Z.ai Code (main)
+
+Task: Fix the dashboard refresh bug — refreshing any /dashboard page was bouncing the user back to the public homepage because the dashboard was an in-memory Zustand view toggled inside `/`, not a real route. Move dashboard to its own /dashboard route with middleware-based auth, persistent tab via URL query, and an isCheckingAuth loader.
+
+Work Log:
+
+**Investigation**
+- Found that `/` rendered either <PublicPage> or <DashboardApp> based on Zustand `view: "public" | "dashboard"` state. Since Zustand state is in-memory only, any refresh reset `view` to its default "public", bouncing the user out of the dashboard.
+- Auth used an httpOnly cookie (`redline_session`) + in-memory session Map in `lib/auth.ts`. `/api/auth/me` verifies the cookie against the DB. The login form was rendered by <DashboardApp> when `user === null`.
+- Found 9 call sites of `setView`: sidebar (×2: logo + logout), login (×1: back button), settings (×1: logout), navbar (×3: view check + dashboard button + mobile dashboard button), footer (×1: dashboard link), floating-cta (×1: setView("public")), plus the page.tsx consumer.
+
+**New files created**
+
+1. `/home/z/my-project/middleware.ts` — gates `/dashboard` requests. Stamps the request with `x-redline-authed: 1` header if the session cookie exists. Does NOT redirect unauthenticated users (so they can still see the login screen on /dashboard — avoids a chicken-and-egg problem). Documents the auth flow + future enhancement hooks.
+
+2. `/home/z/my-project/src/app/dashboard/layout.tsx` — server component. Initially had a `redirect("/")` if no cookie, but removed it because that would make the login screen on /dashboard unreachable (user clicks Dashboard in navbar → no cookie → redirected to / → can never log in). Final version is metadata-only (title, robots noindex) and just renders children. The client-side auth check in DashboardApp handles login vs dashboard rendering.
+
+3. `/home/z/my-project/src/app/dashboard/page.tsx` — minimal client component that delegates to <DashboardApp>. Originally wrapped in <Suspense> because DashboardApp used `useSearchParams()`, but Suspense was removed when I switched to `window.location.search` directly (see race-condition fix below).
+
+**Updated files**
+
+4. `src/components/dashboard/dashboard-app.tsx` — rewrote the tab-persistence logic. The original code had two effects (one reading URL → store, one writing store → URL) which caused a race condition on mount: the second effect ran before the first one set the store, clobbering a valid `?tab=users` URL back to `?tab=hero`. Fixed by consolidating into a single effect guarded by a `useRef(false)` mount flag:
+   - Initial mount: read URL `?tab=` (or localStorage fallback `redline_dashboard_active_tab`) → setDashboardSection(). Do NOT write back to URL.
+   - Subsequent runs (user clicked a different tab): store → URL via `window.history.replaceState` (no scroll jump, no new history entry) + mirror to localStorage.
+   - Switched from `useSearchParams()`/`router.replace()` to `window.location.search`/`window.history.replaceState` for two reasons: (a) removes the <Suspense> requirement, (b) avoids a Next.js router quirk where `router.replace` wasn't firing after the localStorage fallback (URL stayed at bare `/dashboard` even when the section was synced from localStorage). The `window.history.replaceState` approach is simpler, more predictable, and works for the refresh-preservation use case.
+   - Kept the existing auth check (`apiGet('/api/auth/me')`) with the `authChecked` loader state.
+
+5. `src/components/dashboard/sidebar.tsx` — replaced `setView("public")` with `router.push("/")` in two places (logo click + logout). Added `useRouter` import. Fixed a Button import path typo that crept in during the edit.
+
+6. `src/components/dashboard/login.tsx` — replaced `setView("public")` with `router.push("/")` for the "back to site" button. Added `useRouter` import.
+
+7. `src/components/dashboard/settings.tsx` — replaced `setView("public")` with `router.push("/")` in the logout function. Added `useRouter` import.
+
+8. `src/components/site/navbar.tsx` — replaced `setView("dashboard")` with `router.push("/dashboard")` (×2: desktop + mobile). Removed the `view` destructure and the `view !== "public"` check in `go()` (no longer needed since navbar is only rendered on the public page now). Added `useRouter` import. Removed unused `useEffect` import.
+
+9. `src/components/site/footer.tsx` — replaced `setView("dashboard")` with `router.push("/dashboard")` for the dashboard link. Removed `useAppStore` import (no longer needed), added `useRouter` import.
+
+10. `src/components/site/hero.tsx` — removed the unused `useAppStore`/`setView` import and destructure (was dead code).
+
+11. `src/components/shared/floating-cta.tsx` — removed `useAppStore`/`setView("public")`. The floating CTA on the public site no longer needs to "switch back to public view" before scrolling to #contact, because it's always on the public page now.
+
+12. `src/app/page.tsx` — simplified to render only <PublicPage />. Removed the `view === "public" ? <PublicPage> : <DashboardApp>` toggle and the DashboardApp import. Kept theme restore + apply effects.
+
+13. `src/lib/store.ts` — removed the `view: View` and `setView` fields entirely. The URL is now the single source of truth for which "page" the user is on (`/` = public, `/dashboard` = dashboard). Kept `dashboardSection`/`setDashboardSection` (still needed for in-component state, now synced with the URL). Added a comment explaining why view/setView were removed.
+
+**Lint**: 0 errors. 1 pre-existing warning (Unused eslint-disable in page.tsx — was there before this task). No new warnings introduced.
+
+**Agent Browser end-to-end verification (all passed)**:
+- ✅ GET `/` returns 200 (public site renders normally, hero heading "شحن يصل لكل مصر بسرعة Redline").
+- ✅ GET `/dashboard` (no cookie) returns 200 and shows the login screen (no redirect loop, no bounce to /).
+- ✅ GET `/dashboard?tab=services` (no cookie) returns 200 and shows the login screen with `?tab=services` preserved in URL — after login, user lands on the Services section.
+- ✅ Logged in (admin@redline.eg / admin123) → URL becomes `/dashboard?tab=hero` (default tab on fresh login), heading "الهيرو وشريط التمرير".
+- ✅ Clicked "Users" tab in sidebar → URL updated to `/dashboard?tab=users`, heading "إدارة المستخدمين".
+- ✅ **Refreshed `/dashboard?tab=users`** → URL stays at `/dashboard?tab=users`, heading stays "إدارة المستخدمين", no login screen — **the original bug is fixed**.
+- ✅ Refreshed `/dashboard?tab=settings` → URL stays, heading stays — works for any tab.
+- ✅ Clicked sidebar logo → navigated to `/` (public site).
+- ✅ Clicked "Dashboard" button on public navbar → navigated to `/dashboard?tab=settings` (last-used tab restored from localStorage), no login screen.
+- ✅ Clicked logout → navigated to `/` (public site), session cookie cleared.
+- ✅ Navigated directly to `/dashboard` while logged out → login screen shown (no redirect to /), `?tab=services` preserved from localStorage.
+- ✅ Logged in from that state → landed directly on `/dashboard?tab=services` (Services section).
+- ✅ Browser console: no errors, no warnings related to the refactor (only pre-existing image LCP warnings and HMR info).
+- ✅ dev.log: clean — only normal Next.js startup and 200 OK responses.
+
+Stage Summary:
+- The admin dashboard is now a real Next.js App Router route at `/dashboard` (with its own `page.tsx` + `layout.tsx`), no longer a temporary in-memory view toggled inside `/`.
+- `middleware.ts` provides a server-side gate at the Edge (stamps auth presence without redirecting, so the login screen remains reachable on /dashboard).
+- `layout.tsx` provides metadata (title, robots noindex). It deliberately does NOT redirect unauthenticated users, because that would make the login screen unreachable.
+- Auth session is stored in the existing httpOnly `redline_session` cookie (unchanged) and verified client-side via `/api/auth/me` on mount. A full-screen loader shows while verifying — the user is never bounced to `/` while the check is in flight.
+- The active tab is persisted in the URL query string (`/dashboard?tab=services`) AND mirrored to `localStorage` (`redline_dashboard_active_tab`) as a fallback for direct `/dashboard` visits. On refresh, the URL takes priority; if no `?tab=`, the localStorage value is used. Tab changes sync back to the URL via `window.history.replaceState` (no scroll jump, no new history entry).
+- A race condition was found and fixed: the original two-effect design (read URL → store + store → URL) caused the second effect to run before the first on mount, clobbering a valid `?tab=users` back to the default `?tab=hero`. Fixed by consolidating into a single effect guarded by a `useRef(false)` mount flag.
+- Removed `view`/`setView` from the Zustand store entirely. The URL is now the single source of truth (`/` = public, `/dashboard` = dashboard). All 9 `setView` call sites updated to use `router.push("/")` or `router.push("/dashboard")`.
+- 0 lint errors, 1 pre-existing warning. No new warnings introduced. No runtime errors in dev.log or browser console.

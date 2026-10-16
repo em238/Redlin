@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAppStore } from "@/lib/store";
 import { User, Bell, Globe, Shield, Palette, Save, Moon, Sun, LogOut, Truck } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -14,7 +15,8 @@ import { toast } from "sonner";
 import { useDashboardT } from "@/lib/i18n";
 
 export function DashboardSettings() {
-  const { user, setUser, setView, setAuthChecked, theme, toggleTheme } = useAppStore();
+  const router = useRouter();
+  const { user, setUser, setAuthChecked, theme, toggleTheme } = useAppStore();
   const { t, isAr } = useDashboardT();
   const L = (ar: string, en: string) => (isAr ? ar : en);
   const [profile, setProfile] = useState({ name: user?.name || "", email: user?.email || "" });
@@ -24,7 +26,7 @@ export function DashboardSettings() {
     try { await apiPost("/api/auth/logout"); } catch {}
     setUser(null);
     setAuthChecked(true);
-    setView("public");
+    router.push("/");
     toast.success(t("d.settings.toastLogout"));
   };
 

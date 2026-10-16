@@ -4,7 +4,6 @@ import { useState } from "react";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
 import { Zap, ArrowUp } from "lucide-react";
 import { useT } from "@/lib/i18n";
-import { useAppStore } from "@/lib/store";
 
 /**
  * Floating "Book a Shipment" CTA — appears as a sticky button on mobile after
@@ -14,7 +13,6 @@ import { useAppStore } from "@/lib/store";
  */
 export function FloatingCTA() {
   const { t } = useT();
-  const { setView } = useAppStore();
   const [visible, setVisible] = useState(false);
   const { scrollY } = useScroll();
 
@@ -30,11 +28,7 @@ export function FloatingCTA() {
   });
 
   const onClick = () => {
-    // If we're in dashboard view, switch back first
-    setView("public");
-    setTimeout(() => {
-      document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" });
-    }, 50);
+    document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (

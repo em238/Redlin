@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Boxes, ListChecks, Video, DollarSign,
@@ -15,7 +16,8 @@ import { toast } from "sonner";
 import { useDashboardT } from "@/lib/i18n";
 
 export function DashboardSidebar() {
-  const { dashboardSection, setDashboardSection, sidebarOpen, setSidebarOpen, user, setUser, setView, setAuthChecked } = useAppStore();
+  const router = useRouter();
+  const { dashboardSection, setDashboardSection, sidebarOpen, setSidebarOpen, user, setUser, setAuthChecked } = useAppStore();
   const { t, isAr } = useDashboardT();
 
   // Collapsed state — lazy init from localStorage
@@ -48,7 +50,8 @@ export function DashboardSidebar() {
 
   const logout = async () => {
     try { await apiPost("/api/auth/logout", {}); } catch {}
-    setUser(null); setAuthChecked(false); setView("public");
+    setUser(null); setAuthChecked(false);
+    router.push("/");
     toast.success(t("d.sidebar.logoutSuccess"));
   };
 
@@ -56,7 +59,7 @@ export function DashboardSidebar() {
     <div className="flex flex-col h-full w-full bg-sidebar text-sidebar-foreground p-0 m-0">
       {/* === TOP: Logo + Collapse toggle === */}
       <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200 dark:border-slate-800 shrink-0">
-        <button onClick={() => setView("public")} className="flex items-center group focus:outline-none overflow-hidden">
+        <button onClick={() => router.push("/")} className="flex items-center group focus:outline-none overflow-hidden">
           <Image
             src="/redline-transport-logo.png"
             alt="RedLine Transport"

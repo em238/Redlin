@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Lock, Mail, ArrowLeft, ArrowRight, Loader2, ShieldCheck, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +14,8 @@ import { useAppStore } from "@/lib/store";
 import { useDashboardT } from "@/lib/i18n";
 
 export function DashboardLogin() {
-  const { setUser, setView, theme } = useAppStore();
+  const router = useRouter();
+  const { setUser, theme } = useAppStore();
   const { t, isAr } = useDashboardT();
   const [email, setEmail] = useState("admin@redline.eg");
   const [password, setPassword] = useState("admin123");
@@ -147,7 +149,7 @@ export function DashboardLogin() {
             </div>
 
             <button
-              onClick={() => setView("public")}
+              onClick={() => router.push("/")}
               className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors"
             >
               {t("d.login.back")}

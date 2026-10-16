@@ -2,9 +2,9 @@
 
 import { Truck, MapPin, Phone, Mail, Facebook, Instagram, Twitter, Linkedin, Send, ArrowUp } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useAppStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -28,8 +28,8 @@ const LINKS_EN = {
 };
 
 export function Footer() {
+  const router = useRouter();
   const { t, isAr } = useT();
-  const { setView } = useAppStore();
   const [email, setEmail] = useState("");
   const LINKS = isAr ? LINKS_AR : LINKS_EN;
 
@@ -128,7 +128,7 @@ export function Footer() {
               </Button>
             </div>
             <button
-              onClick={() => setView("dashboard")}
+              onClick={() => router.push("/dashboard")}
               className="mt-4 text-xs text-zinc-500 hover:text-primary transition-colors"
             >
               {t("footer.dashboard")} ←

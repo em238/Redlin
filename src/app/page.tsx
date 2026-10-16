@@ -3,10 +3,9 @@
 import { useEffect } from "react";
 import { useAppStore } from "@/lib/store";
 import { PublicPage } from "@/components/site/public-page";
-import { DashboardApp } from "@/components/dashboard/dashboard-app";
 
 export default function Page() {
-  const { view, theme, setTheme } = useAppStore();
+  const { theme, setTheme } = useAppStore();
 
   // restore theme from storage on first paint
   useEffect(() => {
@@ -22,5 +21,9 @@ export default function Page() {
     document.documentElement.classList.toggle("dark", theme === "dark");
   }, [theme]);
 
-  return view === "public" ? <PublicPage /> : <DashboardApp />;
+  // The admin dashboard now lives at its own route /dashboard — this public
+  // homepage no longer toggles between public and dashboard views. Refreshing
+  // /dashboard stays on /dashboard (preserving the auth session and the
+  // active ?tab= query parameter), so users are never bounced back here.
+  return <PublicPage />;
 }

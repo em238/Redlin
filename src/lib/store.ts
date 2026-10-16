@@ -1,6 +1,5 @@
 import { create } from "zustand";
 
-export type View = "public" | "dashboard";
 export type DashboardSection =
   | "hero"
   | "about"
@@ -16,8 +15,11 @@ export type DashboardSection =
   | "settings";
 
 interface AppState {
-  view: View;
-  setView: (v: View) => void;
+  // NOTE: `view`/`setView` were removed. The dashboard is no longer a
+  // temporary in-memory view toggled inside the public homepage — it now
+  // lives at its own /dashboard route. Public ↔ Dashboard navigation is
+  // done via router.push("/") and router.push("/dashboard"), so the URL
+  // is the single source of truth (and refresh preserves everything).
   dashboardSection: DashboardSection;
   setDashboardSection: (s: DashboardSection) => void;
   // auth
@@ -36,8 +38,6 @@ interface AppState {
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
-  view: "public",
-  setView: (v) => set({ view: v }),
   dashboardSection: "hero",
   setDashboardSection: (s) => set({ dashboardSection: s }),
   user: null,

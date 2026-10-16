@@ -6,7 +6,6 @@ import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion"
 import Image from "next/image";
 import { ArrowLeft, ArrowRight, Truck, ShieldCheck, Zap, MapPin, ChevronRight, ChevronLeft, Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAppStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
 import { apiGet } from "@/lib/api";
 import { Magnetic } from "@/components/shared/custom-cursor";
@@ -35,7 +34,6 @@ const GOV_MARQUEE_EN = [
 ];
 
 export function Hero() {
-  const { setView } = useAppStore();
   const { t, isAr } = useT();
   const { data } = useQuery({
     queryKey: ["hero-images"],

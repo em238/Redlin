@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAppStore } from "@/lib/store";
+import { useAppStore, DashboardSection } from "@/lib/store";
 import { apiGet } from "@/lib/api";
 import { DashboardLogin } from "./login";
 import { DashboardSidebar } from "./sidebar";
@@ -22,12 +22,34 @@ import { DashboardSettings } from "./settings";
 import { Loader2 } from "lucide-react";
 import { useT, useDashboardT, useI18n } from "@/lib/i18n";
 
+const VALID_TABS: DashboardSection[] = [
+  "hero", "about", "services", "how-it-works", "videos", "partners",
+  "map", "contact", "reviews", "users", "roles", "settings",
+];
+const TAB_STORAGE_KEY = "redline_dashboard_active_tab";
+
+function readUrlTab(): DashboardSection | null {
+  if (typeof window === "undefined") return null;
+  const params = new URLSearchParams(window.location.search);
+  const t = params.get("tab") as DashboardSection | null;
+  return t && VALID_TABS.includes(t) ? t : null;
+}
+
+function writeUrlTab(tab: DashboardSection) {
+  if (typeof window === "undefined") return;
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("tab") === tab) return; // no-op if already in sync
+  params.set("tab", tab);
+  // replaceState avoids creating a new history entry or scrolling/jumping.
+  window.history.replaceState({}, "", `/dashboard?${params.toString()}`);
+}
+
 export function DashboardApp() {
-  const { user, authChecked, setUser, setAuthChecked, dashboardSection, theme } = useAppStore();
+  const { user, authChecked, setUser, setAuthChecked, dashboardSection, setDashboardSection, theme } = useAppStore();
   const { t } = useDashboardT();
   const { dashboardLocale } = useI18n();
 
-  // restore theme from localStorage on mount
+  // Restore theme from localStorage on mount
   useEffect(() => {
     try {
       const saved = localStorage.getItem("redline-theme") as "light" | "dark" | null;
@@ -35,18 +57,50 @@ export function DashboardApp() {
         useAppStore.getState().setTheme(saved);
       }
     } catch {}
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [theme]);
 
-  // check session
+  // Check session on first mount (verifies the httpOnly cookie against the DB)
   useEffect(() => {
     if (authChecked) return;
     apiGet<{ user: any }>("/api/auth/me")
       .then((r) => setUser(r.user))
       .catch(() => setUser(null))
       .finally(() => setAuthChecked(true));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authChecked]);
+  }, [authChecked, setUser, setAuthChecked]);
+
+  // ── Tab persistence: URL ↔ store + localStorage ───────────────────────
+  // Single effect that handles both directions to avoid race conditions:
+  //   • Initial mount: read URL ?tab= (or localStorage fallback) → set store.
+  //     We do NOT write back to the URL on this run — otherwise the stale
+  //     store default ("hero") would clobber a valid ?tab=users on refresh.
+  //   • Subsequent runs (user clicked a different tab in the sidebar):
+  //     store → URL (replaceState, no scroll jump) + mirror to localStorage.
+  const didMountRef = useRef(false);
+  useEffect(() => {
+    if (!didMountRef.current) {
+      // ── Initial mount: URL/localStorage → store (one-way) ──
+      didMountRef.current = true;
+      let nextTab: DashboardSection | null = readUrlTab();
+      if (!nextTab) {
+        // Fallback to localStorage if URL has no valid ?tab=
+        try {
+          const saved = localStorage.getItem(TAB_STORAGE_KEY) as DashboardSection | null;
+          if (saved && VALID_TABS.includes(saved)) nextTab = saved;
+        } catch {}
+      }
+      if (nextTab && nextTab !== dashboardSection) {
+        setDashboardSection(nextTab);
+      } else if (nextTab) {
+        // Already in sync — just make sure the URL reflects it
+        writeUrlTab(nextTab);
+      }
+      return;
+    }
+
+    // ── After mount: store → URL + localStorage ──
+    try { localStorage.setItem(TAB_STORAGE_KEY, dashboardSection); } catch {}
+    writeUrlTab(dashboardSection);
+  }, [dashboardSection, setDashboardSection]);
 
   if (!authChecked) {
     return (

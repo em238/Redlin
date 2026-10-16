@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
 import { Menu, X, LayoutDashboard, Moon, Sun, Globe } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { useAppStore } from "@/lib/store";
 import { useScrollSpy } from "@/hooks/use-scroll-spy";
 import { ScrollProgress } from "@/components/shared/scroll-progress";
 import { useT, useI18n } from "@/lib/i18n";
+import { useAppStore } from "@/lib/store";
 import { Magnetic } from "@/components/shared/custom-cursor";
 
 const NAV_KEYS = [
@@ -22,9 +23,10 @@ const NAV_KEYS = [
 ];
 
 export function Navbar() {
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { view, setView, theme, toggleTheme } = useAppStore();
+  const { theme, toggleTheme } = useAppStore();
   const { t, isAr } = useT();
   const { locale, setLocale } = useI18n();
   const { scrollY } = useScroll();
@@ -35,12 +37,7 @@ export function Navbar() {
 
   const go = (href: string) => {
     setMobileOpen(false);
-    if (view !== "public") {
-      setView("public");
-      setTimeout(() => document.querySelector(href)?.scrollIntoView({ behavior: "smooth" }), 120);
-    } else {
-      document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
-    }
+    document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
@@ -118,7 +115,7 @@ export function Navbar() {
               </Button>
               <Magnetic strength={0.18} className="hidden sm:inline-flex">
                 <Button
-                  onClick={() => setView("dashboard")}
+                  onClick={() => router.push("/dashboard")}
                   size="sm"
                   className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 font-semibold"
                 >
@@ -164,7 +161,7 @@ export function Navbar() {
                 );
               })}
               <Button
-                onClick={() => { setMobileOpen(false); setView("dashboard"); }}
+                onClick={() => { setMobileOpen(false); router.push("/dashboard"); }}
                 className="mt-2 bg-primary text-primary-foreground gap-2 w-full justify-center"
               >
                 <LayoutDashboard className="w-[18px] h-[18px]" />
