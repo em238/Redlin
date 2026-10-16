@@ -7,15 +7,14 @@ import { apiGet } from "@/lib/api";
 import { DashboardLogin } from "./login";
 import { DashboardSidebar } from "./sidebar";
 import { DashboardTopbar } from "./topbar";
-import { DashboardOverview } from "./overview";
-import { DashboardShipments } from "./shipments";
-import { DashboardOrders } from "./orders";
-import { DashboardCustomers } from "./customers";
+import { DashboardHero } from "./hero";
+import { DashboardAbout } from "./about";
+import { DashboardServices } from "./services";
+import { DashboardHowItWorks } from "./how-it-works";
 import { DashboardVideos } from "./videos";
-import { DashboardHeroImages } from "./hero-images";
 import { DashboardPartners } from "./partners";
-import { DashboardPricing } from "./pricing";
-import { DashboardMessages } from "./messages";
+import { DashboardMapHubs } from "./map-hubs";
+import { DashboardContactInfo } from "./contact-info";
 import { DashboardReviews } from "./reviews";
 import { DashboardSettings } from "./settings";
 import { Loader2 } from "lucide-react";
@@ -60,15 +59,14 @@ export function DashboardApp() {
   if (!user) return <DashboardLogin />;
 
   const sections: Record<string, React.ReactNode> = {
-    overview: <DashboardOverview />,
-    shipments: <DashboardShipments />,
-    orders: <DashboardOrders />,
-    customers: <DashboardCustomers />,
+    hero: <DashboardHero />,
+    about: <DashboardAbout />,
+    services: <DashboardServices />,
+    "how-it-works": <DashboardHowItWorks />,
     videos: <DashboardVideos />,
-    "hero-images": <DashboardHeroImages />,
     partners: <DashboardPartners />,
-    pricing: <DashboardPricing />,
-    messages: <DashboardMessages />,
+    map: <DashboardMapHubs />,
+    contact: <DashboardContactInfo />,
     reviews: <DashboardReviews />,
     settings: <DashboardSettings />,
   };

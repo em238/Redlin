@@ -1,0 +1,1328 @@
+     1→---
+     2→Task ID: 1
+     3→Agent: Orchestrator (main)
+     4→Task: Build premium shipping company website "Redline" with full dashboard for shipping across all Egypt governorates, including a video upload section.
+     5→
+     6→Work Log:
+     7→- Explored existing Next.js 16 project structure (shadcn/ui, Prisma, NextAuth, Zustand, TanStack Query, Framer Motion all available)
+     8→- Generated 5 professional images via z-ai image CLI to /public/images/: hero-truck.png, warehouse.png, operations.png, courier.png, fleet.png
+     9→- Designed Prisma schema (prisma/schema.prisma) with models: User, Governorate (27 Egypt govts), Service, Customer, Shipment, Video, Testimonial, ContactMessage, Order, SiteStat
+    10→- Ran `bun run db:push` successfully
+    11→- Wrote and ran prisma/seed.ts: admin user (admin@redline.eg / admin123), 27 governorates with zones A/B/C/D + basePrice + etaHours, 6 services, 5 testimonials, 4 site stats, 5 customers, 18 shipments, 8 orders, 2 videos
+    12→
+    13→Stage Summary:
+    14→- DB schema finalized and seeded. Images ready in /public/images/.
+    15→- Admin login: admin@redline.eg / admin123
+    16→- Brand: Redline shipping - colors deep red (#DC2626 / crimson), dark charcoal/black, white, with gold (#F59E0B) premium accents. RTL Arabic content.
+    17→- Next: build public landing page + full dashboard + API routes on single / route using Zustand view-switching (dashboard is client-state view, not a separate Next route).
+    18→
+    19→---
+    20→Task ID: 2
+    21→Agent: Orchestrator (main)
+    22→Task: Build full backend API + public landing page + complete dashboard + verify
+    23→
+    24→Work Log:
+    25→- Built backend API routes: /api/auth/{login,logout,me}, /api/stats, /api/shipments (+[id]), /api/track, /api/governorates, /api/services, /api/pricing/calculate, /api/orders (+[id]), /api/customers, /api/testimonials, /api/videos (+[id]), /api/contact (+[id]), /api/site. Auth via in-memory session token in HttpOnly cookie (lib/auth.ts).
+    26→- Built foundation: lib/store.ts (Zustand: view public/dashboard, dashboardSection, user, theme), lib/providers.tsx (React Query), lib/api.ts (fetch helpers + formatters + status labels). globals.css with Redline brand (deep red primary, charcoal, gold accent), RTL, custom scrollbar, gradient/glass/marquee utilities. layout.tsx with Cairo+Tajawal Arabic fonts, RTL dir.
+    27→- Public landing page (src/components/site/*): Navbar (sticky, transparent->blur, mobile menu, theme toggle, dashboard button), Hero (full-screen hero-truck.png, animated badge, dual CTAs, governorate marquee), StatsBar (4 stats from /api/site), Services (6 service cards), Coverage (27 governorates grid with zone badges A/B/C/D), PricingCalculator (interactive: governorate+service+weight -> live price + quick order form -> POST /api/orders), TrackShipment (tracking number input -> /api/track -> timeline UI with demo buttons), VideoSection (featured player + gallery, modal iframe player, data from /api/site), About (warehouse+operations images, features grid), Testimonials (from /api/site), CtaBanner, Contact (form -> /api/contact + contact info panel), Footer (sticky via flex-1, multi-column, newsletter, social, back-to-top).
+    28→- Dashboard (src/components/dashboard/*): Login (split-screen with fleet.png visual + form, prefilled demo creds), Sidebar (8 nav sections, user card, logout, mobile drawer), Topbar (section title, search, bell, theme toggle), Overview (4 KPIs, weekly shipments bar chart, status distribution, monthly revenue chart, quick stats, recent shipments/orders tables), Shipments (searchable/filterable table, quick status dropdown, create/edit modal, delete), Orders (card grid with status update), Customers (avatar cards), Videos (THE KEY UPLOAD SECTION: stats cards, video grid with edit/feature/show-hide/delete, upload modal with title/YouTube URL/description/5 thumbnail picker/category/featured+active toggles/live preview iframe), Pricing (services overview + 27 governorates pricing table with all service prices), Messages (inbox layout with list+detail), Settings (profile, appearance/theme, notifications, system info, logout).
+    29→- page.tsx orchestrator: view === 'public' ? PublicPage : DashboardApp, with theme restore from localStorage.
+    30→- Ran ESLint: 0 errors, 3 harmless unused eslint-disable warnings.
+    31→- Verified with Agent Browser:
+    32→  * Public page renders fully (hero, stats, services, coverage, pricing, track, video, about, testimonials, CTA, contact, footer all present)
+    33→  * Pricing calculator: select gov+service+weight -> click "احسب السعر الآن" -> price shows + order form appears
+    34→  * Track shipment: clicked demo RED100001 -> shipment details + status timeline rendered
+    35→  * Dashboard login: prefilled creds -> click login -> overview with live KPIs (18 shipments, 8 orders, 5 customers, 2021 ج.م revenue) + charts rendered
+    36→  * Videos section: clicked "رفع فيديو جديد" -> upload modal with all fields (title, URL, description, 5 thumbnails, category, featured/active toggles) -> filled + submitted -> new video "رحلة شحنة من القاهرة لاسوان" appeared in list AND on public site video gallery instantly
+    37→  * Shipments table: all 18 shipments with tracking numbers, status dropdowns, edit/delete actions
+    38→  * Mobile (390x844): navbar collapses to menu button, hero renders correctly
+    39→  * Dark mode: toggle button works (html.dark class applied)
+    40→  * Footer: present (1350px), sticky via flex-1 main wrapper
+    41→  * Console: no errors (only harmless Radix DialogContent Description warning)
+    42→  * Dev log: no errors, all API routes returning 200
+    43→
+    44→Stage Summary:
+    45→- Complete Redline shipping website built and verified end-to-end.
+    46→- Admin login: admin@redline.eg / admin123
+    47→- All 8 dashboard sections functional with live DB data.
+    48→- Video upload section works both ways: admin uploads -> appears on public site.
+    49→- Public site: premium hero, interactive pricing, live tracking, video gallery, contact form, sticky footer.
+    50→- Responsive, RTL Arabic, light/dark themes, 5 AI-generated professional images.
+    51→- No runtime errors. Lint clean (0 errors).
+    52→
+    53→---
+    54→Task ID: 3
+    55→Agent: Orchestrator (main)
+    56→Task: ريفاكتور قوي وشامل لكل تفصيلة في الموقع (public + dashboard)
+    57→
+    58→Work Log:
+    59→- بناء مكتبة مشتركة: hooks (use-count-up, use-scroll-spy, use-media-query بـ useSyncExternalStore) + مكونات (ScrollProgress, SectionReveal + StaggerGroup/Item, SectionHeading, MagneticButton, AnimatedCounter, Skeletons/EmptyState)
+    60→- إضافة أدوات CSS احترافية: 3D perspective, mesh-bg, aurora animation, tabular-nums, glow-border, conic-ring, no-scrollbar
+    61→- ريفاكتور Navbar: شريط تقدم القراءة (ScrollProgress أعلى الصفحة) + تمييز القسم النشط (scroll-spy مع layoutId animated pill) + تحسينات انتقال
+    62→- ريفاكتور Hero: بارالاكس للخلفية (useScroll + useTransform) + 3 بطاقات إحصائية عائمة متحركة (99.2%, 82,540, 26 ساعة) + خلفية aurora متدرجة + مؤشر تمرير "اكتشف" متحرك
+    63→- ريفاكتور StatsBar: عدادات متحركة (count-up easeOutExpo) + StaggerGroup + hover -translate-y
+    64→- ريفاكتور Services: بطاقات 3D tilt (mouse-tracking perspective) + translateZ للأيقونة + shine effect
+    65→- ريفاكتور Coverage: تبويبات فلترة بالمنطقة (ALL/A/B/C/D) مع عدّاد + AnimatePresence popLayout + شريط متدرج عند hover
+    66→- ريفاكتور PricingCalculator: presets للوزن (0.5/1/3/5/10/20) + تحقق فوري inline (هاتف مصري 01x) + أنميشن spring للسعر + إعادة حساب تلقائية عند تغيير المدخلات
+    67→- ريفاكتور Track: حاوية بحث محسّنة + timeline بـ ping animation للحالة الحالية + خط متدرج للـ timeline + stagger للبيانات
+    68→- ريفاكتور VideoSection: فلترة بالتصنيف (ترويجي/لوجستيات/شرح/...) + AnimatePresence popLayout للمعرض + ring pulse على زر التشغيل
+    69→- ريفاكتور Testimonials: carousel احترافي (auto-rotate 5s، pause on hover، dots، أسهم، AnimatePresence slide)
+    70→- ريفاكتور About: بارالاكس للصور الثانوية + StaggerGroup للميزات
+    71→- ريفاكتور Contact: تحقق فوري inline للاسم/البريد/الرسالة + رسائل خطأ تحت كل حقل
+    72→- ريفاكتور Dashboard Overview: area chart SVG متدرج (gradient fill) + donut chart (conic-gradient) للمركز + 4 KPIs بـ sparklines (12 bar لكل واحد) + skeleton loading + أنميشن hover
+    73→- ريفاكتور Dashboard Shipments: pagination كامل (8/12/20/50 لكل صفحة + أزرار أول/سابق/تالي/أخير) + bulk select (checkbox لكل صف + select all + حذف جماعي) + detail drawer جانبي مع timeline كامل + CSV export (BOM + تنزيل) + بحث وفلترة محسّنة
+    74→- ريفاكتور Dashboard Videos: منطقة drag-drop لسحب رابط الفيديو + قوالب جاهزة سريعة + تحويل روابط YouTube (watch/shorts/youtu.be/embed) + معاينة iframe مباشرة + hover effects على البطاقات
+    75→- إصلاح أخطاء lint: useMediaQuery بـ useSyncExternalStore, donut useMemo بدون mutability, rename useTemplate->applyTemplate
+    76→- ESLint: 0 errors
+    77→- تحقق Agent Browser:
+    78→  * ScrollProgress bar موجود
+    79→  * Active nav highlight يعمل عند scroll (خدماتنا مميزة)
+    80→  * Floating stats في hero (99.2%, 82,540, 26 ساعة) موجودة
+    81→  * Dashboard: SVG area chart + donut conic-gradient + 4 sparklines all rendered
+    82→  * Shipments: pagination "صفحة 1 من 3" + detail drawer مع timeline + CSV export toast "تم تصدير"
+    83→  * Videos: drag-drop field + قوالب جاهزة + thumbnail picker + preview all present
+    84→  * Testimonials: 5 carousel dots + 2 arrows
+    85→  * Dark mode toggle يعمل (html.dark class)
+    86→  * لا أخطاء بعد reload
+    87→
+    88→Stage Summary:
+    89→- ريفاكتور شامل لكل تفصيلة: 12 ملف موقع عام + 3 ملفات dashboard + 6 hooks/components مشتركة
+    90→- تحسينات بصرية: بارالاكس، 3D tilt، aurora، عدادات متحركة، area/donut charts، sparklines
+    91→- تحسينات وظيفية: pagination، bulk select، detail drawer، CSV export، drag-drop upload، inline validation، carousel، active nav، scroll progress
+    92→- 0 lint errors، لا runtime errors، كل التفاعلات تعمل ومتحققة
+    93→
+    94→---
+    95→Task ID: 4
+    96→Agent: Orchestrator (main)
+    97→Task: إضافة هيدر carousel صور متحركة + قسم الشركاء (قابل للإدارة من لوحة التحكم)
+    98→
+    99→Work Log:
+   100→- حللت الصورتين المرفوعتين بـ VLM:
+   101→  * صورة 1: هيدر بـ image slider/carousel — صور متعددة تتبدّل بأسهم (‹ ›) وعدّاد شرائح (01/05)
+   102→  * صورة 2: قسم "شركاء النجاح والتميز المؤسسي" — شبكة بطاقات بيضاء بحواف دائرية وظل ناعم، كل بطاقة فيها شعار شركة
+   103→- DB: أضفت HeroImage + Partner models لـ prisma/schema.prisma + db:push
+   104→- أنشأت 8 شعارات شركاء احترافية بـ z-ai image (partner-1..8.png) بألوان وأيقونات متنوعة
+   105→- Seed (prisma/seed-content.ts): 5 صور هيدر (hero-truck, fleet, warehouse, operations, courier) + 8 شركاء (TechStore, FashionHub, Adel Trading, Nour Crafts, Ibrahim Group, MegaMart, QuickShip, GlobalTech)
+   106→- API routes: /api/hero-images (GET/POST) + /api/hero-images/[id] (PATCH/DELETE) + /api/partners (GET/POST) + /api/partners/[id] (PATCH/DELETE) + تحديث /api/site ليرجع heroImages + partners
+   107→- ريفاكتور Hero (src/components/site/hero.tsx): 
+   108→  * carousel صور متعددة بـ crossfade (AnimatePresence + motion scale 1.08→1)
+   109→  * تبديل تلقائي كل 5s (pause on hover)
+   110→  * أسهم تنقل ‹ › + عدّاد شرائح (01/05) + شريط تقدم + زر pause/play (مطابق للمرجع)
+   111→  * نقاط (dots) مؤشرات للشرائح
+   112→  * يقرأ الصور من /api/hero-images (DB) مع fallback
+   113→- قسم Public جديد (src/components/site/partners.tsx):
+   114→  * شبكة بطاقات بيضاء بحواف دائرية وظل ناعم + shine sweep عند hover
+   115→  * يعرض شعار (img) أو أيقونة ملونة fallback
+   116→  * يقرأ من /api/partners (DB)
+   117→  * أضفته بين About و Testimonials + رابط "الشركاء" في Navbar
+   118→- Dashboard: 
+   119→  * DashboardHeroImages (src/components/dashboard/hero-images.tsx): إدارة صور الهيدر — رفع/حذف/إعادة ترتيب (up/down)/تفعيل-إخفاء، modal مع drag-drop URL + معاينة + اختيار من معرض + عنوان + ترتيب
+   120→  * DashboardPartners (src/components/dashboard/partners.tsx): إدارة الشركاء — إضافة/تعديل/حذف/تفعيل، modal مع اسم + شعار (8 خيارات أو رابط مخصص) + أيقونة fallback + لون (8 خيارات) + موقع + ترتيب
+   121→  * أضفت زرّين للتنقل في sidebar (صور الهيدر، الشركاء) + topbar titles + store types (DashboardSection)
+   122→- إصلاحات: إعادة توليد Prisma client + إعادة تشغيل dev server (لتحميل النماذج الجديدة من الـ singleton)، setState-in-effect → clamp inline بـ idx
+   123→- ESLint: 0 errors
+   124→- تحقق Agent Browser:
+   125→  * Hero carousel: 6 شرائح dots + 4 أسهم + عدّاد "01/06" — التنقل بـ next يغيّر العدّاد (03/06)
+   126→  * Partners: 8 شعارات + 8 أسماء كلها ظاهرة (TechStore..GlobalTech)
+   127→  * Dashboard Hero Images: "صور الهيدر (Carousel)" + الإحصائيات + 5 صور seeded ظاهرة (شاحنة، أسطول، مستودع...) + زر "إضافة صورة"
+   128→  * أضفت صورة جديدة "صورة تجريبية جديدة من اللوحة" → ظهرت فوراً في carousel الموقع (من 5 → 6 شرائح)
+   129→  * Dashboard Partners: "قسم الشركاء والعملاء" + 8 شركاء + modal إضافة كامل (اسم/شعار/أيقونة/لون/موقع/ترتيب)
+   130→  * أضفت شريك جديد "RedSeaMart" → ظهر فوراً في قسم الشركاء بالموقع (من 8 → 9 شركاء)
+   131→  * لا أخطاء بعد reload
+   132→
+   133→Stage Summary:
+   134→- الميزتان المطلوبتان اشتغلتا بالكامل end-to-end:
+   135→  1. هيدر carousel صور متحركة — الأدمن يضيف/يحذف/يرتب/يفعّل الصور من لوحة التحكم وتظهر فوراً في الـ slider بأعلى الموقع (crossfade + أسهم + عدّاد + dots)
+   136→  2. قسم الشركاء — شبكة بطاقات بيضاء احترافية بالشعارات، الأدمن يضيف/يحرر الشركاء (شعار/أيقونة/لون/موقع) وتظهر فوراً في الموقع
+   137→- 8 شعارات + 5 صور هيدر AI-generated، 2 API routes + 2 مكونات public + 2 مكونات dashboard
+   138→- 0 lint errors، لا runtime errors
+   139→
+   140→---
+   141→Task ID: 5
+   142→Agent: Orchestrator (main)
+   143→Task: إزالة قسمي "تتبع الشحنة" و"حاسبة الأسعار" من الموقع العام
+   144→
+   145→Work Log:
+   146→- أزلت استيراد واستخدام PricingCalculator و TrackShipment من public-page.tsx
+   147→- أزلت روابط #pricing و #track من Navbar NAV_LINKS (بقي: الرئيسية، خدماتنا، التغطية، المعرض، الشركاء، تواصل)
+   148→- حدّثت أزرار Hero: "احسب سعر شحنتك" → "اطلب شحن الآن" (يؤشر لـ #contact)، "تتبع شحنتك" → "خدماتنا" (يؤشر لـ #services)
+   149→- حدّثت زر الخدمات "احسب السعر" → "اطلب الخدمة" (يؤشر لـ #contact)
+   150→- حدّثت CTA banner: النص "تواصل معنا الآن..." + الزر "اطلب عرض سعر" (يؤشر لـ #contact)
+   151→- حدّثت رابط "تتبع الشحنة" في Footer ليؤشر لـ #contact بدلاً من #track
+   152→- ملفات track.tsx و pricing-calculator.tsx بقيت موجودة لكن غير مستخدمة (الـ API routes أيضاً بقيت)
+   153→- ESLint: 0 errors
+   154→- تحقق Agent Browser:
+   155→  * pricing section: REMOVED, track section: REMOVED
+   156→  * nav has تتبع: false, nav has الأسعار: false
+   157→  * زر "اطلب شحن الآن" يطير لـ #contact (top: 0px في viewport)
+   158→  * زر "خدماتنا" يطير لـ #services
+   159→  * الأقسام المتبقية: home, services, coverage, videos, about, partners, contact
+   160→  * لا أخطاء
+   161→
+   162→Stage Summary:
+   163→- تم إزالة القسمين المطلوبين من الموقع العام وكل الإشارات إليهما في الـ Navbar وHero وFooter وCTA banner
+   164→- الأزرار الآن تشاور لأقسام موجودة (services و contact)
+   165→- لا أخطاء، الموقع يعرض بشكل سليم
+   166→
+   167→---
+   168→Task ID: 6
+   169→Agent: Orchestrator (main)
+   170→Task: إصلاح تداخل قسم الإحصائيات مع الهيدر (بطاقات 850K/27/12K/40)
+   171→
+   172→Work Log:
+   173→- حللت الصورة المرفوعة بـ VLM: المشكلة كانت بطاقات الإحصائيات (StatsBar) بتتداخل مع شريط الـ marquee وأسهم الـ carousel في أسفل الهيدر بسبب negative margin `-mt-16`
+   174→- أصلحت stats-bar.tsx:
+   175→  * شلت `-mt-16 z-10` (اللي بيسحب البطاقات لفوق جوّه الهيدر) → استبدلته بـ `py-10 sm:py-14` (مسافة رأسية نظيفة)
+   176→  * شلت `glass` (شفاف) → استخدمت `bg-card` (خلفية صلبة واضحة) عشان مفيش تداخل بصري
+   177→  * زودت padding البطاقات: `p-5 sm:p-6` → `p-6 sm:p-8`
+   178→  * زودت حجم الأيقونات: `w-12 h-12` → `w-14 h-14` و `w-6 h-6` → `w-7 h-7`
+   179→  * زودت المسافة بين البطاقات: `gap-4` → `gap-4 sm:gap-6`
+   180→  * ظبطت المسافات الداخلية: `mb-3` → `mb-4`, `mt-1` → `mt-1.5`
+   181→- تحقق Agent Browser:
+   182→  * overlap: false (hero bottom: 900px, stats top: 900px — flush, clean)
+   183→  * marquee bottom: 188px, stats section top: 200px (12px gap, clean separation: true)
+   184→  * كل المحتوى موجود: 850K, 27, 12K, 40+ وشحنة تم توصيلها/محافظة نغطّيها
+   185→  * لا أخطاء
+   186→- ESLint: 0 errors
+   187→
+   188→Stage Summary:
+   189→- البطاقات الإحصائية بقت تحت الهيدر مباشرة بمسافة نظيفة بدل ما كانت بتدخل جوّه الـ marquee والـ carousel controls
+   190→- خلفية البطاقات بقت صلبة (bg-card) بدل الشفافية (glass) عشان وضوح أفضل
+   191→- المسافات الداخلية والخارجية كلها مظبوطة
+   192→
+   193→---
+   194→Task ID: 7
+   195→Agent: Orchestrator (main)
+   196→Task: تظبيط أسهم الـ carousel في الهيدر زي المرجع بالظبط (minimal design)
+   197→
+   198→Work Log:
+   199→- حللت الصورة المرجعية بـ VLM: المطلوب هو شريط تحكم minimal فيه:
+   200→  * سهمين نحيفين بدون دوائر (outline icons)
+   201→  * فواصل عمودية رفيعة بين العناصر
+   202→  * عدّاد في النص
+   203→  * خط فاصل أفقي رفيع فوق الشريط
+   204→  * خلفية داكنة، تباين عالي، تناظر حول العداد
+   205→- المشكلة في التصميم القديم: كان مزدحم (دوائر حول الأسهم + زر pause/play + شريط تقدم + صف نقاط)
+   206→- أصلحت hero.tsx:
+   207→  * شلت الدوائر (rounded-full + border + bg) حول الأسهم → أسهم نحيفة plain (ChevronLeft/ChevronRight بـ strokeWidth 1.5)
+   208→  * ضفت فواصل عمودية: `<span className="w-px h-6 bg-white/20" />` بين كل عنصرين
+   209→  * شلت زر pause/play والـ progress bar وصف الـ dots
+   210→  * ضفت خط فاصل أفقي رفيع فوق الشريط: `border-t border-white/15 pt-3`
+   211→  * العدّاد في النص: `01 / 06` بخط bold + tracking-widest + tabular-nums
+   212→  * استخدمت dir="ltr" عشان الترتيب البصري يكون `< | counter | >` زي المرجع (سهم شمال = سابق، سهم يمين = تالي)
+   213→  * التنسيق: `px-5 py-1.5` للأسهم، `px-6` للعداد، hover بيلوّن amber
+   214→  * الموضع: `absolute bottom-16 left-1/2 -translate-x-1/2` (فوق الـ marquee)
+   215→  * شلت استيراد Pause/Play من lucide (مش محتاجهم)
+   216→  * auto-rotate لسه شغّال (pause on hover عبر onMouseEnter/onMouseLeave)
+   217→- ESLint: 0 errors
+   218→- تحقق Agent Browser:
+   219→  * Desktop (1440): controls found, arrows: 2, vertical dividers: 2, counter "01 / 06"
+   220→  * بعد click على "التالي": counter اتنقل لـ "06 / 06" (التنقل شغّال)
+   221→  * thin top line: true (الخط الفاصل موجود)
+   222→  * circular buttons: 0 (مفيش دوائر زي المرجع)
+   223→  * Mobile (390x844): top 707px, bottom 780px, viewport 844 → visible: true, centered: true
+   224→  * لا أخطاء
+   225→
+   226→Stage Summary:
+   227→- أسهم الـ carousel بقت minimal بالظبط زي المرجع: [ < | 01/06 | > ] بخلفية داكنة وفواصل عمودية رفيعة وخط أفقي فوق
+   228→- شلت كل العناصر الزايدة (دوائر، pause، progress bar، dots)
+   229→- التنقل والـ auto-rotate لسه بيشتغلوا
+   230→- مظبوط على desktop و mobile
+   231→
+   232→---
+   233→Task ID: 8
+   234→Agent: Orchestrator (main)
+   235→Task: قسم خريطة مصر احترافي تفاعلي مع markers للمحافظات
+   236→
+   237→Work Log:
+   238→- أنشأت src/lib/egypt-coords.ts:
+   239→  * GOV_COORDS: إحداثيات (lat/lng) لـ 27 محافظة عاصمة
+   240→  * EGYPT_BORDER: حدود مصر (16 نقطة) لرسم الـ outline
+   241→  * NILE_MAIN + NILE_DAMIETTA + NILE_ROSETTA: مسار نهر النيل وفروعه
+   242→  * project(lat,lng): دالة تحويل الإحداثيات الجغرافية لإحداثيات SVG (viewBox 600x720)
+   243→  * pathFromCoords: يحول نقاط لـ SVG path d
+   244→- أنشأت src/components/site/interactive-map.tsx — قسم احترافي فخم:
+   245→  * SVG خريطة مصر: outline + Nile river متدرج (gradient) + تسميات البحار (المتوسط/الأحمر/الصحراء الغربية)
+   246→  * 27 marker positioned بالظبط على إحداثيات كل محافظة، ملونة حسب المنطقة (A=emerald, B=blue, C=amber, D=rose)
+   247→  * markers بـ pulse ring + outer glow (filter) + main dot + center dot — تأثير احترافي
+   248→  * hover/click على marker: label بيق pops up + الـ side panel بيتحدّث بتفاصيل المحافظة
+   249→  * خطوط اتصال (dashed) من المحافظة المختارة لباقي المحافظات (decorative)
+   250→  * side panel: بطاقة المحافظة المختارة (اسم عربي + إنجليزي + المنطقة + السعر + ETA) + placeholder "اختر محافظة"
+   251→  * stats: 27 محافظة مغطاة + 99.2% نسبة التسليم
+   252→  * quick list قابلة للنقر (14 محافظة) + scroll
+   253→  * zone legend بـ counts لكل منطقة
+   254→  * خلفية: gradient dark + grid + glow، مع header فيه عدّاد "X محافظة نشطة" بـ pulse
+   255→- أضفت القسم لـ public-page.tsx (بين Coverage و VideoSection)
+   256→- أضفت رابط "الخريطة" لـ Navbar NAV_LINKS
+   257→- ESLint: 0 errors
+   258→- تحقق Agent Browser:
+   259→  * map section: true, svg: true, circles: 81 (markers + nested), paths: 15 (border + nile + connections)
+   260→  * marker groups: 27 (كل المحافظات مغطاة بالظبط)
+   261→  * قبل click: placeholder "اختر محافظة" ظاهر
+   262→  * بعد click على marker: الـ side panel بيظهر بتفاصيل المحافظة (ج.م + التوصيل، والـ placeholder اتمسح)
+   263→  * nav "الخريطة" موجود وبيطير للقسم (map section visible: true بعد click)
+   264→  * لا أخطa
+   265→
+   266→Stage Summary:
+   267→- قسم خريطة مصر تفاعلي احترافي: 27 marker بالظبط على إحداثيات المحافظات الحقيقية، Nile river متدرج، interaction كامل (hover/click + side panel + connection lines)
+   268→- مربوط بـ /api/governorates (بيانات حقيقية من DB)
+   269→- 0 errors، 27 marker كلها بتظهر
+   270→
+   271→---
+   272→Task ID: 9
+   273→Agent: Orchestrator (main)
+   274→Task: ترقية خريطة مصر لتحفة احترافية فخمة (أقوى جذبية)
+   275→
+   276→Work Log:
+   277→- ولّدت صور AI جديدة:
+   278→  * topo-texture.png (1344x768) — texture خطوط كنتور topographic داكنة بـ glow أحمر/كهرمانى
+   279→  * egypt-glow.png (864x1152) — خريطة مصر ليلية متوهجة (Nile متوهج + city lights)
+   280→- ضفت animations CSS جديدة في globals.css:
+   281→  * flow-line: خطوط شبكة بـ dashes بتتحرك (logistics flow)
+   282→  * radar-ring + radar-ring-2: حلقات radar بتتسع وتختفي (pulse)
+   283→  * nile-flow: shimmer متحرك على النيل
+   284→  * border-shimmer: حدود مصر المتوهجة المتحركة
+   285→- أعدت بناء interactive-map.tsx بتصميم فخم خالص:
+   286→  * الخلفية: bg-zinc-950 + grid + aurora blobs (red + amber) متحركة
+   287→  * Egypt landmass: outer glow halo (filter bigGlow) + clipPath بيحط صورة topo-texture جوّه شكل مصر + mood gradient overlay + توهج أحمر علوي
+   288→  * حدود مصر: dashed متوهج ومتحرك (border-shimmer) + soft glow filter
+   289→  * نهر النيل: thick gradient stroke (nileGrad) + softGlow filter + فروع (دمياط + رشيد) + nile-flow shimmer متحرك فوقه
+   290→  * شبكة الخطوط: 26 line من القاهرة (hub) لكل المحافظات، flow-line dashes متحركة، ملونة حسب المنطقة
+   291→  * Cairo hub marker: مميز أكبر (double radar pulse + big glow)
+   292→  * 26 marker للمحافظات: radar-ring + radar-ring-2 (حلقتين متسعتين) + outer glow (radialGradient) + main dot (filter softGlow) + white core
+   293→  * hover/selected: scale + label card + خطوط connection متوهجة
+   294→  * side panel: dark gradient cards (from-primary/15 via-zinc-900 to-black) + glowing zone badges
+   295→  * legend: dots بـ box-shadow glow
+   296→- ESLint: 0 errors
+   297→- تحقق Agent Browser:
+   298→  * topo image: true (texture داخل مصر)
+   299→  * radar rings: 54 (27 markers × 2)
+   300→  * flow lines: 26 (شبكة من القاهرة لكل المحافظات)
+   301→  * nile shimmer: 1, border shimmer: 1
+   302→  * بعد click على marker: price (ج.م) + ETA (التوصيل) ظاهرة في side panel
+   303→  * لا أخطاء
+   304→
+   305→Stage Summary:
+   306→- الخريطة بقت فخمة: texture topographic داخل شكل مصر + نيل متوهج ومتحرك + حدود متوهجة + شبكة خطوط متحركة من القاهرة لكل المحافظات + 54 radar pulse ring + markers متعددة الطبقات (glow + dot + core) + خلفية aurora
+   307→- كل التفاعل لسه شغّال (click → side panel بتفاصيل المحافظة)
+   308→- 0 errors
+   309→
+   310→---
+   311→Task ID: 10
+   312→Agent: Orchestrator (main)
+   313→Task: شيل الأسعار من الخريطة + ترقية الـ markers (city-light breathing)
+   314→
+   315→Work Log:
+   316→- فهمت الطلب: "مش عوز اسعار عوز البلاد فقط" = شيل الأسعار، اعرض البلاد/المحافظات فقط. "عوز تحسينات في الخريطة تكون احسن" = الـ markers أحسن.
+   317→- أضفت animations CSS في globals.css:
+   318→  * breathe keyframes (opacity 0.3↔0.7) + city-light + city-light-2 classes (breathing glow بدون radar متسع)
+   319→- أعدت بناء الـ markers (interactive-map.tsx):
+   320→  * شيلت radar-ring (الحلقات المتسعة المزعجة)
+   321→  * بدلها بـ "city-light" style: توهج radial gradient ناعم بـ breathing + halo ملون + dot متوهج + core أبيض — شكل أضواء مدن ليلية أنيق
+   322→  * Cairo hub: أكبر (double breathing glow)
+   323→  * floating card premium عند hover/click: rect rounded + pointer triangle + softGlow filter + اسم المحافظة بخط bold
+   324→- شيلت الأسعار من الـ side panel:
+   325→  * بدلت "السعر من X ج.م" → "المنطقة" (اسم المنطقة)
+   326→  * بقت "زمن التوصيل" + "المنطقة" + رسالة "نقطة توصيل نشطة في X"
+   327→  * مفيش أي ج.م أو سعر في القسم كله
+   328→- شيلت استيراد Truck (مش مستخدم)
+   329→- ESLint: 0 errors
+   330→- تحقق Agent Browser:
+   331→  * city-light markers: 54 (27 × 2 classes)
+   332→  * قبل click: السعر false, ج.م false (مفيش أسعار أصلاً)
+   333→  * بعد click على marker: زمن التوصيل true, المنطقة true, السعر من false, ج.م false, نقطة توصيل نشطة true
+   334→  * لا أخطa
+   335→
+   336→Stage Summary:
+   337→- الأسعار اتمسحت بالكامل من قسم الخريطة (مفيش ج.م ولا سعر)
+   338→- الـ markers بقت "city-light" متوهجة بـ breathing ناعم بدل radar rings المتسعة
+   339→- الـ side panel بتعبر عن البلاد بس: اسم المحافظة + المنطقة + زمن التوصيل + نقطة نشطة
+   340→- 0 errors
+   341→
+   342→---
+   343→Task ID: 11
+   344→Agent: Orchestrator (main)
+   345→Task: إعادة تصميم الخريطة بستايل political map احترافي (مطابقة الصورة المرجعية)
+   346→
+   347→Work Log:
+   348→- حللت الصورة المرجعية بـ VLM: خريطة سياسية احترافية بألوان pastel فاتحة، بحر أزرق فاتح، dots سوداء صغيرة للمدن، أسماء bold inline، نيل أزرق رفيع، حدود بيضاء رفيعة، بدون sidebar منفصل
+   349→- أعدت بناء interactive-map.tsx بستايل political map نظيف:
+   350→  * palette: SEA (#e0f2fe), EGYPT_FILL (#fde2e4 salmon), EGYPT_STROKE (#ffffff), NILE (#38bdf8), TEXT_SEA (#0284c7)
+   351→  * البحر: gradient (seaGrad) من #bae6fd لـ #e0f2fe + grid خطوط lat/long خفيفة (#7dd3fc)
+   352→  * مصر: gradient fill (salmon) + حدود بيضاء strokeWidth=2 + inner shading رفيع
+   353→  * النيل: خط أزرق (#38bdf8) للفرع الرئيسي + فروع دمياط ورشيد (أرفع)
+   354→  * تسميات البحار: italic blue (المتوسط، الأحمر، الصحراء الغربية)
+   355→  * تسمية "مصر": bold كبيرة شبه شفافة في وسط مصر
+   356→  * compass rose (N) + scale bar (0—300 كم) = لمسة احترافية
+   357→  * Cairo hub: dot أحمر + نجمة ذهبية (عاصمة مميزة)
+   358→  * 26 marker للمحافظات: dots نظيفة (zone colors) بحدود بيضاء + halo عند hover + inline label (bold) floating card
+   359→  * connection lines من المختار لباقي المحافظات (dashed subtle)
+   360→  * header: "خريطة التغطية — جمهورية مصر العربية" + عدّاد محافظات بـ pulse
+   361→  * zone legend في الأسفل
+   362→  * side panel نظيف: اسم + منطقة + zone badge + زمن التوصيل + حالة (نقطة نشطة) + رسالة تغطية
+   363→- أصلحت خطأ: EGYPT_BORDER كان متعرف مرتين (import + local) → غيرت الـ local لـ EGYPT_STROKE
+   364→- ESLint: 0 errors
+   365→- تحقق Agent Browser:
+   366→  * البحر المتوسط: true, البحر الأحمر: true, مصر: true, كم scale: true, dots: 54
+   367→  * بعد click على marker: زمن التوصيل true, نقطة نشطة true, placeholder اتشال
+   368→  * لا أخطاء
+   369→
+   370→Stage Summary:
+   371→- الخريطة بقت political map احترافي نظيف: بحر أزرق فاتح، مصر salmon pastel، dots ملونة بحدود بيضاء، أسماء inline bold، نيل أزرق، compass + scale bar
+   372→- مطابقة للصورة المرجعية بألوان pastel هادئة وستايل سياسي احترافي
+   373→- 0 errors، التفاعل شغّال
+   374→
+   375→---
+   376→Task ID: 12
+   377→Agent: Orchestrator (main)
+   378→Task: خريطة بعرض الصفحة + شيل الأسعار + شيل قسم التغطية
+   379→
+   380→Work Log:
+   381→1) شيل قسم التغطية بالكامل:
+   382→   - public-page.tsx: شيلت استيراد واستخدام <Coverage />
+   383→   - navbar.tsx: شيلت رابط "#coverage" / "التغطية" من NAV_LINKS
+   384→2) خريطة بعرض الصفحة (full-width):
+   385→   - interactive-map.tsx: غيّرت الـ container من `grid lg:grid-cols-5` (map 3/5) لـ `max-w-7xl space-y-4` (map full width)
+   386→   - بطاقة الخريطة بقيت full-width (مش lg:col-span-3)
+   387→   - الـ SVG container بقى `aspect-[16/11] sm:aspect-[16/9]` بـ preserveAspectRatio="xMidYMid meet" (خريطة سينمائية واسعة، البحر يملا الجوانب ومصر في النص)
+   388→   - ضفت floating overlay (absolute top-right) لتفاصيل المحافظة المختارة: اسم + zone badge + زمن التوصيل + حالة (نشطة) — بدون أسعار
+   389→   - لما مفيش محافظة مختارة: overlay صغير "اضغط على أي محافظة"
+   390→   - حوّلت الـ side panel لـ bottom row: stats card (محافظة مغطاة + تسليم في الوقت) + quick list (horizontal scrollable strip بكل الـ 27 محافظة)
+   391→3) شيل الأسعار نهائياً:
+   392→   - الـ floating overlay مفيهوش أسعار (زمن + حالة بس)
+   393→   - الـ bottom row مفيهوش أسعار (stats + قائمة محافظات)
+   394→   - تأكدت: ج.م false, السعر false, basePrice false في القسم كله
+   395→- شيلت استيراد Sparkles (مش مستخدم)
+   396→- ESLint: 0 errors
+   397→- تحقق Agent Browser:
+   398→  * coverage section: REMOVED, nav has التغطية: false
+   399→  * map card width: 1216px من 1440px viewport = 84% (full container width)
+   400→  * مفيش ج.م ولا السعر في القسم
+   401→  * بعد click على marker: floating overlay بيظهر (نشطة + يوم)، بدون أسعار
+   402→  * لا أخطا، لا errors في dev log
+   403→
+   404→Stage Summary:
+   405→- الخريطة بقت بعرض الصفحة كاملة (full-width سينمائي) بـ floating overlay للتفاصيل
+   406→- كل الأسعار اتمسحت من القسم
+   407→- قسم التغطية اتمسح بالكامل من الموقع والناف بار
+   408→- 0 errors
+   409→
+   410→---
+   411→Task ID: 13
+   412→Agent: Orchestrator (main)
+   413→Task: إعادة تصميم الخريطة بالكامل — holographic command center (كريتف ملفت يجنن)
+   414→
+   415→Work Log:
+   416→- أضفت CSS animations في globals.css: beam-pulse (لأعمدة الضوء), particle-float (للجسيمات)
+   417→- أعدت بناء interactive-map.tsx بتصميم خالص جديد (مش سياسي pastel):
+   418→  * خلفية كونية سوداء (black → zinc-950) + 70 نجمة + grid خطوط lat/long سينما
+   419→  * Egypt wireframe: outline متوهج بـ softGlow filter + dashed inner stroke + fill شفاف أحمر
+   420→  * النيل: neon cyan متوهج + softGlow + flow shimmer متحرك
+   421→  * شبكة خطوط neon flowing من القاهرة لكل المحافظات (26 line بـ flow-line animation)
+   422→  * 18 جسيم متحرك (particle-float) بلون أحمر
+   423→  * Cairo HQ: radar sweep دوّار (SMIL animateTransform rotation 4s) + 3 radar rings + عمود ضوء طويل (72px) + top orb + HQ label على hover
+   424→  * 27 محافظة = 27 BEACON (عمود ضوء عمودي متدرج شفاف→زاهي) + top orb متوهج + base glow متنفس (city-light) + base dot + pulse ring على hover + floating label
+   425→  * connection highlight من المختار لباقي المحافظات
+   426→  * HUD header: "LIVE LOGISTICS GRID — ARAB REPUBLIC OF EGYPT" + "NODES ACTIVE" بـ pulse
+   427→  * sea labels (MEDITERRANEAN/RED SEA/EGYPT) خافتة
+   428→  * compass + floating overlay (top-right) + bottom row (stats + quick list) بـ dark theme
+   429→- ESLint: 0 errors
+   430→- تحقق Agent Browser:
+   431→  * beams: 27 (عمود ضوء لكل محافظة) ✅
+   432→  * stars/particles: 88 (70 نجمة + 18 جسيم) ✅
+   433→  * radar sweep anim: true (دوّار من القاهرة) ✅
+   434→  * full-width: true ✅
+   435→  * بعد click: نشطة true, يوم true, ج.م false (مفيش أسعار) ✅
+   436→  * لا أخطا
+   437→
+   438→Stage Summary:
+   439→- الخريطة بقت holographic command center كريتف: خلفية كونية بنجوم، مصر wireframe متوهج، نيل neon متحرك، 27 عمود ضوء (beacons) بيرفعوا فوق، radar sweep دوّار من القاهرة، شبكة خطوط neon flowing، جسيمات متحركة
+   440→- شكل خالص مختلف عن كل اللي قبله — ملفت وجذاب جداً
+   441→- full-width، بدون أسعار، interaction شغّال
+   442→- 0 errors
+   443→
+   444→---
+   445→Task ID: 14
+   446→Agent: Orchestrator (main)
+   447→Task: توسيع الخريطة لتغطي القارة الأفريقية + دول الخليج + شيل عدد أيام التوصيل
+   448→
+   449→Work Log:
+   450→- وسّعت MAP_BOUNDS في egypt-coords.ts لتغطي أفريقيا + الشرق الأوسط (lat -35 إلى 38, lng -17 إلى 61) + MAP_DIMS (760x700)
+   451→- أضفت AFRICA_BORDER (38 نقطة) — outline القارة الأفريقية من المغرب لكيب تاون للقرن الأفريقي
+   452→- أضفت MIDEAST_BORDER (25 نقطة) — outline الجزيرة العربية + الشام + العراق
+   453→- أضفت REGIONAL_CITIES (15 مدينة): الخليج (الرياض، دبي، الدوحة، الكويت، مسقط، المنامة) + كبرى مدن أفريقيا (الخرطوم، أديس أبابا، نيروبي، لاغوس، الدار البيضاء، جوهانسبرغ، الجزائر، تونس، طرابلس)
+   454→- حدّثت interactive-map.tsx:
+   455→  * title: "شبكة Redline على خريطة أفريقيا والخليج"
+   456→  * subtitle: "X محافظة مصرية + Y مركز إقليمي"
+   457→  * HUD: "LIVE LOGISTICS GRID — AFRICA & MIDDLE EAST" + "NODES ACTIVE" = markers+regional
+   458→  * viewBox: 760x700، grid خطوط متظبطة على العرض الجديد
+   459→  * landmass: AFRICA_BORDER + MIDEAST_BORDER wireframe متوهج (بدل EGYPT_BORDER)
+   460→  * sea labels: MEDITERRANEAN SEA / RED SEA-GULF / ATLANTIC OCEAN / INDIAN OCEAN + AFRICA/ARABIA bold شفاف
+   461→  * regional markers (gold dots): 15 مركز إقليمي بـ glow + hover label "X · مركز إقليمي"
+   462→  * regional network lines (amber dashed flowing) من القاهرة لكل المدن الإقليمية
+   463→  * compass اتظبط للموضع الجديد (712,52)
+   464→  * stars/particles اتظبطوا للـ bounds الجديد (80 نجمة + 22 جسيم)
+   465→  * شيلت ETA بالكامل من الـ floating overlay: بقى "نقطة توصيل نشطة" فقط (مش "X يوم")
+   466→  * شيلت استيراد Clock و Globe2 (مش مستخدمين)
+   467→- ESLint: 0 errors
+   468→- تحقق Agent Browser:
+   469→  * AFRICA: true, ARABIA: true, ATLANTIC: true, INDIAN: true, MEDITERRANEAN: true
+   470→  * AFRICA & MIDDLE EAST HUD: true
+   471→  * بعد click على اسوان: overlay "اسوان D نقطة توصيل نشطة" — نشطة true, توصيل نشطة true (مفيش يوم/أيام توصيل)
+   472→  * لا أخطa
+   473→
+   474→Stage Summary:
+   475→- الخريطة بقت بتغطي القارة الأفريقية + دول الخليج (مش مصر بس)
+   476→- 15 مركز إقليمي (الخليج + أفريقيا) كـ gold dots + خطوط شبكة إقليمية من القاهرة
+   477→- 27 محافظة مصرية لسه بـ beacons
+   478→- عدد أيام التوصيل اتمسح بالكامل من الـ overlay
+   479→- 0 errors
+   480→
+   481→---
+   482→Task ID: 15
+   483→Agent: Orchestrator (main)
+   484→Task: ترقية الخريطة لتكون أفخم + تكبير النقاط (مش ضيقة)
+   485→
+   486→Work Log:
+   487→- رقّيت الـ markers كلها عشان تبقى أكبر وأفخم (مش ضيقة):
+   488→  * Governorate beacons (الـ 26): 
+   489→    - beam ارتفع من 48→70px (و88 عند hover)
+   490→    - beam اعرض من 3px→6px width
+   491→    - ضفت WIDE OUTER GLOW COLUMN (width=20, opacity=0.11, bigGlow filter) خلف كل beam = عمود ضوئي عريض متوهج
+   492→    - top orb بقا 3 طبقات متوهجة (r=13 bigGlow + r=7 softGlow + r=3.5 white core) بدل طبقة واحدة
+   493→    - base glow اكبر (r=14→20)
+   494→    - base dot اكبر (r=4/5.5 → r=5.5/7)
+   495→    - pulse ring اكبر (r=4→5, strokeWidth 1.5→2)
+   496→  * Cairo HQ: beam ارتفع 72→95px + اعرض (4→7px) + wide glow column (width=22)
+   497→    - radar sweep اكبر (radius 95→130)
+   498→    - radar rings اكبر (30/55/80 → 40/70/105)
+   499→    - top orb 3 طبقات (r=14 bigGlow + r=8 softGlow + r=4.5 white)
+   500→    - base glow اكبر (20→28) + dot اكبر (7→9)
+   501→  * Regional city dots: dot اكبر (3.2→5.5) + glow halos اكبر (12→20 outer, 5→10 mid) + filter bigGlow
+   502→  * beam gradients اتقوت (stop 70% opacity 0.5→0.7)
+   503→- أصلحت bug: duplicate filter attribute على top orb circle
+   504→- ESLint: 0 errors
+   505→- تحقق Agent Browser:
+   506→  * core beams: 26, wide glow columns: 26, big top orbs (r=13): 26, big base dots: 67 — كلها بتظهر
+   507→  * بعد click على اسوان: overlay "اسوان D نقطة توصيل نشطة" — نشطة true, توصيل نشطة true (مفيش أيام توصيل)
+   508→  * لا أخطا
+   509→
+   510→Stage Summary:
+   511→- النقاط بقت أكبر وأفخم: أعمدة ضوئية عريضة (width 6px + glow column 20px) طويلة (70-88px)، orbs متوهجة 3 طبقات، هالات أكبر
+   512→- Cairo HQ أدراماتيك أكتر (radar 130, beam 95px, orb 3 طبقات)
+   513→- regional dots أكبر وألمع
+   514→- 0 errors، التفاعل شغّال
+   515→
+   516→---
+   517→Task ID: 16
+   518→Agent: Orchestrator (main)
+   519→Task: حل مشكلة التكتل — شيل الأعمدة الطويلة واستبدالها بنقاط مسطحة متوهجة
+   520→
+   521→Work Log:
+   522→- حللت الصورة المرفوعة بـ VLM: المشكلة الأساسية كانت الأعمدة الضوئية الطويلة (beams) بتتداخل فوق بعضها في ركن مصر الصغير على خريطة أفريقيا الواسعة → "بقعة عمياء" فوضوية + تكدس شديد
+   523→- الحل: شيلت كل الأعمدة الطويلة تماماً (لا wide glow columns ولا bright core beams) واستبدلتها بنقاط مسطمة متوهجة:
+   524→  * Governorate markers (26): نقاط مسطحة — soft glow halo (r=11/15 breathing) + colored ring (r=5/6.5, softGlow) + main dot (r=3.4/4.2, white border) + white core (r=1.4) + pulse ring عند الـ hover
+   525→  * Cairo HQ: شيلت الـ beam الطويل (95px) → بقى flat luminous dot (r=8) + radar sweep (radius 95) + 2 radar rings + base glow (r=24) + selection ring على hover
+   526→  * Regional dots (15): flat gold dots (r=4.8/6) + glow halos (r=16/8) + bigGlow filter
+   527→- ضفت SERVICE AREA AMBIENT GLOW تحت مصر (circle r=55, opacity=0.07, bigGlow, breathing) — بيقرأ كـ "منطقة نشاط" مقصودة بدل فوضى
+   528→- النتيجة: مفيش أعمدة بتتداخل → لا تكتل/overlap، النقاط بقت glowing constellation أنيقة
+   529→- ESLint: 0 errors
+   530→- تحقق Agent Browser:
+   531→  * tall beams: 0 ✅ (اتمسحوا)
+   532→  * wide glow columns: 0 ✅
+   533→  * service area glows: 1 ✅ (هالة مصر)
+   534→  * flat gov dots: 26 ✅ (نقاط مسطحة)
+   535→  * بعد click على اسوان: overlay "اسوان D نقطة توصيل نشطة" — نشطة true, توصيل نشطة true (مفيش أيام توصيل)
+   536→  * لا أخطa
+   537→
+   538→Stage Summary:
+   539→- حل مشكلة التكتل: الأعمدة الطويلة اتمسحت تماماً (سبب الـ overlap) واستُبدلت بنقاط مسطمة متوهجة
+   540→- هالة ambient glow تحت مصر بقرأ المنطقة كـ "hub نشط" مقصود
+   541→- التصميم بقى أنظف وأفخم — glowing constellation بدل بقعة فوضوية
+   542→- 0 errors، التفاعل شغّال
+   543→
+   544→---
+   545→Task ID: 17
+   546→Agent: Orchestrator (main)
+   547→Task: حل نهائي لمشكلة التكتل — cluster مصر + نقاط إقليمية منتشرة
+   548→
+   549→Work Log:
+   550→- المشكلة الجوهرية: مصر صغيرة جغرافياً على خريطة أفريقيا الواسعة، فالـ 27 نقطة محافظة بتبقى متراكمة مهما عملت (نقاط مسطحة ولا أعمدة)
+   551→- الحل الجذري: جوّع الـ 27 محافظة في MARKER واحد فخم عند القاهرة (cluster):
+   552→  * Cairo HQ بقى "Egypt service cluster": radar sweep (radius 110) + 3 radar rings + base glow (r=26) + main dot (r=9) + **"27" count badge** (gold circle with "27" text)
+   553→  * label على hover: "★ القاهرة — مصر (27 محافظة)"
+   554→  * شيلت الـ 26 نقطة محافظة الفردية من العرض الدائم (اللي كانت بتعمل التكتل)
+   555→- النقاط الفردية بقت ON-DEMAND: لما تختار محافظة من القائمة السفلية، بيظهر marker واحد متوهج في موقعها (spring animation) + floating overlay بتفاصيلها. لما تدوسها تاني بتختفي (AnimatePresence exit)
+   556→- شيلت "connection highlight" القديم (كان بيرسم خطوط لنقاط مش ظاهرة)
+   557→- قلّلت REGIONAL_CITIES من 15 لـ 11 (شيلت الدوحة/الكويت/المنامة اللي قريبة من الرياض/دبي → بقوا 3 مدن خليج منتشرة: الرياض، دبي، مسقط)
+   558→- النتيجة: الخريطة بقى فيها 1 Cairo cluster (intentional) + 11 نقطة إقليمية منتشرة نظيف = لا تكتل
+   559→- ESLint: 0 errors
+   560→- تحقق Agent Browser + VLM:
+   561→  * hub main dots (r=9): 1 ✅ (cluster واحد)
+   562→  * regional dots (r=4.8): 11 ✅ (منتشرة)
+   563→  * 27 badge: true ✅
+   564→  * بعد click على اسوان من القائمة: on-demand marker (r=4.5) ظهر + overlay "اسوان نشطة" ✅
+   565→  * VLM: "باقي النقاط موزعة نظيف ومنفردة، ~13-15 نقطة واضحة، النقطة المركزية في مصر متعمدة (cluster)"
+   566→  * لا أخطa
+   567→
+   568→Stage Summary:
+   569→- حلّيت مشكلة التكتل جذرياً: الـ 27 محافظة اتجمعت في cluster واحد فخم عند القاهرة (بـ badge "27" + radar)
+   570→- النقاط الفردية بقت on-demand (بتظهر واحدة بس لما تختار محافظة)
+   571→- النقاط الإقليمية اتقلّلت لـ 11 منتشرة نظيف (شيلت المدن الخليجية المتقاربة)
+   572→- الخريطة بقى نظيفة: 1 cluster + 11 نقطة منتشرة = لا تكتل
+   573→- 0 errors
+   574→
+   575→---
+   576→Task ID: 18
+   577→Agent: Orchestrator (main)
+   578→Task: ريفاكتور شامل للجودة والاحترافية والبساطة في كل تفصيلة
+   579→
+   580→Work Log:
+   581→- Design tokens (globals.css):
+   582→  * أضفت نظام shadows ناعم متعدد الطبقات: shadow-soft / shadow-card / shadow-elevated (مع dark mode variants)
+   583→  * تحسين typography base: font-smoothing (antialiased), line-height 1.6, letter-spacing -0.011em, headings letter-spacing -0.02em + line-height 1.15
+   584→  * تضييق scrollbar (10px→8px) أبسط وأنظف
+   585→  * تقليل تشبع gradient text (.text-gradient-red) لأقل توهج
+   586→- SectionHeading: أبسط وأنيق — eyebrow badge أصغر (text-xs, px-3 py-1), title font-bold (مش font-black), subtitle text-base, مسافات مظبوطة
+   587→- Navbar: أنظف — شيلت pill container المزدحم، روابط clean plain مع active underline بسيط (مش gradient), logo solid (مش gradient), زر dashboard solid primary, شيلت rotate-on-hover effects
+   588→- StatsBar: بطاقات shadow-soft بسيطة (مش glass/blur), أيقونات primary/8 أنظف, padding متناسق
+   589→- Services: شيلت 3D tilt المزدحم, بطاقات shadow-soft أنيقة, أيقونات أبسط, transition ناعم
+   590→- Partners: بطاقات shadow-soft أبسط, h-28 متناسق, أقل زحمة
+   591→- Testimonials: كاروسيل أنظف, بطاقة shadow-card, أسهم أبسط (9x9), dots أنيقة
+   592→- CTA banner: solid primary (مش gradient) أبسط, blur blobs أقل
+   593→- Hero: badge أبسط (لا ping animation), title font-bold (مش font-black), text-6xl (مش 7xl), زر primary solid (مش gradient), mini-features أنظف
+   594→- ESLint: 0 errors
+   595→- تحقق Agent Browser + VLM:
+   596→  * nav pill container removed: true ✅
+   597→  * VLM hero assessment: "احترافي ومتوازن — الهيدر أنظف، الألوان متوازنة، التايبوغرافي متناسق، المسافات مظبوطة، لا ازدحام"
+   598→  * VLM full page: "مصممة باحترافية عالية وتعطي انطباعاً بالثقة والجودة — البطاقات عصرية احترافية (زوايا دائرية + ظلال خفيفة), footer ممتاز ومنظم, مسافات بيضاء مستغلة جيداً"
+   599→  * لا أخطa
+   600→
+   601→Stage Summary:
+   602→- ريفاكتور شامل للجودة: نظام shadows ناعم متعدد الطبقات + typography متناسق + بطاقات أنيقة بسيطة (shadow-soft) + أقل gradients/tffects مزدحمة
+   603→- Navbar بقى clean minimal (لا pill مزدحم), زراير solid primary (مش gradients), active underline بسيط
+   604→- كل البطاقات بقت shadow-soft متناسقة, أيقونات primary/8 أنظف
+   605→- VLM: "احترافي عالي + ثقة + جودة + لا ازدحام"
+   606→- 0 errors
+   607→
+   608→---
+   609→Task ID: 19
+   610→Agent: Orchestrator (main)
+   611→Task: ريفاكتور جذاب — إضافة "توابل" premium (gradients + texture + hover) بدون كسر البساطة
+   612→
+   613→Work Log:
+   614→- المشكلة: بعد التبسيط السابق، الموقع بقى باهت/flat (أبيض/رمادي آمن بدون نكهة) — VLM قال "ميّال للباهت، محتاج توابل بصرية"
+   615→- أضفت premium utilities في globals.css:
+   616→  * .noise — subtle noise texture overlay (breaks flat white, يكسر إحساس wireframe)
+   617→  * .mesh-tint — soft mesh gradient background (radial gradients أحمر/كهرماني خفيفة)
+   618→  * .card-premium — gradient top accent على hover + colored lift (translateY + colored shadow) + border accent
+   619→  * .glow-primary + .gradient-border utilities
+   620→- طبّقت على المكونات:
+   621→  * StatsBar / Services / Partners: كل البطاقات بقت card-premium (gradient accent line على hover + colored lift)
+   622→  * أيقونات bg gradient-to-br (from-primary/15 to-primary/5) + shadow-sm shadow-primary/20
+   623→  * PublicPage: noise wrapper على الـ root (subtle texture)
+   624→  * Partners: mesh-tint background (gradient tint بدل flat muted)
+   625→  * CTA: rich gradient mesh background (linear-gradient أحمر داكن + radial gradients + blur blobs + noise overlay) بدل solid primary
+   626→  * Hero: gradient overlay أعمق (from-black/92 via-black/70) + red ambient tint (mix-blend-overlay) + aurora glows أكبر + floating cards بـ shadow-lg
+   627→  * Hero button: gradient (from-primary to-red-700) + shadow-lg shadow-primary/30 hover/40 (premium glow)
+   628→  * Navbar: glassmorphism (bg-background/75 backdrop-blur-xl + shadow-soft عند scroll)
+   629→- أصلحت JSX parsing error (incomplete style attribute)
+   630→- ESLint: 0 errors
+   631→- تحقق Agent Browser + VLM:
+   632→  * VLM: "أكثر جاذبية وأقل باهتاً، التدرجات أضافت عمق بصري قوي، الـ hover effects والظلال ضافت توابل تفاعلية ممتازة، التصميم بقي احترافياً جداً ولم يعد مزدحماً، المساحات البيضاء وضعت توازناً رائعاً"
+   633→  * التقييم: 8.5/10 للجاذبية (أحمر Redline ممتاز، gradients ناعمة، cards أنيقة، هيكل سلس)
+   634→  * لا أخطا
+   635→
+   636→Stage Summary:
+   637→- الموقع بقى جذاب واحترافي: gradients (أحمر داكن + mesh) + noise texture + card-premium hover (gradient accent + colored lift) + glassmorphism navbar + CTA mesh gradient + hero ambient tint
+   638→- كل الـ "توابل" اللي طلبها VLM اتضافت بدون كسر البساطة (لا ازدحام)
+   639→- 0 errors، VLM: 8.5/10 جذاب جداً
+   640→
+   641→---
+   642→Task ID: 20
+   643→Agent: Orchestrator (main)
+   644→Task: ريفاكتور أبسط + كريتف + احترافي
+   645→
+   646→Work Log:
+   647→- أنشأت قسم "كيف نعمل" (how-it-works.tsx) جديد — 3 خطوات بسيطة:
+   648→  1. احجز شحنتك (ClipboardList) — احجز أونلاين أو بالهاتف 19999
+   649→  2. نستلم ونشحن (Truck) — مندوبنا يستلم ونشحن لوجهتها
+   650→  3. توصّل للمستلم (Home) — توصّل لأي محافظة بأمان وضمان
+   651→  * كل خطوة: دائرة 96px بـ icon + badge رقم متدرج (gradient from-primary to-red-700) + خط رابط dashed متدرج خفيف بين الخطوات
+   652→  * بسيط + كريتف + احترافي + بيعبّي الفراغ الكبير في وسط الصفحة
+   653→  * أضفته بين Services و InteractiveMap + رابط "كيف نعمل" في Navbar
+   654→- Testimonials: ضخّمت علامة الاقتباس (Quote) لـ w-20 h-20 كـ watermark شفاف (text-primary/[0.06]) = لمسة كريتف بصرية
+   655→- Footer: بسّطت المسافات بين الروابط (space-y-2.5 → space-y-2) + whitespace أكتر + أنظف
+   656→- أصلحت خطأ: HomeCheck مش موجود في lucide → استبدلته بـ Home
+   657→- ESLint: 0 errors
+   658→- تحقق Agent Browser + VLM:
+   659→  * how section: true ✅, احجز شحنتك: true ✅, 3 خطوات: true ✅, nav كيف نعمل: true ✅
+   660→  * VLM: "أبسط وأكثر احترافية، قسم كيف نعمل مظبوط ومحسّن الفراغ، علامة الاقتباس الكبيرة كريتف جداً، footer أبسط ومنظم"
+   661→  * التقييم: 9/10 (ارتفاع من 8.5/10) — تصميم متقن، عصري، توازن بين الجمال والوظيفة
+   662→  * لا أخطا
+   663→
+   664→Stage Summary:
+   665→- الموقع بقى أبسط + كريتف + احترافي:
+   666→  * قسم "كيف نعمل" جديد (3 خطوات بسيطة بأيقونات + خط رابط) — كريتف واحترافي ويعبّي الفراغ
+   667→  * علامة اقتباس كبيرة كـ watermark في آراء العملاء (لمسة كريتف)
+   668→  * footer أبسط وأكثر whitespace
+   669→- VLM: 9/10 (ارتفاع من 8.5) — متقن، عصري، متوازن
+   670→- 0 errors
+   671→
+   672→---
+   673→Task ID: 21
+   674→Agent: Orchestrator (main)
+   675→Task: ريفاكتور فخم قوي جذاب جداً — gold accents + gradients + decorative details
+   676→
+   677→Work Log:
+   678→- VLM طلب: gold accents + عمق (depth) + gradients ناعمة + decorative dividers + luxury micro-interactions
+   679→- globals.css premium additions:
+   680→  * .text-gradient-red بقى red→gold→amber (3-stop luxury gradient بدل red بس)
+   681→  * .text-gradient-gold جديد (gold pure gradient للأكسنت)
+   682→  * scrollbar بقى gold-tinted (gradient أحمر→ذهبي) بدل رمادي
+   683→  * .divider-gradient (خط فاصل متدرج red→gold→transparent)
+   684→  * .btn-glow (hover: translateY + colored glow + gold ring)
+   685→  * .icon-gold-ring (gold accent ring حول الأيقونات)
+   686→- Hero:
+   687→  * كلمة "Redline" بقى عليها text-shadow glow (0 2px 30px red)
+   688→  * decorative gradient divider تحت العنوان (h-px w-32 from-transparent via-amber-400/60) بـ scaleX animation
+   689→  * زر CTA بقى btn-glow (hover lift + gold glow ring)
+   690→- SectionHeading:
+   691→  * eyebrow pill بقى gradient (from-primary/10 via-primary/8 to-amber-500/10) + border border-primary/15
+   692→  * dot بقى gradient (from-primary to-amber-500)
+   693→  * decorative divider-gradient (w-16) تحت العنوان بـ scaleX animation (center align فقط)
+   694→- StatsBar + Services: أيقونات بقت gradient bg (from-primary/15 via-primary/8 to-amber-500/10) + icon-gold-ring (gold accent ring)
+   695→- ESLint: 0 errors
+   696→- تحقق Agent Browser + VLM:
+   697→  * VLM: "بقي فخماً وجذاباً جداً، الـ gold accents و gradients و decorative dividers أضافت لمسة فاخرة واضحة، العنوان والأزرار فخمة"
+   698→  * التقييم: 9/10 للفخامة والجاذبية
+   699→  * لا أخطa
+   700→
+   701→Stage Summary:
+   702→- الموقع بقى فخم luxury: gold accents (scrollbar + gradient text red→gold + icon rings) + decorative dividers (hero + section headings) + button glow/scale + gradient eyebrow pills
+   703→- كل التفاصيل اترفعت لمستوى فخم جذاب
+   704→- VLM: 9/10 فخامة وجاذبية
+   705→- 0 errors
+   706→
+   707→---
+   708→Task ID: 22
+   709→Agent: Orchestrator (main)
+   710→Task: تطوير كريتف قوي — لمسات جمالية في كل جزء
+   711→
+   712→Work Log:
+   713→- VLM طلب: أرقام كبيرة watermark + glassmorphism + فواصل متوهجة + shine sweeps + gradient avatar rings
+   714→- Services: ضفت لكل بطاقة (6):
+   715→  * رقم كبير faded watermark (01-06) في الزاوية (text-6xl text-primary/[0.06]) = لمسة agency premium كريتف
+   716→  * .shine sweep على hover (لمعان ضوئي بيعدي فوق البطاقة)
+   717→  * overflow-hidden + relative على المحتوى
+   718→- StatsBar: ضفت فواصل عمودية متوهجة (h-12 w-px bg-gradient-to-b from-transparent via-primary/30) بين كل عمودين على lg = تفصيلة كريتف
+   719→- Testimonials: avatar بقى gradient ring (bg-gradient-to-br from-primary to-amber-600 p-[2px]) + inner bg-card = لمسة كريتف فخمة
+   720→- Partners: ضفت .shine sweep على hover كل البطاقات = لمسة ضوئية كريتف
+   721→- ESLint: 0 errors
+   722→- تحقق Agent Browser + VLM:
+   723→  * service number watermarks: 6 ✅, shine cards: 6 ✅
+   724→  * VLM: "أصبح أكثر جاذبية وإبداعاً، الأرقام الكبيرة (01-06) والفواصل المتوهجة وحلقة الصورة الرمزية أضافت لمسة جمالية مميزة"
+   725→  * التقييم: 9/10 جاذبية وإبداع
+   726→  * لا أخطa
+   727→
+   728→Stage Summary:
+   729→- لمسات كريتف في كل جزء:
+   730→  * Services: أرقام كبيرة watermark (01-06) + shine sweep على hover
+   731→  * StatsBar: فواصل عمودية متوهجة بين الأعمدة
+   732→  * Testimonials: gradient avatar ring (from-primary to-amber-600)
+   733→  * Partners: shine sweep على hover
+   734→- VLM: 9/10 — أكثر جاذبية وإبداع
+   735→- 0 errors
+   736→
+   737→---
+   738→Task ID: 23
+   739→Agent: Orchestrator (main)
+   740→Task: تحسينات احترافية جبارة — تناسق + تباين + إكمال
+   741→
+   742→Work Log:
+   743→- VLM لقى فجوات تنفيذية: footer imbalance، تباين نصوص باهتة في القسم الداكن، dead space (معبّي بـ HowItWorks)
+   744→- Footer rebalance: غيّرت grid spans من brand 4/links 2/2/2/newsletter 2 لـ brand 3/links 2/2/2/newsletter 3 = توازن وزن المحتوى (brand و newsletter الأثقل، links في النص)
+   745→- تدقيق المسافات: اتأكدت إن كل الأقسام (about, contact, coverage, how, map, partners, services, testimonials, videos) بتستخدم py-20 sm:py-28 متناسق (CTA py-16 و StatsBar py-10 مقصودين)
+   746→- رفعت تباين النصوص في القسم الداكن (interactive-map): text-zinc-400 → text-zinc-300 (أوفر قراءة على bg-zinc-950) في 5 أماكن
+   747→- Contact form polish: بطاقة الفورم shadow-sm → shadow-card + زرار الإرسال بقى btn-glow (hover lift + gold glow) + font-semibold
+   748→- ESLint: 0 errors
+   749→- تحقق Agent Browser + VLM:
+   750→  * VLM: "الفوتر بقى متوازن ومُنظّم، التباين أحسن كثيراً (خاصة الأقسام الداكنة والنصوص)، المسافات متناسقة وتعطي راحة بصرية، الموقع بقى أكثر احترافية ومكتمل بوضوح"
+   751→  * التقييم: 8.5/10 احترافية
+   752→  * لا أخطا
+   753→
+   754→Stage Summary:
+   755→- تحسينات احترافية جبارة: footer متوازن (grid 3/2/2/2/3) + تباين نصوص أحسن (zinc-300 في القسم الداكن) + مسافات متناسقة + Contact form shadow-card + btn-glow
+   756→- VLM: 8.5/10 احترافية (فوتر متوازن، تباين أحسن، مسافات متناسقة، مكتمل)
+   757→- 0 errors
+   758→
+   759→---
+   760→Task ID: 24
+   761→Agent: Orchestrator (main)
+   762→Task: شريط تحكم الهيدر — سهمين + عدّاد + فواصل + أيقونة تشغيل/إيقاف
+   763→
+   764→Work Log:
+   765→- حللت الصورة المرجعية بـ VLM: شريط minimal بخلفية داكنة شبه شفافة، خط فاصل علوي رفيع، أسهم line icons بلا خلفية، فواصل عمودية رفيعة، عدّاد في النص
+   766→- المستخدم طلب: سهم يمين + سهم شمال + أيقونة تشغيل/إيقاف للمحتوى
+   767→- أضفت Play/Pause للاستيراد من lucide-react
+   768→- فصلت state الإيقاف اليدوي عن hover-pause:
+   769→  * manualPause (للزرار) + hoverPaused (للـ hover)
+   770→  * paused = manualPause || hoverPaused (الأوتو-روتيب يقف لو أي واحد فيهم true)
+   771→  * كده مفيش تعارض بين hover و الزرار اليدوي
+   772→- أضفت زرار play/pause للـ control bar بعد السهم التالي، مفصول بخط عمودي رفيع:
+   773→  * لما المحتوى شغّال → أيقونة Pause (زرار "إيقاف")
+   774→  * لما متوقف → أيقونة Play (زرار "تشغيل")
+   775→  * onClick بيقلب manualPause
+   776→- الـ control bar بقى: [سهم شمال] | [عدّاد 01/06] | [سهم يمين] | [play/pause] — كله بخط فاصل عمودي رفيع + خط فاصل علوي + خلفية داكنة شبه شفافة + أيقونات line بيضاء بلا خلفية (مطابق للمرجع)
+   777→- ESLint: 0 errors
+   778→- تحقق Agent Browser:
+   779→  * arrows: 3 (سهمين + play/pause) ✅
+   780→  * vertical dividers: 3 ✅
+   781→  * counter: "01 / 06" ✅
+   782→  * play/pause toggle: قبل click "إيقاف" → بعد click "تشغيل" ✅
+   783→  * لا أخطا
+   784→
+   785→Stage Summary:
+   786→- شريط تحكم الهيدر بقى مطابق للمرجع + أيقونة تشغيل/إيقاف: [‹] | [01/06] | [›] | [⏸/▶]
+   787→- فصل clean بين hover-pause و manual-pause (لا تعارض)
+   788→- 0 errors، التفاعل شغّال
+   789→
+   790→---
+   791→Task ID: 25
+   792→Agent: Orchestrator (main)
+   793→Task: شريط تحكم الهيدر — شيل الأرقام + play/pause في النص + شريط تحميل فوق
+   794→
+   795→Work Log:
+   796→- شيلت عدّاد الأرقام (01 / 06) بالكامل من الـ control bar
+   797→- حطيت زرار الـ play/pause في **النص** بين السهمين (بدل مكانه في الآخر):
+   798→  * [‹] | [⏸/▶] | [›] — الـ play/pause بقى في الوسط
+   799→- ضفت **شريط تحميل (progress bar)** فوق الـ control bar:
+   800→  * w-40 h-[2px] bg-white/15 track + bg-white fill
+   801→  * بيحمل من 0% لـ 100% على مدة 5 ثواني (مدة عرض الشريحة)
+   802→  * key={idx + (paused ? "-p" : "-r")} → بيعيد التحميل مع كل صورة جديدة + بيقف لو paused
+   803→  * transition linear 5s (يبدأ من جديد مع كل شريحة)
+   804→- ESLint: 0 errors
+   805→- تحقق Agent Browser + VLM:
+   806→  * counter 01/06 present: false ✅ (اتمسح)
+   807→  * progress bar present: true ✅
+   808→  * play/pause button: true ✅
+   809→  * VLM: "شريط تحميل بسيط في الأعلى + سهمين يمين ويسار + أيقونة إيقاف مؤقت في المنتصف + لا يوجد أرقام 01/06"
+   810→  * لا أخطا
+   811→
+   812→Stage Summary:
+   813→- شريط التحكم بقى: شريط تحميل فوق (بيمشي مع مدة كل صورة) + [‹] | [⏸/▶] | [›] بدون أرقام
+   814→- الـ progress bar بيرست مع كل صورة وبيقف لو الـ content متوقف
+   815→- 0 errors
+   816→
+   817→---
+   818→Task ID: 26
+   819→Agent: Orchestrator (main)
+   820→Task: شريط التحميل بقى full-width بعرض الصفحة مع الصورة
+   821→
+   822→Work Log:
+   823→- المشكلة: شريط التحميل كان 40px بس (centered) — المستخدم عاوزه بعرض الصفحة كامل
+   824→- الحل: فصلت شريط التحميل عن الـ controls وخلّيته full-width:
+   825→  * شريط تحميل full-width: absolute bottom-[52px] inset-x-0 h-[3px] bg-white/10 (track) + motion fill بـ gradient from-primary to-amber-400
+   826→  * بيحمل 0→100% على 5 ثواني مع كل صورة، key بيتغير مع idx (re-reset مع كل صورة) + بيقف لو paused
+   827→  * الـ controls (سهمين + play/pause في النص) لسه centered تحته
+   828→  * الشريط فوق الـ marquee مباشرة (bottom-[52px] فوق bottom-0 marquee)
+   829→- ESLint: 0 errors
+   830→- تحقق Agent Browser + VLM:
+   831→  * progress bar width: 1440px = viewport full-width ✅
+   832→  * VLM: "شريط التحميل بعرض الصفحة كامل (full-width) ويقع فوق الـ marquee"
+   833→  * لا أخطا
+   834→
+   835→Stage Summary:
+   836→- شريط التحميل بقى full-width بعرض الصفحة مع الصورة (gradient أحمر→ذهبي)، فوق الـ marquee
+   837→- الـ controls (سهمين + play/pause) لسه centered تحته
+   838→- 0 errors
+   839→
+   840→---
+   841→Task ID: 27
+   842→Agent: Orchestrator (main)
+   843→Task: ريفاكتور قوي لقسم "إزاي بنشتغل" (3 خطوات)
+   844→
+   845→Work Log:
+   846→- VLM لقى مشاكل: ترتيب معكوس (step 1 على اليسار بدل اليمين)، أرقام بتطفو غلط على حافة الدوائر، الخط الرابط مش واضح، إحساس amateur
+   847→- ريفاكتور كامل لـ how-it-works.tsx:
+   848→  * RTL: ضفت dir="rtl" على الـ container → الخطوة 1 على اليمين، 3 على اليسار (تدفق قراءة عربي صحيح)
+   849→  * الدائرة الكبيرة (w-28 h-28): gradient ring border (p-[2px] bg-gradient from-primary/40 via-primary/15 to-amber-500/30) + inner bg-card + shadow-card→elevated على hover
+   850→  * أيقونة داخلية: دائرة صغيرة (w-14 h-14) بـ gradient bg (from-primary/15 to-amber-500/10) + icon-gold-ring + scale-110 على hover
+   851→  * رقم الخطوة: badge دائري (w-9 h-9) متركز فوق الدائرة (top-center) — gradient bg + ring-4 ring-muted/30 (بيندمج مع الخلفية) + shadow-soft = مظبوط مش بيطفو
+   852→  * الخط الرابط: gradient واضح (from-transparent via-primary/40 to-transparent) خلف الدوائر + نقطة متوهجة متحركة بتنيج على الخط (motion x 0→100%)
+   853→  * أسهم بين الخطوات: دائرة صغيرة (w-7 h-7) bg-card + border + shadow + ArrowLeft (يشير لليسار = اتجاه الخطوة التالية في RTL)
+   854→  * زرار CTA في الآخر: "ابدأ شحنتك الآن" بـ btn-glow + gradient + arrow
+   855→- ESLint: 0 errors
+   856→- تحقق Agent Browser + VLM:
+   857→  * الترتيب: step 1 على اليمين ✅ (RTL صحيح)
+   858→  * الخط الرابط: واضح ويصل بين الدوائر ✅
+   859→  * الأرقام: متمركزة ومظبوطة على الدوائر ✅
+   860→  * الأسهم: موجودة وتشير لليسار (الاتجاه الصحيح) ✅
+   861→  * VLM: "تصميم احترافي، نظيف، ومكتمل"
+   862→  * التقييم: 9/10
+   863→  * لا أخطا
+   864→
+   865→Stage Summary:
+   866→- قسم "إزاي بنشتغل" بقى احترافي ومكتمل:
+   867→  * ترتيب RTL صحيح (1 على اليمين → 3 على اليسار)
+   868→  * دوائر بـ gradient ring + أيقونات داخلية بـ gold ring
+   869→  * أرقام متمركزة فوق الدوائر (مش بتطفو)
+   870→  * خط رابط gradient واضح + نقطة متوهجة متحركة
+   871→  * أسهم بين الخطوات (الاتجاه الصحيح)
+   872→  * زرار CTA في الآخر
+   873→- VLM: 9/10 احترافي ومكتمل
+   874→- 0 errors
+   875→
+   876→---
+   877→Task ID: 28
+   878→Agent: Orchestrator (main)
+   879→Task: ظبط وضوح روابط الناف بار فوق الهيدر الداكن
+   880→
+   881→Work Log:
+   882→- المشكلة: روابط الناف بار (خدماتنا، كيف نعمل، الخريطة، المعرض، الشركاء، تواصل) كانت بلون غامق (text-foreground) فوق الهيدر الداكن → مبانش
+   883→- الحل: عملت conditional colors حسب scrolled state:
+   884→  * !scrolled (فوق الهيدر الداكن): روابط text-white/80 hover:text-white، active text-white
+   885→  * scrolled (خلفية بيضاء): روابط text-foreground/70 hover:text-foreground، active text-primary
+   886→  * كله بـ transition-colors (تحول ناعم)
+   887→- Logo: "Redline" بقى text-white لما !scrolled، text-foreground لما scrolled + subtitle text-white/60 / text-muted-foreground
+   888→- زرار theme toggle + menu button: text-white hover:bg-white/10 لما !scrolled، text-foreground hover:bg-muted لما scrolled
+   889→- ESLint: 0 errors
+   890→- تحقق Agent Browser + VLM:
+   891→  * VLM: "الروابط واضحة ومقروءة تماماً، اللون الأبيض/الفاتح مناسب جداً للخلفية الداكنة، تباين عالٍ يسهل القراءة ويبرز النص بوضوح"
+   892→  * لا أخطa
+   893→
+   894→Stage Summary:
+   895→- روابط الناف بار بقت بيضاء وواضحة فوق الهيدر الداكن (تباين عالٍ)
+   896→- بتتحول ناعمة لغامقة لما الناف بار يعمل scroll (خلفية بيضاء)
+   897→- Logo + theme toggle + menu button كلهم بيتكيفوا مع الـ scrolled state
+   898→- 0 errors
+   899→
+   900→---
+   901→Task ID: 29
+   902→Agent: Orchestrator (main)
+   903→Task: ريفاكتور رهيب في كل قسم — شركاء + تقييمات
+   904→
+   905→Work Log:
+   906→- VLM لقى: شعارات الشركاء صغيرة/مكتظة، فراغ ميت في التقييمات، عدم توحيد أزرار
+   907→- Partners: 
+   908→  * شعارات بقت **grayscale opacity-60** افتراضياً → على hover **grayscale-0 opacity-100 scale-110** (لمسة premium كلاسيكية — رمادي→ملون)
+   909→  * كبرت الشعارات (w-14→w-16) + الاسم text-foreground/70→hover:text-foreground
+   910→- Testimonials: 
+   911→  * تخطيط أفقي (horizontal): اقتباس على اليمين + بطاقة المؤلف (avatar gradient + اسم) على اليسار بفاصل border-l-2 primary/30
+   912→  * max-w-3xl→4xl + rounded-3xl + bg-gradient from-card to-muted/20 (أكتر امتلاء واحترافية)
+   913→  * watermark quote أكبر (w-32) + rotate-180 + text-primary/[0.05]
+   914→  * stars أكبر (w-4→w-5) + quote text-xl→2xl
+   915→  * ملا الفراغ الميت اللي كان حوالين البطاقة الواحدة
+   916→- ESLint: 0 errors
+   917→- تحقق Agent Browser + VLM:
+   918→  * VLM: "شعارات الشركاء grayscale وتتحول للون على hover ✅، بطاقة التقييم أكتر احترافية وامتلاء بفضل التخطيط الأفقي ✅، الموقع أكتر احترافية وجاذبية"
+   919→  * التقييم: 9/10
+   920→  * لا أخطa
+   921→
+   922→Stage Summary:
+   923→- Partners: شعارات grayscale→color على hover (premium) + أكبر
+   924→- Testimonials: تخطيط أفقي احترافي (اقتباس + بطاقة مؤلف بفاصل gradient) + بطاقة أكبر + watermark أكبر = ملا الفراغ الميت
+   925→- VLM: 9/10 أكتر احترافية وجاذبية
+   926→- 0 errors
+   927→
+   928→---
+   929→Task ID: 30
+   930→Agent: Orchestrator (main)
+   931→Task: تظبيط الألوان في كل الأقسام — تناسق + توحيد لوحة
+   932→
+   933→Work Log:
+   934→- VLM لقى: خلفيات مش متناسقة، أخضر (99.2%) بيخانق لوحة red/gold، انتقالات مفاجئة
+   935→- توحيد خلفيات الأقسام (إيقاع نظيف: أبيض / bg-muted/30 / داكن):
+   936→  * Videos: bg-gradient-to-b from-muted/40 to-background → bg-muted/30
+   937→  * Partners: mesh-tint → bg-muted/30
+   938→  * الإيقاع النهائي: white (StatsBar, Services, About, Testimonials, Contact) / muted/30 (HowItWorks, Videos, Partners) / zinc-950 (Map, Footer) / gradient (CTA)
+   939→- شيلت كل الأخضر (emerald) من الخريطة ووحّدت لـ amber/gold (مطابق للوحة red/gold):
+   940→  * 99.2% stat: text-emerald-400 → text-amber-400
+   941→  * "نشطة" labels: text-emerald-400 → text-amber-400
+   942→  * active node ping: bg-emerald-400/500 → bg-amber-400/500
+   943→  * (0 emerald remaining)
+   944→- ESLint: 0 errors
+   945→- تحقق Agent Browser + VLM:
+   946→  * VLM: "الخلفيات متناسقة (أسود/أبيض)، تم إزالة الأخضر وتوحيد الألوان لـ Red/Gold، الانتقال بين الأقسام واضح ومتباين"
+   947→  * التقييم: 9/10 لتناسق الألوان
+   948→  * لا أخطa
+   949→
+   950→Stage Summary:
+   951→- توحيد خلفيات الأقسام لإيقاع نظيف: أبيض / muted/30 / داكن
+   952→- شيلت الأخضر بالكامل من الخريطة ووحّدت لـ amber/gold (مطابق red/gold palette)
+   953→- VLM: 9/10 تناسق ألوان
+   954→- 0 errors
+   955→
+   956→---
+   957→Task ID: 31
+   958→Agent: Orchestrator (main)
+   959→Task: تظبيط الريسبونسيف على كل الأجهزة (موبايل/تابلت/ديسكتوب)
+   960→
+   961→Work Log:
+   962→- Hero responsive:
+   963→  * title: text-4xl → text-3xl على الموبايل (sm:text-5xl lg:text-6xl)
+   964→  * paragraph: text-base → text-sm على الموبايل (sm:text-lg)
+   965→  * الأزرار: flex-col على الموبايل (full-width + stacked + justify-center) → flex-row على sm+
+   966→  * mini-features: flex-col على الموبايل → flex-row على sm+
+   967→- Section spacing (إكليني):
+   968→  * كل الأقسام: py-20 sm:py-28 → py-14 sm:py-24 lg:py-28 (أضيق على الموبايل)
+   969→  * StatsBar: py-10 sm:py-14 → py-8 sm:py-12
+   970→  * CTA: py-16 sm:py-20 → py-12 sm:py-16 lg:py-20
+   971→- Footer responsive:
+   972→  * grid: lg:grid-cols-12 → sm:grid-cols-2 lg:grid-cols-12 (عمودين على التابلت، 12 على الديسكتوب)
+   973→- ESLint: 0 errors
+   974→- تحقق Agent Browser + VLM على 3 أحجام:
+   975→  * Mobile (375px): 8/10 — العنوان مظبوط، الأزرار full-width، لا overflow، مسافات معقولة ✅
+   976→  * Tablet (768px): 7/10 — متجاوب بشكل عام
+   977→  * Desktop (1440px): 8/10 — احترافي ومتوازن، خطوط واضحة، ألوان متناسقة ✅
+   978→  * لا أخطا
+   979→
+   980→Stage Summary:
+   981→- الريسبونسيف متظبط على كل الأجهزة:
+   982→  * Hero: عناوين/فقرات أصغر على الموبايل، أزرار full-width stacked
+   983→  * كل الأقسام: spacing أضيق على الموبايل (py-14) → معتدل على تابلت (py-24) → واسع على ديسكتوب (py-28)
+   984→  * Footer: 2 أعمدة على تابلت، 12 على ديسكتوب
+   985→- VLM: موبايل 8/10، تابلت 7/10، ديسكتوب 8/10
+   986→- 0 errors
+   987→
+   988→---
+   989→Task ID: i18n-translate
+   990→Agent: full-stack-developer
+   991→Task: Translate all public components to use i18n (EN/AR)
+   992→
+   993→Work Log:
+   994→- Updated src/components/site/hero.tsx — wired to `useT()` hook; replaced hardcoded Arabic for badge (hero.badge), title (hero.title1 + hero.title2 + Redline gradient), subtitle (hero.subtitle), CTA buttons (hero.cta1, hero.cta2), mini-feature labels (hero.feat1/2/3), and carousel aria-labels (localized Previous/Next/Play/Pause via isAr).
+   995→- Updated src/components/site/stats-bar.tsx — added `useT()`; for AR uses DB/fallback Arabic label; for EN uses `STAT_KEY_BY_ICON` mapping to `t("stats.shipments|governorates|customers|branches")`.
+   996→- Updated src/components/site/services.tsx — added `useT()`; localized SectionHeading (services.eyebrow/title/subtitle), service names + descriptions via `SERVICE_KEY_BY_NAME` mapping (AR uses DB Arabic name+desc; EN uses `t("service.<key>")` + `t("service.<key>.desc")`), CTA button uses `t("services.cta")`. Removed unused `motion` import.
+   997→- Updated src/components/site/how-it-works.tsx — added `useT()`; STEPS array now built from `t("how.step1|2|3")` + `.desc`; SectionHeading eyebrow/title (Redline gradient split)/subtitle, and CTA all use `t()` keys.
+   998→- Updated src/components/site/interactive-map.tsx — added `useT()`; localized section eyebrow/title (Redline gradient split)/subtitle (markers.length + regional.length interpolated via `.split("+")` of t("map.subtitle")), HUD header (`t("map.hud")`, `t("map.nodes")`), overlay panel (`t("map.active")`, `t("map.placeholder")`), zone legend labels (`ZONE.labelAr`/`labelEn` via isAr), bottom stats (`t("map.covered")`, `t("map.delivery")`), quick list title (`t("map.quicklist")`). Governorate & regional city names use `isAr ? nameAr : name` via `govName()` helper; hub label localized similarly. ZONE object restructured to {labelAr, labelEn, color}.
+   999→- Updated src/components/site/video-section.tsx — added `useT()`; SectionHeading eyebrow (with Clapperboard icon)/title (Redline gradient split)/subtitle all localized; split CATEGORY_LABELS into AR/EN maps; category pill "ALL" label localized; featured badge localized; modal close aria-label localized.
+  1000→- Updated src/components/site/about.tsx — added `useT()`; SectionHeading eyebrow (about.eyebrow) and title (about.title Redline gradient split), paragraphs (about.p1, about.p2), experience label (about.exp) all via `t()`; split FEATURES into FEATURES_AR/FEATURES_EN and selected via isAr.
+  1001→- Updated src/components/site/partners.tsx — added `useT()`; SectionHeading eyebrow (with Star icon), title (full string, no Redline), subtitle all localized; trust line below grid uses `t("partners.trust")`.
+  1002→- Updated src/components/site/testimonials.tsx — added `useT()`; SectionHeading eyebrow/title/subtitle via `t("test.*")`; prev/next/pagination aria-labels localized via isAr.
+  1003→- Updated src/components/site/cta-banner.tsx — added `useT()`; main title (cta.title with Redline gradient split), subtitle (cta.subtitle), button label (cta.button) all via `t()`.
+  1004→- Updated src/components/site/contact.tsx — added `useT()`; SectionHeading eyebrow/title/subtitle (contact.*), info card title (contact.direct) and description (contact.directDesc), info rows (address/phone/email/hours via contact.* key/value pairs), form title (contact.formTitle), all form Labels (contact.name/email/phone/subject/message) and submit button (contact.submit) use `t()`. Validation errors + toast messages localized via isAr; placeholders localized via isAr.
+  1005→- Updated src/components/site/footer.tsx — added `useT()`; brand tagline (nav.tagline), description (footer.desc), address/phone lines localized via isAr; LINKS split into LINKS_AR/LINKS_EN (company/services/help column items); column titles use `t("footer.company|services|help")`; newsletter title/desc (footer.newsletter/newsletterDesc), dashboard link (footer.dashboard), copyright (footer.copyright with year interpolation), made-in-Egypt line (footer.made), and back-to-top aria-label all localized. Toast messages localized via isAr.
+  1006→
+  1007→Stage Summary:
+  1008→- All 12 listed public components (hero, stats-bar, services, how-it-works, interactive-map, video-section, about, partners, testimonials, cta-banner, contact, footer) now use the `useT()` hook from `src/lib/i18n.ts` for translations.
+  1009→- Language switcher (Globe icon in Navbar, already wired before this task) toggles AR ⇄ EN; RTL/LTR direction switches automatically via the Zustand i18n store.
+  1010→- For data-driven UI (services, stats, governorates, regional cities, video categories), local mapping objects translate the Arabic DB content when locale is English; Arabic content continues to come from the DB / FALLBACK unchanged.
+  1011→- Titles containing "Redline" preserve the gradient span by splitting `t()` result on the literal "Redline" and re-inserting the styled span.
+  1012→- `bun run lint`: 0 errors (3 pre-existing unused eslint-disable warnings remain unchanged).
+  1013→- Dev server (`bun run dev`) auto-compiled cleanly after each edit; all `/api/*` routes returned 200 OK.
+  1014→
+  1015→---
+  1016→Task ID: i18n-verify
+  1017→Agent: Orchestrator (main)
+  1018→Task: التحقق من نظام اللغتين (عربي/إنجليزي)
+  1019→
+  1020→Work Log:
+  1021→- أنشأت نظام i18n كامل:
+  1022→  * src/lib/i18n.ts: MESSAGES dictionary (en/ar لكل نص) + useT() hook + useI18n store (Zustand) + locale من localStorage
+  1023→  * الغة افتراضية: عربي (RTL) → تبديل لإنجليزي (LTR) بزر الـ Globe
+  1024→- Navbar: ضفت زر Globe للتبديل بين AR/EN + كل النصوص بتستخدم t()
+  1025→- Subagent (full-stack-developer) أحدّث كل المكونات الـ 12 لاستخدام useT():
+  1026→  * hero, stats-bar, services, how-it-works, interactive-map, video-section, about, partners, testimonials, cta-banner, contact, footer
+  1027→  * كل نص اتاستبدل بـ t("key") 
+  1028→  * زرار Globe بيقلب اللغة + الاتجاه (RTL↔LTR) بيتحول تلقائياً
+  1029→- ESLint: 0 errors
+  1030→- تحقق Agent Browser:
+  1031→  * عربي (افتراضي): lang=ar, dir=rtl ✅, title "شحن يصل لكل مصر بسرعة Redline"
+  1032→  * بعد الضغط على Globe → إنجليزي: lang=en, dir=ltr ✅, title "Shipping across all Egypt with Redline"
+  1033→  * VLM: "الموقع بالإنجليزي واتجاهه من اليسار لليمين (LTR)"
+  1034→  * بعد الضغط تاني → عربي: lang=ar, dir=rtl ✅
+  1035→  * لا أخطا
+  1036→
+  1037→Stage Summary:
+  1038→- الموقع بقى يدعم عربي + إنجليزي بالكامل
+  1039→- زر الـ Globe في الناف بار بيقلب اللغة + الاتجاه (RTL↔LTR) تلقائياً
+  1040→- كل الـ 12 مكون معم (Hero, Services, How, Map, Videos, About, Partners, Testimonials, CTA, Contact, Footer, Stats) مترجمين
+  1041→- locale بيتحفظ في localStorage
+  1042→- 0 errors
+  1043→
+  1044→---
+  1045→Task ID: i18n-complete-en
+  1046→Agent: Orchestrator (main)
+  1047→Task: ضمان إن الإنجليزي بالكامل بدون أي عربي مرئي
+  1048→
+  1049→Work Log:
+  1050→- المشكلة: لما بتحول للإنجليزي، كان لسه فيه نصوص عربية باقية (GOV_MARQUEE، عناوين فيديوهات، تقييمات)
+  1051→- أصلحت:
+  1052→  * GOV_MARQUEE: قسمت لـ GOV_MARQUEE_AR + GOV_MARQUEE_EN (Cairo, Giza, Alexandria...) والـ hero بيستخدم isAr عشان يختار
+  1053→  * VideoSection: ضفت VIDEO_EN translation map (keyed by Arabic title → English) للفيديوهات اللي من الـ DB + ظبطت الـ dash (em-dash → regular hyphen matching)
+  1054→  * Testimonials: ضفت TEST_EN translation map (keyed by name → English role/content)
+  1055→  * الـ stats-bar كان مظبوط من الـ subagent (STAT_KEY_BY_ICON → t())
+  1056→  * الـ map كان مظبوط (govName = isAr ? nameAr : name)
+  1057→  * كل المكونات الـ 12 بتستخدم useT() بـ t() لكل النصوص
+  1058→- ESLint: 0 errors
+  1059→- تحقق Agent Browser + VLM:
+  1060→  * بعد تبديل اللغة للإنجليزي: lang=en, dir=ltr ✅
+  1061→  * VLM: "لا يوجد أي نص عربي في الصفحة. جميع الأقسام باللغة الإنجليزية بالكامل (Shipping across all Egypt, Book a Shipment, Start your shipment now, Company, Services, Help, Newsletter)"
+  1062→  * الـ regex لقى 57 كلمة بس كانت كلها من عناصر مخفية (aria-labels, mobile menu off-screen) — المحتوى المرئي كله إنجليزي
+  1063→  * لا أخطا
+  1064→
+  1065→Stage Summary:
+  1066→- الإنجليزي بالكامل بدون أي عربي مرئي: GOV_MARQUEE مترجم، عناوين/وصف الفيديوهات مترجمة، تقييمات العملاء مترجمة، كل النصوص بتستخدم t()
+  1067→- زر الـ Globe بيقلب عربي/إنجليزي بالكامل + RTL↔LTR
+  1068→- 0 errors
+  1069→
+  1070→---
+  1071→Task ID: final-polish
+  1072→Agent: Orchestrator (main)
+  1073→Task: تحسينات احترافية في كل قسم + برفورمنس
+  1074→
+  1075→Work Log:
+  1076→- VLM audit: أيقونات صغيرة في الإحصائيات، تباين منخفض في شريط المحافظات، subtitle ضعيف القراءة، footer icons
+  1077→- StatsBar: كبرت الأيقونات w-5→w-6 h-6 (متناسقة مع حجم الأرقام text-3xl/4xl)
+  1078→- Hero: رفعت تباين subtitle من text-white/75→text-white/80 (قراءة أوفر)
+  1079→- Marquee: رفعت تباين نص المحافظات من text-white/70→text-white/80
+  1080→- Performance:
+  1081→  * next/image lazy loading بـ default (priority بس للـ hero slide الأول)
+  1082→  * React Query staleTime 30s (مظبوط من الـ providers)
+  1083→  * كل الصور بـ next/image مع proper sizes attributes
+  1084→- Footer: social icons متساوية (w-9 h-9) — متأكد
+  1085→- ESLint: 0 errors
+  1086→- تحقق Agent Browser + VLM:
+  1087→  * VLM: "الأيقونات متناسقة، التباين ممتاز (خاصة الهيدر والفوتر)، لا توجد تفاصيل مشوهة، البرفورمنس البصري احترافي جداً مع استخدام جيد للمساحات البيضاء والألوان"
+  1088→  * التقييم: 9/10
+  1089→  * لا أخطa
+  1090→
+  1091→Stage Summary:
+  1092→- تحسينات احترافية: أيقونات إحصائيات أكبر ومتناسقة + تباين مرفوع (subtitle + marquee) + performance مظبوط (lazy loading + staleTime)
+  1093→- VLM: 9/10 برفورمنس بصري احترافي
+  1094→- 0 errors
+  1095→
+  1096→---
+  1097→Task ID: partners-images
+  1098→Agent: Orchestrator (main)
+  1099→Task: ضيف صور PNG لكل الشركاء بدون أي أيقونات
+  1100→
+  1101→Work Log:
+  1102→- ولّدت صورة PNG جديدة لـ RedSeaMart (partner-9.png) — red shopping cart logo
+  1103→- حدّثت DB: RedSeaMart بقى عنده logo = /images/partner-9.png
+  1104→- كل الـ 9 شركاء ليهم صور PNG:
+  1105→  * TechStore → partner-1.png
+  1106→  * FashionHub → partner-2.png
+  1107→  * Adel Trading → partner-3.png
+  1108→  * Nour Crafts → partner-4.png
+  1109→  * Ibrahim Group → partner-5.png
+  1110→  * MegaMart → partner-6.png
+  1111→  * QuickShip → partner-7.png
+  1112→  * GlobalTech → partner-8.png
+  1113→  * RedSeaMart → partner-9.png
+  1114→- أحدّث Partners component:
+  1115→  * شيلت الـ icon fallback بالكامل (مفيش أي `<svg>` icons للشركاء)
+  1116→  * بقى بيعرض بس `<Image>` لكل شريك (grayscale→color على hover)
+  1117→  * شيلت استيراد كل أيقونات الشركاء (Building2, Briefcase, etc.)
+  1118→- ESLint: 0 errors
+  1119→- تحقق Agent Browser:
+  1120→  * partner images: 9 ✅ (كلهم PNG <img>)
+  1121→  * لا icon fallbacks للشركاء ✅
+  1122→  * لا أخطا
+  1123→
+  1124→Stage Summary:
+  1125→- كل الـ 9 شركاء بيظهروا بصور PNG بدون أي أيقونات
+  1126→- RedSeaMart بقى عنده صورة (partner-9.png)
+  1127→- الـ Partners component شال أي icon fallback — بس صور
+  1128→- 0 errors
+  1129→
+  1130→---
+  1131→Task ID: detail-fixes
+  1132→Agent: Orchestrator (main)
+  1133→Task: تحسينات تفصيلية — أيقونات + contrast + alignment + play icon
+  1134→
+  1135→Work Log:
+  1136→- Hero: كبرت أيقونات المميزات (w-4 → w-[18px] h-[18px]) + shrink-0 (مش هتتداخل)
+  1137→- Hero: رفعت contrast زر "Our Services" (bg-white/10→/15 + border-white/20→/30 + font-medium)
+  1138→- Videos: كبرت play icon في بطاقات الفيديو الصغيرة (w-8 h-8 → w-10 h-10, icon w-3.5 → w-4.5)
+  1139→- Footer: ظبطت alignment حقل الإيميل + الزر (items-stretch + flex-1 على الإيميل)
+  1140→- Testimonials: ظبطت alignment الـ avatar (sm:items-center → sm:items-start + sm:pt-2 على author side + gap-4 → gap-3)
+  1141→- ESLint: 0 errors
+  1142→- تحقق VLM: "الأيقونات متناسقة، Our Services أوضح، play icon مناسب، footer مظبوط، testimonials avatar محاذي"
+  1143→- التقييم: 9/10
+  1144→
+  1145→---
+  1146→Task ID: precision-design
+  1147→Agent: Orchestrator (main)
+  1148→Task: مراجعة دقيقة + توحيد التصميم (border-radius + icons + spacing)
+  1149→
+  1150→Work Log:
+  1151→- VLM audit: border-radius مش متناسق بين الأزرار، أيقونات بأحجام مختلفة، spacing غير موحد
+  1152→- توحيد border-radius:
+  1153→  * Button component: rounded-md → rounded-lg (default + sm + lg) = كل الأزرار بقت rounded-lg متناسقة
+  1154→- توحيد أحجام الأيقونات في الـ navbar (كلها w-[18px] h-[18px]):
+  1155→  * Truck (logo): w-4.5 → w-[18px]
+  1156→  * LayoutDashboard: w-4 → w-[18px]
+  1157→  * Menu/X (mobile): w-5 → w-[18px]
+  1158→  * Globe/Moon/Sun: كانت w-[18px] بالفعل ✅
+  1159→- أصلحت JSX syntax error (}} زايدة)
+  1160→- ESLint: 0 errors
+  1161→- تحقق VLM: "الأزرار متناسقة في الاستدارة، الأيقونات موحدة الحجم، التصميم أكثر احترافية وتناسقاً"
+  1162→- التقييم: 9/10
+  1163→
+  1164→---
+  1165→Task ID: i18n-dashboard
+  1166→Agent: full-stack-developer
+  1167→
+  1168→Task: Translate ALL dashboard components in `src/components/dashboard/` to use the `useT()` hook from `src/lib/i18n.ts` so they switch between Arabic/English when the Globe button is clicked.
+  1169→
+  1170→Work Log:
+  1171→- Read existing i18n.ts (useT hook + MESSAGES dictionary with `nav.`, `hero.`, `footer.` etc.)
+  1172→- Read previous agent's worklog note (`/agent-ctx/i18n-translate-full-stack-developer.md`) which translated the public site and confirmed the i18n system pattern
+  1173→- Audited all 13 dashboard components + dashboard-app.tsx loader
+  1174→- Added ~270 new dashboard message keys (with `d.` prefix) to MESSAGES dictionary — both `ar` and `en` sections, organized in clearly-commented blocks:
+  1175→  - Login (d.login.*) — title, subtitle, form labels, buttons, demo info, back link, toasts
+  1176→  - Sidebar nav (d.nav.*) + brand/viewSite/logout + logoutToast
+  1177→  - Topbar titles+subtitles (d.topbar.*) for all 10 sections + search placeholder
+  1178→  - App loader (d.app.checking)
+  1179→  - Overview (d.overview.kpi.*, weeklyTitle, donutTitle, quickStatsTitle, recentShipments, viewAll, total)
+  1180→  - Shared status labels (d.status.*) for: pending, picked_up, in_transit, out_for_delivery, delivered, returned, cancelled, confirmed, processing, new
+  1181→  - Shipments (d.ship.*) — toolbar, headers, modal labels, drawer labels, toasts, confirm dialogs
+  1182→  - Orders (d.orders.*) — empty, weightUnit, toasts, confirmDelete
+  1183→  - Customers (d.customers.*) — empty, since
+  1184→  - Videos (d.videos.*) — header, stats, modal labels, category labels (promo/logistics/tutorial/testimonial/other), toasts
+  1185→  - Hero Images (d.hero.*) — header, stats, modal labels, toasts
+  1186→  - Partners (d.partners.*) — header, stats, modal labels, toasts
+  1187→  - Pricing (d.pricing.*) — servicesTitle, govTitle, headers, searchPlaceholder, daysUnit
+  1188→  - Messages (d.messages.*) — title, empty, selectMsg, replyEmail, call, toasts
+  1189→  - Settings (d.settings.*) — profile, appearance, notifications, system, security, toastLogout
+  1190→- Updated 14 dashboard files to use `import { useT } from "@/lib/i18n"` and replaced hardcoded Arabic strings with `t("d.xxx")` calls. For each toast/confirm dialog, used `t()` for static messages and prefix/suffix split for messages with dynamic counts (e.g. `${t("d.ship.confirmBulkDeletePrefix")}${n}${t("d.ship.confirmBulkDeleteSuffix")}`)
+  1191→- For `sidebar.tsx`: moved module-level `NAV` array INSIDE the `DashboardSidebar` component function so `t()` calls are reactive to locale changes
+  1192→- For `topbar.tsx`: moved module-level `TITLES` record INSIDE the `DashboardTopbar` component function for the same reason
+  1193→- For `videos.tsx`: moved module-level `CATEGORIES` array inside the component; renamed inner `.map((t) =>` callback var to `tp` to avoid colliding with the `t` translation function
+  1194→- For shipments/orders/overview: built local `STATUS_LABELS` dict inside each component that uses `t("d.status.*")` keys, replacing the API-side `STATUS_LABELS` import (kept `STATUS_COLORS` since colors are static)
+  1195→- For overview weekly chart axis: localized weekday formatting via `new Date(d.date).toLocaleDateString(isAr ? "ar-EG" : "en-US", { weekday: "short" })`
+  1196→- For shipments governorate/service dropdowns: switched display from `g.nameAr` to `isAr ? g.nameAr : g.name` (and similar for services)
+  1197→- For settings role badge: split into `t("d.settings.rolePrefix")` + `t("d.settings.roleValue")` (Super Admin)
+  1198→- Updated `dashboard-app.tsx` loader text "جاري التحقق..." → `t("d.app.checking")`
+  1199→- Ran `bun run lint` → **0 errors, 3 warnings** (all pre-existing "Unused eslint-disable directive" warnings; no new warnings introduced)
+  1200→- Verified via `dev.log`: `GET / 200` returns clean, all compiles successful after fix of one transient path typo (`@lib/store` → `@/lib/store` in overview.tsx, fixed immediately)
+  1201→
+  1202→Files modified (all under `/home/z/my-project/`):
+  1203→- src/lib/i18n.ts (added ~270 keys × 2 locales)
+  1204→- src/components/dashboard/login.tsx
+  1205→- src/components/dashboard/sidebar.tsx
+  1206→- src/components/dashboard/topbar.tsx
+  1207→- src/components/dashboard/overview.tsx
+  1208→- src/components/dashboard/shipments.tsx
+  1209→- src/components/dashboard/orders.tsx
+  1210→- src/components/dashboard/customers.tsx
+  1211→- src/components/dashboard/videos.tsx
+  1212→- src/components/dashboard/hero-images.tsx
+  1213→- src/components/dashboard/partners.tsx
+  1214→- src/components/dashboard/pricing.tsx
+  1215→- src/components/dashboard/messages.tsx
+  1216→- src/components/dashboard/settings.tsx
+  1217→- src/components/dashboard/dashboard-app.tsx
+  1218→
+  1219→Notes for next agent:
+  1220→- The dashboard now fully respects the Zustand locale store — clicking the Globe button in the public site Navbar (or any component that calls `setLocale("ar"|"en")`) instantly re-renders ALL dashboard strings, topbar titles, sidebar nav labels, modal/empty/toast/confirm-dialog messages, status labels, and pagination text.
+  1221→- Module-level static arrays/records that contain display strings (like the old `NAV` and `TITLES`) MUST be moved inside the component function or wrapped in a function so `t()` is called reactively. Otherwise they freeze at first-locale-at-mount.
+  1222→- Status label localization: replaced the static `STATUS_LABELS` export from `@/lib/api` with localized per-component dicts built from `t("d.status.*")`. The `STATUS_COLORS` export in api.ts is kept since colors don't need translation.
+  1223→- For dynamic strings with numbers (e.g. "حذف N شحنة؟"), split into prefix + suffix keys to avoid placeholder substitution logic.
+  1224→- Lint result: 0 errors / 3 warnings (all pre-existing, none introduced by this change).
+  1225→
+  1226→---
+  1227→Task ID: i18n-dashboard-verify
+  1228→Agent: Orchestrator (main)
+  1229→Task: تحقق من ترجمة لوحة التحكم للإنجليزي
+  1230→
+  1231→Work Log:
+  1232→- المشكلة: لوحة التحكم كانت كلها بالعربي ما بتتحولش مع الـ Globe button (111 كلمة عربي)
+  1233→- Subagent (full-stack-developer) أضاف ~270 مفتاح ترجمة (d.*) وحدّث 14 مكون:
+  1234→  * login, sidebar, topbar, overview, shipments, orders, customers, videos, hero-images, partners, pricing, messages, settings, dashboard-app
+  1235→  * نقل NAV array و TITLES record جوّه المكونات عشان re-render مع locale change
+  1236→  * localized status labels, toast messages, confirm dialogs, empty states, pagination
+  1237→- ESLint: 0 errors
+  1238→- تحقق Agent Browser + VLM:
+  1239→  * بعد تبديل اللغة للإنجليزي + فتح لوحة التحكم:
+  1240→  * dashboard arabic: نزل من 111 → 57 (كلها من عناصر مخفية)
+  1241→  * VLM: "النصوص بالإنجليزي بالكامل ولا يوجد أي نص عربي ظاهر" ✅
+  1242→  * لا أخطا
+  1243→
+  1244→Stage Summary:
+  1245→- لوحة التحكم بقت مترجمة بالكامل (عربي/إنجليزي) مع زر الـ Globe
+  1246→- 14 مكون dashboard بيستخدموا useT() + ~270 مفتاح ترجمة
+  1247→- VLM: لا يوجد نص عربي مرئي في الإنجليزي ✅
+  1248→- 0 errors
+  1249→
+  1250→---
+  1251→Task ID: mobile-overlap-fix
+  1252→Agent: Orchestrator (main)
+  1253→Task: إصلاح تداخل الأيقونات والصور والنصوص على الموبايل
+  1254→
+  1255→Work Log:
+  1256→- VLM حلل 5 صور موبايل: أرقام متداخلة مع أيقونات، صور About متداخلة، HUD خريطة متزحم، نص فيديو يتداخل مع play icon، نصوص أسفل الهيدر متداخلة
+  1257→- Services: خفّيت الـ number watermark (01-06) على الموبايل (hidden sm:block) — مش هيتداخل مع الأيقونة
+  1258→- About: خفّيت الصور المتداخلة (operations + badge) على الموبايل (hidden sm:block) — بس الصورة الرئيسية بتصير
+  1259→- Map HUD: flex-col على الموبايل (stacked) + text-xs/text-[11px] + truncate + shrink-0 على الأيقونة
+  1260→- Videos: صغّرت play icon على الموبايل (w-16 h-16 → w-7 h-7) + صغّرت العنوان (text-2xl→text-lg) + padding (p-6→p-4)
+  1261→- Hero: زوّدت gap بين mini-features على الموبايل (gap-2→gap-2.5)
+  1262→- ESLint: 0 errors
+  1263→- تحقق Agent Browser + VLM على موبايل 375px:
+  1264→  * "الأرقام مظبوطة ومفصولة، صور About مفيش تداخل، نصوص الفيديو مظبوطة، HUD متناسق، الريسبونزيف جيد جداً"
+  1265→  * التقييم: 8/10
+  1266→  * لا أخطa
+  1267→
+  1268→Stage Summary:
+  1269→- أصلحت كل مشاكل التداخل على الموبايل: أرقام الخدمات، صور About، HUD الخريطة، play icon الفيديو، نصوص الهيدر
+  1270→- VLM: 8/10 موبايل مظبوط بدون تداخل
+  1271→- 0 errors
+  1272→
+  1273→---
+  1274→Task ID: responsive-fix-all
+  1275→Agent: Orchestrator (main)
+  1276→Task: Fix all responsive issues — eliminate horizontal overflow + pixel-perfect
+  1277→
+  1278→Work Log:
+  1279→1) Horizontal Overflow (CRITICAL):
+  1280→   - Added `overflow-x: hidden` + `max-width: 100%` to html/body in globals.css
+  1281→   - Added `box-sizing: border-box` to all elements
+  1282→   - Added `overflow-x-hidden` to PublicPage wrapper
+  1283→   - Verified: NO `w-screen` or fixed pixel widths causing overflow
+  1284→
+  1285→2) Services Grid:
+  1286→   - Changed to `grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch`
+  1287→   - Mobile: 1 column stacked; Tablet: 2 cols; Desktop: 3 cols
+  1288→   - Equal card heights via `items-stretch` + `h-full`
+  1289→   - All cards have same `overflow-hidden` + padding
+  1290→
+  1291→3) Map:
+  1292→   - Container has `overflow-hidden` + `aspect-[16/11] sm:aspect-[16/9]`
+  1293→   - Legend uses `flex flex-wrap` — wraps gracefully on mobile
+  1294→   - HUD header uses `flex-col sm:flex-row` — stacks on mobile
+  1295→
+  1296→4) Videos:
+  1297→   - Featured card: `overflow-hidden` + `relative` maintained
+  1298→   - Other video cards: `overflow-hidden` on each card
+  1299→   - Badges stay inside via `absolute` positioning within `overflow-hidden` parent
+  1300→
+  1301→5) Floating Elements (About):
+  1302→   - Operations image + "+15" badge: `hidden sm:block` — hidden on mobile
+  1303→   - Only main warehouse image shows on mobile — no overflow
+  1304→
+  1305→6) Containers & Typography:
+  1306→   - All sections use `container mx-auto px-4 sm:px-6 lg:px-8`
+  1307→   - Hero title: `text-3xl sm:text-5xl lg:text-6xl`
+  1308→   - Section headings: `text-3xl sm:text-4xl lg:text-[2.75rem]`
+  1309→
+  1310→VERIFICATION (Agent Browser):
+  1311→  - Mobile 375px: scrollWidth=375, clientWidth=375, overflow=false ✅
+  1312→  - Tablet 768px: scrollWidth=768, clientWidth=768, overflow=false ✅  
+  1313→  - Desktop 1440px: scrollWidth=1440, clientWidth=1440, overflow=false ✅
+  1314→  - VLM Mobile: "لا يوجد horizontal scroll ولا white gap. الأقسام مظبوطة. 9/10"
+  1315→  - ESLint: 0 errors
+  1316→
+  1317→---
+  1318→Task ID: 4
+  1319→Agent: general-purpose
+  1320→Task: Add "reviews" to DashboardSection store type + add i18n keys for review form and moderation module
+  1321→
+  1322→Work Log:
+  1323→- Updated src/lib/store.ts DashboardSection union to include "reviews"
+  1324→- Added 30+ i18n keys to both Arabic and English dictionaries in src/lib/i18n.ts
+  1325→
+  1326→Stage Summary:
+  1327→- Store type updated, i18n keys added for review form + dashboard moderation
+  1328→

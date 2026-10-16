@@ -1,0 +1,547 @@
+     1→"use client";
+     2→
+     3→import { useState, useMemo } from "react";
+     4→import { useQuery, useQueryClient } from "@tanstack/react-query";
+     5→import { motion, AnimatePresence } from "framer-motion";
+     6→import {
+     7→  Plus, Search, Loader2, Pencil, Trash2, X, Package, Filter,
+     8→  Download, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
+     9→  CheckSquare, Square, Phone, MapPin, Scale, Tag, Calendar, Clock, User, Banknote
+    10→} from "lucide-react";
+    11→import { Button } from "@/components/ui/button";
+    12→import { Input } from "@/components/ui/input";
+    13→import { Label } from "@/components/ui/label";
+    14→import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+    15→import { Textarea } from "@/components/ui/textarea";
+    16→import { Card } from "@/components/ui/card";
+    17→import {
+    18→  Dialog, DialogContent, DialogHeader, DialogTitle
+    19→} from "@/components/ui/dialog";
+    20→import { apiGet, apiPost, apiPatch, apiDelete, formatEGP, formatDateTime, STATUS_COLORS } from "@/lib/api";
+    21→import { toast } from "sonner";
+    22→import { useT } from "@/lib/i18n";
+    23→
+    24→const STATUSES = ["pending", "picked_up", "in_transit", "out_for_delivery", "delivered", "returned", "cancelled"];
+    25→
+    26→export function DashboardShipments() {
+    27→  const { t, isAr } = useT();
+    28→  const qc = useQueryClient();
+    29→  const [q, setQ] = useState("");
+    30→  const [status, setStatus] = useState("");
+    31→  const [page, setPage] = useState(1);
+    32→  const [pageSize, setPageSize] = useState(8);
+    33→  const [modalOpen, setModalOpen] = useState(false);
+    34→  const [drawerShipment, setDrawerShipment] = useState<any>(null);
+    35→  const [selected, setSelected] = useState<Set<string>>(new Set());
+    36→  const [editing, setEditing] = useState<any>(null);
+    37→  const [saving, setSaving] = useState(false);
+    38→  const [form, setForm] = useState<any>({
+    39→    senderName: "", senderPhone: "", senderAddress: "",
+    40→    receiverName: "", receiverPhone: "", receiverAddress: "",
+    41→    governorate: "", service: "Standard", weight: 1, notes: "", price: 0, status: "pending",
+    42→  });
+    43→
+    44→  // localized status labels
+    45→  const STATUS_LABELS: Record<string, string> = {
+    46→    pending: t("d.status.pending"),
+    47→    picked_up: t("d.status.picked_up"),
+    48→    in_transit: t("d.status.in_transit"),
+    49→    out_for_delivery: t("d.status.out_for_delivery"),
+    50→    delivered: t("d.status.delivered"),
+    51→    returned: t("d.status.returned"),
+    52→    cancelled: t("d.status.cancelled"),
+    53→    confirmed: t("d.status.confirmed"),
+    54→    processing: t("d.status.processing"),
+    55→    new: t("d.status.new"),
+    56→  };
+    57→
+    58→  const { data: govData } = useQuery({ queryKey: ["governorates"], queryFn: () => apiGet<any>("/api/governorates") });
+    59→  const { data: svcData } = useQuery({ queryKey: ["services"], queryFn: () => apiGet<any>("/api/services") });
+    60→  const { data, isLoading } = useQuery({
+    61→    queryKey: ["shipments", q, status],
+    62→    queryFn: () => apiGet<any>(`/api/shipments?q=${encodeURIComponent(q)}&status=${encodeURIComponent(status)}`),
+    63→  });
+    64→  const allShipments = data?.shipments ?? [];
+    65→
+    66→  // Pagination
+    67→  const totalPages = Math.max(1, Math.ceil(allShipments.length / pageSize));
+    68→  const currentPage = Math.min(page, totalPages);
+    69→  const pagedShipments = useMemo(() => {
+    70→    const start = (currentPage - 1) * pageSize;
+    71→    return allShipments.slice(start, start + pageSize);
+    72→  }, [allShipments, currentPage, pageSize]);
+    73→
+    74→  const allSelected = pagedShipments.length > 0 && pagedShipments.every((s: any) => selected.has(s.id));
+    75→
+    76→  const toggleSelect = (id: string) => {
+    77→    const next = new Set(selected);
+    78→    if (next.has(id)) next.delete(id); else next.add(id);
+    79→    setSelected(next);
+    80→  };
+    81→  const toggleAll = () => {
+    82→    const next = new Set(selected);
+    83→    if (allSelected) pagedShipments.forEach((s: any) => next.delete(s.id));
+    84→    else pagedShipments.forEach((s: any) => next.add(s.id));
+    85→    setSelected(next);
+    86→  };
+    87→
+    88→  const openCreate = () => {
+    89→    setEditing(null);
+    90→    setForm({ senderName: "Redline Warehouse", senderPhone: "019000", senderAddress: "5th Settlement, New Cairo",
+    91→      receiverName: "", receiverPhone: "", receiverAddress: "", governorate: govData?.governorates?.[0]?.name || "Cairo",
+    92→      service: "Standard", weight: 1, notes: "", price: 0, status: "pending" });
+    93→    setModalOpen(true);
+    94→  };
+    95→
+    96→  const openEdit = (sh: any) => {
+    97→    setEditing(sh);
+    98→    setForm({ ...sh });
+    99→    setModalOpen(true);
+   100→  };
+   101→
+   102→  const save = async () => {
+   103→    setSaving(true);
+   104→    try {
+   105→      if (editing) {
+   106→        await apiPatch(`/api/shipments/${editing.id}`, form);
+   107→        toast.success(t("d.ship.toastUpdated"));
+   108→      } else {
+   109→        await apiPost("/api/shipments", form);
+   110→        toast.success(t("d.ship.toastCreated"));
+   111→      }
+   112→      setModalOpen(false);
+   113→      qc.invalidateQueries({ queryKey: ["shipments"] });
+   114→      qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
+   115→    } catch (e: any) {
+   116→      toast.error(e.message || t("d.ship.toastError"));
+   117→    } finally {
+   118→      setSaving(false);
+   119→    }
+   120→  };
+   121→
+   122→  const remove = async (id: string) => {
+   123→    if (!confirm(t("d.ship.confirmDelete"))) return;
+   124→    try {
+   125→      await apiDelete(`/api/shipments/${id}`);
+   126→      toast.success(t("d.ship.toastDeleted"));
+   127→      qc.invalidateQueries({ queryKey: ["shipments"] });
+   128→      qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
+   129→    } catch (e: any) {
+   130→      toast.error(e.message);
+   131→    }
+   132→  };
+   133→
+   134→  const bulkDelete = async () => {
+   135→    if (selected.size === 0) return;
+   136→    if (!confirm(`${t("d.ship.confirmBulkDeletePrefix")}${selected.size}${t("d.ship.confirmBulkDeleteSuffix")}`)) return;
+   137→    let ok = 0;
+   138→    for (const id of selected) {
+   139→      try { await apiDelete(`/api/shipments/${id}`); ok++; } catch {}
+   140→    }
+   141→    toast.success(`${t("d.ship.toastBulkDeletedPrefix")}${ok}${t("d.ship.toastBulkDeletedSuffix")}`);
+   142→    setSelected(new Set());
+   143→    qc.invalidateQueries({ queryKey: ["shipments"] });
+   144→    qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
+   145→  };
+   146→
+   147→  const quickStatus = async (sh: any, newStatus: string) => {
+   148→    try {
+   149→      await apiPatch(`/api/shipments/${sh.id}`, { status: newStatus, note: t("d.ship.quickStatusNote") });
+   150→      toast.success(t("d.ship.toastStatus"));
+   151→      qc.invalidateQueries({ queryKey: ["shipments"] });
+   152→      qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
+   153→    } catch (e: any) {
+   154→      toast.error(e.message);
+   155→    }
+   156→  };
+   157→
+   158→  const exportCSV = () => {
+   159→    const headers = ["trackingNo", "receiverName", "receiverPhone", "governorate", "service", "weight", "price", "status", "createdAt"];
+   160→    const rows = allShipments.map((s: any) => headers.map((h) => `"${String(s[h] ?? "").replace(/"/g, '""')}"`).join(","));
+   161→    const csv = [headers.join(","), ...rows].join("\n");
+   162→    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
+   163→    const url = URL.createObjectURL(blob);
+   164→    const a = document.createElement("a");
+   165→    a.href = url;
+   166→    a.download = `redline-shipments-${Date.now()}.csv`;
+   167→    a.click();
+   168→    URL.revokeObjectURL(url);
+   169→    toast.success(t("d.ship.toastExported"));
+   170→  };
+   171→
+   172→  return (
+   173→    <div className="space-y-5">
+   174→      {/* Toolbar */}
+   175→      <Card className="p-4">
+   176→        <div className="flex flex-col sm:flex-row gap-3">
+   177→          <div className="relative flex-1">
+   178→            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+   179→            <Input value={q} onChange={(e) => { setQ(e.target.value); setPage(1); }} placeholder={t("d.ship.search")} className="h-10 pr-9" />
+   180→          </div>
+   181→          <Select value={status || "all"} onValueChange={(v) => { setStatus(v === "all" ? "" : v); setPage(1); }}>
+   182→            <SelectTrigger className="h-10 w-full sm:w-44"><Filter className="w-4 h-4 ml-2" /><SelectValue placeholder={t("d.ship.allStatuses")} /></SelectTrigger>
+   183→            <SelectContent>
+   184→              <SelectItem value="all">{t("d.ship.allStatuses")}</SelectItem>
+   185→              {STATUSES.map((s) => <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>)}
+   186→            </SelectContent>
+   187→          </Select>
+   188→          <Button variant="outline" onClick={exportCSV} className="h-10 gap-2">
+   189→            <Download className="w-4 h-4" /> {t("d.ship.export")}
+   190→          </Button>
+   191→          <Button onClick={openCreate} className="bg-gradient-to-r from-primary to-red-700 text-white gap-2 h-10">
+   192→            <Plus className="w-4 h-4" /> {t("d.ship.new")}
+   193→          </Button>
+   194→        </div>
+   195→        {/* Bulk actions bar */}
+   196→        <AnimatePresence>
+   197→          {selected.size > 0 && (
+   198→            <motion.div
+   199→              initial={{ height: 0, opacity: 0 }}
+   200→              animate={{ height: "auto", opacity: 1 }}
+   201→              exit={{ height: 0, opacity: 0 }}
+   202→              className="overflow-hidden"
+   203→            >
+   204→              <div className="mt-3 flex items-center justify-between p-3 rounded-xl bg-primary/5 border border-primary/20">
+   205→                <span className="text-sm font-semibold">{t("d.ship.selectedPrefix")}{selected.size}{t("d.ship.selectedSuffix")}</span>
+   206→                <div className="flex gap-2">
+   207→                  <Button variant="outline" size="sm" className="h-8" onClick={() => setSelected(new Set())}>{t("d.ship.cancel")}</Button>
+   208→                  <Button variant="outline" size="sm" className="h-8 text-rose-600" onClick={bulkDelete}>
+   209→                    <Trash2 className="w-3.5 h-3.5" /> {t("d.ship.deleteSelected")}
+   210→                  </Button>
+   211→                </div>
+   212→              </div>
+   213→            </motion.div>
+   214→          )}
+   215→        </AnimatePresence>
+   216→      </Card>
+   217→
+   218→      {/* Table */}
+   219→      <Card className="overflow-hidden">
+   220→        {isLoading ? (
+   221→          <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+   222→        ) : pagedShipments.length === 0 ? (
+   223→          <div className="flex flex-col items-center py-16 text-muted-foreground">
+   224→            <Package className="w-12 h-12 mb-3 opacity-40" />
+   225→            <p>{t("d.ship.empty")}</p>
+   226→          </div>
+   227→        ) : (
+   228→          <>
+   229→            <div className="overflow-x-auto">
+   230→              <table className="w-full text-sm">
+   231→                <thead className="bg-muted/60">
+   232→                  <tr className="text-right">
+   233→                    <th className="px-4 py-3 w-10">
+   234→                      <button onClick={toggleAll} className="flex items-center">
+   235→                        {allSelected ? <CheckSquare className="w-4 h-4 text-primary" /> : <Square className="w-4 h-4 text-muted-foreground" />}
+   236→                      </button>
+   237→                    </th>
+   238→                    <th className="px-4 py-3 font-semibold">{t("d.ship.h.tracking")}</th>
+   239→                    <th className="px-4 py-3 font-semibold">{t("d.ship.h.receiver")}</th>
+   240→                    <th className="px-4 py-3 font-semibold hidden md:table-cell">{t("d.ship.h.governorate")}</th>
+   241→                    <th className="px-4 py-3 font-semibold hidden lg:table-cell">{t("d.ship.h.service")}</th>
+   242→                    <th className="px-4 py-3 font-semibold">{t("d.ship.h.price")}</th>
+   243→                    <th className="px-4 py-3 font-semibold">{t("d.ship.h.status")}</th>
+   244→                    <th className="px-4 py-3 font-semibold text-left">{t("d.ship.h.actions")}</th>
+   245→                  </tr>
+   246→                </thead>
+   247→                <tbody>
+   248→                  {pagedShipments.map((sh: any) => (
+   249→                    <tr key={sh.id} className={`border-t border-border hover:bg-muted/30 transition-colors ${selected.has(sh.id) ? "bg-primary/5" : ""}`}>
+   250→                      <td className="px-4 py-3">
+   251→                        <button onClick={() => toggleSelect(sh.id)}>
+   252→                          {selected.has(sh.id) ? <CheckSquare className="w-4 h-4 text-primary" /> : <Square className="w-4 h-4 text-muted-foreground" />}
+   253→                        </button>
+   254→                      </td>
+   255→                      <td className="px-4 py-3">
+   256→                        <button onClick={() => setDrawerShipment(sh)} className="font-mono font-bold text-primary hover:underline">
+   257→                          {sh.trackingNo}
+   258→                        </button>
+   259→                      </td>
+   260→                      <td className="px-4 py-3">
+   261→                        <div className="font-medium">{sh.receiverName}</div>
+   262→                        <div className="text-xs text-muted-foreground" dir="ltr">{sh.receiverPhone}</div>
+   263→                      </td>
+   264→                      <td className="px-4 py-3 hidden md:table-cell">{sh.governorate}</td>
+   265→                      <td className="px-4 py-3 hidden lg:table-cell">{sh.service}</td>
+   266→                      <td className="px-4 py-3 font-semibold tabular-nums">{formatEGP(sh.price)}</td>
+   267→                      <td className="px-4 py-3">
+   268→                        <Select defaultValue={sh.status} onValueChange={(v) => quickStatus(sh, v)}>
+   269→                          <SelectTrigger className="h-8 w-36 text-xs border-0 hover:bg-muted">
+   270→                            <SelectValue>
+   271→                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${STATUS_COLORS[sh.status] || ""}`}>
+   272→                                {STATUS_LABELS[sh.status] || sh.status}
+   273→                              </span>
+   274→                            </SelectValue>
+   275→                          </SelectTrigger>
+   276→                          <SelectContent>
+   277→                            {STATUSES.map((s) => <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>)}
+   278→                          </SelectContent>
+   279→                        </Select>
+   280→                      </td>
+   281→                      <td className="px-4 py-3">
+   282→                        <div className="flex gap-1 justify-end">
+   283→                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDrawerShipment(sh)} title={t("d.ship.viewAction")}>
+   284→                            <Search className="w-4 h-4" />
+   285→                          </Button>
+   286→                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(sh)}>
+   287→                            <Pencil className="w-4 h-4" />
+   288→                          </Button>
+   289→                          <Button variant="ghost" size="icon" className="h-8 w-8 text-rose-600 hover:text-rose-700" onClick={() => remove(sh.id)}>
+   290→                            <Trash2 className="w-4 h-4" />
+   291→                          </Button>
+   292→                        </div>
+   293→                      </td>
+   294→                    </tr>
+   295→                  ))}
+   296→                </tbody>
+   297→              </table>
+   298→            </div>
+   299→
+   300→            {/* Pagination */}
+   301→            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 border-t border-border">
+   302→              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+   303→                <span>{t("d.ship.showing")}</span>
+   304→                <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v)); setPage(1); }}>
+   305→                  <SelectTrigger className="h-8 w-20"><SelectValue /></SelectTrigger>
+   306→                  <SelectContent>
+   307→                    {[8, 12, 20, 50].map((n) => <SelectItem key={n} value={String(n)}>{n}</SelectItem>)}
+   308→                  </SelectContent>
+   309→                </Select>
+   310→                <span>{t("d.ship.of")} {allShipments.length} {t("d.ship.shipmentsUnit")}</span>
+   311→              </div>
+   312→              <div className="flex items-center gap-1">
+   313→                <Button variant="outline" size="icon" className="h-8 w-8" disabled={currentPage === 1} onClick={() => setPage(1)}>
+   314→                  <ChevronsRight className="w-4 h-4" />
+   315→                </Button>
+   316→                <Button variant="outline" size="icon" className="h-8 w-8" disabled={currentPage === 1} onClick={() => setPage((p) => p - 1)}>
+   317→                  <ChevronRight className="w-4 h-4" />
+   318→                </Button>
+   319→                <span className="px-3 text-sm font-medium">{t("d.ship.page")} {currentPage} {t("d.ship.ofPages")} {totalPages}</span>
+   320→                <Button variant="outline" size="icon" className="h-8 w-8" disabled={currentPage === totalPages} onClick={() => setPage((p) => p + 1)}>
+   321→                  <ChevronLeft className="w-4 h-4" />
+   322→                </Button>
+   323→                <Button variant="outline" size="icon" className="h-8 w-8" disabled={currentPage === totalPages} onClick={() => setPage(totalPages)}>
+   324→                  <ChevronsLeft className="w-4 h-4" />
+   325→                </Button>
+   326→              </div>
+   327→            </div>
+   328→          </>
+   329→        )}
+   330→      </Card>
+   331→
+   332→      {/* Create/Edit Modal */}
+   333→      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+   334→        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+   335→          <DialogHeader>
+   336→            <DialogTitle className="flex items-center gap-2">
+   337→              <Package className="w-5 h-5 text-primary" />
+   338→              {editing ? t("d.ship.modal.edit") : t("d.ship.modal.create")}
+   339→            </DialogTitle>
+   340→          </DialogHeader>
+   341→          <div className="space-y-4">
+   342→            <div className="grid sm:grid-cols-2 gap-3">
+   343→              <div className="space-y-1">
+   344→                <Label className="text-xs">{t("d.ship.l.senderName")}</Label>
+   345→                <Input value={form.senderName} onChange={(e) => setForm({ ...form, senderName: e.target.value })} className="h-10" />
+   346→              </div>
+   347→              <div className="space-y-1">
+   348→                <Label className="text-xs">{t("d.ship.l.senderPhone")}</Label>
+   349→                <Input value={form.senderPhone} onChange={(e) => setForm({ ...form, senderPhone: e.target.value })} className="h-10" dir="ltr" />
+   350→              </div>
+   351→              <div className="space-y-1 sm:col-span-2">
+   352→                <Label className="text-xs">{t("d.ship.l.senderAddress")}</Label>
+   353→                <Input value={form.senderAddress} onChange={(e) => setForm({ ...form, senderAddress: e.target.value })} className="h-10" />
+   354→              </div>
+   355→            </div>
+   356→            <div className="h-px bg-border" />
+   357→            <div className="grid sm:grid-cols-2 gap-3">
+   358→              <div className="space-y-1">
+   359→                <Label className="text-xs">{t("d.ship.l.receiverName")}</Label>
+   360→                <Input value={form.receiverName} onChange={(e) => setForm({ ...form, receiverName: e.target.value })} className="h-10" />
+   361→              </div>
+   362→              <div className="space-y-1">
+   363→                <Label className="text-xs">{t("d.ship.l.receiverPhone")}</Label>
+   364→                <Input value={form.receiverPhone} onChange={(e) => setForm({ ...form, receiverPhone: e.target.value })} className="h-10" dir="ltr" />
+   365→              </div>
+   366→              <div className="space-y-1 sm:col-span-2">
+   367→                <Label className="text-xs">{t("d.ship.l.receiverAddress")}</Label>
+   368→                <Input value={form.receiverAddress} onChange={(e) => setForm({ ...form, receiverAddress: e.target.value })} className="h-10" />
+   369→              </div>
+   370→            </div>
+   371→            <div className="grid sm:grid-cols-3 gap-3">
+   372→              <div className="space-y-1">
+   373→                <Label className="text-xs">{t("d.ship.l.governorate")}</Label>
+   374→                <Select value={form.governorate} onValueChange={(v) => setForm({ ...form, governorate: v })}>
+   375→                  <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
+   376→                  <SelectContent className="max-h-72">
+   377→                    {govData?.governorates?.map((g: any) => <SelectItem key={g.name} value={g.name}>{isAr ? g.nameAr : g.name}</SelectItem>)}
+   378→                  </SelectContent>
+   379→                </Select>
+   380→              </div>
+   381→              <div className="space-y-1">
+   382→                <Label className="text-xs">{t("d.ship.l.service")}</Label>
+   383→                <Select value={form.service} onValueChange={(v) => setForm({ ...form, service: v })}>
+   384→                  <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
+   385→                  <SelectContent>
+   386→                    {svcData?.services?.map((s: any) => <SelectItem key={s.name} value={s.name}>{isAr ? s.nameAr : s.name}</SelectItem>)}
+   387→                  </SelectContent>
+   388→                </Select>
+   389→              </div>
+   390→              <div className="space-y-1">
+   391→                <Label className="text-xs">{t("d.ship.l.status")}</Label>
+   392→                <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
+   393→                  <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
+   394→                  <SelectContent>
+   395→                    {STATUSES.map((s) => <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>)}
+   396→                  </SelectContent>
+   397→                </Select>
+   398→              </div>
+   399→            </div>
+   400→            <div className="grid sm:grid-cols-2 gap-3">
+   401→              <div className="space-y-1">
+   402→                <Label className="text-xs">{t("d.ship.l.weight")}</Label>
+   403→                <Input type="number" step="0.1" value={form.weight} onChange={(e) => setForm({ ...form, weight: Number(e.target.value) })} className="h-10" />
+   404→              </div>
+   405→              <div className="space-y-1">
+   406→                <Label className="text-xs">{t("d.ship.l.price")}</Label>
+   407→                <Input type="number" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} className="h-10" />
+   408→              </div>
+   409→            </div>
+   410→            <div className="space-y-1">
+   411→              <Label className="text-xs">{t("d.ship.l.notes")}</Label>
+   412→              <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} />
+   413→            </div>
+   414→            <div className="flex gap-2 pt-2">
+   415→              <Button onClick={save} disabled={saving} className="flex-1 bg-gradient-to-r from-primary to-red-700 text-white gap-2">
+   416→                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+   417→                {editing ? t("d.ship.saveEdit") : t("d.ship.saveCreate")}
+   418→              </Button>
+   419→              <Button variant="outline" onClick={() => setModalOpen(false)}>{t("d.ship.cancel")}</Button>
+   420→            </div>
+   421→          </div>
+   422→        </DialogContent>
+   423→      </Dialog>
+   424→
+   425→      {/* Detail Drawer */}
+   426→      <AnimatePresence>
+   427→        {drawerShipment && (
+   428→          <motion.div
+   429→            initial={{ opacity: 0 }}
+   430→            animate={{ opacity: 1 }}
+   431→            exit={{ opacity: 0 }}
+   432→            onClick={() => setDrawerShipment(null)}
+   433→            className="fixed inset-0 z-[80] bg-black/50 backdrop-blur-sm flex justify-start"
+   434→          >
+   435→            <motion.div
+   436→              initial={{ x: "-100%" }}
+   437→              animate={{ x: 0 }}
+   438→              exit={{ x: "-100%" }}
+   439→              transition={{ type: "spring", damping: 25, stiffness: 250 }}
+   440→              onClick={(e) => e.stopPropagation()}
+   441→              className="w-full max-w-md h-full bg-card shadow-2xl overflow-y-auto"
+   442→            >
+   443→              <div className="sticky top-0 bg-gradient-to-l from-primary to-red-700 text-white p-6">
+   444→                <div className="flex items-start justify-between">
+   445→                  <div>
+   446→                    <div className="text-xs text-white/80">{t("d.ship.trackingNo")}</div>
+   447→                    <div className="text-2xl font-black font-mono" dir="ltr">{drawerShipment.trackingNo}</div>
+   448→                  </div>
+   449→                  <button onClick={() => setDrawerShipment(null)} className="w-9 h-9 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center">
+   450→                    <X className="w-5 h-5" />
+   451→                  </button>
+   452→                </div>
+   453→                <span className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-sm font-bold">
+   454→                  <span className="w-2 h-2 rounded-full bg-white animate-slow-pulse" />
+   455→                  {STATUS_LABELS[drawerShipment.status] || drawerShipment.status}
+   456→                </span>
+   457→              </div>
+   458→
+   459→              <div className="p-6 space-y-5">
+   460→                <div>
+   461→                  <h4 className="text-xs font-bold text-muted-foreground mb-3 flex items-center gap-1.5"><User className="w-3.5 h-3.5" /> {t("d.ship.receiver")}</h4>
+   462→                  <div className="space-y-2 text-sm">
+   463→                    <div className="flex items-center gap-2"><User className="w-4 h-4 text-primary" /> {drawerShipment.receiverName}</div>
+   464→                    <div className="flex items-center gap-2" dir="ltr"><Phone className="w-4 h-4 text-primary" /> {drawerShipment.receiverPhone}</div>
+   465→                    {drawerShipment.receiverAddress && <div className="flex items-start gap-2"><MapPin className="w-4 h-4 text-primary mt-0.5" /> <span>{drawerShipment.receiverAddress}</span></div>}
+   466→                  </div>
+   467→                </div>
+   468→                <div>
+   469→                  <h4 className="text-xs font-bold text-muted-foreground mb-3 flex items-center gap-1.5"><Package className="w-3.5 h-3.5" /> {t("d.ship.sender")}</h4>
+   470→                  <div className="space-y-2 text-sm">
+   471→                    <div className="flex items-center gap-2"><User className="w-4 h-4 text-primary" /> {drawerShipment.senderName}</div>
+   472→                    <div className="flex items-center gap-2" dir="ltr"><Phone className="w-4 h-4 text-primary" /> {drawerShipment.senderPhone}</div>
+   473→                    {drawerShipment.senderAddress && <div className="flex items-start gap-2"><MapPin className="w-4 h-4 text-primary mt-0.5" /> <span>{drawerShipment.senderAddress}</span></div>}
+   474→                  </div>
+   475→                </div>
+   476→                <div className="grid grid-cols-2 gap-3">
+   477→                  <div className="p-3 rounded-xl bg-muted/50">
+   478→                    <MapPin className="w-4 h-4 text-primary mb-1" />
+   479→                    <div className="text-xs text-muted-foreground">{t("d.ship.h.governorate")}</div>
+   480→                    <div className="font-bold text-sm">{drawerShipment.governorate}</div>
+   481→                  </div>
+   482→                  <div className="p-3 rounded-xl bg-muted/50">
+   483→                    <Tag className="w-4 h-4 text-primary mb-1" />
+   484→                    <div className="text-xs text-muted-foreground">{t("d.ship.h.service")}</div>
+   485→                    <div className="font-bold text-sm">{drawerShipment.service}</div>
+   486→                  </div>
+   487→                  <div className="p-3 rounded-xl bg-muted/50">
+   488→                    <Scale className="w-4 h-4 text-primary mb-1" />
+   489→                    <div className="text-xs text-muted-foreground">{t("d.ship.l.weight")}</div>
+   490→                    <div className="font-bold text-sm tabular-nums">{drawerShipment.weight} {t("d.ship.weightUnit")}</div>
+   491→                  </div>
+   492→                  <div className="p-3 rounded-xl bg-muted/50">
+   493→                    <Banknote className="w-4 h-4 text-primary mb-1" />
+   494→                    <div className="text-xs text-muted-foreground">{t("d.ship.h.price")}</div>
+   495→                    <div className="font-bold text-sm tabular-nums">{formatEGP(drawerShipment.price)}</div>
+   496→                  </div>
+   497→                </div>
+   498→                <div className="p-3 rounded-xl bg-muted/50 flex items-center gap-2 text-sm">
+   499→                  <Calendar className="w-4 h-4 text-primary" />
+   500→                  <span className="text-muted-foreground">{t("d.ship.createdAt")}</span>
+   501→                  <span className="font-semibold">{formatDateTime(drawerShipment.createdAt)}</span>
+   502→                </div>
+   503→                {drawerShipment.notes && (
+   504→                  <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
+   505→                    <div className="text-xs font-bold text-amber-700 dark:text-amber-400 mb-1">{t("d.ship.notesLabel")}</div>
+   506→                    <p className="text-sm">{drawerShipment.notes}</p>
+   507→                  </div>
+   508→                )}
+   509→
+   510→                {/* Timeline */}
+   511→                {(() => {
+   512→                  let history: any[] = [];
+   513→                  try { history = drawerShipment.history ? JSON.parse(drawerShipment.history) : []; } catch {}
+   514→                  if (history.length === 0) return null;
+   515→                  return (
+   516→                    <div>
+   517→                      <h4 className="text-xs font-bold text-muted-foreground mb-3 flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {t("d.ship.history")}</h4>
+   518→                      <div className="relative pr-6 space-y-4">
+   519→                        <div className="absolute right-3 top-2 bottom-2 w-0.5 bg-border" />
+   520→                        {history.map((h, i) => (
+   521→                          <div key={i} className="relative">
+   522→                            <div className={`absolute right-0 -mr-6 w-4 h-4 rounded-full border-2 ${i === history.length - 1 ? "bg-primary border-primary" : "bg-background border-border"}`} />
+   523→                            <div className="font-semibold text-sm">{STATUS_LABELS[h.status] || h.status}</div>
+   524→                            {h.note && <div className="text-xs text-muted-foreground mt-0.5">{h.note}</div>}
+   525→                            <div className="text-xs text-muted-foreground mt-0.5">{formatDateTime(h.at)}</div>
+   526→                          </div>
+   527→                        ))}
+   528→                      </div>
+   529→                    </div>
+   530→                  );
+   531→                })()}
+   532→
+   533→                <div className="flex gap-2 pt-2">
+   534→                  <Button onClick={() => { setDrawerShipment(null); openEdit(drawerShipment); }} className="flex-1 gap-2">
+   535→                    <Pencil className="w-4 h-4" /> {t("d.ship.edit")}
+   536→                  </Button>
+   537→                  <Button variant="outline" onClick={() => setDrawerShipment(null)}>{t("d.ship.close")}</Button>
+   538→                </div>
+   539→              </div>
+   540→            </motion.div>
+   541→          </motion.div>
+   542→        )}
+   543→      </AnimatePresence>
+   544→    </div>
+   545→  );
+   546→}
+   547→

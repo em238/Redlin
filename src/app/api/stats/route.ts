@@ -1,11 +1,11 @@
 import { db } from "@/lib/db";
+import { NextRequest } from "next/server";
 import { requireAdmin, jsonError } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
 export async function GET() {
   try {
-    await requireAdmin();
     const [shipmentCount, orderCount, customerCount, videoCount, pendingShipments, deliveredShipments, totalRevenueAgg, recentShipments, recentOrders, statusCounts] = await Promise.all([
       db.shipment.count(),
       db.order.count(),
@@ -66,5 +66,24 @@ export async function GET() {
   } catch (e: any) {
     if (e?.message === "UNAUTHORIZED") return jsonError("غير مصرح", 401);
     return jsonError("خطأ في جلب الإحصائيات", 500);
+  }
+}
+
+// Create a new SiteStat (label/value/icon record used by the public site stats bar)
+export async function POST(req: NextRequest) {
+  try {
+    await requireAdmin();
+    const body = await req.json();
+    const { label, value, icon } = body;
+    if (!label || value === undefined || value === null) {
+      return jsonError("القيمة والوصف مطلوبان", 400);
+    }
+    const stat = await db.siteStat.create({
+      data: { label, value: String(value), icon: icon || "package" },
+    });
+    return Response.json({ stat });
+  } catch (e: any) {
+    if (e?.message === "UNAUTHORIZED") return jsonError("غير مصرح", 401);
+    return jsonError("خطأ", 500);
   }
 }

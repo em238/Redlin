@@ -2,17 +2,16 @@ import { create } from "zustand";
 
 export type View = "public" | "dashboard";
 export type DashboardSection =
-  | "overview"
-  | "shipments"
-  | "orders"
-  | "customers"
+  | "hero"
+  | "about"
+  | "services"
+  | "how-it-works"
   | "videos"
-  | "hero-images"
   | "partners"
-  | "pricing"
-  | "messages"
-  | "settings"
-  | "reviews";
+  | "map"
+  | "contact"
+  | "reviews"
+  | "settings";
 
 interface AppState {
   view: View;
@@ -37,7 +36,7 @@ interface AppState {
 export const useAppStore = create<AppState>((set, get) => ({
   view: "public",
   setView: (v) => set({ view: v }),
-  dashboardSection: "overview",
+  dashboardSection: "hero",
   setDashboardSection: (s) => set({ dashboardSection: s }),
   user: null,
   setUser: (u) => set({ user: u }),

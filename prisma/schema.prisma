@@ -154,3 +154,54 @@ model Partner {
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
 }
+
+// === New models for dedicated content management ===
+
+model About {
+  id            String   @id @default(cuid())
+  titleAr       String   @default("من نحن")
+  titleEn       String   @default("About Us")
+  subtitleAr    String   @default("")
+  subtitleEn    String   @default("")
+  descriptionAr String   @default("")
+  descriptionEn String   @default("")
+  image         String?
+  features      String   @default("") // JSON array of {ar, en}
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model HowItWorksStep {
+  id          String   @id @default(cuid())
+  order       Int      @default(0)
+  titleAr     String
+  titleEn     String
+  descAr      String
+  descEn      String
+  icon        String   @default("clipboard-list")
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ContactInfo {
+  id        String   @id @default(cuid())
+  type      String   // "address" | "phone" | "email"
+  labelAr   String
+  labelEn   String
+  value     String
+  href      String?  // tel: or mailto: link
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model WhatsAppSetting {
+  id              String   @id @default(cuid())
+  phoneNumber     String   @default("201000000000")
+  defaultMessageAr String  @default("مرحباً، أريد الاستفسار عن خدمات الشحن")
+  defaultMessageEn String  @default("Hello, I'd like to inquire about shipping services")
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}

@@ -11,19 +11,19 @@ export function DashboardTopbar() {
   const { t } = useT();
 
   const TITLES: Record<DashboardSection, { title: string; subtitle: string }> = {
-    overview: { title: t("d.topbar.overview"), subtitle: t("d.topbar.overviewSub") },
-    shipments: { title: t("d.topbar.shipments"), subtitle: t("d.topbar.shipmentsSub") },
-    orders: { title: t("d.topbar.orders"), subtitle: t("d.topbar.ordersSub") },
-    customers: { title: t("d.topbar.customers"), subtitle: t("d.topbar.customersSub") },
-    videos: { title: t("d.topbar.videos"), subtitle: t("d.topbar.videosSub") },
-    "hero-images": { title: t("d.topbar.heroImages"), subtitle: t("d.topbar.heroImagesSub") },
-    partners: { title: t("d.topbar.partners"), subtitle: t("d.topbar.partnersSub") },
-    pricing: { title: t("d.topbar.pricing"), subtitle: t("d.topbar.pricingSub") },
-    messages: { title: t("d.topbar.messages"), subtitle: t("d.topbar.messagesSub") },
-    settings: { title: t("d.topbar.settings"), subtitle: t("d.topbar.settingsSub") },
+    hero: { title: t("d.nav.hero"), subtitle: t("d.topbar.heroSub") },
+    about: { title: t("d.nav.about"), subtitle: t("d.topbar.aboutSub") },
+    services: { title: t("d.nav.services"), subtitle: t("d.topbar.servicesSub") },
+    "how-it-works": { title: t("d.nav.howItWorks"), subtitle: t("d.topbar.howItWorksSub") },
+    videos: { title: t("d.nav.videos"), subtitle: t("d.topbar.videosSub") },
+    partners: { title: t("d.nav.partners"), subtitle: t("d.topbar.partnersSub") },
+    map: { title: t("d.nav.map"), subtitle: t("d.topbar.mapSub") },
+    contact: { title: t("d.nav.contact"), subtitle: t("d.topbar.contactSub") },
+    reviews: { title: t("d.nav.reviews"), subtitle: t("d.topbar.reviewsSub") },
+    settings: { title: t("d.nav.settings"), subtitle: t("d.topbar.settingsSub") },
   };
 
-  const current = TITLES[dashboardSection];
+  const current = TITLES[dashboardSection] || { title: "", subtitle: "" };
 
   return (
     <header className="sticky top-0 z-30 h-16 border-b border-border bg-background/85 backdrop-blur-xl">
@@ -37,14 +37,14 @@ export function DashboardTopbar() {
           <p className="text-xs text-muted-foreground truncate hidden sm:block">{current.subtitle}</p>
         </div>
 
-        <div className="mr-auto flex items-center gap-2">
+        <div className="ms-auto flex items-center gap-2">
           <div className="relative hidden md:block">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input placeholder={t("d.topbar.search")} className="h-9 w-48 pr-9 bg-muted/50 border-0" />
+            <Search className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input placeholder={t("d.topbar.search")} className="h-9 w-48 pe-9 bg-muted/50 border-0" />
           </div>
           <Button variant="ghost" size="icon" className="rounded-full relative">
             <Bell className="w-5 h-5" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full ring-2 ring-background" />
+            <span className="absolute top-1.5 end-1.5 w-2 h-2 bg-primary rounded-full ring-2 ring-background" />
           </Button>
           <Button variant="ghost" size="icon" className="rounded-full" onClick={toggleTheme}>
             {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}

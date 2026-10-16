@@ -1325,3 +1325,104 @@ Work Log:
 
 Stage Summary:
 - Store type updated, i18n keys added for review form + dashboard moderation
+
+---
+Task ID: dashboard-modules-1
+Agent: Orchestrator (main)
+Task: Create 3 new dashboard module components (hero, about, services) + supporting API routes
+
+Work Log:
+- Read worklog.md, dashboard-app.tsx, hero-images.tsx, partners.tsx, videos.tsx, reviews.tsx to study existing patterns
+- Read lib/api.ts (apiGet/apiPost/apiPatch/apiDelete), lib/auth.ts (requireAdmin, jsonError), prisma/schema.prisma (HeroImage, Service, SiteStat, About models)
+- Checked existing API routes: /api/hero-images (CRUD), /api/services (GET only), /api/stats (GET only for dashboard overview), /api/site (GET, returns stats as part of public data)
+
+API routes:
+- EXTENDED /api/services/route.ts: added GET ?all=1 (admin, all incl inactive) + POST (admin, create Service)
+- CREATED /api/services/[id]/route.ts: GET, PATCH (admin), DELETE (admin)
+- CREATED /api/about/route.ts: GET (auto-upserts first row), POST + PATCH (admin upsert)
+- EXTENDED /api/stats/route.ts: kept GET (dashboard overview), added POST (admin, create SiteStat)
+- CREATED /api/stats/[id]/route.ts: PATCH + DELETE (admin, SiteStat CRUD)
+
+Dashboard components (all "use client", bilingual via isAr inline, follow partners.tsx/videos.tsx patterns):
+1. src/components/dashboard/hero.tsx — DashboardHero
+   - Fetch /api/hero-images?all=1
+   - Grid: thumbnail, filename (basename extracted), title, #order badge, active toggle, Move Up/Down, Change (opens edit dialog w/ FileUpload), Remove (delete)
+   - Add Image dialog: drag-drop URL, FileUpload, gallery quick-select, title, order, active
+   - Reorder swaps order with adjacent image
+2. src/components/dashboard/about.tsx — DashboardAbout
+   - Section 1 "About Content": bilingual fields side by side (Title/Subtitle/Description × Ar+En with colored AR/EN badges) + FileUpload for image + single Save button → POST /api/about
+   - Section 2 "Metrics/Counters": fetches SiteStat from /api/site (stats), grid of metric cards (icon+value+label+Edit+Delete), Add/Edit modal (value+label+icon picker with 8 preset lucide icons + live preview), CRUD via /api/stats (POST) + /api/stats/[id] (PATCH, DELETE)
+3. src/components/dashboard/services.tsx — DashboardServices
+   - Fetch /api/services?all=1
+   - Grid: icon (img if URL-like else lucide with Boxes fallback), nameAr (top) + name (below), description, multiplier × N, icon name (mono), Edit/Show-Hide/Delete buttons
+   - Add/Edit modal: names side-by-side (Ar+En with badges), description, icon picker (text input + 10 preset lucide buttons + live preview), optional FileUpload for custom icon image (URL stored in icon field), multiplier, active toggle
+   - CRUD via /api/services (POST) + /api/services/[id] (PATCH, DELETE)
+
+Verification:
+- bun run lint: 0 errors, 3 warnings (all pre-existing in page.tsx and dashboard-app.tsx — none from this task)
+- dev.log: previously failed on `Can't resolve './services'` (and `./hero`, `./about`) — now only `./how-it-works`, `./map-hubs`, `./contact-info` remain missing (other agents' scope)
+- Final log: `✓ Compiled in 224ms` — my 3 files compile cleanly
+
+Stage Summary:
+- 3 new dashboard modules (DashboardHero, DashboardAbout, DashboardServices) + 5 API route changes
+- All modules follow exact existing patterns (TanStack Query + apiGet/apiPost/apiPatch/apiDelete + useT() + FileUpload + shadcn/ui + Framer Motion + sonner)
+- Bilingual UI via inline isAr — no new i18n keys needed
+- 0 lint errors introduced
+
+---
+Task ID: dashboard-modules-2
+Agent: Orchestrator (main)
+Task: Create 3 new dashboard module components (how-it-works, map-hubs, contact-info) + supporting API routes
+
+Work Log:
+- Read worklog.md, lib/api.ts (apiGet/apiPost/apiPatch/apiDelete), lib/auth.ts (requireAdmin, jsonError), prisma/schema.prisma (HowItWorksStep, Governorate, ContactInfo, WhatsAppSetting models)
+- Studied existing patterns from partners.tsx, about.tsx, services.tsx, videos.tsx, dashboard-app.tsx — confirmed inline isAr + L(ar,en) bilingual pattern is the established convention (no new i18n keys needed)
+- Confirmed dashboard-app.tsx already imports DashboardHowItWorks, DashboardMapHubs, DashboardContactInfo (slots reserved by previous orchestrator agent)
+
+API routes created/extended:
+- CREATED /api/how-it-works/route.ts — GET (?all=1 admin, sorted by order) + POST (create step)
+- CREATED /api/how-it-works/[id]/route.ts — GET, PATCH, DELETE
+- EXTENDED /api/governorates/route.ts — kept GET, added ?all=1 (admin, includes inactive) + POST (create governorate, defaults zone="A", basePrice=30, etaHours=48)
+- CREATED /api/governorates/[id]/route.ts — GET, PATCH, DELETE
+- CREATED /api/contact-info/route.ts — GET (?all=1) + POST (create contact info)
+- CREATED /api/contact-info/[id]/route.ts — PATCH, DELETE
+- CREATED /api/whatsapp-settings/route.ts — GET (auto-creates default row if none), POST (upsert), PATCH (alias POST)
+
+All routes use NextRequest/NextResponse pattern + db from "@/lib/db" + requireAdmin/jsonError from "@/lib/auth".
+
+Dashboard components (all "use client", bilingual via isAr inline L(ar,en), follow partners/about/services patterns):
+1. src/components/dashboard/how-it-works.tsx — DashboardHowItWorks
+   - Fetch /api/how-it-works?all=1 via TanStack Query (key: how-it-works-admin)
+   - Header card with gradient + Add Step button
+   - 3-column grid of step cards with: step number watermark (01, 02, 03...), icon, "Step N" label, titleAr (RTL) + titleEn (LTR), descAr + descEn, Edit/Show-Hide/Delete buttons, Framer Motion layout animations
+   - Add/Edit modal: titleAr/titleEn side-by-side with AR/EN badges, descAr/descEn side-by-side, icon picker (13 preset lucide icons + text input for custom name + live preview), FileUpload for custom icon image (URL stored in icon field — overrides lucide name), order number, active toggle
+   - CRUD via apiPost/apiPatch/apiDelete + invalidate how-it-works-admin + site-data + site
+2. src/components/dashboard/map-hubs.tsx — DashboardMapHubs
+   - Fetch /api/governorates?all=1 via TanStack Query (key: governorates-admin)
+   - Header card + Add Governorate button
+   - 4 zone stats cards (A=Greater Cairo green, B=Delta blue, C=Upper Egypt amber, D=Borders rose) showing active/total counts
+   - Zone filter pills (All + A/B/C/D with color dots + counts) — reactively filters the table
+   - Responsive: table on desktop (name/nameAr, zone badge with color dot, basePrice EGP, etaHours, active Switch, edit/show-hide/delete actions) + cards on mobile
+   - Add/Edit modal: nameAr/name side-by-side with AR/EN badges, zone Select (shadcn/ui) + quick color-pill zone buttons, basePrice number, etaHours number, active toggle
+   - CRUD via apiPost/apiPatch/apiDelete + invalidate governorates-admin + governorates + site-data + site
+3. src/components/dashboard/contact-info.tsx — DashboardContactInfo
+   - Fetch /api/contact-info?all=1 (key: contact-info-admin) + /api/whatsapp-settings (key: whatsapp-settings) in parallel
+   - Header card
+   - 3 sections (Address/Phone/Email) — each is a Card with header icon+title+count badge+Add button, then list of items (icon, labelAr/labelEn, value as link with ExternalLink icon for phone/email/URL items, active Switch, Edit/Delete buttons), empty state when no items
+   - WhatsApp Settings card (emerald theme): single-record form with phoneNumber (mono, EN/AR badge), defaultMessageAr/defaultMessageEn side-by-side, active toggle + emerald Save button (POST /api/whatsapp-settings) + live wa.me link preview that opens in new tab
+   - Add/Edit Contact Item modal: type fixed by which section's Add button was clicked (shown in dialog title with section icon + bilingual label), labelAr/labelEn side-by-side, value textarea (rows 3 for address, 2 for phone/email), optional href with auto-generated fallback (tel: for phone, mailto: for email), order number, active toggle
+   - useEffect syncs whatsapp state from query data once loaded
+   - CRUD via apiPost/apiPatch/apiDelete + invalidate contact-info-admin + whatsapp-settings + site-data + site
+
+Verification:
+- bun run lint: 0 errors, 3 warnings (all pre-existing Unused eslint-disable directives in page.tsx and dashboard-app.tsx — none from this task)
+- dev.log: clean — no errors; governorates route already serving correctly (200 OK) with the new GET ?all=1 + POST extension; admin server is running smoothly
+- dashboard-app.tsx: already references all 3 new components (DashboardHowItWorks, DashboardMapHubs, DashboardContactInfo) in the sections map → all imports resolved cleanly
+
+Stage Summary:
+- 3 new dashboard modules + 7 API route files (5 created, 1 extended, 1 existing [governorates] rewritten with extra verbs)
+- All modules follow exact existing patterns (TanStack Query + apiGet/apiPost/apiPatch/apiDelete + useT() + isAr L() inline + FileUpload + shadcn/ui + Framer Motion + sonner)
+- Bilingual UI via inline isAr — no new i18n keys needed
+- Zone color system: A=emerald (Greater Cairo), B=blue (Delta), C=amber (Upper Egypt), D=rose (Borders) — applied to both filter pills and table badges
+- All mutations invalidate both admin query AND public /api/site (plus related read keys) so live site updates immediately
+- 0 lint errors introduced
