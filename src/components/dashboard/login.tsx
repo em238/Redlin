@@ -122,7 +122,6 @@ export function DashboardLogin() {
                 <input type="checkbox" className="rounded accent-primary" defaultChecked />
                 {t("d.login.remember")}
               </label>
-              <button className="text-primary hover:underline">{t("d.login.forgot")}</button>
             </div>
 
             <Button
