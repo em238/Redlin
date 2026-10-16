@@ -263,3 +263,19 @@ model WhatsAppSetting {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
+
+// Pre-Footer CTA Banner ("جاهز تبدأ شحن مع Redline؟") — single record, upsert semantics
+model CtaBanner {
+  id                 String   @id @default(cuid())
+  headingAr          String   @default("جاهز تبدأ شحن مع Redline؟")
+  headingEn          String   @default("Ready to Start Shipping with Redline?")
+  subAr              String   @default("انضم لأكثر من 12,000 عميل يثقون بنا يومياً. تواصل معنا الآن واحصل على عرض سعر مخصص لشحناتك.")
+  subEn              String   @default("Join over 12,000 clients who trust us daily. Contact us now and get a custom quote for your shipments.")
+  btnTextAr          String   @default("اطلب عرض سعر")
+  btnTextEn          String   @default("Request a Quote")
+  btnLink            String   @default("#contact")
+  phone              String   @default("19999")
+  active             Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}

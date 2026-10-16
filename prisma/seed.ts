@@ -554,6 +554,21 @@ const heroContent = {
 };
 
 // ====================================================================
+// 11c. PRE-FOOTER CTA BANNER (single record — heading, subtitle, button, hotline)
+// ====================================================================
+const ctaBanner = {
+  headingAr: "جاهز تبدأ شحن مع Redline؟",
+  headingEn: "Ready to Start Shipping with Redline?",
+  subAr: "انضم لأكثر من 12,000 عميل يثقون بنا يومياً. تواصل معنا الآن واحصل على عرض سعر مخصص لشحناتك.",
+  subEn: "Join over 12,000 clients who trust us daily. Contact us now and get a custom quote for your shipments.",
+  btnTextAr: "اطلب عرض سعر",
+  btnTextEn: "Request a Quote",
+  btnLink: "#contact",
+  phone: "19999",
+  active: true,
+};
+
+// ====================================================================
 // 12. ROLES (3 system roles with permission matrices)
 //     permissions stored as JSON string per schema
 // ====================================================================
@@ -797,6 +812,12 @@ async function main() {
   await prisma.heroContent.create({ data: heroContent });
   console.log(`  ✓ Hero content seeded (badge, title, subtitle, CTAs, features)`);
 
+  // --- 15. PRE-FOOTER CTA BANNER (single record — heading, subtitle, button, hotline) ---
+  console.log(`→ CtaBanner (pre-footer CTA)...`);
+  await prisma.ctaBanner.deleteMany();
+  await prisma.ctaBanner.create({ data: ctaBanner });
+  console.log(`  ✓ CTA banner seeded (heading, subtitle, button, hotline: ${ctaBanner.phone})`);
+
   console.log("✅ Comprehensive seed complete!");
   console.log("");
   console.log("Summary:");
@@ -813,6 +834,7 @@ async function main() {
   console.log(`  - ${siteStats.length} site stats (incl. ticker cities JSON)`);
   console.log(`  - About content + features JSON`);
   console.log(`  - WhatsApp default setting`);
+  console.log(`  - Pre-footer CTA banner (heading, subtitle, button, hotline)`);
 }
 
 main()

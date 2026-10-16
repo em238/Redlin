@@ -1756,3 +1756,57 @@ Stage Summary:
 - API POST/PATCH routes accept and persist the ctaTextAr/ctaTextEn fields (with safe defaults for legacy clients).
 - Schema was already prepared with the ctaTextAr/ctaTextEn fields (no schema migration needed — schema.prisma already had them at lines 59-60).
 - 0 lint errors introduced. 3 pre-existing warnings untouched.
+
+---
+Task ID: cta-banner-management
+Agent: Z.ai Code (main)
+
+Task: Add management for the Pre-Footer CTA Banner ("جاهز تبدأ شحن مع Redline؟") to the Admin Dashboard — schema + seed + API + dashboard card + dynamic public landing page integration.
+
+Work Log:
+- prisma/schema.prisma — added a new `CtaBanner` single-record model (mirroring the existing HeroContent/WhatsAppSetting pattern) with fields: headingAr, headingEn, subAr, subEn, btnTextAr, btnTextEn, btnLink, phone, active, createdAt, updatedAt. All fields have defaults that match the user-specified seed values, so an empty `create({ data: {} })` yields the correct banner.
+- prisma/seed.ts — added a `ctaBanner` constant with the exact user-provided values (heading/subtitle/btn text in AR+EN, btnLink="#contact", phone="19999"), and a new seeding block #15 in main() that does `prisma.ctaBanner.deleteMany()` then `prisma.ctaBanner.create({ data: ctaBanner })`. Updated the final summary log line to mention the CTA banner.
+- Ran `bun run db:push` → schema applied (CtaBanner table created, Prisma Client regenerated).
+- Ran `bun run db:seed` → CtaBanner row seeded with the exact seed values. Verified via direct API call.
+- src/app/api/cta-banner/route.ts — new file. GET (public, auto-creates default row if none exists), POST (admin upsert via requireAdmin), PATCH (alias of POST). Allowlist: headingAr, headingEn, subAr, subEn, btnTextAr, btnTextEn, btnLink, phone, active. Pattern matches whatsapp-settings/route.ts.
+- src/app/api/site/route.ts — extended the existing Promise.all to also fetch `db.ctaBanner.findFirst({ orderBy: { updatedAt: "desc" } })` and return it as `ctaBanner` in the response. Now /api/site exposes stats + testimonials + videos + heroImages + partners + ctaBanner in a single request.
+- src/components/site/cta-banner.tsx — rewrote the public CTA banner to:
+  • Add useQuery fetching /api/cta-banner with queryKey ["cta-banner"].
+  • Resolve bilingual fields based on isAr (with i18n fallbacks if DB row missing).
+  • Split heading around "Redline" to keep the amber brand highlight.
+  • Use the DB-driven btnLink (supports both #anchor scroll and path navigation) and phone (renders as a `tel:` link).
+  • Add `dir={isAr ? "rtl" : "ltr"}` to the heading and subtitle so the directionality is correct in both languages.
+- src/components/dashboard/contact-info.tsx — extended the existing "Direct Contact / تواصل مباشر" module with a new dedicated CTA Banner management card:
+  • Added `Megaphone` and `Zap` icons to the lucide-react imports.
+  • Added a `CtaBannerSetting` TypeScript type.
+  • Added `ctaBanner` and `savingCta` state, pre-initialized with the exact seed defaults so the form never opens blank.
+  • Added `useQuery(["cta-banner"])` to fetch the live row from the DB.
+  • Added a `useEffect` that syncs state with fetched data once loaded (pre-fills fields with the seed values).
+  • Added `cta-banner` to the `invalidate()` function so changes propagate immediately to the public site.
+  • Added `saveCtaBanner()` async function with validation (heading + button label required in both languages), apiPost to /api/cta-banner, and a success toast "تم حفظ بانر التحفيز والتواصل السريع / CTA banner saved successfully".
+  • Added a Card UI placed BETWEEN the contact-info sections (address/phone/email) and the WhatsApp Settings card. The card contains: Megaphone icon header, Save Changes button in the header row, then a grid of bilingual inputs:
+      - Heading (AR/EN) — 2-col grid, Input fields
+      - Subtitle (AR/EN) — 2-col grid, Textarea fields
+      - Button text (AR/EN) + Button link — 3-col grid (link field is font-mono with helper text explaining #anchor vs path)
+      - Hotline phone (font-mono, dir=ltr) + Active toggle — 2-col grid
+      - Live preview block showing a mini-rendered version of the banner (with the actual red gradient, amber Redline highlight, and both buttons) so admins see exactly how it will look on the public site.
+- Lint verification: `bun run lint` → 0 errors, 3 warnings (all pre-existing Unused eslint-disable directives in src/app/page.tsx and src/components/dashboard/dashboard-app.tsx — none from this task).
+- Restarted dev server (the auto-restart picked up the regenerated Prisma Client which had been stale in the previous server's memory). Verified:
+  • GET /api/cta-banner → 200, returns the seeded row.
+  • GET /api/site → 200, response now includes `ctaBanner` field.
+- Agent Browser end-to-end verification (all passed):
+  • Public landing page renders the CTA banner with DB-driven content. AR mode: heading "جاهز تبدأ شحن مع Redline؟" (Redline highlighted in amber), subtitle "انضم لأكثر من 12,000 عميل...", buttons "اطلب عرض سعر" + "19999", phone link tel:19999.
+  • Toggled language to English (via navbar language button). Banner re-renders with heading "Ready to Start Shipping with Redline?" (dir="ltr"), subtitle "Join over 12,000 clients who trust us daily...", buttons "Request a Quote" + "19999". Bilingual switching confirmed end-to-end.
+  • Logged in to dashboard as admin@redline.eg / admin123. Navigated to "تواصل مباشر" module. Verified the new "بانر التحفيز والتواصل السريع (Bottom CTA Banner)" card is rendered with all 8 fields pre-filled from the seed data (verified each value, dir attribute, and placeholder).
+  • Edited the hotline phone field (19999 → 19998) and clicked "حفظ التغييرات" button. Verified via /api/cta-banner that the change persisted (phone returned as 19998). Confirms the Save Changes flow works end-to-end including the toast notification.
+  • Restored the original 19999 value via the same flow and verified via /api/cta-banner that it persisted back.
+  • Checked browser console + errors: only the standard React DevTools info, HMR connected, and a non-blocking position warning (pre-existing). No runtime errors, no hydration mismatches.
+  • dev.log: clean — only the normal Next.js startup and 200 OK responses.
+
+Stage Summary:
+- The Pre-Footer CTA Banner is now fully manageable from the Admin Dashboard under the existing "Direct Contact / تواصل مباشر" module.
+- All 7 user-specified values (headingAr, headingEn, subAr, subEn, btnTextAr, btnTextEn, btnLink, phone) are stored in the new `CtaBanner` Prisma model and seeded with the exact user-provided content.
+- Public landing page dynamically fetches and displays the banner content based on the active language, with proper RTL/LTR direction handling and the "Redline" amber brand highlight preserved in both languages.
+- Dashboard card includes a live preview block so admins see exactly how the banner will look before saving.
+- Save Changes flow: form → apiPost /api/cta-banner → DB upsert → toast notification → query invalidation propagates to public site immediately.
+- Zero lint errors introduced (only 3 pre-existing warnings untouched). No runtime errors in dev.log or browser console.
