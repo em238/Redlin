@@ -2951,3 +2951,53 @@ Work Log:
 - Both messages visible in the list (Sara Smith + أحمد محمد) ✓
 - Cleaned up test messages after verification ✓
 - Lint: 0 errors, 0 warnings ✓
+
+---
+Task ID: dark-theme-palette-picker
+Agent: Z.ai Code (main)
+
+Task: Implement a dynamic dark mode color theme palette picker in the Admin Dashboard with 5 curated enterprise palettes, applying across both public site and dashboard.
+
+Work Log:
+
+**1. Schema (`prisma/schema.prisma`)**
+- Added `darkThemeVariant String @default("slate")` to `FooterContent` model.
+- Ran `bun run db:push` + `bun run db:seed`.
+
+**2. CSS Variables (`src/app/globals.css`)**
+- Added 5 `[data-dark-theme="..."].dark` blocks that override `--background`, `--card`, `--popover`, `--secondary`, `--muted`, `--accent`, `--border`, `--input`, `--sidebar`:
+  1. `slate` — Slate Modern (default, #0f172a / #1e293b / #334155)
+  2. `pure` — OLED Pure Black (#000000 / #0d0d0d / #222222)
+  3. `navy` — Midnight Navy (#070d18 / #0f1a2e / #1e2f4d)
+  4. `zinc` — Zinc Tech (#09090b / #18181b / #27272a)
+  5. `crimson` — Redline Dark Crimson (#100709 / #1c0d12 / #361620)
+- The primary red accent (`--primary: oklch(0.62 0.22 27)`) is NOT overridden — stays vibrant across all 5 palettes.
+
+**3. ThemeProvider (`src/lib/providers.tsx`)**
+- Exported `DARK_PALETTES` array (5 palettes with id, nameAr, nameEn, bg, surface, border, accent).
+- Exported `getDarkVariant()` + `applyDarkVariant(variant)` helpers.
+- `applyDarkVariant` sets `data-dark-theme` attribute on `<html>` + persists to `localStorage("redline_dark_variant")`.
+- On mount: reads the saved variant and applies it (runs after hydration, no SSR mismatch).
+
+**4. API (`src/app/api/footer-content/route.ts`)**
+- Added `darkThemeVariant` to the POST allowlist so admins can save the selection to the DB.
+
+**5. Dashboard Settings UI (`src/components/dashboard/settings.tsx`)**
+- Added a "سمة الوضع الليلي / Dark Theme Palette" card with:
+  - 5 visual swatch cards showing a mini 3-layer preview (background + surface with red accent square + border)
+  - Each card shows the palette name (AR/EN) + ID
+  - Active palette has a red checkmark badge
+  - Click any card → instant live preview (applies `data-dark-theme` to `<html>` immediately + saves to localStorage)
+  - "حفظ / Save" button persists to DB via POST /api/footer-content
+  - Color detail chips below: shows the 4 color values (bg/surface/border/accent) of the selected palette
+
+**Verification (Agent Browser)**
+- Settings page shows "سمة الوضع الليلي" heading ✓
+- 5 palette swatches present (Slate Modern, OLED Pure Black, Midnight Navy, Zinc Tech, Redline Dark Crimson) ✓
+- 1 active checkmark on the default "slate" ✓
+- `data-dark-theme="slate"` on `<html>` ✓
+- Toggled to dark mode + clicked "OLED Pure Black":
+  - `data-dark-theme` changed to `"pure"` ✓
+  - Background changed to `rgb(0, 0, 0)` (pure black) ✓
+  - Live preview instant ✓
+- Lint: 0 errors, 0 warnings ✓

@@ -668,6 +668,7 @@ const footerContent = {
   linkedinUrl: "https://linkedin.com",
   whatsappUrl: "https://wa.me/201000000000",
   telegramUrl: "https://t.me/redline",
+  darkThemeVariant: "slate",
   active: true,
 };
 

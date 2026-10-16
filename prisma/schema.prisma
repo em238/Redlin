@@ -328,6 +328,7 @@ model FooterContent {
   linkedinUrl        String   @default("https://linkedin.com")
   whatsappUrl        String   @default("https://wa.me/201000000000")
   telegramUrl        String   @default("https://t.me/redline")
+  darkThemeVariant   String   @default("slate")
   active             Boolean  @default(true)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt

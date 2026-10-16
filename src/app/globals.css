@@ -115,6 +115,78 @@
   --sidebar-ring: oklch(0.62 0.22 27);
 }
 
+/* === Dark Theme Palette Variants ===
+   Each [data-dark-theme="..."].dark block overrides the surface/background/
+   border variables. The primary red accent stays vibrant across all 5.
+   The admin picks a variant from the Dashboard Settings; the choice is
+   persisted in localStorage("redline_dark_variant") and applied to <html>
+   via the data-dark-theme attribute by the ThemeProvider. */
+
+/* 1. Slate Modern (Default) — same as .dark above, explicitly defined */
+[data-dark-theme="slate"].dark {
+  --background: oklch(0.14 0.02 20);       /* #0f172a Slate 900 */
+  --card: oklch(0.18 0.025 20);            /* #1e293b Slate 800 */
+  --popover: oklch(0.18 0.025 20);
+  --secondary: oklch(0.24 0.03 20);
+  --muted: oklch(0.24 0.03 20);
+  --accent: oklch(0.32 0.06 60);
+  --border: oklch(0.33 0.02 20);           /* #334155 */
+  --input: oklch(0.33 0.02 20);
+  --sidebar: oklch(0.16 0.02 20);
+}
+
+/* 2. OLED Pure Black */
+[data-dark-theme="pure"].dark {
+  --background: #000000;
+  --card: #0d0d0d;
+  --popover: #0d0d0d;
+  --secondary: #161616;
+  --muted: #161616;
+  --accent: #1a1a1a;
+  --border: #222222;
+  --input: #222222;
+  --sidebar: #0a0a0a;
+}
+
+/* 3. Midnight Navy */
+[data-dark-theme="navy"].dark {
+  --background: #070d18;
+  --card: #0f1a2e;
+  --popover: #0f1a2e;
+  --secondary: #14233d;
+  --muted: #14233d;
+  --accent: #1a2f4a;
+  --border: #1e2f4d;
+  --input: #1e2f4d;
+  --sidebar: #0a1322;
+}
+
+/* 4. Zinc Tech */
+[data-dark-theme="zinc"].dark {
+  --background: #09090b;                    /* Zinc 950 */
+  --card: #18181b;                          /* Zinc 900 */
+  --popover: #18181b;
+  --secondary: #1f1f23;
+  --muted: #1f1f23;
+  --accent: #27272a;
+  --border: #27272a;                        /* Zinc 800 */
+  --input: #27272a;
+  --sidebar: #0d0d0f;
+}
+
+/* 5. Redline Dark Crimson */
+[data-dark-theme="crimson"].dark {
+  --background: #100709;
+  --card: #1c0d12;
+  --popover: #1c0d12;
+  --secondary: #251016;
+  --muted: #251016;
+  --accent: #2d1419;
+  --border: #361620;
+  --input: #361620;
+  --sidebar: #14080b;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

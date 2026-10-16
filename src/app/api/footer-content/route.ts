@@ -60,6 +60,7 @@ export async function POST(req: NextRequest) {
       "linkedinUrl",
       "whatsappUrl",
       "telegramUrl",
+      "darkThemeVariant",
       "active",
     ]) {
       if (body[key] !== undefined) data[key] = body[key];
