@@ -22,8 +22,17 @@ export function CustomCursor() {
     const fine = window.matchMedia("(pointer: fine)").matches;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (!fine || reduced) return;
+
+    // Hide system cursor ONLY while CustomCursor is mounted (public page).
+    // When the user switches to dashboard/login, PublicPage unmounts →
+    // CustomCursor unmounts → class removed → standard OS cursor returns.
+    document.documentElement.classList.add("custom-cursor-active");
+
     const raf = requestAnimationFrame(() => setEnabled(true));
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      document.documentElement.classList.remove("custom-cursor-active");
+    };
   }, []);
 
   useEffect(() => {

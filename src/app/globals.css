@@ -485,11 +485,19 @@ textarea::placeholder {
   }
 }
 
-/* Custom cursor: hide native cursor on devices that support fine pointers
-   (the React <CustomCursor /> component paints a premium dot + ring) */
-@media (pointer: fine) {
-  body { cursor: none; }
-  a, button, [role="button"], [data-magnetic] { cursor: none; }
+/* Custom cursor: hide native cursor ONLY when the CustomCursor component is mounted.
+   The component adds `.custom-cursor-active` class to <html> on mount (public page only)
+   and removes it on unmount (dashboard/login pages get the standard OS cursor back). */
+.custom-cursor-active,
+.custom-cursor-active a,
+.custom-cursor-active button,
+.custom-cursor-active [role="button"],
+.custom-cursor-active [data-magnetic],
+.custom-cursor-active input,
+.custom-cursor-active textarea,
+.custom-cursor-active select,
+.custom-cursor-active label {
+  cursor: none !important;
 }
 
 /* Custom cursor hover states — handled entirely via JS transform string
