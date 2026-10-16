@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Boxes, ListChecks, Video, DollarSign,
   MessageSquare, Settings, LogOut, X, Globe, ChevronLeft, ChevronRight,
   ImageIcon, Handshake, Users, ShieldCheck, PanelLeftClose, PanelLeftOpen,
-  Link as LinkIcon,
+  Link as LinkIcon, Inbox,
 } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ export function DashboardSidebar() {
   const router = useRouter();
   const { dashboardSection, setDashboardSection, sidebarOpen, setSidebarOpen, user, setUser, setAuthChecked } = useAppStore();
   const { t, isAr } = useDashboardT();
+  const L = (ar: string, en: string) => (isAr ? ar : en);
 
   // Collapsed state — lazy init from localStorage
   const [collapsed, setCollapsed] = useState(() => {
@@ -43,6 +44,7 @@ export function DashboardSidebar() {
     { id: "partners", label: t("d.nav.partners"), icon: Handshake },
     { id: "map", label: t("d.nav.map"), icon: Globe },
     { id: "contact", label: t("d.nav.contact"), icon: MessageSquare },
+    { id: "messages", label: L("الرسائل", "Messages"), icon: Inbox },
     { id: "reviews", label: t("d.nav.reviews"), icon: DollarSign },
     { id: "footer", label: t("d.nav.footer"), icon: LinkIcon },
     { id: "users", label: t("d.nav.users"), icon: Users },

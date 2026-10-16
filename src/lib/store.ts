@@ -9,6 +9,7 @@ export type DashboardSection =
   | "partners"
   | "map"
   | "contact"
+  | "messages"
   | "reviews"
   | "footer"
   | "users"

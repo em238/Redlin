@@ -2904,3 +2904,50 @@ Work Log:
 
 - Public site HTML: zero dashboard navigation links/buttons ✓
 - Lint: 0 errors, 0 warnings ✓
+
+---
+Task ID: contact-form-inbox-management
+Agent: Z.ai Code (main)
+
+Task: Implement contact form submission + admin dashboard inbox management. Connect the public "أرسل لنا رسالة" form to an API + create a Messages/Inbox module in the Admin Dashboard.
+
+Work Log:
+
+**1. Schema (`prisma/schema.prisma`)**
+- Updated `ContactMessage` model: added `isRead Boolean @default(false)`, `updatedAt DateTime @updatedAt`, made `subject String?` (optional). Removed the old `status` field.
+- Ran `bun run db:push` to sync.
+
+**2. API Routes**
+- `POST /api/contact` (public) — already existed, updated to store `subject: null` when not provided (was defaulting to "استفسار").
+- `GET /api/contact` (admin) — already existed, returns all messages newest-first.
+- `PATCH /api/contact/[id]` (admin) — already existed, allows toggling `isRead`.
+- `DELETE /api/contact/[id]` (admin) — already existed, deletes a message.
+
+**3. Dashboard Messages Module (`src/components/dashboard/messages.tsx`)** — NEW
+- Full inbox UI with:
+  - Stats cards: total / unread / read
+  - Filter buttons: All / Unread / Read
+  - Search by name, email, subject, or message
+  - Message list with sender avatar, name, subject, email, date, unread badge, preview
+  - Click to open detail modal with full message + sender info
+  - "Reply via Email" button (opens mailto: link)
+  - Mark as read/unread toggle
+  - Delete with confirmation
+  - Auto-marks as read when opening the detail modal
+- Registered in:
+  - `src/lib/store.ts` — added `"messages"` to DashboardSection type
+  - `src/components/dashboard/dashboard-app.tsx` — added `messages: <DashboardMessages />`
+  - `src/components/dashboard/sidebar.tsx` — added nav item with Inbox icon + `L()` helper function (was missing, causing a crash — fixed)
+  - `src/components/dashboard/topbar.tsx` — added title/subtitle for messages section
+
+**4. Public Contact Form**
+- Already connected to `POST /api/contact` (verified: submits name, email, phone, subject, message → returns `{ ok: true, id }`).
+- Toast feedback on success/error.
+
+**Verification (Agent Browser)**
+- Submitted 2 test messages via the API (Arabic + English) → both stored ✓
+- GET /api/contact with admin auth → returns both messages ✓
+- Navigated to "الرسائل" module in dashboard → stats show 2 total / 2 unread / 0 read ✓
+- Both messages visible in the list (Sara Smith + أحمد محمد) ✓
+- Cleaned up test messages after verification ✓
+- Lint: 0 errors, 0 warnings ✓

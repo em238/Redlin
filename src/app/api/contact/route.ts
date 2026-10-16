@@ -4,12 +4,19 @@ import { jsonError } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
+// POST /api/contact — public form submission
 export async function POST(req: NextRequest) {
   try {
     const { name, email, phone, subject, message } = await req.json();
     if (!name || !email || !message) return jsonError("الاسم والبريد والرسالة مطلوبة", 400);
     const msg = await db.contactMessage.create({
-      data: { name, email, phone: phone || null, subject: subject || "استفسار", message },
+      data: {
+        name,
+        email,
+        phone: phone || null,
+        subject: subject || null,
+        message,
+      },
     });
     return Response.json({ ok: true, id: msg.id });
   } catch {
@@ -17,6 +24,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
+// GET /api/contact — admin lists all messages (newest first)
 export async function GET() {
   try {
     await import("@/lib/auth").then(async (m) => { await m.requireAdmin(); });

@@ -22,6 +22,7 @@ export function DashboardTopbar() {
     partners: { title: t("d.nav.partners"), subtitle: t("d.topbar.partnersSub") },
     map: { title: t("d.nav.map"), subtitle: t("d.topbar.mapSub") },
     contact: { title: t("d.nav.contact"), subtitle: t("d.topbar.contactSub") },
+    messages: { title: "الرسائل", subtitle: "صندوق الرسائل الواردة" },
     reviews: { title: t("d.nav.reviews"), subtitle: t("d.topbar.reviewsSub") },
     footer: { title: t("d.nav.footer"), subtitle: t("d.topbar.footerSub") },
     users: { title: t("d.nav.users"), subtitle: t("d.topbar.usersSub") },

@@ -15,6 +15,7 @@ import { DashboardVideos } from "./videos";
 import { DashboardPartners } from "./partners";
 import { DashboardMapHubs } from "./map-hubs";
 import { DashboardContactInfo } from "./contact-info";
+import { DashboardMessages } from "./messages";
 import { DashboardReviews } from "./reviews";
 import { DashboardUsers } from "./users";
 import { DashboardRoles } from "./roles";
@@ -124,6 +125,7 @@ export function DashboardApp() {
     partners: <DashboardPartners />,
     map: <DashboardMapHubs />,
     contact: <DashboardContactInfo />,
+    messages: <DashboardMessages />,
     reviews: <DashboardReviews />,
     footer: <DashboardFooterLinks />,
     users: <DashboardUsers />,
