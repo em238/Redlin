@@ -85,7 +85,7 @@ export function DashboardApp() {
       <DashboardSidebar />
       <div className="flex-1 flex flex-col h-screen overflow-hidden min-w-0">
         <DashboardTopbar />
-        <main className="flex-1 min-w-0 overflow-y-auto p-4 bg-slate-50 dark:bg-slate-950">
+        <main className="flex-1 min-w-0 overflow-y-auto p-3 bg-background">
           <AnimatePresence mode="wait">
             <motion.div
               key={dashboardSection}
