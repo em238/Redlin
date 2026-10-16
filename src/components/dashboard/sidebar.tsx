@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Boxes, ListChecks, Video, DollarSign,
-  MessageSquare, Settings, LogOut, X, Globe, ChevronLeft,
+  MessageSquare, Settings, LogOut, X, Globe, ChevronLeft, ChevronRight,
   ImageIcon, Handshake, Users, ShieldCheck, PanelLeftClose, PanelLeftOpen,
 } from "lucide-react";
 import Image from "next/image";
@@ -16,7 +16,7 @@ import { useDashboardT } from "@/lib/i18n";
 
 export function DashboardSidebar() {
   const { dashboardSection, setDashboardSection, sidebarOpen, setSidebarOpen, user, setUser, setView, setAuthChecked } = useAppStore();
-  const { t } = useDashboardT();
+  const { t, isAr } = useDashboardT();
 
   // Collapsed state — lazy init from localStorage
   const [collapsed, setCollapsed] = useState(() => {
@@ -102,7 +102,11 @@ export function DashboardSidebar() {
             >
               <item.icon className="w-5 h-5 shrink-0" strokeWidth={1.8} />
               {!collapsed && <span className="flex-1 text-start truncate">{item.label}</span>}
-              {!collapsed && isActive && <ChevronLeft className="w-4 h-4 shrink-0" />}
+              {!collapsed && isActive && (
+                isAr
+                  ? <ChevronLeft className="w-4 h-4 shrink-0" />
+                  : <ChevronRight className="w-4 h-4 shrink-0" />
+              )}
             </button>
           );
         })}
