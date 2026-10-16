@@ -244,8 +244,7 @@ export function DashboardMapHubs() {
                 <tr className="text-xs uppercase tracking-wider text-muted-foreground">
                   <th className="text-start font-semibold py-3 px-4">{L("المحافظة", "Governorate")}</th>
                   <th className="text-start font-semibold py-3 px-4">{L("المنطقة", "Zone")}</th>
-                  <th className="text-start font-semibold py-3 px-4">{L("السعر الأساسي", "Base price")}</th>
-                  <th className="text-start font-semibold py-3 px-4">{L("وقت التوصيل", "ETA (hours)")}</th>
+
                   <th className="text-center font-semibold py-3 px-4">{L("نشط", "Active")}</th>
                   <th className="text-end font-semibold py-3 px-4">{L("إجراءات", "Actions")}</th>
                 </tr>
@@ -274,12 +273,7 @@ export function DashboardMapHubs() {
                             {isAr ? z.ar : z.en} · {z.id}
                           </Badge>
                         </td>
-                        <td className="py-3 px-4 tabular-nums font-semibold" dir="ltr">
-                          {Number(g.basePrice).toFixed(0)} <span className="text-[11px] text-muted-foreground">EGP</span>
-                        </td>
-                        <td className="py-3 px-4 tabular-nums" dir="ltr">
-                          {g.etaHours} <span className="text-[11px] text-muted-foreground">{L("س", "h")}</span>
-                        </td>
+
                         <td className="py-3 px-4 text-center">
                           <Switch checked={g.active} onCheckedChange={() => toggleActive(g)} />
                         </td>
@@ -320,16 +314,7 @@ export function DashboardMapHubs() {
                       {z.id}
                     </Badge>
                   </div>
-                  <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
-                    <div>
-                      <div className="text-muted-foreground">{L("السعر", "Price")}</div>
-                      <div className="font-bold tabular-nums" dir="ltr">{Number(g.basePrice).toFixed(0)} EGP</div>
-                    </div>
-                    <div>
-                      <div className="text-muted-foreground">{L("الوقت", "ETA")}</div>
-                      <div className="font-bold tabular-nums" dir="ltr">{g.etaHours} {L("س", "h")}</div>
-                    </div>
-                  </div>
+
                   <div className="mt-3 flex items-center justify-between">
                     <label className="flex items-center gap-2 text-xs cursor-pointer">
                       <Switch checked={g.active} onCheckedChange={() => toggleActive(g)} />
@@ -429,30 +414,6 @@ export function DashboardMapHubs() {
                     </button>
                   );
                 })}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label className="text-xs">{L("السعر الأساسي (EGP)", "Base price (EGP)")}</Label>
-                <Input
-                  type="number"
-                  step="0.5"
-                  value={form.basePrice}
-                  onChange={(e) => setForm({ ...form, basePrice: e.target.value })}
-                  className="h-10"
-                  dir="ltr"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">{L("وقت التوصيل (ساعات)", "ETA (hours)")}</Label>
-                <Input
-                  type="number"
-                  value={form.etaHours}
-                  onChange={(e) => setForm({ ...form, etaHours: e.target.value })}
-                  className="h-10"
-                  dir="ltr"
-                />
               </div>
             </div>
 
