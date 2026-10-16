@@ -29,12 +29,12 @@ export const metadata: Metadata = {
   authors: [{ name: "Redline" }],
   icons: {
     icon: [
-      { url: "/icon.png?v=2", sizes: "512x512", type: "image/png" },
-      { url: "/favicon.ico?v=2", sizes: "any" },
+      { url: "/icon.png?v=3", sizes: "512x512", type: "image/png" },
+      { url: "/favicon.ico?v=3", sizes: "any" },
     ],
-    shortcut: "/favicon.ico?v=2",
+    shortcut: "/favicon.ico?v=3",
     apple: [
-      { url: "/apple-icon.png?v=2", sizes: "180x180", type: "image/png" },
+      { url: "/apple-icon.png?v=3", sizes: "180x180", type: "image/png" },
     ],
   },
   openGraph: {

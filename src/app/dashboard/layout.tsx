@@ -5,8 +5,8 @@ export const metadata: Metadata = {
   description: "Redline shipping — admin dashboard",
   robots: { index: false, follow: false },
   icons: {
-    icon: "/icon.png?v=2",
-    shortcut: "/favicon.ico?v=2",
+    icon: "/icon.png?v=3",
+    shortcut: "/favicon.ico?v=3",
   },
 };
 
