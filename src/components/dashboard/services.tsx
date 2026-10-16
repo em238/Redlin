@@ -28,6 +28,8 @@ type Service = {
   description: string;
   descriptionAr: string;
   descriptionEn: string;
+  ctaTextAr: string;
+  ctaTextEn: string;
   icon: string;
   multiplier: number;
   active: boolean;
@@ -48,6 +50,7 @@ const isImageUrl = (v: string) =>
 const emptyForm = {
   name: "", nameAr: "",
   description: "", descriptionAr: "", descriptionEn: "",
+  ctaTextAr: "اطلب الخدمة", ctaTextEn: "Request Service",
   icon: "truck", multiplier: 1.0, active: true,
 };
 
@@ -80,6 +83,8 @@ export function DashboardServices() {
       description: s.description,
       descriptionAr: s.descriptionAr || "",
       descriptionEn: s.descriptionEn || "",
+      ctaTextAr: s.ctaTextAr || "اطلب الخدمة",
+      ctaTextEn: s.ctaTextEn || "Request Service",
       icon: s.icon || "truck", multiplier: s.multiplier ?? 1.0, active: s.active,
     });
     setModalOpen(true);
@@ -102,6 +107,8 @@ export function DashboardServices() {
         description: form.description,
         descriptionAr: form.descriptionAr || "",
         descriptionEn: form.descriptionEn || "",
+        ctaTextAr: form.ctaTextAr || "اطلب الخدمة",
+        ctaTextEn: form.ctaTextEn || "Request Service",
         icon: form.icon || "truck",
         multiplier: Number(form.multiplier) || 1.0,
         active: !!form.active,
@@ -260,6 +267,21 @@ export function DashboardServices() {
                       <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">{s.description}</p>
                     )}
                   </div>
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    {s.ctaTextAr && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-semibold" dir="rtl">
+                        <span className="px-1 rounded bg-primary/15 text-[8px]">AR</span>
+                        {s.ctaTextAr}
+                      </span>
+                    )}
+                    {s.ctaTextEn && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-600 text-[10px] font-semibold" dir="ltr">
+                        <span className="px-1 rounded bg-blue-500/15 text-[8px]">EN</span>
+                        {s.ctaTextEn}
+                      </span>
+                    )}
+                  </div>
+
                   <div className="mt-2 flex items-center gap-3 text-[11px] text-muted-foreground">
                     <span dir="ltr">×{s.multiplier ?? 1}</span>
                     <span className="font-mono truncate" dir="ltr">icon: {s.icon}</span>
@@ -364,6 +386,36 @@ export function DashboardServices() {
                 rows={2}
                 placeholder={L("يُستخدم إذا كانت الحقول الثنائية فارغة", "Used when bilingual fields are empty")}
               />
+            </div>
+
+            {/* CTA text bilingual */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs flex items-center gap-1.5">
+                  <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold">AR</span>
+                  {L("نص الزر (عربي)", "CTA text (Arabic)")}
+                </Label>
+                <Input
+                  value={form.ctaTextAr || ""}
+                  onChange={(e) => setForm({ ...form, ctaTextAr: e.target.value })}
+                  placeholder="اطلب الخدمة"
+                  dir="rtl"
+                  className="h-10"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs flex items-center gap-1.5">
+                  <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 text-[10px] font-bold">EN</span>
+                  {L("نص الزر (إنجليزي)", "CTA text (English)")}
+                </Label>
+                <Input
+                  value={form.ctaTextEn || ""}
+                  onChange={(e) => setForm({ ...form, ctaTextEn: e.target.value })}
+                  placeholder="Request Service"
+                  dir="ltr"
+                  className="h-10"
+                />
+              </div>
             </div>
 
             {/* Icon picker */}

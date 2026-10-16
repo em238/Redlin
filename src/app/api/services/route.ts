@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
   try {
     await requireAdmin();
     const body = await req.json();
-    const { name, nameAr, description, descriptionAr, descriptionEn, icon, multiplier, active } = body;
+    const { name, nameAr, description, descriptionAr, descriptionEn, ctaTextAr, ctaTextEn, icon, multiplier, active } = body;
     if (!name || !nameAr) return jsonError("الاسم بالعربي والإنجليزي مطلوب", 400);
     if (!description) return jsonError("الوصف مطلوب", 400);
     const service = await db.service.create({
@@ -37,6 +37,8 @@ export async function POST(req: NextRequest) {
         description,
         descriptionAr: descriptionAr || "",
         descriptionEn: descriptionEn || "",
+        ctaTextAr: ctaTextAr || "اطلب الخدمة",
+        ctaTextEn: ctaTextEn || "Request Service",
         icon: icon || "truck",
         multiplier: typeof multiplier === "number" ? multiplier : 1.0,
         active: active !== false,

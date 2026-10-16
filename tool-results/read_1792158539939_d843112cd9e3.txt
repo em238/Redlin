@@ -1,0 +1,742 @@
+     1→/**
+     2→ * Redline Shipping — Comprehensive Prisma Seed
+     3→ * Populates ALL live website content into the database.
+     4→ *
+     5→ * Idempotent: safe to re-run — deletes existing rows then re-inserts.
+     6→ * Preserves the admin user (admin@redline.eg / admin123) and links them
+     7→ * to the super-admin role.
+     8→ *
+     9→ * Run with: npx tsx prisma/seed.ts   (or `bun run db:seed`)
+    10→ */
+    11→import { PrismaClient } from "@prisma/client";
+    12→
+    13→const prisma = new PrismaClient();
+    14→
+    15→// ====================================================================
+    16→// 1. HERO IMAGES (from src/components/site/hero.tsx FALLBACK_IMAGES)
+    17→//    Expanded to include all 5 site-generated images used in carousel.
+    18→// ====================================================================
+    19→const heroImages = [
+    20→  {
+    21→    url: "/images/hero-truck.png",
+    22→    title: "شاحنة Redline على الطريق السريع",
+    23→    titleAr: "شاحنة Redline على الطريق السريع",
+    24→    titleEn: "Redline truck on the highway",
+    25→    order: 0,
+    26→    active: true,
+    27→  },
+    28→  {
+    29→    url: "/images/fleet.png",
+    30→    title: "أسطول Redline عند الفجر",
+    31→    titleAr: "أسطول Redline عند الفجر",
+    32→    titleEn: "Redline fleet at dawn",
+    33→    order: 1,
+    34→    active: true,
+    35→  },
+    36→  {
+    37→    url: "/images/warehouse.png",
+    38→    title: "مستودعات Redline",
+    39→    titleAr: "مستودعات Redline",
+    40→    titleEn: "Redline warehouses",
+    41→    order: 2,
+    42→    active: true,
+    43→  },
+    44→  {
+    45→    url: "/images/operations.png",
+    46→    title: "مركز العمليات",
+    47→    titleAr: "مركز العمليات",
+    48→    titleEn: "Operations center",
+    49→    order: 3,
+    50→    active: true,
+    51→  },
+    52→  {
+    53→    url: "/images/courier.png",
+    54→    title: "مندوب التوصيل",
+    55→    titleAr: "مندوب التوصيل",
+    56→    titleEn: "Delivery courier",
+    57→    order: 4,
+    58→    active: true,
+    59→  },
+    60→];
+    61→
+    62→// ====================================================================
+    63→// 2. ABOUT (from src/components/site/about.tsx + i18n keys about.*)
+    64→// ====================================================================
+    65→const aboutRecords = [
+    66→  {
+    67→    titleAr: "Redline — عصب الشحن في مصر",
+    68→    titleEn: "Redline — Egypt's shipping backbone",
+    69→    subtitleAr: "من نحن",
+    70→    subtitleEn: "About Us",
+    71→    descriptionAr:
+    72→      "منذ أكثر من 15 عاماً، نبني Redline لنكون الشريك اللوجستي الموثوق للشركات والأفراد في مصر. شبكتنا تغطي 27 محافظة بأكملها بأكثر من 40 فرعاً ومستودعاً، ونوفّر حلول شحن متكاملة بسرعة وأمان وأسعار تنافسية لا تضاهى.\n\nمن البداية، آمنّا بأن الشحن ليس مجرد نقل طرود، بل التزام بالوعد. لذلك نستثمر في التكنولوجيا والبنية التحتية والكوادر البشرية لنضمن وصول كل شحنة في الوقت المحدد.",
+    73→    descriptionEn:
+    74→      "For over 15 years, we have built Redline to be the trusted logistics partner for businesses and individuals across Egypt. Our network covers all 27 governorates with more than 40 branches and warehouses, and we provide integrated shipping solutions with speed, safety, and unbeatable competitive prices.\n\nFrom the start, we believed that shipping is not just moving parcels — it's a promise. That's why we invest in technology, infrastructure, and human talent to guarantee that every shipment arrives on time.",
+    75→    image: "/images/warehouse.png",
+    76→    features: JSON.stringify([
+    77→      {
+    78→        icon: "zap",
+    79→        titleAr: "سرعة فائقة",
+    80→        titleEn: "Ultra-fast",
+    81→        descAr: "توصيل في نفس اليوم داخل القاهرة الكبرى و48-96 ساعة لكل المحافظات",
+    82→        descEn: "Same-day delivery in Greater Cairo and 48-96 hours for all governorates",
+    83→      },
+    84→      {
+    85→        icon: "shield-check",
+    86→        titleAr: "أمان مضمون",
+    87→        titleEn: "Guaranteed safety",
+    88→        descAr: "تأمين كامل على كل شحنة مع تعويض كامل عند أي طارئ",
+    89→        descEn: "Full insurance on every shipment with complete compensation in case of any incident",
+    90→      },
+    91→      {
+    92→        icon: "bar-chart-3",
+    93→        titleAr: "تتبع مباشر",
+    94→        titleEn: "Live tracking",
+    95→        descAr: "نظام تتبع لحظي يخبرك بمكان شحنتك في كل خطوة",
+    96→        descEn: "Real-time tracking system that tells you where your shipment is at every step",
+    97→      },
+    98→      {
+    99→        icon: "map-pinned",
+   100→        titleAr: "تغطية شاملة",
+   101→        titleEn: "Comprehensive coverage",
+   102→        descAr: "27 محافظة و40+ فرع ومستودع في كل أنحاء مصر",
+   103→        descEn: "27 governorates and 40+ branches and warehouses across Egypt",
+   104→      },
+   105→      {
+   106→        icon: "banknote",
+   107→        titleAr: "أسعار منافسة",
+   108→        titleEn: "Competitive prices",
+   109→        descAr: "أفضل الأسعار في السوق مع خصومات للكميات والشركات",
+   110→        descEn: "Best market prices with volume and corporate discounts",
+   111→      },
+   112→      {
+   113→        icon: "headphones",
+   114→        titleAr: "دعم 24/7",
+   115→        titleEn: "24/7 support",
+   116→        descAr: "فريق دعم متكامل على مدار الساعة لخدمتك في أي وقت",
+   117→        descEn: "Integrated support team available around the clock to serve you anytime",
+   118→      },
+   119→    ]),
+   120→  },
+   121→];
+   122→
+   123→// ====================================================================
+   124→// 3. SERVICES (from src/components/site/services.tsx FALLBACK)
+   125→// ====================================================================
+   126→const services = [
+   127→  {
+   128→    name: "Standard",
+   129→    nameAr: "عادي",
+   130→    description: "Standard delivery within 48-96 hours at the best prices",
+   131→    descriptionAr: "توصيل خلال 48-96 ساعة بأفضل الأسعار",
+   132→    descriptionEn: "Standard delivery within 48-96 hours at the best prices",
+   133→    icon: "truck",
+   134→    multiplier: 1.0,
+   135→    active: true,
+   136→  },
+   137→  {
+   138→    name: "Express",
+   139→    nameAr: "ممتاز",
+   140→    description: "Express delivery within 24-48 hours with shipping priority",
+   141→    descriptionAr: "توصيل خلال 24-48 ساعة مع أولوية الشحن",
+   142→    descriptionEn: "Express delivery within 24-48 hours with shipping priority",
+   143→    icon: "zap",
+   144→    multiplier: 1.6,
+   145→    active: true,
+   146→  },
+   147→  {
+   148→    name: "Same Day",
+   149→    nameAr: "نفس اليوم",
+   150→    description: "Same-day delivery within Greater Cairo",
+   151→    descriptionAr: "توصيل في نفس اليوم داخل القاهرة الكبرى",
+   152→    descriptionEn: "Same-day delivery within Greater Cairo",
+   153→    icon: "rocket",
+   154→    multiplier: 2.3,
+   155→    active: true,
+   156→  },
+   157→  {
+   158→    name: "Freight",
+   159→    nameAr: "شحن ثقيل",
+   160→    description: "Heavy freight and bulk shipments",
+   161→    descriptionAr: "شحن البضائع والأغراض الثقيلة والكميات",
+   162→    descriptionEn: "Heavy freight and bulk shipments",
+   163→    icon: "package",
+   164→    multiplier: 1.4,
+   165→    active: true,
+   166→  },
+   167→  {
+   168→    name: "Cash on Delivery",
+   169→    nameAr: "دفع عند الاستلام",
+   170→    description: "Collect shipment value from recipient upon delivery",
+   171→    descriptionAr: "استلام قيمة الشحنة عند التسليم للمستلم",
+   172→    descriptionEn: "Collect shipment value from recipient upon delivery",
+   173→    icon: "banknote",
+   174→    multiplier: 1.1,
+   175→    active: true,
+   176→  },
+   177→  {
+   178→    name: "Returns",
+   179→    nameAr: "مرتجعات",
+   180→    description: "Retrieve returned shipments from customers",
+   181→    descriptionAr: "استرجاع الشحنات المرتجعة من العملاء",
+   182→    descriptionEn: "Retrieve returned shipments from customers",
+   183→    icon: "rotate-ccw",
+   184→    multiplier: 1.2,
+   185→    active: true,
+   186→  },
+   187→];
+   188→
+   189→// ====================================================================
+   190→// 4. HOW-IT-WORKS STEPS (from src/components/site/how-it-works.tsx)
+   191→// ====================================================================
+   192→const howItWorksSteps = [
+   193→  {
+   194→    order: 1,
+   195→    titleAr: "احجز شحنتك",
+   196→    titleEn: "Book your shipment",
+   197→    descAr: "احجز شحنتك أونلاين أو بالهاتف 19999 في دقائق معدودة — بدون تعقيد.",
+   198→    descEn: "Book your shipment online or by phone at 19999 in minutes — no hassle.",
+   199→    icon: "clipboard-list",
+   200→    active: true,
+   201→  },
+   202→  {
+   203→    order: 2,
+   204→    titleAr: "نستلم ونشحن",
+   205→    titleEn: "We pick up & ship",
+   206→    descAr: "مندوبنا يستلم الشحنة منك ونشحنها لوجهتها بأسرع خدمة مناسبة لك.",
+   207→    descEn: "Our courier picks up your shipment and we ship it to its destination with the fastest suitable service.",
+   208→    icon: "truck",
+   209→    active: true,
+   210→  },
+   211→  {
+   212→    order: 3,
+   213→    titleAr: "توصّل للمستلم",
+   214→    titleEn: "Delivered to recipient",
+   215→    descAr: "توصّل الشحنة لأي محافظة في مصر وتسليمها للمستلم بأمان وضمان كامل.",
+   216→    descEn: "We deliver the shipment to any governorate in Egypt and hand it to the recipient with full safety and guarantee.",
+   217→    icon: "package-check",
+   218→    active: true,
+   219→  },
+   220→];
+   221→
+   222→// ====================================================================
+   223→// 5. VIDEOS (from src/components/site/video-section.tsx FALLBACK_VIDEOS)
+   224→// ====================================================================
+   225→const videos = [
+   226→  {
+   227→    title: "Redline — قصة شحن",
+   228→    titleAr: "Redline — قصة شحن",
+   229→    description: "Discover Redline's journey from the beginning to becoming Egypt's largest shipping company",
+   230→    descriptionAr: "تعرف على رحلة Redline من البداية حتى أصبحنا أكبر شركة شحن في مصر",
+   231→    url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+   232→    thumbnail: "/images/operations.png",
+   233→    category: "promo",
+   234→    active: true,
+   235→    featured: true,
+   236→  },
+   237→  {
+   238→    title: "شبكة التوصيل في 27 محافظة",
+   239→    titleAr: "شبكة التوصيل في 27 محافظة",
+   240→    description: "How we cover all Egyptian governorates in the fastest time",
+   241→    descriptionAr: "كيف نغطي كل محافظات مصر بأسرع وقت ممكن",
+   242→    url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+   243→    thumbnail: "/images/fleet.png",
+   244→    category: "logistics",
+   245→    active: true,
+   246→    featured: false,
+   247→  },
+   248→];
+   249→
+   250→// ====================================================================
+   251→// 6. PARTNERS (from src/components/site/partners.tsx + seed-content.ts)
+   252→// ====================================================================
+   253→const partners = [
+   254→  { name: "TechStore", nameAr: "متجر التقنية", logo: "/images/partner-1.png", icon: "smartphone", color: "#2563eb", website: null, order: 0, active: true },
+   255→  { name: "FashionHub", nameAr: "مركز الأزياء", logo: "/images/partner-2.png", icon: "shirt", color: "#ec4899", website: null, order: 1, active: true },
+   256→  { name: "Adel Trading", nameAr: "شركة عادل للتجارة", logo: "/images/partner-3.png", icon: "briefcase", color: "#d97706", website: null, order: 2, active: true },
+   257→  { name: "Nour Crafts", nameAr: "حرفيات نور", logo: "/images/partner-4.png", icon: "palette", color: "#9333ea", website: null, order: 3, active: true },
+   258→  { name: "Ibrahim Group", nameAr: "مجموعة إبراهيم", logo: "/images/partner-5.png", icon: "building", color: "#0d9488", website: null, order: 4, active: true },
+   259→  { name: "MegaMart", nameAr: "ميجا مارت", logo: "/images/partner-6.png", icon: "store", color: "#16a34a", website: null, order: 5, active: true },
+   260→  { name: "QuickShip", nameAr: "كويك شيب", logo: "/images/partner-7.png", icon: "truck", color: "#dc2626", website: null, order: 6, active: true },
+   261→  { name: "GlobalTech", nameAr: "جلوبال تك", logo: "/images/partner-8.png", icon: "cpu", color: "#4f46e5", website: null, order: 7, active: true },
+   262→];
+   263→
+   264→// ====================================================================
+   265→// 7. GOVERNORATES (27 governorates from src/lib/egypt-coords.ts GOV_COORDS)
+   266→//    Zones: A = Greater Cairo | B = Delta | C = Upper Egypt | D = Borders
+   267→// ====================================================================
+   268→const governorates = [
+   269→  { name: "Cairo", nameAr: "القاهره", zone: "A", basePrice: 30, etaHours: 24, active: true },
+   270→  { name: "Giza", nameAr: "الجيزه", zone: "A", basePrice: 30, etaHours: 24, active: true },
+   271→  { name: "Alexandria", nameAr: "الاسكندريه", zone: "A", basePrice: 40, etaHours: 36, active: true },
+   272→  { name: "Qalyubia", nameAr: "القليوبيه", zone: "A", basePrice: 35, etaHours: 24, active: true },
+   273→  { name: "Port Said", nameAr: "بورسعيد", zone: "B", basePrice: 55, etaHours: 48, active: true },
+   274→  { name: "Suez", nameAr: "السويس", zone: "B", basePrice: 55, etaHours: 48, active: true },
+   275→  { name: "Dakahlia", nameAr: "الدقهليه", zone: "B", basePrice: 45, etaHours: 36, active: true },
+   276→  { name: "Sharqia", nameAr: "الشرقيه", zone: "B", basePrice: 45, etaHours: 36, active: true },
+   277→  { name: "Kafr El Sheikh", nameAr: "كفر الشيخ", zone: "B", basePrice: 50, etaHours: 48, active: true },
+   278→  { name: "Gharbia", nameAr: "الغربيه", zone: "B", basePrice: 45, etaHours: 36, active: true },
+   279→  { name: "Monufia", nameAr: "المنوفيه", zone: "B", basePrice: 40, etaHours: 36, active: true },
+   280→  { name: "Beheira", nameAr: "البحيره", zone: "B", basePrice: 50, etaHours: 48, active: true },
+   281→  { name: "Ismailia", nameAr: "الاسماعيليه", zone: "B", basePrice: 50, etaHours: 48, active: true },
+   282→  { name: "Faiyum", nameAr: "الفيوم", zone: "C", basePrice: 55, etaHours: 60, active: true },
+   283→  { name: "Beni Suef", nameAr: "بني سويف", zone: "C", basePrice: 55, etaHours: 60, active: true },
+   284→  { name: "Minya", nameAr: "المنيا", zone: "C", basePrice: 60, etaHours: 72, active: true },
+   285→  { name: "Asyut", nameAr: "اسيوط", zone: "C", basePrice: 65, etaHours: 72, active: true },
+   286→  { name: "Sohag", nameAr: "سوهاج", zone: "C", basePrice: 70, etaHours: 72, active: true },
+   287→  { name: "Qena", nameAr: "قنا", zone: "D", basePrice: 75, etaHours: 84, active: true },
+   288→  { name: "Luxor", nameAr: "الاقصر", zone: "D", basePrice: 80, etaHours: 96, active: true },
+   289→  { name: "Aswan", nameAr: "اسوان", zone: "D", basePrice: 90, etaHours: 96, active: true },
+   290→  { name: "Red Sea", nameAr: "البحر الاحمر", zone: "D", basePrice: 85, etaHours: 96, active: true },
+   291→  { name: "New Valley", nameAr: "الوادي الجديد", zone: "D", basePrice: 95, etaHours: 120, active: true },
+   292→  { name: "Matrouh", nameAr: "مطروح", zone: "D", basePrice: 85, etaHours: 96, active: true },
+   293→  { name: "North Sinai", nameAr: "شمال سيناء", zone: "D", basePrice: 90, etaHours: 96, active: true },
+   294→  { name: "South Sinai", nameAr: "جنوب سيناء", zone: "D", basePrice: 90, etaHours: 96, active: true },
+   295→  { name: "Damietta", nameAr: "دمياط", zone: "B", basePrice: 45, etaHours: 36, active: true },
+   296→];
+   297→
+   298→// ====================================================================
+   299→// 8. CONTACT INFO (from src/components/site/contact.tsx ADDRESSES/PHONES/EMAILS)
+   300→// ====================================================================
+   301→const contactInfo = [
+   302→  // Addresses (type: "address")
+   303→  {
+   304→    type: "address",
+   305→    labelAr: "الفرع الرئيسي",
+   306→    labelEn: "Headquarters",
+   307→    value: "التجمع الخامس، القاهرة الجديدة، مصر",
+   308→    href: null,
+   309→    order: 0,
+   310→    active: true,
+   311→  },
+   312→  {
+   313→    type: "address",
+   314→    labelAr: "مركز التوزيع والشحن",
+   315→    labelEn: "Distribution & Shipping Center",
+   316→    value: "المنطقة اللوجستية، العاشر من رمضان",
+   317→    href: null,
+   318→    order: 1,
+   319→    active: true,
+   320→  },
+   321→  // Phones (type: "phone")
+   322→  {
+   323→    type: "phone",
+   324→    labelAr: "الخط الساخن الموحد",
+   325→    labelEn: "Unified Hotline",
+   326→    value: "19999 (24/7)",
+   327→    href: "tel:19999",
+   328→    order: 0,
+   329→    active: true,
+   330→  },
+   331→  {
+   332→    type: "phone",
+   333→    labelAr: "خدمة العملاء والشحنات",
+   334→    labelEn: "Customer & Shipping Service",
+   335→    value: "01000000000",
+   336→    href: "tel:+201000000000",
+   337→    order: 1,
+   338→    active: true,
+   339→  },
+   340→  {
+   341→    type: "phone",
+   342→    labelAr: "إدارة التعاقدات والشركات",
+   343→    labelEn: "Contracts & Corporate",
+   344→    value: "01100000000",
+   345→    href: "tel:+201100000000",
+   346→    order: 2,
+   347→    active: true,
+   348→  },
+   349→  // Emails (type: "email")
+   350→  {
+   351→    type: "email",
+   352→    labelAr: "الدعم الفني وخدمة العملاء",
+   353→    labelEn: "Technical Support & Customer Service",
+   354→    value: "support@redline.eg",
+   355→    href: "mailto:support@redline.eg",
+   356→    order: 0,
+   357→    active: true,
+   358→  },
+   359→  {
+   360→    type: "email",
+   361→    labelAr: "قسم المبيعات والشركات",
+   362→    labelEn: "Sales & Corporate",
+   363→    value: "sales@redline.eg",
+   364→    href: "mailto:sales@redline.eg",
+   365→    order: 1,
+   366→    active: true,
+   367→  },
+   368→  {
+   369→    type: "email",
+   370→    labelAr: "الاستفسارات العامة",
+   371→    labelEn: "General Inquiries",
+   372→    value: "info@redline.eg",
+   373→    href: "mailto:info@redline.eg",
+   374→    order: 2,
+   375→    active: true,
+   376→  },
+   377→];
+   378→
+   379→// ====================================================================
+   380→// 9. TESTIMONIALS (from src/components/site/testimonials.tsx + TEST_EN map)
+   381→//    Each testimonial has bilingual name/role/company/content fields.
+   382→// ====================================================================
+   383→const testimonials = [
+   384→  {
+   385→    name: "Ahmed Mansour",
+   386→    nameAr: "أحمد منصور",
+   387→    role: "Store Owner",
+   388→    roleAr: "صاحب متجر إلكترونيات",
+   389→    company: "TechStore EG",
+   390→    companyAr: "TechStore EG",
+   391→    content: "Excellent and fast service! Shipments reached my customers across all Egyptian governorates on time. Redline completely changed how I manage my shipments.",
+   392→    contentAr: "خدمة ممتازة وسريعة! وصلت الشحنات لعملائي في كل محافظات مصر في الوقت المحدد. Redline غيّرت طريقة إدارة شحناتي تماماً.",
+   393→    rating: 5,
+   394→    avatar: null,
+   395→    active: true,
+   396→    status: "approved",
+   397→  },
+   398→  {
+   399→    name: "Sara El-Sayed",
+   400→    nameAr: "سارة السيد",
+   401→    role: "Sales Manager",
+   402→    roleAr: "مديرة مبيعات",
+   403→    company: "Fashion Hub",
+   404→    companyAr: "Fashion Hub",
+   405→    content: "The best shipping company I've dealt with. Competitive prices and professional service. The tracking system is excellent.",
+   406→    contentAr: "أفضل شركة شحن تعاملت معها. الأسعار منافسة والخدمة احترافية. نظام التتبع ممتاز ويسهل عليّ متابعة كل شحنة.",
+   407→    rating: 5,
+   408→    avatar: null,
+   409→    active: true,
+   410→    status: "approved",
+   411→  },
+   412→  {
+   413→    name: "Mohamed Adel",
+   414→    nameAr: "محمد عادل",
+   415→    role: "Wholesale Trader",
+   416→    roleAr: "تاجر جملة",
+   417→    company: "Adel Trading",
+   418→    companyAr: "Adel Trading",
+   419→    content: "Heavy shipping and high professionalism. The team is professional and delivery is precise. I recommend Redline to everyone.",
+   420→    contentAr: "شحن ثقيل وبضائع كثيرة ولم أواجه أي مشكلة. الفريق محترف والتوصيل دقيق. أنصح الجميع بـ Redline.",
+   421→    rating: 5,
+   422→    avatar: null,
+   423→    active: true,
+   424→    status: "approved",
+   425→  },
+   426→  {
+   427→    name: "Nour Hassan",
+   428→    nameAr: "نور حسن",
+   429→    role: "Startup Founder",
+   430→    roleAr: "مؤسسة مشروع ناشئ",
+   431→    company: "Nour Crafts",
+   432→    companyAr: "Nour Crafts",
+   433→    content: "As a small business, Redline provided me with affordable shipping solutions with high quality. Thank you for the professionalism.",
+   434→    contentAr: "كمشروع صغير، Redline وفّرت لي حلول شحن مناسبة لميزانيتي مع جودة عالية. شكراً لكم على الاحترافية.",
+   435→    rating: 5,
+   436→    avatar: null,
+   437→    active: true,
+   438→    status: "approved",
+   439→  },
+   440→  {
+   441→    name: "Khaled Ibrahim",
+   442→    nameAr: "خالد إبراهيم",
+   443→    role: "Supply Chain Manager",
+   444→    roleAr: "مدير سلاسل الإمداد",
+   445→    company: "Ibrahim Group",
+   446→    companyAr: "Ibrahim Group",
+   447→    content: "A strategic partnership for two years. The flexibility and speed in handling large quantities is unmatched. A reliable company by all measures.",
+   448→    contentAr: "شراكة استراتيجية منذ سنتين. المرونة والسرعة في التعامل مع الكميات الكبيرة لا تضاهى. شركة موثوقة بكل المقاييس.",
+   449→    rating: 5,
+   450→    avatar: null,
+   451→    active: true,
+   452→    status: "approved",
+   453→  },
+   454→];
+   455→
+   456→// ====================================================================
+   457→// 10. SITE STATS (from src/components/site/stats-bar.tsx FALLBACK)
+   458→// ====================================================================
+   459→const siteStats = [
+   460→  { label: "Shipments delivered", labelAr: "شحنة تم توصيلها", value: "850K+", icon: "package" },
+   461→  { label: "Governorates covered", labelAr: "محافظة نغطّيها", value: "27", icon: "map" },
+   462→  { label: "Happy customers", labelAr: "عميل سعيد", value: "12K+", icon: "users" },
+   463→  { label: "Branches & warehouses", labelAr: "فرع ومستودع", value: "40+", icon: "building" },
+   464→];
+   465→
+   466→// ====================================================================
+   467→// 11. WHATSAPP SETTING (default — phone + bilingual messages)
+   468→// ====================================================================
+   469→const whatsappSetting = {
+   470→  phoneNumber: "201000000000",
+   471→  defaultMessageAr: "مرحباً، أريد الاستفسار عن خدمات الشحن",
+   472→  defaultMessageEn: "Hello, I'd like to inquire about shipping services",
+   473→  active: true,
+   474→};
+   475→
+   476→// ====================================================================
+   477→// 12. ROLES (3 system roles with permission matrices)
+   478→//     permissions stored as JSON string per schema
+   479→// ====================================================================
+   480→const ALL_ACTIONS = ["create", "read", "edit", "delete"];
+   481→const REVIEWS_ACTIONS = ["read", "approve", "reject", "delete"];
+   482→
+   483→const buildAllPermissions = () => ({
+   484→  hero: ALL_ACTIONS,
+   485→  about: ALL_ACTIONS,
+   486→  services: ALL_ACTIONS,
+   487→  "how-it-works": ALL_ACTIONS,
+   488→  videos: ALL_ACTIONS,
+   489→  partners: ALL_ACTIONS,
+   490→  map: ALL_ACTIONS,
+   491→  contact: ALL_ACTIONS,
+   492→  reviews: REVIEWS_ACTIONS,
+   493→  users: ALL_ACTIONS,
+   494→  roles: ALL_ACTIONS,
+   495→});
+   496→
+   497→const buildEditorPermissions = () => ({
+   498→  hero: ["create", "read", "edit", "delete"],
+   499→  about: ["create", "read", "edit", "delete"],
+   500→  services: ["create", "read", "edit", "delete"],
+   501→  "how-it-works": ["create", "read", "edit", "delete"],
+   502→  videos: ["create", "read", "edit", "delete"],
+   503→  partners: ["create", "read", "edit", "delete"],
+   504→  map: ["create", "read", "edit", "delete"],
+   505→  contact: ["create", "read", "edit", "delete"],
+   506→  reviews: ["read", "approve", "reject"],
+   507→  users: ["read"],
+   508→  roles: ["read"],
+   509→});
+   510→
+   511→const buildViewerPermissions = () => ({
+   512→  hero: ["read"],
+   513→  about: ["read"],
+   514→  services: ["read"],
+   515→  "how-it-works": ["read"],
+   516→  videos: ["read"],
+   517→  partners: ["read"],
+   518→  map: ["read"],
+   519→  contact: ["read"],
+   520→  reviews: ["read"],
+   521→  users: ["read"],
+   522→  roles: ["read"],
+   523→});
+   524→
+   525→const roles = [
+   526→  {
+   527→    name: "super-admin",
+   528→    nameAr: "المدير العام",
+   529→    description: "Super Administrator — full access to all modules and actions",
+   530→    descriptionAr: "مدير عام — صلاحية كاملة على كل الوحدات والإجراءات",
+   531→    descriptionEn: "Super Administrator — full access to all modules and actions",
+   532→    isSystemRole: true,
+   533→    permissions: JSON.stringify(buildAllPermissions()),
+   534→  },
+   535→  {
+   536→    name: "editor",
+   537→    nameAr: "محرر",
+   538→    description: "Editor — manage site content (hero, about, services, videos, etc.) and moderate reviews",
+   539→    descriptionAr: "محرر — إدارة محتوى الموقع (الهيدر، من نحن، الخدمات، الفيديوهات، إلخ) ومراجعة الآراء",
+   540→    descriptionEn: "Editor — manage site content (hero, about, services, videos, etc.) and moderate reviews",
+   541→    isSystemRole: true,
+   542→    permissions: JSON.stringify(buildEditorPermissions()),
+   543→  },
+   544→  {
+   545→    name: "viewer",
+   546→    nameAr: "مشاهد",
+   547→    description: "Viewer — read-only access to all dashboard modules",
+   548→    descriptionAr: "مشاهد — صلاحية قراءة فقط لكل وحدات لوحة التحكم",
+   549→    descriptionEn: "Viewer — read-only access to all dashboard modules",
+   550→    isSystemRole: true,
+   551→    permissions: JSON.stringify(buildViewerPermissions()),
+   552→  },
+   553→];
+   554→
+   555→// ====================================================================
+   556→// MAIN SEED FUNCTION
+   557→// ====================================================================
+   558→async function main() {
+   559→  console.log("🌱 Seeding Redline database (comprehensive)...");
+   560→
+   561→  // --- 1. ROLES (created first so users can link to them) ---
+   562→  console.log("→ Roles (3 system roles)...");
+   563→  const superAdminRole = await prisma.role.upsert({
+   564→    where: { name: "super-admin" },
+   565→    update: {
+   566→      nameAr: roles[0].nameAr,
+   567→      description: roles[0].description,
+   568→      descriptionAr: roles[0].descriptionAr,
+   569→      descriptionEn: roles[0].descriptionEn,
+   570→      isSystemRole: true,
+   571→      permissions: roles[0].permissions,
+   572→    },
+   573→    create: roles[0],
+   574→  });
+   575→  await prisma.role.upsert({
+   576→    where: { name: "editor" },
+   577→    update: {
+   578→      nameAr: roles[1].nameAr,
+   579→      description: roles[1].description,
+   580→      descriptionAr: roles[1].descriptionAr,
+   581→      descriptionEn: roles[1].descriptionEn,
+   582→      isSystemRole: true,
+   583→      permissions: roles[1].permissions,
+   584→    },
+   585→    create: roles[1],
+   586→  });
+   587→  await prisma.role.upsert({
+   588→    where: { name: "viewer" },
+   589→    update: {
+   590→      nameAr: roles[2].nameAr,
+   591→      description: roles[2].description,
+   592→      descriptionAr: roles[2].descriptionAr,
+   593→      descriptionEn: roles[2].descriptionEn,
+   594→      isSystemRole: true,
+   595→      permissions: roles[2].permissions,
+   596→    },
+   597→    create: roles[2],
+   598→  });
+   599→  console.log(`  ✓ ${roles.length} system roles seeded (super-admin, editor, viewer)`);
+   600→
+   601→  // --- 2. ADMIN USER (upsert + link to super-admin role) ---
+   602→  console.log("→ Admin user (admin@redline.eg)...");
+   603→  const admin = await prisma.user.upsert({
+   604→    where: { email: "admin@redline.eg" },
+   605→    update: {
+   606→      name: "Redline Admin",
+   607→      password: "admin123",
+   608→      role: "admin",
+   609→      roleId: superAdminRole.id,
+   610→      status: "active",
+   611→    },
+   612→    create: {
+   613→      email: "admin@redline.eg",
+   614→      name: "Redline Admin",
+   615→      password: "admin123",
+   616→      role: "admin",
+   617→      roleId: superAdminRole.id,
+   618→      status: "active",
+   619→    },
+   620→  });
+   621→  console.log(`  ✓ Admin user linked to super-admin role (id: ${admin.id})`);
+   622→
+   623→  // --- 3. GOVERNORATES (upsert by name) ---
+   624→  console.log(`→ Governorates (${governorates.length} entries)...`);
+   625→  for (const g of governorates) {
+   626→    await prisma.governorate.upsert({
+   627→      where: { name: g.name },
+   628→      update: g,
+   629→      create: g,
+   630→    });
+   631→  }
+   632→  console.log(`  ✓ ${governorates.length} governorates seeded`);
+   633→
+   634→  // --- 4. SERVICES (upsert by name) ---
+   635→  console.log(`→ Services (${services.length} entries)...`);
+   636→  for (const s of services) {
+   637→    await prisma.service.upsert({
+   638→      where: { name: s.name },
+   639→      update: s,
+   640→      create: s,
+   641→    });
+   642→  }
+   643→  console.log(`  ✓ ${services.length} services seeded`);
+   644→
+   645→  // --- 5. HOW-IT-WORKS STEPS (delete + create) ---
+   646→  console.log(`→ HowItWorksSteps (${howItWorksSteps.length} entries)...`);
+   647→  await prisma.howItWorksStep.deleteMany();
+   648→  for (const step of howItWorksSteps) {
+   649→    await prisma.howItWorksStep.create({ data: step });
+   650→  }
+   651→  console.log(`  ✓ ${howItWorksSteps.length} steps seeded`);
+   652→
+   653→  // --- 6. CONTACT INFO (delete + create) ---
+   654→  console.log(`→ ContactInfo (${contactInfo.length} entries)...`);
+   655→  await prisma.contactInfo.deleteMany();
+   656→  for (const c of contactInfo) {
+   657→    await prisma.contactInfo.create({ data: c });
+   658→  }
+   659→  console.log(`  ✓ ${contactInfo.length} contact items seeded`);
+   660→
+   661→  // --- 7. HERO IMAGES (delete + create) ---
+   662→  console.log(`→ HeroImages (${heroImages.length} entries)...`);
+   663→  await prisma.heroImage.deleteMany();
+   664→  for (const h of heroImages) {
+   665→    await prisma.heroImage.create({ data: h });
+   666→  }
+   667→  console.log(`  ✓ ${heroImages.length} hero images seeded`);
+   668→
+   669→  // --- 8. PARTNERS (delete + create) ---
+   670→  console.log(`→ Partners (${partners.length} entries)...`);
+   671→  await prisma.partner.deleteMany();
+   672→  for (const p of partners) {
+   673→    await prisma.partner.create({ data: p });
+   674→  }
+   675→  console.log(`  ✓ ${partners.length} partners seeded`);
+   676→
+   677→  // --- 9. VIDEOS (delete + create) ---
+   678→  console.log(`→ Videos (${videos.length} entries)...`);
+   679→  await prisma.video.deleteMany();
+   680→  for (const v of videos) {
+   681→    await prisma.video.create({ data: v });
+   682→  }
+   683→  console.log(`  ✓ ${videos.length} videos seeded`);
+   684→
+   685→  // --- 10. TESTIMONIALS (delete + create) ---
+   686→  console.log(`→ Testimonials (${testimonials.length} entries)...`);
+   687→  await prisma.testimonial.deleteMany();
+   688→  for (const t of testimonials) {
+   689→    await prisma.testimonial.create({ data: t });
+   690→  }
+   691→  console.log(`  ✓ ${testimonials.length} testimonials seeded`);
+   692→
+   693→  // --- 11. SITE STATS (delete + create) ---
+   694→  console.log(`→ SiteStats (${siteStats.length} entries)...`);
+   695→  await prisma.siteStat.deleteMany();
+   696→  for (const s of siteStats) {
+   697→    await prisma.siteStat.create({ data: s });
+   698→  }
+   699→  console.log(`  ✓ ${siteStats.length} site stats seeded`);
+   700→
+   701→  // --- 12. ABOUT (upsert single record) ---
+   702→  console.log(`→ About (1 record)...`);
+   703→  await prisma.about.deleteMany();
+   704→  for (const a of aboutRecords) {
+   705→    await prisma.about.create({ data: a });
+   706→  }
+   707→  console.log(`  ✓ About content seeded`);
+   708→
+   709→  // --- 13. WHATSAPP SETTING (upsert single record) ---
+   710→  console.log(`→ WhatsAppSetting (1 record)...`);
+   711→  // WhatsAppSetting table — use upsert-like pattern: delete + create
+   712→  await prisma.whatsAppSetting.deleteMany();
+   713→  await prisma.whatsAppSetting.create({ data: whatsappSetting });
+   714→  console.log(`  ✓ WhatsApp setting seeded (phone: ${whatsappSetting.phoneNumber})`);
+   715→
+   716→  console.log("✅ Comprehensive seed complete!");
+   717→  console.log("");
+   718→  console.log("Summary:");
+   719→  console.log(`  - 3 system roles (super-admin, editor, viewer)`);
+   720→  console.log(`  - 1 admin user (admin@redline.eg / admin123) → super-admin`);
+   721→  console.log(`  - ${governorates.length} governorates (zones A/B/C/D)`);
+   722→  console.log(`  - ${services.length} services (with bilingual fields)`);
+   723→  console.log(`  - ${howItWorksSteps.length} how-it-works steps`);
+   724→  console.log(`  - ${contactInfo.length} contact info items (address/phone/email)`);
+   725→  console.log(`  - ${heroImages.length} hero images (carousel)`);
+   726→  console.log(`  - ${partners.length} partners`);
+   727→  console.log(`  - ${videos.length} videos`);
+   728→  console.log(`  - ${testimonials.length} testimonials`);
+   729→  console.log(`  - ${siteStats.length} site stats`);
+   730→  console.log(`  - About content + features JSON`);
+   731→  console.log(`  - WhatsApp default setting`);
+   732→}
+   733→
+   734→main()
+   735→  .catch((e) => {
+   736→    console.error("❌ Seed failed:", e);
+   737→    process.exit(1);
+   738→  })
+   739→  .finally(async () => {
+   740→    await prisma.$disconnect();
+   741→  });
+   742→

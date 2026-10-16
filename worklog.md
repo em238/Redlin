@@ -1691,3 +1691,68 @@ Stage Summary:
 - PART 1: prisma/seed.ts created + package.json prisma.seed config + db:seed script + tsx devDependency installed. Seed ran successfully — 13 entity types populated (3 system roles, 1 admin linked to super-admin, 27 governorates, 6 services, 3 how-it-works steps, 8 contact items, 5 hero images, 8 partners, 2 videos, 5 testimonials, 4 site stats, 1 About record with features JSON, 1 WhatsApp setting). Verified via direct Prisma queries + live /api/site, /api/hero-images, /api/services, /api/about, /api/whatsapp-settings endpoints.
 - PART 2: 12 dashboard module components updated with section context banners (9 with "Preview on Site" links to anchors #home/#about/#services/#how/#videos/#partners/#map/#contact + 3 internal modules with "Internal" pill badge). L helper added to 2 modules that were missing it (reviews, settings). All edits are minimal — banner is the FIRST child of each component's root return div, preserving all existing structure.
 - 0 lint errors introduced. 3 pre-existing warnings untouched.
+
+---
+Task ID: bilingual-services-seed
+Agent: Fullstack Developer (subagent)
+
+Task: Update seed with exact bilingual Service data (6 records incl. ctaTextAr/ctaTextEn), add 32-entry bilingual ticker cities as a SiteStat, update Services dashboard form for CTA fields, update API routes to whitelist the new fields, run seed, verify.
+
+Work Log:
+
+1. prisma/seed.ts
+   - Replaced the existing 6-service array with the user-provided exact records. Each entry now includes:
+     • name (EN), nameAr (AR)
+     • description (AR fallback, mirrors descriptionAr), descriptionAr, descriptionEn
+     • ctaTextAr = "اطلب الخدمة", ctaTextEn = "Request Service"
+     • icon (truck / banknote / rotate-ccw / package / zap / rocket)
+     • multiplier (1.0 / 1.3 / 1.2 / 2.0 / 1.5 / 2.3 — exact values)
+     • active = true
+   - Final 6 services seeded (matched user spec exactly):
+       Standard Delivery / عادي / truck / ×1.0
+       Cash on Delivery / دفع عند الاستلام / banknote / ×1.3
+       Returns Management / مرتجعات / rotate-ccw / ×1.2
+       Heavy Cargo & Freight / شحن ثقيل / package / ×2.0
+       Express Shipping / ممتاز / zap / ×1.5
+       Same-Day Delivery / نفس اليوم / rocket / ×2.3
+   - Added a 32-entry bilingual `tickerCities` array (nameAr/nameEn for each city) covering all 27 governorates + 5 major cities (Tanta, Mansoura, Zagazig, Sharm El Sheikh, Hurghada). First 3: Cairo/Giza/Alexandria. Last 3: Zagazig/Sharm El Sheikh/Hurghada.
+   - Added a 5th SiteStat entry to `siteStats` array storing the cities list as JSON in the `value` field:
+       label="Ticker cities", labelAr="مداخل شريط المدن", value=JSON.stringify(tickerCities), icon="ticker"
+   - Switched Services seeding from `upsert({where:{name}})` to `deleteMany() + create()` pattern (matches the existing pattern used by HowItWorksSteps, ContactInfo, HeroImages, Partners, Videos, Testimonials, SiteStats, About, WhatsAppSetting). This was necessary because the user's new service names ("Standard Delivery", "Express Shipping", "Same-Day Delivery", "Returns Management", "Heavy Cargo & Freight") differ from the prior names ("Standard", "Express", "Same Day", "Returns", "Freight") — the upsert-by-name pattern would have left stale duplicates behind. Verified by re-running the seed: services count went from 11 (with duplicates) to exactly 6.
+   - Updated final summary log line: `→ ${siteStats.length} site stats (incl. ticker cities JSON)`.
+
+2. src/components/dashboard/services.tsx
+   - Service type: added `ctaTextAr: string` and `ctaTextEn: string` fields to the local type definition (between descriptionEn and icon).
+   - emptyForm: added `ctaTextAr: "اطلب الخدمة"` and `ctaTextEn: "Request Service"` defaults (matches schema defaults).
+   - openEdit(): form state now loads `ctaTextAr: s.ctaTextAr || "اطلب الخدمة"` and `ctaTextEn: s.ctaTextEn || "Request Service"` (with safe fallbacks for legacy rows).
+   - save(): payload now includes `ctaTextAr: form.ctaTextAr || "اطلب الخدمة"` and `ctaTextEn: form.ctaTextEn || "Request Service"`.
+   - Add/Edit dialog form: added a new bilingual CTA-text grid section after the fallback description (2-column responsive `sm:grid-cols-2` grid following the exact pattern of the existing Name and Description AR/EN fields — each Input has an AR/EN badge Label and `dir="rtl"` for AR / `dir="ltr"` for EN, with `placeholder` values "اطلب الخدمة" / "Request Service"). Inputs use `h-10` className matching existing form fields.
+   - Card display: added a CTA preview block between the description block and the multiplier/icon row, showing two small inline badges side-by-side (`flex-wrap items-center gap-1.5`) with the AR badge (red-tinted, `dir="rtl"`) and EN badge (blue-tinted, `dir="ltr"`). Each badge uses the same AR/EN color scheme as the description block for visual consistency.
+
+3. src/app/api/services/route.ts (POST)
+   - Destructured `ctaTextAr, ctaTextEn` from the request body.
+   - Added them to the `db.service.create({ data: {...} })` object with safe defaults: `ctaTextAr: ctaTextAr || "اطلب الخدمة"` and `ctaTextEn: ctaTextEn || "Request Service"` (matching the schema-level defaults so legacy clients without these fields still get valid CTA text).
+
+4. src/app/api/services/[id]/route.ts (PATCH)
+   - Added `"ctaTextAr"` and `"ctaTextEn"` to the PATCH allowlist array (between `"descriptionEn"` and `"icon"`). The dynamic `body[key]`-copy loop already handles them via `data[key] = body[key]` — no further changes needed.
+
+5. Seed run
+   - First run with upsert pattern produced 11 services (5 stale duplicates remained from the prior seed with old names: Standard / Express / Same Day / Freight / Returns). The upsert-by-name pattern matched Cash on Delivery (unchanged name) and inserted the other 5 new ones alongside the old ones.
+   - After switching to deleteMany + create pattern and re-running `npx tsx prisma/seed.ts`:
+     ✓ 6 services seeded (exact user spec)
+     ✓ 5 site stats seeded (4 original + 1 ticker cities JSON)
+   - Direct Prisma verification query confirmed:
+     • 6 services with EXACT names, multipliers, icons, CTA texts, and `active=true` matching the user-provided spec.
+     • Ticker SiteStat row: label="Ticker cities", labelAr="مداخل شريط المدن", icon="ticker", value parsed to a 32-element array with first 3 = Cairo/Giza/Alexandria and last 3 = Zagazig/Sharm El Sheikh/Hurghada.
+
+6. Lint verification
+   - `bun run lint`: 0 errors, 3 warnings (all pre-existing Unused eslint-disable directives in src/app/page.tsx and src/components/dashboard/dashboard-app.tsx — none introduced by this task).
+   - dev.log: server returns 200 OK on `/` with no compile errors.
+
+Stage Summary:
+- prisma/seed.ts now seeds exactly the user-specified 6 bilingual services with proper ctaTextAr/ctaTextEn fields and the proper multipliers (1.0/1.3/1.2/2.0/1.5/2.3) and icons (truck/banknote/rotate-ccw/package/zap/rocket).
+- 32 bilingual ticker cities are stored as a JSON value in a dedicated SiteStat row with icon="ticker".
+- Services dashboard form fully supports editing the CTA text in both AR/EN with the standard bilingual input pattern, and the card now shows live AR/EN CTA badges.
+- API POST/PATCH routes accept and persist the ctaTextAr/ctaTextEn fields (with safe defaults for legacy clients).
+- Schema was already prepared with the ctaTextAr/ctaTextEn fields (no schema migration needed — schema.prisma already had them at lines 59-60).
+- 0 lint errors introduced. 3 pre-existing warnings untouched.

@@ -21,7 +21,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const { id } = await params;
     const body = await req.json();
     const data: Record<string, unknown> = {};
-    for (const key of ["name", "nameAr", "description", "descriptionAr", "descriptionEn", "icon", "multiplier", "active"]) {
+    for (const key of ["name", "nameAr", "description", "descriptionAr", "descriptionEn", "ctaTextAr", "ctaTextEn", "icon", "multiplier", "active"]) {
       if (body[key] !== undefined) data[key] = body[key];
     }
     const service = await db.service.update({ where: { id }, data });

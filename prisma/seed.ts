@@ -121,67 +121,79 @@ const aboutRecords = [
 ];
 
 // ====================================================================
-// 3. SERVICES (from src/components/site/services.tsx FALLBACK)
+// 3. SERVICES (bilingual AR/EN with CTA text + custom multipliers)
 // ====================================================================
 const services = [
   {
-    name: "Standard",
+    name: "Standard Delivery",
     nameAr: "عادي",
-    description: "Standard delivery within 48-96 hours at the best prices",
+    description: "توصيل خلال 48-96 ساعة بأفضل الأسعار",
     descriptionAr: "توصيل خلال 48-96 ساعة بأفضل الأسعار",
-    descriptionEn: "Standard delivery within 48-96 hours at the best prices",
+    descriptionEn: "Delivery within 48-96 hours at the best rates",
+    ctaTextAr: "اطلب الخدمة",
+    ctaTextEn: "Request Service",
     icon: "truck",
     multiplier: 1.0,
     active: true,
   },
   {
-    name: "Express",
-    nameAr: "ممتاز",
-    description: "Express delivery within 24-48 hours with shipping priority",
-    descriptionAr: "توصيل خلال 24-48 ساعة مع أولوية الشحن",
-    descriptionEn: "Express delivery within 24-48 hours with shipping priority",
-    icon: "zap",
-    multiplier: 1.6,
-    active: true,
-  },
-  {
-    name: "Same Day",
-    nameAr: "نفس اليوم",
-    description: "Same-day delivery within Greater Cairo",
-    descriptionAr: "توصيل في نفس اليوم داخل القاهرة الكبرى",
-    descriptionEn: "Same-day delivery within Greater Cairo",
-    icon: "rocket",
-    multiplier: 2.3,
-    active: true,
-  },
-  {
-    name: "Freight",
-    nameAr: "شحن ثقيل",
-    description: "Heavy freight and bulk shipments",
-    descriptionAr: "شحن البضائع والأغراض الثقيلة والكميات",
-    descriptionEn: "Heavy freight and bulk shipments",
-    icon: "package",
-    multiplier: 1.4,
-    active: true,
-  },
-  {
     name: "Cash on Delivery",
     nameAr: "دفع عند الاستلام",
-    description: "Collect shipment value from recipient upon delivery",
+    description: "استلام قيمة الشحنة عند التسليم للمستلم",
     descriptionAr: "استلام قيمة الشحنة عند التسليم للمستلم",
-    descriptionEn: "Collect shipment value from recipient upon delivery",
+    descriptionEn: "Collection of parcel value upon delivery to recipient",
+    ctaTextAr: "اطلب الخدمة",
+    ctaTextEn: "Request Service",
     icon: "banknote",
-    multiplier: 1.1,
+    multiplier: 1.3,
     active: true,
   },
   {
-    name: "Returns",
+    name: "Returns Management",
     nameAr: "مرتجعات",
-    description: "Retrieve returned shipments from customers",
+    description: "استرجاع الشحنات المرتجعة من العملاء",
     descriptionAr: "استرجاع الشحنات المرتجعة من العملاء",
-    descriptionEn: "Retrieve returned shipments from customers",
+    descriptionEn: "Seamless reverse logistics and customer returns",
+    ctaTextAr: "اطلب الخدمة",
+    ctaTextEn: "Request Service",
     icon: "rotate-ccw",
     multiplier: 1.2,
+    active: true,
+  },
+  {
+    name: "Heavy Cargo & Freight",
+    nameAr: "شحن ثقيل",
+    description: "شحن البضائع والأغراض الثقيلة والكميات",
+    descriptionAr: "شحن البضائع والأغراض الثقيلة والكميات",
+    descriptionEn: "Shipping bulky items, heavy cargo, and commercial bulk quantities",
+    ctaTextAr: "اطلب الخدمة",
+    ctaTextEn: "Request Service",
+    icon: "package",
+    multiplier: 2.0,
+    active: true,
+  },
+  {
+    name: "Express Shipping",
+    nameAr: "ممتاز",
+    description: "توصيل خلال 24-48 ساعة مع أولوية الشحن",
+    descriptionAr: "توصيل خلال 24-48 ساعة مع أولوية الشحن",
+    descriptionEn: "Priority delivery within 24-48 hours",
+    ctaTextAr: "اطلب الخدمة",
+    ctaTextEn: "Request Service",
+    icon: "zap",
+    multiplier: 1.5,
+    active: true,
+  },
+  {
+    name: "Same-Day Delivery",
+    nameAr: "نفس اليوم",
+    description: "توصيل في نفس اليوم داخل القاهرة الكبرى",
+    descriptionAr: "توصيل في نفس اليوم داخل القاهرة الكبرى",
+    descriptionEn: "Same-day fast dispatch and delivery within Greater Cairo",
+    ctaTextAr: "اطلب الخدمة",
+    ctaTextEn: "Request Service",
+    icon: "rocket",
+    multiplier: 2.3,
     active: true,
   },
 ];
@@ -455,12 +467,55 @@ const testimonials = [
 
 // ====================================================================
 // 10. SITE STATS (from src/components/site/stats-bar.tsx FALLBACK)
+//     + a 5th "ticker" SiteStat storing the bilingual cities list as JSON
 // ====================================================================
+const tickerCities = [
+  { nameAr: "القاهرة", nameEn: "Cairo" },
+  { nameAr: "الجيزة", nameEn: "Giza" },
+  { nameAr: "الإسكندرية", nameEn: "Alexandria" },
+  { nameAr: "القليوبية", nameEn: "Qalyubia" },
+  { nameAr: "بورسعيد", nameEn: "Port Said" },
+  { nameAr: "السويس", nameEn: "Suez" },
+  { nameAr: "الدقهلية", nameEn: "Dakahlia" },
+  { nameAr: "الشرقية", nameEn: "Sharqia" },
+  { nameAr: "كفر الشيخ", nameEn: "Kafr El Sheikh" },
+  { nameAr: "الغربية", nameEn: "Gharbia" },
+  { nameAr: "المنوفية", nameEn: "Menofia" },
+  { nameAr: "البحيرة", nameEn: "Beheira" },
+  { nameAr: "الإسماعيلية", nameEn: "Ismailia" },
+  { nameAr: "الفيوم", nameEn: "Fayoum" },
+  { nameAr: "بني سويف", nameEn: "Beni Suef" },
+  { nameAr: "المنيا", nameEn: "Minya" },
+  { nameAr: "أسيوط", nameEn: "Asyut" },
+  { nameAr: "سوهاج", nameEn: "Sohag" },
+  { nameAr: "قنا", nameEn: "Qena" },
+  { nameAr: "الأقصر", nameEn: "Luxor" },
+  { nameAr: "أسوان", nameEn: "Aswan" },
+  { nameAr: "البحر الأحمر", nameEn: "Red Sea" },
+  { nameAr: "الوادي الجديد", nameEn: "New Valley" },
+  { nameAr: "مطروح", nameEn: "Matrouh" },
+  { nameAr: "شمال سيناء", nameEn: "North Sinai" },
+  { nameAr: "جنوب سيناء", nameEn: "South Sinai" },
+  { nameAr: "دمياط", nameEn: "Damietta" },
+  { nameAr: "طنطا", nameEn: "Tanta" },
+  { nameAr: "المنصورة", nameEn: "Mansoura" },
+  { nameAr: "الزقازيق", nameEn: "Zagazig" },
+  { nameAr: "شرم الشيخ", nameEn: "Sharm El Sheikh" },
+  { nameAr: "الغردقة", nameEn: "Hurghada" },
+];
+
 const siteStats = [
   { label: "Shipments delivered", labelAr: "شحنة تم توصيلها", value: "850K+", icon: "package" },
   { label: "Governorates covered", labelAr: "محافظة نغطّيها", value: "27", icon: "map" },
   { label: "Happy customers", labelAr: "عميل سعيد", value: "12K+", icon: "users" },
   { label: "Branches & warehouses", labelAr: "فرع ومستودع", value: "40+", icon: "building" },
+  // Ticker entry — value field carries the bilingual cities list as JSON
+  {
+    label: "Ticker cities",
+    labelAr: "مداخل شريط المدن",
+    value: JSON.stringify(tickerCities),
+    icon: "ticker",
+  },
 ];
 
 // ====================================================================
@@ -631,14 +686,13 @@ async function main() {
   }
   console.log(`  ✓ ${governorates.length} governorates seeded`);
 
-  // --- 4. SERVICES (upsert by name) ---
+  // --- 4. SERVICES (delete + create) ---
+  //     delete+create pattern (matches HowItWorksSteps / ContactInfo / etc.)
+  //     so renamed services don't leave stale duplicates behind.
   console.log(`→ Services (${services.length} entries)...`);
+  await prisma.service.deleteMany();
   for (const s of services) {
-    await prisma.service.upsert({
-      where: { name: s.name },
-      update: s,
-      create: s,
-    });
+    await prisma.service.create({ data: s });
   }
   console.log(`  ✓ ${services.length} services seeded`);
 
@@ -726,7 +780,7 @@ async function main() {
   console.log(`  - ${partners.length} partners`);
   console.log(`  - ${videos.length} videos`);
   console.log(`  - ${testimonials.length} testimonials`);
-  console.log(`  - ${siteStats.length} site stats`);
+  console.log(`  - ${siteStats.length} site stats (incl. ticker cities JSON)`);
   console.log(`  - About content + features JSON`);
   console.log(`  - WhatsApp default setting`);
 }
