@@ -245,6 +245,7 @@ export const MESSAGES: Record<Locale, Record<string, string>> = {
     "d.sidebar.viewSite": "عرض الموقع",
     "d.sidebar.logout": "تسجيل الخروج",
     "d.sidebar.logoutToast": "تم تسجيل الخروج",
+    "d.sidebar.logoutSuccess": "تم تسجيل الخروج بنجاح",
 
     // Topbar
     "d.topbar.heroSub": "أدر صور وشريط الهيرو + العناوين والـ CTAs",
@@ -785,6 +786,7 @@ export const MESSAGES: Record<Locale, Record<string, string>> = {
     "d.sidebar.viewSite": "View site",
     "d.sidebar.logout": "Logout",
     "d.sidebar.logoutToast": "Logged out",
+    "d.sidebar.logoutSuccess": "Logged out successfully",
 
     // Topbar
     "d.topbar.heroSub": "Manage hero slides + headings & CTAs",

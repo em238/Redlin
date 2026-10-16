@@ -19,8 +19,8 @@ export function DashboardLogin() {
   const { setUser } = useAppStore();
   const { theme } = useTheme();
   const { t, isAr } = useDashboardT();
-  const [email, setEmail] = useState("admin@redline.eg");
-  const [password, setPassword] = useState("admin123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const login = async () => {
@@ -141,14 +141,6 @@ export function DashboardLogin() {
                   : <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               )}
             </Button>
-
-            <div className="rounded-xl border border-dashed border-border bg-muted/30 p-4 text-center">
-              <p className="text-xs text-muted-foreground">
-                {t("d.login.demo")} <span className="font-mono font-semibold text-foreground">admin@redline.eg</span>
-                {" / "}
-                <span className="font-mono font-semibold text-foreground">admin123</span>
-              </p>
-            </div>
 
             <button
               onClick={() => router.push("/admin")}
