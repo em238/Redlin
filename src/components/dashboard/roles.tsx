@@ -101,6 +101,16 @@ export function DashboardRoles() {
 
   return (
     <div className="space-y-4">
+      {/* Section Context Banner */}
+      <div className="flex items-center justify-between gap-2 p-3 rounded-xl bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 mb-4">
+        <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+          📍 {L("مكان الظهور: ", "Appears at: ")}{L("إدارة الأدوار والصلاحيات", "Roles & Permissions management")}
+        </span>
+        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+          {L("داخلي", "Internal")}
+        </span>
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between gap-3 p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
         <div className="flex items-center gap-2">

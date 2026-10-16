@@ -34,6 +34,7 @@ const TABS = [
 
 export function DashboardReviews() {
   const { t, isAr } = useDashboardT();
+  const L = (ar: string, en: string) => (isAr ? ar : en);
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<string>("pending");
 
@@ -99,6 +100,16 @@ export function DashboardReviews() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+      {/* Section Context Banner */}
+      <div className="flex items-center justify-between gap-2 p-3 rounded-xl bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 mb-4">
+        <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+          📍 {L("مكان الظهور: ", "Appears at: ")}{L("قسم آراء العملاء", "Customer Reviews section")}
+        </span>
+        <a href="/#home" target="_blank" className="text-xs font-semibold text-red-600 dark:text-red-400 hover:underline flex items-center gap-1">
+          {L("عرض في الموقع", "Preview on Site")} ↗
+        </a>
+      </div>
+
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-black tracking-tight">{t("d.reviews.title")}</h1>

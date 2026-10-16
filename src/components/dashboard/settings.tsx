@@ -15,7 +15,8 @@ import { useDashboardT } from "@/lib/i18n";
 
 export function DashboardSettings() {
   const { user, setUser, setView, setAuthChecked, theme, toggleTheme } = useAppStore();
-  const { t } = useDashboardT();
+  const { t, isAr } = useDashboardT();
+  const L = (ar: string, en: string) => (isAr ? ar : en);
   const [profile, setProfile] = useState({ name: user?.name || "", email: user?.email || "" });
   const [notifications, setNotifications] = useState({ email: true, push: true, orders: true, messages: false });
 
@@ -36,6 +37,16 @@ export function DashboardSettings() {
 
   return (
     <div className="space-y-5 w-full">
+      {/* Section Context Banner */}
+      <div className="flex items-center justify-between gap-2 p-3 rounded-xl bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 mb-4">
+        <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+          📍 {L("مكان الظهور: ", "Appears at: ")}{L("إعدادات الحساب والنظام", "Account & system settings")}
+        </span>
+        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+          {L("داخلي", "Internal")}
+        </span>
+      </div>
+
       {/* Profile */}
       <Card className="p-6">
         <div className="flex items-center gap-3 mb-5">

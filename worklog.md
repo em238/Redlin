@@ -1591,3 +1591,103 @@ Stage Summary:
 - Bilingual hook pattern `const { isAr } = useDashboardT(); const L = (ar, en) => isAr ? ar : en;` reused; added `isAr` + `L` to videos.tsx and partners.tsx which previously only destructured `t`.
 - Legacy fields kept for backward compat where the schema preserved them (HeroImage.title, Service.description, Video.title/description, Role.description) — labeled "Legacy ... (fallback)" and visually muted with `text-muted-foreground`.
 - 0 lint errors introduced.
+
+---
+Task ID: seed-and-context-banners
+Agent: Fullstack Developer (seed + context banners)
+Task: Create comprehensive Prisma seed script that populates ALL live website content into the database, then add Section Context Banners to all 12 dashboard modules.
+
+Work Log:
+
+PART 1 — Comprehensive Prisma Seed Script (prisma/seed.ts)
+- Read all 9 public site components (hero, about, stats-bar, services, how-it-works, video-section, partners, contact, testimonials) to extract the EXACT real Arabic/English text, image URLs, phone numbers, etc. that are hardcoded as FALLBACK_* constants.
+- Read prisma/schema.prisma to confirm models + bilingual fields exist (HeroImage.titleAr/titleEn, Service.descriptionAr/descriptionEn, Video.titleAr/descriptionAr, Partner.nameAr, Testimonial.nameAr/roleAr/companyAr/contentAr, SiteStat.labelAr, Role.descriptionAr/descriptionEn, About.*, HowItWorksStep.*, ContactInfo.*, WhatsAppSetting.*).
+- Read src/lib/egypt-coords.ts GOV_COORDS for the 27 governorate names (with English names) — kept the existing zones A/B/C/D + basePrice + etaHours mapping from the prior seed.ts.
+
+prisma/seed.ts created — idempotent, safe to re-run (uses deleteMany + create for collections, upsert for unique-constrained rows):
+
+1. ROLES (3 system roles) — created FIRST so users can link to them:
+   - super-admin (المدير العام): full permissions on all 11 modules (hero/about/services/how-it-works/videos/partners/map/contact/reviews/users/roles). Reviews module uses read/approve/reject/delete. All others use create/read/edit/delete.
+   - editor (محرر): full content perms on 9 content modules (hero/about/services/how-it-works/videos/partners/map/contact) + reviews (read/approve/reject) + read-only on users & roles.
+   - viewer (مشاهد): read-only on all 11 modules.
+   - All 3 marked isSystemRole=true. Permissions stored as JSON.stringify({...}) string per schema.
+   - Bilingual descriptions: descriptionAr + descriptionEn for all 3.
+
+2. ADMIN USER — upsert admin@redline.eg / admin123, linked to super-admin role (roleId + role="admin" set).
+
+3. GOVERNORATES (27) — upsert by name, with name/nameAr/zone(A|B|C|D)/basePrice/etaHours/active. Data matches egypt-coords.ts GOV_COORDS English names exactly.
+
+4. SERVICES (6) — upsert by name, with bilingual fields filled from services.tsx FALLBACK + i18n EN values: name, nameAr, description, descriptionAr, descriptionEn, icon, multiplier, active.
+
+5. HOWITWORKS STEPS (3) — delete + create. Each step has order, titleAr/titleEn, descAr/descEn, icon (clipboard-list/truck/package-check), active.
+
+6. CONTACTINFO (8) — delete + create. 3 types (address/phone/email) with labelAr/labelEn/value/href (tel:/mailto: links auto-built for phones/emails)/order/active. Matches contact.tsx ADDRESSES + PHONES + EMAILS arrays + i18n keys.
+
+7. HERO IMAGES (5) — delete + create. url/title (legacy fallback)/titleAr/titleEn/order/active. Includes all 5 site-generated images (hero-truck, fleet, warehouse, operations, courier) matching hero.tsx FALLBACK_IMAGES (3) + seed-content.ts (5).
+
+8. PARTNERS (8) — delete + create. name, nameAr (Arabic transliteration of each brand), logo, icon, color, website (null), order, active. Matches seed-content.ts partner-1..partner-8 logos.
+
+9. VIDEOS (2) — delete + create. title, titleAr, description, descriptionAr, url, thumbnail, category (promo/logistics), active, featured (1 featured + 1 secondary). Matches video-section.tsx FALLBACK_VIDEOS.
+
+10. TESTIMONIALS (5) — delete + create. Bilingual: name + nameAr, role + roleAr, company + companyAr, content + contentAr. Arabic content/role taken from existing seed.ts; English versions taken from testimonials.tsx TEST_EN map. All status="approved", rating=5.
+
+11. SITE STATS (4) — delete + create. label (English), labelAr (Arabic), value, icon. Matches stats-bar.tsx FALLBACK (850K+/27/12K+/40+) with icon mapping (package/map/users/building).
+
+12. ABOUT (1 record) — delete + create. titleAr="Redline — عصب الشحن في مصر", titleEn="Redline — Egypt's shipping backbone", subtitleAr="من نحن", subtitleEn="About Us", descriptionAr + descriptionEn (long bilingual text from i18n about.p1 + about.p2), image="/images/warehouse.png", features field stored as JSON.stringify([{icon, titleAr, titleEn, descAr, descEn}, ... × 6]) matching the 6 features in about.tsx FEATURES_AR/FEATURES_EN arrays.
+
+13. WHATSAPP SETTING (1) — delete + create. phoneNumber="201000000000", defaultMessageAr="مرحباً، أريد الاستفسار عن خدمات الشحن", defaultMessageEn="Hello, I'd like to inquire about shipping services", active=true.
+
+package.json updates:
+- Added "prisma": { "seed": "npx tsx prisma/seed.ts" } config block.
+- Added "db:seed": "npx tsx prisma/seed.ts" script.
+- Installed tsx as devDependency (^4.23.15).
+
+Verification — ran `npx tsx prisma/seed.ts`:
+- All 13 entities seeded successfully (output confirmed each section with ✓ checkmark + count).
+- Verified DB row counts via direct Prisma query: HeroImage=5, Service=6, Governorate=27, HowItWorksStep=3, ContactInfo=8, Partner=8, Video=2, Testimonial=5, SiteStat=4, About=1, WhatsAppSetting=1, Role=3, User=1.
+- Verified Cairo governorate record: name="Cairo", nameAr="القاهره", zone="A", basePrice=30, etaHours=24, active=true ✓
+- Verified super-admin role: isSystemRole=true, permissions JSON parsed to {hero:[c,r,e,d], about:[...], reviews:[read,approve,reject,delete], ...} ✓
+- Verified admin user (admin@redline.eg) has roleId pointing to super-admin role (roleRef.name="super-admin") ✓
+- Verified live API: GET /api/site returns seeded stats with EN labels + approved testimonials; GET /api/hero-images returns 5 images; GET /api/services returns 6 services with descriptionEn; GET /api/about returns the bilingual About record; GET /api/whatsapp-settings returns the default setting.
+
+PART 2 — Section Context Banners added to 12 dashboard modules
+- For each module, added a context banner as the FIRST child inside the root `<div>`/`<motion.div>` of the component's return.
+- Banner pattern (consistent across all 12 modules):
+  ```tsx
+  <div className="flex items-center justify-between gap-2 p-3 rounded-xl bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 mb-4">
+    <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+      📍 {L("مكان الظهور: ", "Appears at: ")}{contextText}
+    </span>
+    <a href={`/#${anchor}`} target="_blank" className="text-xs font-semibold text-red-600 dark:text-red-400 hover:underline flex items-center gap-1">
+      {L("عرض في الموقع", "Preview on Site")} ↗
+    </a>
+  </div>
+  ```
+- For internal modules (users, roles, settings) with no public anchor, the `<a>` link is replaced by a small "Internal / داخلي" pill badge.
+
+Files updated (12 modules):
+
+1. src/components/dashboard/hero.tsx — anchor "#home", context AR="أول شاشة يراها الزائر (الصور الدوارة + شريط المزايا)" / EN="First screen visitors see (carousel + features ticker)".
+2. src/components/dashboard/about.tsx — anchor "#about", context AR="قسم من نحن والإحصائيات" / EN="About Us & Statistics section".
+3. src/components/dashboard/services.tsx — anchor "#services", context AR="قسم خدماتنا على الصفحة الرئيسية" / EN="Services section on the homepage".
+4. src/components/dashboard/how-it-works.tsx — anchor "#how", context AR="قسم كيف نعمل (3 خطوات)" / EN="How It Works section (3 steps)".
+5. src/components/dashboard/videos.tsx — anchor "#videos", context AR="معرض الفيديوهات" / EN="Video Gallery section".
+6. src/components/dashboard/partners.tsx — anchor "#partners", context AR="قسم الشركاء وعملائنا" / EN="Partners & Clients section".
+7. src/components/dashboard/map-hubs.tsx — anchor "#map", context AR="قسم الخريطة اللوجستية والمراكز" / EN="Interactive Map & Hubs section".
+8. src/components/dashboard/contact-info.tsx — anchor "#contact", context AR="قسم تواصل مباشر في أسفل الصفحة" / EN="Direct Contact section at the bottom".
+9. src/components/dashboard/reviews.tsx — anchor "#home" (testimonials don't have own anchor), context AR="قسم آراء العملاء" / EN="Customer Reviews section". Added the `L` helper (file previously had `isAr` from useDashboardT but no L).
+10. src/components/dashboard/users.tsx — no anchor (internal), context AR="إدارة مستخدمي لوحة التحكم" / EN="Dashboard user management".
+11. src/components/dashboard/roles.tsx — no anchor (internal), context AR="إدارة الأدوار والصلاحيات" / EN="Roles & Permissions management".
+12. src/components/dashboard/settings.tsx — no anchor (internal), context AR="إعدادات الحساب والنظام" / EN="Account & system settings". Added `isAr` + `L` to the useDashboardT() destructure (file previously only had `t`).
+
+Verification:
+- bun run lint: 0 errors, 3 warnings (all pre-existing Unused eslint-disable directives in page.tsx & dashboard-app.tsx — none from this task).
+- dev.log: clean — no compile errors. Server returns 200 on `/`.
+- All 12 modules preserve their existing structure (only added the banner as the first child of the root return div).
+- All bilingual context texts follow the existing inline `L(ar, en)` pattern (consistent with the rest of each module's bilingual UI).
+- For modules missing the L helper (reviews.tsx, settings.tsx), added it without breaking existing `t()` usage — both `t` and `L` work side-by-side.
+
+Stage Summary:
+- PART 1: prisma/seed.ts created + package.json prisma.seed config + db:seed script + tsx devDependency installed. Seed ran successfully — 13 entity types populated (3 system roles, 1 admin linked to super-admin, 27 governorates, 6 services, 3 how-it-works steps, 8 contact items, 5 hero images, 8 partners, 2 videos, 5 testimonials, 4 site stats, 1 About record with features JSON, 1 WhatsApp setting). Verified via direct Prisma queries + live /api/site, /api/hero-images, /api/services, /api/about, /api/whatsapp-settings endpoints.
+- PART 2: 12 dashboard module components updated with section context banners (9 with "Preview on Site" links to anchors #home/#about/#services/#how/#videos/#partners/#map/#contact + 3 internal modules with "Internal" pill badge). L helper added to 2 modules that were missing it (reviews, settings). All edits are minimal — banner is the FIRST child of each component's root return div, preserving all existing structure.
+- 0 lint errors introduced. 3 pre-existing warnings untouched.

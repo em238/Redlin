@@ -176,6 +176,16 @@ export function DashboardVideos() {
 
   return (
     <div className="space-y-5">
+      {/* Section Context Banner */}
+      <div className="flex items-center justify-between gap-2 p-3 rounded-xl bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 mb-4">
+        <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+          📍 {L("مكان الظهور: ", "Appears at: ")}{L("معرض الفيديوهات", "Video Gallery section")}
+        </span>
+        <a href="/#videos" target="_blank" className="text-xs font-semibold text-red-600 dark:text-red-400 hover:underline flex items-center gap-1">
+          {L("عرض في الموقع", "Preview on Site")} ↗
+        </a>
+      </div>
+
       {/* Header card */}
       <Card className="p-5 bg-gradient-to-l from-primary/10 to-red-700/5 border-primary/30 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
