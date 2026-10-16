@@ -3157,3 +3157,43 @@ Work Log:
 - The close button uses `end-3.5` (Tailwind logical property) which automatically positions at top-right in LTR and top-left in RTL.
 
 Lint: 0 errors, 0 warnings.
+
+---
+Task ID: dashboard-ltr-switch-overflow-fix
+Agent: Z.ai Code (main)
+
+Task: Fix 3 dashboard LTR layout bugs: (1) Toggle switch knob overflows outside the track in English (LTR) mode, (2) Arabic/English labels overlap horizontally, (3) Sidebar user profile card collides with the logout button.
+
+Work Log:
+
+**1. Switch Component Fix (`src/components/ui/switch.tsx`)**
+- Root cause: The Switch used `data-[state=checked]:translate-x-5` for the thumb in LTR and `rtl:data-[state=checked]:-translate-x-5` for RTL. But the `rtl:` Tailwind variant checks the `<html>` element's `dir` attribute — which is ALWAYS `dir="rtl"` (set by the layout). So even when the dashboard root div has `dir="ltr"` (English mode), the `rtl:` variant still matches `<html dir="rtl">` and applies the RTL thumb position (-translate-x-5 = move LEFT), causing the knob to overflow to the left outside the track.
+- Fix: Replaced transform-based positioning with flexbox:
+  - Root: added `justify-start data-[state=checked]:justify-end px-0.5`
+  - Thumb: removed all `translate-x` and `rtl:translate-x` classes, kept only `transition-all duration-200`
+- `justify-end` is a LOGICAL property that respects the nearest ancestor's `dir` attribute (not `<html>`). In LTR, `justify-end` = right. In RTL, `justify-end` = left. This is correct for both directions without any `rtl:` variants.
+- Added `px-0.5` to the Root so the thumb has 2px padding on each side.
+
+**2. Text Overlap Fix (`footer-links.tsx` + `contact-info.tsx`)**
+- Both modules rendered AR + EN labels horizontally in the same row:
+  ```tsx
+  <div className="flex items-baseline gap-2 flex-wrap">
+    <div dir="rtl">labelAr</div>
+    <div dir="ltr">labelEn</div>
+  </div>
+  ```
+  When both labels were long, they collided horizontally.
+- Fix: Changed to vertical stacking:
+  ```tsx
+  <div className="flex flex-col gap-0.5 min-w-0">
+    <div className="font-semibold text-sm truncate" dir="rtl">labelAr</div>
+    <div className="text-xs text-muted-foreground truncate" dir="ltr">labelEn</div>
+  </div>
+  ```
+  AR on top, EN below — no horizontal collision. Added `truncate` for overflow safety.
+
+**3. Sidebar User Card Spacing Fix (`sidebar.tsx`)**
+- The bottom container had `space-y-1` (4px gap) between the user profile card and the logout button — too tight, causing visual collision.
+- Fix: Changed `space-y-1` → `space-y-2` (8px gap) + added `mb-1` (4px margin-bottom) to the user profile card div. Total gap = 12px — clean separation.
+
+Lint: 0 errors, 0 warnings.

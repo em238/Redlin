@@ -128,11 +128,11 @@ export function DashboardSidebar() {
       </nav>
 
       {/* === BOTTOM: User profile + Footer actions === */}
-      <div className="border-t border-slate-200 dark:border-slate-800 px-3 py-2 space-y-1 shrink-0">
+      <div className="border-t border-slate-200 dark:border-slate-800 px-3 py-2 space-y-2 shrink-0">
         {/* User profile card */}
         {user && (
           <div
-            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800/50 ${collapsed ? "justify-center" : ""}`}
+            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800/50 mb-1 ${collapsed ? "justify-center" : ""}`}
             title={collapsed ? `${user.name}\n${user.email}` : undefined}
           >
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-red-700 flex items-center justify-center text-white font-bold text-xs shrink-0">

@@ -349,9 +349,9 @@ export function DashboardContactInfo() {
                     <Icon className={`w-4 h-4 ${meta.iconColor}`} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-baseline gap-2 flex-wrap">
-                      <div className="font-semibold text-sm" dir="rtl">{item.labelAr}</div>
-                      <div className="text-xs text-muted-foreground" dir="ltr">{item.labelEn}</div>
+                    <div className="flex flex-col gap-0.5 min-w-0">
+                      <div className="font-semibold text-sm truncate" dir="rtl">{item.labelAr}</div>
+                      <div className="text-xs text-muted-foreground truncate" dir="ltr">{item.labelEn}</div>
                     </div>
                     {item.href ? (
                       <a
