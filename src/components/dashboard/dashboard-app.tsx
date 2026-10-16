@@ -83,7 +83,7 @@ export function DashboardApp() {
       lang={dashboardLocale}
     >
       <DashboardSidebar />
-      <div className="flex-1 flex flex-col h-screen overflow-hidden min-w-0">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden min-w-0 p-0 m-0">
         <DashboardTopbar />
         <main className="flex-1 min-w-0 overflow-y-auto p-3 bg-background">
           <AnimatePresence mode="wait">
