@@ -141,7 +141,17 @@ export function Footer() {
             {t("footer.copyright").replace("© ", `© ${new Date().getFullYear()} `)}
           </p>
           <div className="flex items-center gap-4 text-xs text-zinc-500">
-            <span>{t("footer.made")} 🇪🇬</span>
+            <span className="text-slate-400 text-xs sm:text-sm">
+              {t("footer.made")}{" "}
+              <a
+                href="https://gloval.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-white hover:text-red-500 transition-colors"
+              >
+                GloVal
+              </a>
+            </span>
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
               className="w-8 h-8 rounded-full bg-white/5 hover:bg-primary flex items-center justify-center transition-colors"

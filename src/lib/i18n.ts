@@ -200,7 +200,7 @@ export const MESSAGES: Record<Locale, Record<string, string>> = {
     "footer.newsletter": "النشرة البريدية",
     "footer.newsletterDesc": "اشترك لتصلك آخر العروض والأخبار",
     "footer.copyright": "© Redline Shipping. جميع الحقوق محفوظة.",
-    "footer.made": "صُنع بشغف في مصر",
+    "footer.made": "تم التطوير بواسطة",
     "footer.dashboard": "دخول لوحة التحكم",
 
     // ===== Dashboard =====
@@ -734,7 +734,7 @@ export const MESSAGES: Record<Locale, Record<string, string>> = {
     "footer.newsletter": "Newsletter",
     "footer.newsletterDesc": "Subscribe for the latest offers and news",
     "footer.copyright": "© Redline Shipping. All rights reserved.",
-    "footer.made": "Made with passion in Egypt",
+    "footer.made": "Powered by",
     "footer.dashboard": "Dashboard login",
 
     // ===== Dashboard =====
