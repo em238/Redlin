@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 import { Lock, Mail, ArrowLeft, ArrowRight, Loader2, ShieldCheck, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +16,8 @@ import { useDashboardT } from "@/lib/i18n";
 
 export function DashboardLogin() {
   const router = useRouter();
-  const { setUser, theme } = useAppStore();
+  const { setUser } = useAppStore();
+  const { theme } = useTheme();
   const { t, isAr } = useDashboardT();
   const [email, setEmail] = useState("admin@redline.eg");
   const [password, setPassword] = useState("admin123");

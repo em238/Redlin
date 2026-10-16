@@ -48,19 +48,15 @@ function writeUrlTab(tab: DashboardSection) {
 }
 
 export function DashboardApp() {
-  const { user, authChecked, setUser, setAuthChecked, dashboardSection, setDashboardSection, theme } = useAppStore();
+  const { user, authChecked, setUser, setAuthChecked, dashboardSection, setDashboardSection } = useAppStore();
   const { t } = useDashboardT();
   const { dashboardLocale } = useI18n();
 
-  // Restore theme from localStorage on mount
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("redline-theme") as "light" | "dark" | null;
-      if (saved && saved !== theme) {
-        useAppStore.getState().setTheme(saved);
-      }
-    } catch {}
-  }, [theme]);
+  // NOTE: theme restore logic was removed. next-themes (ThemeProvider in
+  // src/lib/providers.tsx) now owns the theme: it defaults to "light",
+  // persists under localStorage["redline_dashboard_theme"], and injects
+  // a no-flash inline script before hydration. No more dark flash on
+  // refresh.
 
   // Check session on first mount (verifies the httpOnly cookie against the DB)
   useEffect(() => {

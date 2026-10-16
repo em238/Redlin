@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
 import { Menu, X, LayoutDashboard, Moon, Sun, Globe } from "lucide-react";
 import Image from "next/image";
@@ -9,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { useScrollSpy } from "@/hooks/use-scroll-spy";
 import { ScrollProgress } from "@/components/shared/scroll-progress";
 import { useT, useI18n } from "@/lib/i18n";
-import { useAppStore } from "@/lib/store";
 import { Magnetic } from "@/components/shared/custom-cursor";
 
 const NAV_KEYS = [
@@ -24,9 +24,9 @@ const NAV_KEYS = [
 
 export function Navbar() {
   const router = useRouter();
+  const { theme, setTheme } = useTheme();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { theme, toggleTheme } = useAppStore();
   const { t, isAr } = useT();
   const { locale, setLocale } = useI18n();
   const { scrollY } = useScroll();
@@ -57,8 +57,7 @@ export function Navbar() {
               aria-label="RedLine Transport"
             >
               <Image
-                src={!scrolled || theme === "dark" ? "/redline-transport-white.png" : "/redline-transport-logo.png"}
-                alt="RedLine Transport"
+                src={!scrolled || theme === "dark" ? "/redline-transport-white.png" : "/redline-transport-logo.png"}  alt="RedLine Transport"
                 width={1200}
                 height={514}
                 priority
@@ -107,11 +106,11 @@ export function Navbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={toggleTheme}
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                 className={`rounded-lg transition-colors ${scrolled ? "text-foreground hover:bg-muted" : "text-white hover:bg-white/10"}`}
                 aria-label="تبديل السمة"
               >
-                {theme === "light" ? <Moon className="w-[18px] h-[18px]" /> : <Sun className="w-[18px] h-[18px]" />}
+                {theme === "dark" ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
               </Button>
               <Magnetic strength={0.18} className="hidden sm:inline-flex">
                 <Button

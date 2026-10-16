@@ -1943,3 +1943,72 @@ Stage Summary:
 - All routes verified via curl through the gateway: max 1 redirect (only when URL is missing the trailing slash). No more loop.
 - All local flows verified via Agent Browser: login, tab switching, refresh, tab persistence, public ↔ dashboard navigation — all working.
 - API calls work because `fetch` follows the 308 redirect transparently and 308 preserves method + body.
+
+---
+Task ID: dashboard-theme-flash-fix
+Agent: Z.ai Code (main)
+
+Task: Fix the dashboard theme flash on refresh — refreshing `/dashboard` was briefly flipping the page to dark mode even though the intended default theme is light. The user reported this happened because `<html>` had a hardcoded `class="dark"` and there was no no-flash inline script.
+
+Work Log:
+
+**Root cause investigation**
+- `src/app/layout.tsx` line 46 had `<html ... className="dark" style={{ backgroundColor: "#0b0f17" }}>` — this forced dark mode + a dark `#0b0f17` background on every initial SSR render, BEFORE client hydration had a chance to read `localStorage` and apply the user's saved theme.
+- `src/app/globals.css` had `html { background-color: #0b0f17; color-scheme: dark; }` — also forcing dark on the root element.
+- `src/lib/store.ts` (Zustand) had a `theme` field with `toggleTheme`/`setTheme` that persisted under `localStorage["redline-theme"]`, but only after a `useEffect` ran — so on initial render there was always a dark flash before the effect could restore the saved (light) theme.
+- `next-themes` was already a dependency (`^0.4.6`) but was NOT being used — `Providers` only wrapped children in `QueryClientProvider`.
+
+**Fix**
+
+1. `src/lib/providers.tsx` — wrapped the whole app in next-themes `ThemeProvider`:
+   ```tsx
+   <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} storageKey="redline_dashboard_theme" disableTransitionOnChange>
+   ```
+   - `defaultTheme="light"` → LIGHT is the primary/intended theme.
+   - `enableSystem={false}` → never fall back to the OS color-scheme (the previous code had no `enableSystem`, so next-themes would have defaulted to system if it had been wired up — but more importantly the original Zustand store didn't set this either).
+   - `storageKey="redline_dashboard_theme"` → persisted under this dedicated key (separate from the old `redline-theme`).
+   - `disableTransitionOnChange` → no CSS transition when toggling (prevents color flicker during the class swap).
+   - next-themes injects an inline script BEFORE hydration that reads `localStorage["redline_dashboard_theme"]` and applies the `dark` class to `<html>` if the user previously chose dark — so there is NO theme flash on reload.
+
+2. `src/app/layout.tsx` — removed `className="dark"` and `style={{ backgroundColor: "#0b0f17" }}` from `<html>`. Kept `suppressHydrationWarning` because next-themes intentionally modifies the `<html>` class outside of React's render cycle.
+
+3. `src/app/globals.css`:
+   - Changed `html { background-color: #0b0f17; color-scheme: dark; }` → `html { color-scheme: light; background-color: var(--background); }`. The `--background` CSS variable resolves to light in `:root` and dark in `.dark`, so the background follows the active theme automatically.
+   - Added `color-scheme: light;` to `:root` and `color-scheme: dark;` to `.dark` so browser-native controls (scrollbars, form inputs, date pickers) also follow the theme.
+
+4. `src/lib/store.ts` — removed `theme`, `toggleTheme`, `setTheme` from the Zustand store. next-themes is now the single source of truth for theme. Components use the `useTheme()` hook from next-themes directly.
+
+5. `src/app/page.tsx` (public homepage) — removed the manual theme restore + apply `useEffect` blocks. next-themes handles this now. The file went from ~26 lines down to a single `<PublicPage />` return.
+
+6. `src/components/dashboard/dashboard-app.tsx` — removed the manual theme restore `useEffect`. The file is now leaner (one less effect to run on mount).
+
+7. Theme-reading components migrated from Zustand to `useTheme()` from next-themes:
+   - `src/components/dashboard/topbar.tsx` — `const { theme, setTheme } = useTheme();` → button `onClick={() => setTheme(theme === "dark" ? "light" : "dark")}`. Icon: `theme === "dark" ? <Sun> : <Moon>` (showing the icon for "switch to").
+   - `src/components/dashboard/settings.tsx` — same migration. The Switch `onCheckedChange` now calls `setTheme(...)`. The Sun/Moon icon display was flipped to `theme === "dark" ? <Moon> : <Sun>` so it shows the CURRENT state's icon (paired with the "Current theme: Dark/Light" label).
+   - `src/components/site/navbar.tsx` — same migration. The logo image selection (`!scrolled || theme === "dark" ? white : colored`) works the same way.
+   - `src/components/dashboard/login.tsx` — same migration. Logo image selection by theme.
+
+**Lint**: `bun run lint` → **0 errors, 0 warnings**. The pre-existing "Unused eslint-disable directive" warning in `src/app/page.tsx` is gone too (because page.tsx was rewritten without the eslint-disable comment).
+
+**Agent Browser end-to-end verification (all passed)**:
+
+| Scenario | Before refresh | After refresh | Verdict |
+|----------|----------------|---------------|---------|
+| First visit (no localStorage) | — | light, `htmlBgColor=lab(98.79)`, `storage=null` | ✅ defaults to light |
+| Logged-in dashboard, light mode | light, `storage="light"` | light, `storage="light"`, `htmlBgColor=lab(98.79)` same as before | ✅ no flash, stays light |
+| Logged-in dashboard, dark mode | dark, `storage="dark"` | dark, `storage="dark"`, `htmlBgColor=lab(2.38)` same as before | ✅ no flash, stays dark |
+| Toggle light → dark → refresh | dark | dark (preserved) | ✅ |
+| Toggle dark → light → refresh | light | light (preserved) | ✅ the original bug is fixed |
+| Tab preservation | `/dashboard/?tab=hero` | same tab after refresh | ✅ still works (no regression from previous fix) |
+| Auth session preservation | logged in | logged in after refresh | ✅ still works (no regression) |
+
+- Dev log: clean — only normal Next.js startup + 200 OK responses.
+- Browser console: no errors. One benign image LCP warning (pre-existing, not from this task).
+- `<html>` element after fix: `<html lang="ar" dir="rtl" suppressHydrationWarning>` — no `className="dark"`, no inline `style`. next-themes adds the `dark` class via its inline script only when the user has saved dark.
+
+Stage Summary:
+- The dashboard no longer flashes to dark mode on refresh. The root cause was a hardcoded `className="dark"` on `<html>` (in layout.tsx) plus `color-scheme: dark` and a dark `#0b0f17` background on the `html` element (in globals.css) — both forced dark on the initial SSR render before client hydration could read localStorage.
+- The fix migrates the entire theme management to next-themes (which was already a dependency but wasn't being used). next-themes handles the no-flash inline script, defaults to "light", disables system-theme fallback, and persists under `localStorage["redline_dashboard_theme"]`.
+- Removed theme state from the Zustand store — next-themes is now the single source of truth. All 4 components that read/toggle theme (topbar, settings, navbar, login) use `useTheme()` from next-themes.
+- The default theme is now LIGHT. The first visit shows light mode. Refreshing on light stays light. Refreshing on dark stays dark. No flash in either direction.
+- 0 lint errors, 0 warnings. No runtime errors. No regressions to the tab persistence or auth session fixes from the previous tasks.

@@ -1,13 +1,15 @@
 "use client";
 
 import { Menu, Moon, Sun, Globe } from "lucide-react";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAppStore, DashboardSection } from "@/lib/store";
 import { useI18n, useDashboardT } from "@/lib/i18n";
 
 export function DashboardTopbar() {
-  const { dashboardSection, setSidebarOpen, theme, toggleTheme } = useAppStore();
+  const { dashboardSection, setSidebarOpen } = useAppStore();
+  const { theme, setTheme } = useTheme();
   const { t } = useDashboardT();
   const { dashboardLocale, setDashboardLocale } = useI18n();
 
@@ -51,8 +53,8 @@ export function DashboardTopbar() {
             <Globe className="w-4 h-4" />
             {dashboardLocale === "ar" ? "English" : "عربي"}
           </Button>
-          <Button variant="ghost" size="icon" className="rounded-full" onClick={toggleTheme}>
-            {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+          <Button variant="ghost" size="icon" className="rounded-full" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
+            {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </Button>
         </div>
       </div>

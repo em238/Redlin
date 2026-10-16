@@ -44,6 +44,7 @@
 }
 
 :root {
+  color-scheme: light;
   --radius: 0.75rem;
   /* Redline brand: deep red primary, dark charcoal ink, gold accent */
   --background: oklch(0.99 0.004 15);
@@ -80,6 +81,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --background: oklch(0.14 0.02 20);
   --foreground: oklch(0.97 0.006 15);
   --card: oklch(0.18 0.025 20);
@@ -126,8 +128,13 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    background-color: #0b0f17;
-    color-scheme: dark;
+    /* Default to light color-scheme. The `.dark` class on <html>
+       (applied by next-themes when the user picks dark, or by the
+       no-flash inline script on initial load) sets color-scheme: dark
+       via the .dark {} block below. Don't hardcode dark here — that
+       was forcing the dashboard to flash to dark on every refresh. */
+    color-scheme: light;
+    background-color: var(--background);
   }
   body {
     @apply bg-background text-foreground;

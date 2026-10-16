@@ -31,13 +31,16 @@ interface AppState {
   // mobile sidebar
   sidebarOpen: boolean;
   setSidebarOpen: (b: boolean) => void;
-  // theme
-  theme: "light" | "dark";
-  toggleTheme: () => void;
-  setTheme: (t: "light" | "dark") => void;
+  // NOTE: `theme`/`toggleTheme`/`setTheme` were removed. Theme is now
+  // owned by next-themes (ThemeProvider in src/lib/providers.tsx). All
+  // components that need to read or toggle the theme use the `useTheme()`
+  // hook from next-themes. This:
+  //   - Defaults to "light" (no more dark flash on refresh).
+  //   - Persists under localStorage["redline_dashboard_theme"].
+  //   - Injects a no-flash inline script before hydration.
 }
 
-export const useAppStore = create<AppState>((set, get) => ({
+export const useAppStore = create<AppState>((set) => ({
   dashboardSection: "hero",
   setDashboardSection: (s) => set({ dashboardSection: s }),
   user: null,
@@ -46,19 +49,5 @@ export const useAppStore = create<AppState>((set, get) => ({
   setAuthChecked: (b) => set({ authChecked: b }),
   sidebarOpen: false,
   setSidebarOpen: (b) => set({ sidebarOpen: b }),
-  theme: "light",
-  toggleTheme: () => {
-    const next = get().theme === "light" ? "dark" : "light";
-    set({ theme: next });
-    if (typeof document !== "undefined") {
-      document.documentElement.classList.toggle("dark", next === "dark");
-    }
-    try { localStorage.setItem("redline-theme", next); } catch {}
-  },
-  setTheme: (t) => {
-    set({ theme: t });
-    if (typeof document !== "undefined") {
-      document.documentElement.classList.toggle("dark", t === "dark");
-    }
-  },
 }));
+

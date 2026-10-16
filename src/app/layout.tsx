@@ -42,8 +42,18 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  // NOTE: `<html>` no longer has a hardcoded `className="dark"` or inline
+  // `style={{ backgroundColor: "#0b0f17" }}`. Those forced dark mode on
+  // the initial SSR render (before client hydration read localStorage),
+  // which caused the dashboard to flash to dark on every refresh.
+  // next-themes now injects an inline script that reads
+  // localStorage("redline_dashboard_theme") BEFORE hydration and applies
+  // the `dark` class only if the user explicitly chose dark — so the
+  // default is always light, with no flash. `suppressHydrationWarning`
+  // is kept because next-themes intentionally modifies the <html> class
+  // outside of React's render cycle.
   return (
-    <html lang="ar" dir="rtl" suppressHydrationWarning className="dark" style={{ backgroundColor: "#0b0f17" }}>
+    <html lang="ar" dir="rtl" suppressHydrationWarning>
       <body className={`${cairo.variable} ${tajawal.variable} antialiased bg-background text-foreground font-sans`}>
         <Providers>
           {children}

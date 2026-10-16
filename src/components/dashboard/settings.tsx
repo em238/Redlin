@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 import { useAppStore } from "@/lib/store";
 import { User, Bell, Globe, Shield, Palette, Save, Moon, Sun, LogOut, Truck } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -16,7 +17,8 @@ import { useDashboardT } from "@/lib/i18n";
 
 export function DashboardSettings() {
   const router = useRouter();
-  const { user, setUser, setAuthChecked, theme, toggleTheme } = useAppStore();
+  const { user, setUser, setAuthChecked } = useAppStore();
+  const { theme, setTheme } = useTheme();
   const { t, isAr } = useDashboardT();
   const L = (ar: string, en: string) => (isAr ? ar : en);
   const [profile, setProfile] = useState({ name: user?.name || "", email: user?.email || "" });
@@ -94,13 +96,13 @@ export function DashboardSettings() {
         </div>
         <div className="flex items-center justify-between p-4 rounded-xl bg-muted/40">
           <div className="flex items-center gap-3">
-            {theme === "light" ? <Sun className="w-5 h-5 text-amber-500" /> : <Moon className="w-5 h-5 text-primary" />}
+            {theme === "dark" ? <Moon className="w-5 h-5 text-primary" /> : <Sun className="w-5 h-5 text-amber-500" />}
             <div>
               <div className="font-semibold text-sm">{t("d.settings.currentTheme")}</div>
-              <div className="text-xs text-muted-foreground">{theme === "light" ? t("d.settings.light") : t("d.settings.dark")}</div>
+              <div className="text-xs text-muted-foreground">{theme === "dark" ? t("d.settings.dark") : t("d.settings.light")}</div>
             </div>
           </div>
-          <Switch checked={theme === "dark"} onCheckedChange={toggleTheme} />
+          <Switch checked={theme === "dark"} onCheckedChange={() => setTheme(theme === "dark" ? "light" : "dark")} />
         </div>
       </Card>
 
