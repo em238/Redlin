@@ -2662,3 +2662,25 @@ Stage Summary:
 - The browser tab shows the new title "RedLine Transport — شحن يصل لكل مصر" with the RedLine icon.
 - Meets Google's Favicon guidelines: square 1:1 format, accessible public URL, multiple sizes.
 - 0 lint errors, 0 warnings.
+
+---
+Task ID: favicon-icon-update-bigger
+Agent: Z.ai Code (main)
+
+Task: User uploaded a new RedLine Transport logo image (2688x1152 PNG, wide format with RED + BLACK elements on transparent background) and requested: "Bring back the logo again, the light one, but make the size a bit bigger. I want this one."
+
+Work Log:
+- Source: `/home/z/my-project/upload/pasted_image_1792174770463.png` (2688x1152, RGBA, transparent background)
+- Analyzed the image: content bbox (0,17,2656,1056), cropped to 2656x1039, aspect ratio 2.56:1 (wide logo)
+- Color analysis: RED (219,1,2) dominant (~4531 samples) + BLACK/dark (17,18,19) (~3015 samples) on transparent background
+- To make the logo "bigger" in the favicon: created a square canvas (size = logo width = 2656x2656) with a WHITE background filling the entire square, and the logo centered vertically filling the full width. This makes the icon appear as a full square block (not a thin band with transparent space).
+- Resized to all required formats:
+  - `icon.png` (512x512, white bg, logo fills width) → src/app/ + public/
+  - `apple-icon.png` (180x180, white bg) → src/app/ + public/
+  - `apple-touch-icon.png` (180x180, white bg) → public/
+  - `favicon.ico` (16/32/48/64 multi-size ICO, white bg) → src/app/ + public/
+- All 4 icon paths return HTTP 200 ✓
+- All 5 `<link>` tags render in HTML `<head>` ✓
+- Browser tab title: "RedLine Transport — شحن يصل لكل مصر" ✓
+- Lint: 0 errors, 0 warnings.
+- The metadata in layout.tsx was already configured from the previous task (title, description, icons config) and continues to work with the new icon files.
