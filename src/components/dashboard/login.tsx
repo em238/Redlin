@@ -87,11 +87,18 @@ export function DashboardLogin() {
         >
           <div className="lg:hidden flex items-center gap-2.5 mb-8 justify-center">
             <Image
-              src={theme === "dark" ? "/redline-transport-white.png" : "/redline-transport-logo.png"}
+              src="/redline-transport-logo.png"
               alt="RedLine Transport"
               width={1200}
               height={514}
-              className="h-10 w-auto max-w-none object-contain"
+              className="h-10 w-auto max-w-none object-contain dark:hidden"
+            />
+            <Image
+              src="/redline-transport-white.png"
+              alt="RedLine Transport"
+              width={1200}
+              height={514}
+              className="hidden h-10 w-auto max-w-none object-contain dark:block"
             />
           </div>
 

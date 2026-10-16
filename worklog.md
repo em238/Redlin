@@ -3053,3 +3053,36 @@ English (LTR) mode (after clicking the language switcher):
 - `bannerHeading: "Manage Shipping Operations from One Place"` ✓
 
 - Lint: 0 errors, 0 warnings.
+
+---
+Task ID: dark-mode-contrast-fix
+Agent: Z.ai Code (main)
+
+Task: Fix dark mode contrast — white text/icons on red action buttons + dark-mode branded logo switching.
+
+Work Log:
+
+**1. Root Cause: `--primary-foreground` was dark in `.dark` mode**
+- `src/app/globals.css` line 92: `.dark { --primary-foreground: oklch(0.14 0.02 20); }` — this is a DARK color, making all `text-primary-foreground` elements (text on red buttons/badges) render dark/invisible on red backgrounds in dark mode.
+- Fixed: changed to `oklch(0.99 0.004 15)` (white) — same as the light mode value. Now `text-primary-foreground` is ALWAYS white, ensuring crisp white text on red backgrounds in both modes.
+- Also fixed `--sidebar-primary-foreground` in `.dark` from dark to white (same issue for the dashboard sidebar active nav item).
+
+**2. Explicit `text-white` on key red action buttons**
+Even though the CSS variable fix above handles all `text-primary-foreground` elements, I also explicitly added `text-white` to the most visible buttons for extra safety:
+- `src/components/site/hero.tsx`: Hero CTA button — `text-primary-foreground` → `text-white` (the "اطلب شحن الآن" button with the Zap icon)
+- `src/components/site/how-it-works.tsx`: How It Works CTA — `text-primary-foreground` → `text-white` (the "ابدأ شحنتك الآن" button with the arrow)
+- `src/components/site/footer.tsx`: Newsletter subscribe button — added `text-white` (the red Send icon button)
+
+**3. Logo dual-image CSS approach (no SSR flash)**
+Replaced the JS-based `theme === "dark"` conditional with CSS `dark:hidden` / `hidden dark:block` dual-image rendering:
+- `src/components/site/navbar.tsx`: When scrolled, renders BOTH logos — colored logo has `dark:hidden` (visible in light only), white logo has `hidden dark:block` (visible in dark only). When not scrolled (over dark hero), always shows the white logo.
+- `src/components/dashboard/login.tsx`: Mobile logo uses the same dual-image approach.
+- `src/components/dashboard/sidebar.tsx`: Dashboard sidebar logo uses the same dual-image approach.
+
+The CSS approach works because next-themes injects an inline script BEFORE hydration that adds the `.dark` class to `<html>`. The CSS `dark:hidden` / `dark:block` selectors match immediately — no JS hydration needed, no flash.
+
+**Verification (Agent Browser, dark mode)**
+- Hero CTA "اطلب شحن الآن": textColor=`rgb(255,255,255)` ✓, iconColor=`rgb(255,255,255)` ✓
+- Navbar logo: src=`/redline-transport-white.png` (white variant) ✓, visible=true ✓
+- Footer Send button: iconColor=`rgb(255,255,255)` ✓
+- Lint: 0 errors, 0 warnings ✓

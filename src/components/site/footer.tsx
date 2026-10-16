@@ -224,7 +224,7 @@ export function Footer() {
                 placeholder={isAr ? "بريدك" : "Your email"}
                 className="h-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-500 flex-1"
               />
-              <Button size="icon" onClick={subscribe} className="bg-primary hover:bg-red-600 h-10 w-10 shrink-0">
+              <Button size="icon" onClick={subscribe} className="bg-primary hover:bg-red-600 h-10 w-10 shrink-0 text-white">
                 <Send className="w-4 h-4" />
               </Button>
             </div>

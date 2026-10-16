@@ -65,13 +65,20 @@ export function DashboardSidebar() {
       {/* === TOP: Logo + Collapse toggle === */}
       <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200 dark:border-slate-800 shrink-0">
         <button onClick={() => router.push("/admin")} className="flex items-center group focus:outline-none overflow-hidden">
-          <Image
-            src="/redline-transport-logo.png"
-            alt="RedLine Transport"
-            width={1200}
-            height={514}
-            className={`transition-all duration-300 ${collapsed ? "h-0 w-0 opacity-0" : "h-8 w-auto opacity-100"}`}
-          />
+              <Image
+                src="/redline-transport-logo.png"
+                alt="RedLine Transport"
+                width={1200}
+                height={514}
+                className={`transition-all duration-300 ${collapsed ? "h-0 w-0 opacity-0" : "h-8 w-auto opacity-100"} dark:hidden`}
+              />
+              <Image
+                src="/redline-transport-white.png"
+                alt="RedLine Transport"
+                width={1200}
+                height={514}
+                className={`hidden transition-all duration-300 ${collapsed ? "h-0 w-0 opacity-0" : "h-8 w-auto opacity-100"} dark:block`}
+              />
         </button>
         <Button
           variant="ghost"

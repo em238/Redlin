@@ -47,19 +47,46 @@ export function Navbar() {
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Logo — RedLine transport official logo (switches light/dark variant by background) */}
+            {/* Logo — dual image approach: CSS `dark:hidden` / `hidden dark:block`
+                ensures the white logo shows in dark mode IMMEDIATELY (before JS
+                hydration) with no flash. When not scrolled (transparent navbar
+                over dark hero), always show the white logo. */}
             <button
               onClick={() => go("#home")}
               className="flex items-center shrink-0 group focus:outline-none"
               aria-label="RedLine Transport"
             >
-              <Image
-                src={!scrolled || theme === "dark" ? "/redline-transport-white.png" : "/redline-transport-logo.png"}  alt="RedLine Transport"
-                width={1200}
-                height={514}
-                priority
-                className="h-10 sm:h-12 w-auto max-w-none object-contain transition-transform group-hover:scale-105"
-              />
+              {!scrolled ? (
+                /* Not scrolled — always white logo (over dark hero image) */
+                <Image
+                  src="/redline-transport-white.png"
+                  alt="RedLine Transport"
+                  width={1200}
+                  height={514}
+                  priority
+                  className="h-10 sm:h-12 w-auto max-w-none object-contain transition-transform group-hover:scale-105"
+                />
+              ) : (
+                /* Scrolled — colored logo in light mode, white logo in dark mode */
+                <>
+                  <Image
+                    src="/redline-transport-logo.png"
+                    alt="RedLine Transport"
+                    width={1200}
+                    height={514}
+                    priority
+                    className="h-10 sm:h-12 w-auto max-w-none object-contain transition-transform group-hover:scale-105 dark:hidden"
+                  />
+                  <Image
+                    src="/redline-transport-white.png"
+                    alt="RedLine Transport"
+                    width={1200}
+                    height={514}
+                    priority
+                    className="hidden h-10 sm:h-12 w-auto max-w-none object-contain transition-transform group-hover:scale-105 dark:block"
+                  />
+                </>
+              )}
             </button>
 
             {/* Desktop nav — clean, minimal */}
