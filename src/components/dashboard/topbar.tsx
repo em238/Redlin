@@ -1,14 +1,15 @@
 "use client";
 
-import { Menu, Moon, Sun, Bell, Search } from "lucide-react";
+import { Menu, Moon, Sun, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAppStore, DashboardSection } from "@/lib/store";
-import { useT } from "@/lib/i18n";
+import { useI18n, useDashboardT } from "@/lib/i18n";
 
 export function DashboardTopbar() {
   const { dashboardSection, setSidebarOpen, theme, toggleTheme } = useAppStore();
-  const { t } = useT();
+  const { t } = useDashboardT();
+  const { dashboardLocale, setDashboardLocale } = useI18n();
 
   const TITLES: Record<DashboardSection, { title: string; subtitle: string }> = {
     hero: { title: t("d.nav.hero"), subtitle: t("d.topbar.heroSub") },
@@ -40,13 +41,15 @@ export function DashboardTopbar() {
         </div>
 
         <div className="ms-auto flex items-center gap-2">
-          <div className="relative hidden md:block">
-            <Search className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input placeholder={t("d.topbar.search")} className="h-9 w-48 pe-9 bg-muted/50 border-0" />
-          </div>
-          <Button variant="ghost" size="icon" className="rounded-full relative">
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-1.5 end-1.5 w-2 h-2 bg-primary rounded-full ring-2 ring-background" />
+          {/* Dashboard language switcher — independent from public site */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="rounded-lg gap-1.5 text-xs font-semibold"
+            onClick={() => setDashboardLocale(dashboardLocale === "ar" ? "en" : "ar")}
+          >
+            <Globe className="w-4 h-4" />
+            {dashboardLocale === "ar" ? "English" : "عربي"}
           </Button>
           <Button variant="ghost" size="icon" className="rounded-full" onClick={toggleTheme}>
             {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}

@@ -14,13 +14,13 @@ import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 import { toast } from "sonner";
 import { FileUpload } from "@/components/shared/file-upload";
 import { useAppStore } from "@/lib/store";
-import { useT } from "@/lib/i18n";
+import { useDashboardT } from "@/lib/i18n";
 
 type RoleItem = { id: string; name: string; nameAr: string; isSystemRole: boolean };
 type UserItem = { id: string; email: string; name: string; roleId: string | null; roleName: string | null; roleNameAr: string | null; status: string; avatar: string | null; lastLoginAt: string | null };
 
 export function DashboardUsers() {
-  const { isAr } = useT();
+  const { isAr } = useDashboardT();
   const L = (ar: string, en: string) => (isAr ? ar : en);
   const qc = useQueryClient();
   const currentUser = useAppStore((s) => s.user);

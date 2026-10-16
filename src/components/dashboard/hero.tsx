@@ -18,7 +18,7 @@ import {
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 import { toast } from "sonner";
 import { FileUpload } from "@/components/shared/file-upload";
-import { useT } from "@/lib/i18n";
+import { useDashboardT } from "@/lib/i18n";
 
 const IMAGE_OPTIONS = [
   "/images/hero-truck.png", "/images/fleet.png", "/images/warehouse.png",
@@ -38,7 +38,7 @@ type HeroImage = {
 const emptyForm = { url: "", title: "", order: 0, active: true };
 
 export function DashboardHero() {
-  const { isAr } = useT();
+  const { isAr } = useDashboardT();
   const qc = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<HeroImage | null>(null);

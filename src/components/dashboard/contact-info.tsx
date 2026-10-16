@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 import { toast } from "sonner";
-import { useT } from "@/lib/i18n";
+import { useDashboardT } from "@/lib/i18n";
 
 type ContactInfo = {
   id: string;
@@ -57,7 +57,7 @@ const emptyContactForm = {
 };
 
 export function DashboardContactInfo() {
-  const { isAr } = useT();
+  const { isAr } = useDashboardT();
   const qc = useQueryClient();
   const L = (ar: string, en: string) => (isAr ? ar : en);
 

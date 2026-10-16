@@ -20,11 +20,12 @@ import { DashboardUsers } from "./users";
 import { DashboardRoles } from "./roles";
 import { DashboardSettings } from "./settings";
 import { Loader2 } from "lucide-react";
-import { useT } from "@/lib/i18n";
+import { useT, useDashboardT, useI18n } from "@/lib/i18n";
 
 export function DashboardApp() {
   const { user, authChecked, setUser, setAuthChecked, dashboardSection, theme } = useAppStore();
-  const { t } = useT();
+  const { t } = useDashboardT();
+  const { dashboardLocale } = useI18n();
 
   // restore theme from localStorage on mount
   useEffect(() => {
@@ -76,7 +77,11 @@ export function DashboardApp() {
   };
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <div
+      className="min-h-screen flex bg-background"
+      dir={dashboardLocale === "ar" ? "rtl" : "ltr"}
+      lang={dashboardLocale}
+    >
       <DashboardSidebar />
       <div className="flex-1 flex flex-col min-w-0">
         <DashboardTopbar />

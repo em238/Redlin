@@ -10,11 +10,11 @@ import { useState } from "react";
 import { apiPost } from "@/lib/api";
 import { toast } from "sonner";
 import { useAppStore } from "@/lib/store";
-import { useT } from "@/lib/i18n";
+import { useDashboardT } from "@/lib/i18n";
 
 export function DashboardLogin() {
   const { setUser, setView, theme } = useAppStore();
-  const { t, isAr } = useT();
+  const { t, isAr } = useDashboardT();
   const [email, setEmail] = useState("admin@redline.eg");
   const [password, setPassword] = useState("admin123");
   const [loading, setLoading] = useState(false);

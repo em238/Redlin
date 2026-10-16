@@ -10,11 +10,11 @@ import { Button } from "@/components/ui/button";
 import { useAppStore, DashboardSection } from "@/lib/store";
 import { apiPost } from "@/lib/api";
 import { toast } from "sonner";
-import { useT } from "@/lib/i18n";
+import { useDashboardT } from "@/lib/i18n";
 
 export function DashboardSidebar() {
   const { dashboardSection, setDashboardSection, sidebarOpen, setSidebarOpen, user, setUser, setView, setAuthChecked } = useAppStore();
-  const { t } = useT();
+  const { t } = useDashboardT();
 
   const NAV: { id: DashboardSection; label: string; icon: any }[] = [
     { id: "hero", label: t("d.nav.hero"), icon: ImageIcon },

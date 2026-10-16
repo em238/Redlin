@@ -12,7 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 import { toast } from "sonner";
-import { useT } from "@/lib/i18n";
+import { useDashboardT } from "@/lib/i18n";
 
 type RoleItem = { id: string; name: string; nameAr: string; description: string; isSystemRole: boolean; permissions: string; userCount: number };
 
@@ -31,7 +31,7 @@ const MODULES = [
 ];
 
 export function DashboardRoles() {
-  const { isAr } = useT();
+  const { isAr } = useDashboardT();
   const L = (ar: string, en: string) => (isAr ? ar : en);
   const qc = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);

@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 import { toast } from "sonner";
-import { useT } from "@/lib/i18n";
+import { useDashboardT } from "@/lib/i18n";
 
 type Governorate = {
   id: string;
@@ -47,7 +47,7 @@ const emptyForm = {
 };
 
 export function DashboardMapHubs() {
-  const { isAr } = useT();
+  const { isAr } = useDashboardT();
   const qc = useQueryClient();
   const L = (ar: string, en: string) => (isAr ? ar : en);
 

@@ -19,7 +19,7 @@ import {
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 import { toast } from "sonner";
 import { FileUpload } from "@/components/shared/file-upload";
-import { useT } from "@/lib/i18n";
+import { useDashboardT } from "@/lib/i18n";
 
 type Service = {
   id: string;
@@ -48,7 +48,7 @@ const emptyForm = {
 };
 
 export function DashboardServices() {
-  const { isAr } = useT();
+  const { isAr } = useDashboardT();
   const qc = useQueryClient();
   const L = (ar: string, en: string) => (isAr ? ar : en);
 

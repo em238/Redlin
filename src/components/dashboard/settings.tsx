@@ -11,11 +11,11 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { apiPost } from "@/lib/api";
 import { toast } from "sonner";
-import { useT } from "@/lib/i18n";
+import { useDashboardT } from "@/lib/i18n";
 
 export function DashboardSettings() {
   const { user, setUser, setView, setAuthChecked, theme, toggleTheme } = useAppStore();
-  const { t } = useT();
+  const { t } = useDashboardT();
   const [profile, setProfile] = useState({ name: user?.name || "", email: user?.email || "" });
   const [notifications, setNotifications] = useState({ email: true, push: true, orders: true, messages: false });
 

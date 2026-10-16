@@ -21,7 +21,7 @@ import {
 import { apiGet, apiPost, apiPatch, apiDelete, formatDate } from "@/lib/api";
 import { toast } from "sonner";
 import { FileUpload } from "@/components/shared/file-upload";
-import { useT } from "@/lib/i18n";
+import { useDashboardT } from "@/lib/i18n";
 
 const TEMPLATE_VIDEOS = [
   { title: "Redline — رحلة شحنة", url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", description: "وثائقي قصير يوثّق رحلة شحنة من المخزن حتى باب العميل", category: "promo" },
@@ -29,7 +29,7 @@ const TEMPLATE_VIDEOS = [
 ];
 
 export function DashboardVideos() {
-  const { t } = useT();
+  const { t } = useDashboardT();
   const qc = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);

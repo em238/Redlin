@@ -1087,9 +1087,13 @@ export const MESSAGES: Record<Locale, Record<string, string>> = {
 interface I18nState {
   locale: Locale;
   setLocale: (l: Locale) => void;
+  // Dashboard-specific locale (independent from public site)
+  dashboardLocale: Locale;
+  setDashboardLocale: (l: Locale) => void;
 }
 
 export const useI18n = create<I18nState>((set) => ({
+  // Public site locale — affects <html> dir/lang
   locale: "ar",
   setLocale: (locale) => {
     set({ locale });
@@ -1099,11 +1103,24 @@ export const useI18n = create<I18nState>((set) => ({
     }
     try { localStorage.setItem("redline-locale", locale); } catch {}
   },
+  // Dashboard locale — completely independent, does NOT touch <html> dir/lang
+  dashboardLocale: "ar",
+  setDashboardLocale: (dashboardLocale) => {
+    set({ dashboardLocale });
+    try { localStorage.setItem("redline_dashboard_lang", dashboardLocale); } catch {}
+  },
 }));
 
-// === Hook: useT (returns t function + current locale) ===
+// === Hook: useT (returns t function + current locale for PUBLIC site) ===
 export function useT() {
   const locale = useI18n((s) => s.locale);
+  const t = (key: string): string => MESSAGES[locale]?.[key] ?? MESSAGES.ar[key] ?? key;
+  return { t, locale, isAr: locale === "ar", isEn: locale === "en" };
+}
+
+// === Hook: useDashboardT (returns t function + current locale for DASHBOARD) ===
+export function useDashboardT() {
+  const locale = useI18n((s) => s.dashboardLocale);
   const t = (key: string): string => MESSAGES[locale]?.[key] ?? MESSAGES.ar[key] ?? key;
   return { t, locale, isAr: locale === "ar", isEn: locale === "en" };
 }
@@ -1112,8 +1129,8 @@ export function useT() {
 if (typeof window !== "undefined") {
   try {
     const saved = localStorage.getItem("redline-locale") as Locale | null;
-    if (saved) {
-      useI18n.getState().setLocale(saved);
-    }
+    if (saved) useI18n.getState().setLocale(saved);
+    const savedDash = localStorage.getItem("redline_dashboard_lang") as Locale | null;
+    if (savedDash) useI18n.setState({ dashboardLocale: savedDash });
   } catch {}
 }

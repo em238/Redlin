@@ -17,7 +17,7 @@ import {
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 import { toast } from "sonner";
 import { FileUpload } from "@/components/shared/file-upload";
-import { useT } from "@/lib/i18n";
+import { useDashboardT } from "@/lib/i18n";
 
 const LOGO_OPTIONS = [
   "/images/partner-1.png", "/images/partner-2.png", "/images/partner-3.png",
@@ -26,7 +26,7 @@ const LOGO_OPTIONS = [
 ];
 
 export function DashboardPartners() {
-  const { t } = useT();
+  const { t } = useDashboardT();
   const qc = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);

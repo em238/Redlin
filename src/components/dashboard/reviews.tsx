@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { Star, Check, X, Trash2, Clock, CheckCircle2, XCircle, Star as StarIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { apiGet, apiPatch, apiDelete } from "@/lib/api";
-import { useT } from "@/lib/i18n";
+import { useDashboardT } from "@/lib/i18n";
 import { toast } from "sonner";
 
 type Review = {
@@ -29,7 +29,7 @@ const TABS = [
 ] as const;
 
 export function DashboardReviews() {
-  const { t, isAr } = useT();
+  const { t, isAr } = useDashboardT();
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<string>("pending");
 
