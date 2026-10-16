@@ -1885,3 +1885,61 @@ Stage Summary:
 - A race condition was found and fixed: the original two-effect design (read URL → store + store → URL) caused the second effect to run before the first on mount, clobbering a valid `?tab=users` back to the default `?tab=hero`. Fixed by consolidating into a single effect guarded by a `useRef(false)` mount flag.
 - Removed `view`/`setView` from the Zustand store entirely. The URL is now the single source of truth (`/` = public, `/dashboard` = dashboard). All 9 `setView` call sites updated to use `router.push("/")` or `router.push("/dashboard")`.
 - 0 lint errors, 1 pre-existing warning. No new warnings introduced. No runtime errors in dev.log or browser console.
+
+---
+Task ID: dashboard-redirect-loop-fix
+Agent: Z.ai Code (main)
+
+Task: Fix `ERR_TOO_MANY_REDIRECTS` when accessing /dashboard via the chat preview gateway (preview-chat-*.space-z.ai). The user reported being unable to reach the login screen — the browser showed "redirected you too many times".
+
+Work Log:
+
+**Root cause investigation**
+- The user accessed `https://preview-chat-d6396599-0d84-4938-89bf-027914f634b0.space-z.ai/dashboard` and got `ERR_TOO_MANY_REDIRECTS`.
+- Local curl tests showed the dev server returned 200 OK for `/dashboard` (no redirect), so the issue wasn't in the Next.js app code itself.
+- curling the gateway URL revealed the loop:
+  - `GET /dashboard` → gateway returns `307 Location: /dashboard/` (gateway ADDS trailing slash)
+  - `GET /dashboard/` → dev server returns `308 Location: /dashboard` (Next.js default `trailingSlash: false` REMOVES trailing slash)
+  - gateway → `307 Location: /dashboard/` again → dev server → `308 Location: /dashboard` → ∞ loop → `ERR_TOO_MANY_REDIRECTS`
+- The two layers (chat preview gateway vs Next.js default config) were fighting over the trailing slash and creating an infinite redirect loop.
+
+**Fix**
+1. `next.config.ts` — set `trailingSlash: true`. Now Next.js KEEPS the trailing slash (matches the gateway's behavior), so:
+   - `GET /dashboard` → dev server `308` → `/dashboard/` (one redirect, both layers agree)
+   - `GET /dashboard/` → dev server `200 OK` (no redirect, no loop)
+   - Restarted the dev server (next.config.ts changes are not HMR-able).
+
+2. `src/components/dashboard/dashboard-app.tsx` — updated `writeUrlTab()` to use `/dashboard/?tab=X` (with trailing slash) instead of `/dashboard?tab=X`. This way the URL bar already has the trailing slash, so refresh causes ZERO redirects (no normalization needed).
+
+**Verification (curl through the gateway)**
+- Before fix: `GET /dashboard` → ∞ redirects → `ERR_TOO_MANY_REDIRECTS`.
+- After fix:
+  - `GET /dashboard` → 1 redirect → `/dashboard/` (403 because curl lacks the chat auth cookie — expected; the user's browser inside the chat iframe has the cookie and gets 200).
+  - `GET /dashboard/` → 0 redirects → 403 (same reason).
+  - `GET /dashboard/?tab=users` → 0 redirects → 403.
+  - `GET /` → 0 redirects → 403.
+- So the redirect loop is gone. Maximum 1 redirect for URL normalization.
+
+**Verification (Agent Browser locally)**
+- Opened `http://localhost:3000/dashboard` → URL auto-normalized to `/dashboard/`, login screen rendered, no loop.
+- Logged in (admin@redline.eg / admin123) → URL `/dashboard/`, dashboard rendered with Hero section.
+- Clicked Users tab → URL `/dashboard/?tab=users` (trailing slash present, no normalization needed on refresh).
+- Refreshed `/dashboard/?tab=users` → URL stayed, heading "إدارة المستخدمين", no login screen — auth + tab both persisted.
+- Clicked Settings tab → URL `/dashboard/?tab=settings`.
+- Refreshed → URL stayed, heading "الإعدادات", no login screen.
+
+**API impact check**
+- With `trailingSlash: true`, API routes also get trailing slashes: `/api/auth/me` → `308` → `/api/auth/me/`.
+- Verified GET `/api/cta-banner/` returns the banner JSON ✓.
+- Verified POST `/api/auth/login` (without slash) → follows the 308 redirect → POST `/api/auth/login/` → returns `{ok: true, user: {...}}` with the session cookie set ✓. (308 is defined to preserve method + body, and `fetch` follows it automatically.)
+- The api.ts client uses `fetch(path)` where path is like `/api/auth/me` (no slash). `fetch` follows the 308 redirect transparently. Verified working end-to-end via Agent Browser login.
+
+**Lint**: 0 errors, 1 pre-existing warning (Unused eslint-disable in page.tsx). No new warnings.
+
+Stage Summary:
+- The `ERR_TOO_MANY_REDIRECTS` error is fixed. The root cause was a URL normalization disagreement between the chat preview gateway (adds trailing slash) and Next.js's default `trailingSlash: false` (removes trailing slash) — they fought each other in an infinite loop.
+- Setting `trailingSlash: true` in next.config.ts makes Next.js agree with the gateway.
+- Updated `writeUrlTab()` to write URLs with the trailing slash already present, so refresh causes zero redirects (not even the normalization one).
+- All routes verified via curl through the gateway: max 1 redirect (only when URL is missing the trailing slash). No more loop.
+- All local flows verified via Agent Browser: login, tab switching, refresh, tab persistence, public ↔ dashboard navigation — all working.
+- API calls work because `fetch` follows the 308 redirect transparently and 308 preserves method + body.

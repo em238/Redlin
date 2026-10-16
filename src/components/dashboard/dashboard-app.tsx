@@ -41,7 +41,10 @@ function writeUrlTab(tab: DashboardSection) {
   if (params.get("tab") === tab) return; // no-op if already in sync
   params.set("tab", tab);
   // replaceState avoids creating a new history entry or scrolling/jumping.
-  window.history.replaceState({}, "", `/dashboard?${params.toString()}`);
+  // Path uses a trailing slash to match Next.js's `trailingSlash: true`
+  // config + the chat preview gateway's URL normalization — this prevents
+  // an extra 308 redirect on refresh.
+  window.history.replaceState({}, "", `/dashboard/?${params.toString()}`);
 }
 
 export function DashboardApp() {
