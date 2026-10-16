@@ -57,7 +57,7 @@ export function Footer() {
                 alt="RedLine Transport"
                 width={1200}
                 height={514}
-                className="h-10 w-auto max-w-none object-contain"
+                className="h-8 w-auto max-w-none object-contain"
               />
             </div>
             <p className="text-sm text-zinc-400 leading-relaxed max-w-sm">
