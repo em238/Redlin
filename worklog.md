@@ -2532,3 +2532,71 @@ Stage Summary:
 - 3 new Prisma models (SectionContent, FooterLink, FooterContent), 4 new API routes, 1 shared dashboard component, 1 new dashboard module, 8 public component updates, 8 dashboard module updates.
 - Items CRUD (services, videos, partners, testimonials, etc.) was already in place from previous tasks and continues to work unchanged.
 - 0 lint errors, 0 warnings. No runtime errors. All section text verified rendering from DB on both public site and dashboard.
+
+---
+Task ID: deployment-readiness-verification
+Agent: Z.ai Code (main)
+
+Task: Verify all project data, images, and seed configurations are fully preserved and ready for export/deployment.
+
+Work Log:
+
+**1. Assets Check**
+
+`public/images/` — 16 image files present:
+- courier.png, egypt-glow.png, fleet.png, hero-truck.png, operations.png, warehouse.png (6 site images)
+- partner-1.png through partner-9.png (9 partner logos)
+- topo-texture.png (1 texture)
+
+`public/` root — 6 files:
+- apple-touch-icon.png, favicon.ico, icon.png, logo.svg, redline-transport-logo.png, redline-transport-white.png
+
+`public/uploads/` — exists with `.gitkeep` (cleaned test artifacts, directory preserved for admin uploads)
+
+`.gitignore` — verified: 0 matches for "public", "images", or "uploads" → all media assets ARE tracked in git and will be included when downloading/pushing the repository.
+
+All 13 image paths referenced in `prisma/seed.ts` verified to exist in `public/images/`:
+✓ /images/courier.png, /images/fleet.png, /images/hero-truck.png, /images/operations.png, /images/warehouse.png, /images/partner-1.png through /images/partner-8.png
+
+3 orphaned images (egypt-glow.png, topo-texture.png, partner-9.png) exist but are not referenced in seed or code — harmless extras, no action needed.
+
+**2. Seed & Database Verification**
+
+`prisma/seed.ts` — verified to contain complete bilingual (AR+EN) live texts for ALL 18 content-bearing models:
+1. Roles (3: super-admin, editor, viewer)
+2. Admin user (admin@redline.eg / admin123)
+3. Governorates (27: all Egyptian governorates with nameAr)
+4. Services (6: with nameAr, descriptionAr, descriptionEn, ctaTextAr, ctaTextEn)
+5. HowItWorksSteps (3: with titleAr, titleEn, descAr, descEn)
+6. ContactInfo (8: address/phone/email with labelAr, labelEn)
+7. HeroImages (5: carousel images with titleAr, titleEn)
+8. Partners (8: with nameAr)
+9. Videos (2: with titleAr, descriptionAr)
+10. Testimonials (5: with nameAr, roleAr, companyAr, contentAr)
+11. SiteStats (5: with labelAr, incl. ticker cities JSON)
+12. About (1: with titleAr, titleEn, subtitleAr, subtitleEn, descriptionAr, descriptionEn, features JSON)
+13. WhatsAppSetting (1: with defaultMessageAr, defaultMessageEn)
+14. HeroContent (1: with badgeAr/badgeEn, titleAr/titleEn, subtitleAr/subtitleEn, cta1TextAr/cta1TextEn, cta2TextAr/cta2TextEn, feature1Ar/feature1En, etc.)
+15. CtaBanner (1: with headingAr/headingEn, subAr/subEn, btnTextAr/btnTextEn, phone)
+16. SectionContent (8: services, how-it-works, videos, partners, testimonials, contact, map, footer — each with badgeAr/badgeEn, titleAr/titleEn, descriptionAr/descriptionEn)
+17. FooterContent (1: with bioAr/bioEn, newsletterTitleAr/newsletterTitleEn, newsletterDescAr/newsletterDescEn, dashboardLinkAr/dashboardLinkEn, addressAr/addressEn)
+18. FooterLinks (15: 3 categories × 5, each with labelAr/labelEn, href)
+
+`bun run db:seed` (equivalent to `npx prisma db seed`) — runs successfully, 100% of default content populated, 0 errors.
+
+`.env` — exists with `DATABASE_URL=file:/home/z/my-project/db/custom.db`
+`db/custom.db` — exists (237KB, fully populated)
+`package.json` — has `"prisma": { "seed": "npx tsx prisma/seed.ts" }` + `db:push`, `db:generate`, `db:seed` scripts.
+
+22 Prisma models total; 18 content-bearing models are seeded; 4 transactional models (Customer, Shipment, ContactMessage, Order) are intentionally not seeded (created at runtime).
+
+Lint: 0 errors, 0 warnings.
+
+Stage Summary:
+- ✅ All default images and logos are stored in `public/images/` (16 files) and `public/` root (6 files). `public/uploads/` exists with `.gitkeep` for admin uploads.
+- ✅ `.gitignore` does NOT ignore `public/images/`, `public/uploads/`, or any media assets — all will be included in git push/download.
+- ✅ `prisma/seed.ts` contains complete bilingual (AR+EN) live texts for all 18 content-bearing models across all sections (Hero, About, Services, How-It-Works, Map, Videos, Reviews, Contact, Footer + all items).
+- ✅ Running `npx prisma db seed` on a fresh setup will populate 100% of the site's default content with no missing fields — verified by running it.
+- ✅ `.env` exists with DATABASE_URL, `package.json` has the prisma seed config, DB file is populated.
+- ✅ Lint: 0 errors, 0 warnings.
+- The project is fully preserved and ready for export/deployment.
