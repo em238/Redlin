@@ -24,7 +24,15 @@ export const metadata: Metadata = {
   description: "Redline - شركة شحن احترافية تغطي جميع محافظات مصر بسرعة وأمان. شحن عادي، ممتاز، نفس اليوم، وشحن ثقيل مع تتبع مباشر لشحناتك.",
   keywords: ["شحن", "شحن مصر", "Redline", "توصيل", "شحنات", "خدمات لوجستية", "مصر"],
   authors: [{ name: "Redline" }],
-  icons: { icon: "/logo.svg" },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.png", type: "image/png", sizes: "192x192" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180" },
+    ],
+  },
   openGraph: {
     title: "Redline | شركة الشحن الأولى في مصر",
     description: "شحن احترافي لجميع محافظات مصر بسرعة وأمان",
