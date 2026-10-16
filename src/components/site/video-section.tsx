@@ -10,14 +10,15 @@ import { useT } from "@/lib/i18n";
 import { SectionHeading } from "@/components/shared/section-heading";
 
 interface VideoItem {
-  id: string; title: string; description: string | null;
+  id: string; title: string; titleAr?: string;
+  description: string | null; descriptionAr?: string;
   url: string; thumbnail: string | null; category: string;
   active: boolean; featured: boolean;
 }
 
 const FALLBACK_VIDEOS: VideoItem[] = [
-  { id: "1", title: "Redline — قصة شحن", description: "تعرف على رحلة Redline", url: "https://www.youtube.com/embed/dQw4w9WgXcQ", thumbnail: "/images/operations.png", category: "promo", active: true, featured: true },
-  { id: "2", title: "شبكة التوصيل في 27 محافظة", description: "كيف نغطي كل محافظات مصر", url: "https://www.youtube.com/embed/dQw4w9WgXcQ", thumbnail: "/images/fleet.png", category: "logistics", active: true, featured: false },
+  { id: "1", title: "Redline — The Shipping Story", titleAr: "Redline — قصة شحن", description: "Discover Redline's journey from the beginning to becoming Egypt's largest shipping company", descriptionAr: "تعرف على رحلة Redline منذ البداية وحتى أصبحت أكبر شركة شحن في مصر", url: "https://www.youtube.com/embed/dQw4w9WgXcQ", thumbnail: "/images/operations.png", category: "promo", active: true, featured: true },
+  { id: "2", title: "Delivery Network Across 27 Governorates", titleAr: "شبكة التوصيل في 27 محافظة", description: "How we cover all Egyptian governorates in the fastest time", descriptionAr: "كيف نغطي جميع محافظات مصر بأسرع وقت وأعلى دقة", url: "https://www.youtube.com/embed/dQw4w9WgXcQ", thumbnail: "/images/fleet.png", category: "logistics", active: true, featured: false },
 ];
 
 const CATEGORY_LABELS_AR: Record<string, string> = {
@@ -67,8 +68,13 @@ export function VideoSection() {
   const featured = videos.find((v) => v.featured) ?? videos[0];
   const others = filtered.filter((v) => v.id !== featured?.id).slice(0, 6);
 
-  const titleFor = (v: VideoItem) => isAr ? v.title : (VIDEO_EN[v.title]?.title || v.title);
-  const descFor = (v: VideoItem) => isAr ? v.description : (VIDEO_EN[v.title]?.desc || v.description);
+  // Strict fallback rule per the localization spec:
+  //   Arabic  → titleAr/descriptionAr  (|| title/description as fallback)
+  //   English → title/description      (|| VIDEO_EN legacy lookup as last resort)
+  const titleFor = (v: VideoItem) =>
+    isAr ? (v.titleAr || v.title) : (VIDEO_EN[v.title]?.title || v.title);
+  const descFor = (v: VideoItem) =>
+    isAr ? (v.descriptionAr || v.description || "") : (VIDEO_EN[v.title]?.desc || v.description || "");
 
   return (
     <section id="videos" className="py-14 sm:py-24 lg:py-28 bg-muted/30 relative overflow-hidden">

@@ -236,10 +236,10 @@ const howItWorksSteps = [
 // ====================================================================
 const videos = [
   {
-    title: "Redline — قصة شحن",
+    title: "Redline — The Shipping Story",
     titleAr: "Redline — قصة شحن",
     description: "Discover Redline's journey from the beginning to becoming Egypt's largest shipping company",
-    descriptionAr: "تعرف على رحلة Redline من البداية حتى أصبحنا أكبر شركة شحن في مصر",
+    descriptionAr: "تعرف على رحلة Redline منذ البداية وحتى أصبحت أكبر شركة شحن في مصر",
     url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     thumbnail: "/images/operations.png",
     category: "promo",
@@ -247,10 +247,10 @@ const videos = [
     featured: true,
   },
   {
-    title: "شبكة التوصيل في 27 محافظة",
+    title: "Delivery Network Across 27 Governorates",
     titleAr: "شبكة التوصيل في 27 محافظة",
     description: "How we cover all Egyptian governorates in the fastest time",
-    descriptionAr: "كيف نغطي كل محافظات مصر بأسرع وقت ممكن",
+    descriptionAr: "كيف نغطي جميع محافظات مصر بأسرع وقت وأعلى دقة",
     url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     thumbnail: "/images/fleet.png",
     category: "logistics",
@@ -439,11 +439,11 @@ const testimonials = [
     name: "Nour Hassan",
     nameAr: "نور حسن",
     role: "Startup Founder",
-    roleAr: "مؤسسة مشروع ناشئ",
+    roleAr: "مؤسس شركة ناشئة",
     company: "Nour Crafts",
-    companyAr: "Nour Crafts",
+    companyAr: "نور كرافتس",
     content: "As a small business, Redline provided me with affordable shipping solutions with high quality. Thank you for the professionalism.",
-    contentAr: "كمشروع صغير، Redline وفّرت لي حلول شحن مناسبة لميزانيتي مع جودة عالية. شكراً لكم على الاحترافية.",
+    contentAr: "كشركة صغيرة، وفرت لي Redline حلول شحن بأسعار مناسبة وبأعلى جودة. شكراً على الاحترافية والالتزام بالمواعيد.",
     rating: 5,
     avatar: null,
     active: true,
@@ -505,9 +505,9 @@ const tickerCities = [
 ];
 
 const siteStats = [
-  { label: "Shipments delivered", labelAr: "شحنة تم توصيلها", value: "850K+", icon: "package" },
-  { label: "Governorates covered", labelAr: "محافظة نغطّيها", value: "27", icon: "map" },
-  { label: "Happy customers", labelAr: "عميل سعيد", value: "12K+", icon: "users" },
+  { label: "Shipments delivered", labelAr: "شحنة تم تسليمها", value: "850K+", icon: "package" },
+  { label: "Governorates covered", labelAr: "محافظة مغطاة", value: "27", icon: "map" },
+  { label: "Happy customers", labelAr: "عميل يثقون بنا", value: "12K+", icon: "users" },
   { label: "Branches & warehouses", labelAr: "فرع ومستودع", value: "40+", icon: "building" },
   // Ticker entry — value field carries the bilingual cities list as JSON
   {

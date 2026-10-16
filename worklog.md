@@ -2189,3 +2189,93 @@ Stage Summary:
 - The fix: (1) replaced `right-4` with `end-4` in `dialog.tsx` and `sheet.tsx`; (2) replaced `left-3` with `end-3` in the public video-section modal; (3) added `dir={dashboardLocale === "ar" ? "rtl" : "ltr"}` to the DialogContent so the modal follows the dashboard's current language regardless of the HTML root; (4) changed `sm:text-left` to `sm:text-start` in DialogHeader for logical text alignment.
 - The fix is universal — automatically applies to all 10 dashboard modules that use the shared Dialog (Videos, Users, Services, Hero, How-It-Works, Partners, About, Contact-Info, Reviews, Roles, Map-Hubs) without any per-module changes.
 - 0 lint errors, 0 warnings. No runtime errors. Both Arabic and English modes verified end-to-end via Agent Browser.
+
+---
+Task ID: arabic-localization-fix
+Agent: Z.ai Code (main)
+
+Task: Fix incomplete Arabic localization across 4 public site sections: (1) Stats/Metrics cards showed English labels in Arabic mode, (2) Interactive Map header showed English "NODES ACTIVE 38" + "LIVE LOGISTICS GRID — AFRICA & MIDDLE EAST", (3) Video Gallery showed English descriptions below Arabic titles, (4) Testimonials showed English author name/role/content in Arabic mode.
+
+Work Log:
+
+**Root cause investigation**
+- `src/components/site/stats-bar.tsx`: `labelFor()` returned `s.label` (English from DB) even in Arabic mode. The DB SiteStat model has both `label` (English) and `labelAr` (Arabic), but the code never used `labelAr`.
+- `src/lib/i18n.ts`: The AR section had `map.hud` and `map.nodes` still set to English placeholder strings ("LIVE LOGISTICS GRID — AFRICA & MIDDLE EAST", "NODES ACTIVE") — the Arabic translations were never written.
+- `src/components/site/video-section.tsx`: `titleFor()` returned `v.title` for Arabic, but `v.title` is the English field. Same for `descFor()` using `v.description` (English). The DB Video model has `titleAr` and `descriptionAr` but they were unused.
+- `src/components/site/testimonials.tsx`: `roleFor()` and `contentFor()` returned `current.role` and `current.content` (English from DB) for Arabic. The name display used `current.name` (English) always. The DB Testimonial model has `nameAr`, `roleAr`, `contentAr`, `companyAr` but none were used.
+- Seed data: videos had Arabic text stored in the `title` field (instead of English) with `titleAr` also Arabic — both were Arabic, so English mode showed Arabic. Testimonials for Nour Hassan had slightly different Arabic wording than the user's exact spec.
+
+**Files updated**
+
+1. `prisma/seed.ts` — three seed-data updates:
+   - `siteStats` labelAr updated to match the user's exact spec:
+     - "Shipments delivered" → labelAr: "شحنة تم تسليمها" (was "شحنة تم توصيلها")
+     - "Governorates covered" → labelAr: "محافظة مغطاة" (was "محافظة نغطّيها")
+     - "Happy customers" → labelAr: "عميل يثقون بنا" (was "عميل سعيد")
+     - "Branches & warehouses" → labelAr: "فرع ومستودع" (no change, already correct)
+   - `videos` array: swapped `title` to English (was Arabic — a long-standing bug where both `title` and `titleAr` were Arabic) and updated `descriptionAr` to match the user's exact spec:
+     - Video 1: title="Redline — The Shipping Story" (English), titleAr="Redline — قصة شحن", descriptionAr="تعرف على رحلة Redline منذ البداية وحتى أصبحت أكبر شركة شحن في مصر"
+     - Video 2: title="Delivery Network Across 27 Governorates" (English), titleAr="شبكة التوصيل في 27 محافظة", descriptionAr="كيف نغطي جميع محافظات مصر بأسرع وقت وأعلى دقة"
+   - `testimonials` Nour Hassan: updated roleAr, companyAr, contentAr to match the user's exact spec:
+     - roleAr: "مؤسس شركة ناشئة" (was "مؤسسة مشروع ناشئ")
+     - companyAr: "نور كرافتس" (was "Nour Crafts" — English)
+     - contentAr: "كشركة صغيرة، وفرت لي Redline حلول شحن بأسعار مناسبة وبأعلى جودة. شكراً على الاحترافية والالتزام بالمواعيد."
+
+2. `src/lib/i18n.ts` — three i18n updates:
+   - AR section `map.hud`: "شبكة الربط اللوجستي المباشر — أفريقيا والشرق الأوسط" (was English placeholder)
+   - AR section `map.nodes`: "نقطة لوجستية نشطة" (was English placeholder) — so "38 نقطة لوجستية نشطة" reads naturally with the number first
+   - AR section `stats.*`: updated to match the user's spec wording (شحنة تم تسليمها / محافظة مغطاة / عميل يثقون بنا / فرع ومستودع)
+   - EN section `stats.shipments`: "Shipments delivered" (was "Delivered shipments") to match the user's spec exactly.
+
+3. `src/components/site/stats-bar.tsx` — rewrote labelFor:
+   - `isAr` → `s.labelAr || s.label` (was always `s.label`)
+   - English path unchanged (uses `t(STAT_KEY_BY_ICON[icon])` with `s.label` fallback)
+   - Updated FALLBACK to include both `label` (English) and `labelAr` (Arabic) fields explicitly (previously only had Arabic in `label`).
+   - Added `visibleStats` filter to skip the `ticker` SiteStat row (which stores a JSON cities list, not a stat to render).
+   - Added a clear comment documenting the strict fallback rule.
+
+4. `src/components/site/video-section.tsx` — updated the VideoItem interface and the titleFor/descFor helpers:
+   - Added `titleAr?: string` and `descriptionAr?: string` to the VideoItem interface.
+   - Updated FALLBACK_VIDEOS to include both English and Arabic fields.
+   - `titleFor`: `isAr ? (v.titleAr || v.title) : (VIDEO_EN[v.title]?.title || v.title)` — prefers the Arabic field for Arabic mode, falls back to the English field.
+   - `descFor`: `isAr ? (v.descriptionAr || v.description || "") : (VIDEO_EN[v.title]?.desc || v.description || "")` — same pattern.
+   - Kept the legacy `VIDEO_EN` lookup object as a last-resort fallback for any DB rows that pre-date the bilingual schema.
+
+5. `src/components/site/testimonials.tsx` — four helper-function updates:
+   - Added `nameFor()`: `isAr ? (current.nameAr || current.name) : current.name` — was always using `current.name` (English).
+   - Updated `roleFor()`: `isAr ? (current.roleAr || current.role) : (TEST_EN[current.name]?.role || current.role)` — was using `current.role` (English) for Arabic.
+   - Updated `contentFor()`: `isAr ? (current.contentAr || current.content) : (TEST_EN[current.name]?.content || current.content)` — same pattern.
+   - Added `companyFor()`: `isAr ? (current.companyAr || current.company) : current.company` — was always using `current.company` (English).
+   - Updated FALLBACK to include all bilingual fields (nameAr, roleAr, companyAr, contentAr).
+   - Updated the avatar to use `nameFor().charAt(0)` so it shows the Arabic initial in Arabic mode (was `current.name.charAt(0)` = English initial always).
+   - Updated the name/role/company display JSX to use the new `nameFor()` and `companyFor()` functions.
+
+**Verification (Agent Browser, Arabic mode)**
+
+| Section | Before | After |
+|---------|--------|-------|
+| Stats Bar | "Shipments delivered", "Governorates covered", "Happy customers", "Branches & warehouses" (English) | "شحنة تم تسليمها", "محافظة مغطاة", "عميل يثقون بنا", "فرع ومستودع" (Arabic) ✓ |
+| Map HUD | "LIVE LOGISTICS GRID — AFRICA & MIDDLE EAST" (English) | "شبكة الربط اللوجستي المباشر — أفريقيا والشرق الأوسط" (Arabic) ✓ |
+| Map Nodes | "38 NODES ACTIVE" (English) | "38 نقطة لوجستية نشطة" (Arabic) ✓ |
+| Video title | "Redline — قصة شحن" (Arabic — but came from the wrong DB field) | "Redline — قصة شحن" (Arabic, from titleAr) ✓ |
+| Video description | "تعرف على رحلة Redline" (truncated Arabic from old seed) | "تعرف على رحلة Redline منذ البداية وحتى أصبحت أكبر شركة شحن في مصر" (full Arabic, user spec exact match) ✓ |
+| Testimonial name (Nour Hassan) | "Nour Hassan" (English) | "نور حسن" (Arabic) ✓ |
+| Testimonial role | "Startup Founder · Nour Crafts" (English) | "مؤسس شركة ناشئة · نور كرافتس" (Arabic, user spec exact match) ✓ |
+| Testimonial content | English | "كشركة صغيرة، وفرت لي Redline حلول شحن بأسعار مناسبة وبأعلى جودة. شكراً على الاحترافية والالتزام بالمواعيد." (Arabic, user spec exact match) ✓ |
+| Testimonial avatar initial | "N" (English initial) | "ن" (Arabic initial) ✓ |
+
+**Verification (Agent Browser, English mode)** — confirmed no regression:
+- Stats: "Shipments delivered", "Governorates covered", "Happy customers", "Branches & warehouses" ✓
+- Map HUD: "LIVE LOGISTICS GRID — AFRICA & MIDDLE EAST" ✓
+- Map Nodes: "38 NODES ACTIVE" ✓
+- Video title: "Redline — The Shipping Story" ✓
+- Video description: "Discover Redline's journey from the beginning to becoming Egypt's largest shipping company" ✓
+- Nour Hassan testimonial: name="Nour Hassan", role="Startup Founder · Nour Crafts", content="As a small business, Redline provided me with affordable shipping solutions with high quality. Thank you for the professionalism." ✓
+
+**Lint**: `bun run lint` → 0 errors, 0 warnings. Dev log clean.
+
+Stage Summary:
+- The public site now renders fully localized Arabic across all 4 previously-leaking sections (Stats, Map header, Videos, Testimonials). The root cause was threefold: (a) React components used `s.label` / `v.title` / `current.name` (the English DB fields) even in Arabic mode instead of the `*Ar` fields; (b) the i18n.ts AR section had English placeholder strings for `map.hud` and `map.nodes`; (c) the seed stored Arabic in the `title` field for videos (instead of English), making English mode show Arabic video titles.
+- The fix applies the user's strict fallback rule universally: `lang === 'ar' ? (item.textAr || item.text) : (item.textEn || item.text)`. All bilingual DB fields (`labelAr`, `titleAr`, `descriptionAr`, `nameAr`, `roleAr`, `contentAr`, `companyAr`) are now preferred for Arabic mode, with the English field as a fallback.
+- Seed data updated to match the user's exact spec wording for all 4 sections. Videos now have proper English `title` + Arabic `titleAr` (instead of both being Arabic).
+- 0 lint errors, 0 warnings. No runtime errors. Both Arabic and English modes verified end-to-end via Agent Browser.

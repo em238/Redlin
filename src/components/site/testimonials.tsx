@@ -11,11 +11,13 @@ import { ReviewModal } from "@/components/shared/review-modal";
 import { useQueryClient } from "@tanstack/react-query";
 
 const FALLBACK = [
-  { name: "Ahmed Mansour", role: "صاحب متجر", company: "TechStore", content: "خدمة ممتازة وسريعة!", rating: 5 },
-  { name: "Sara El-Sayed", role: "مديرة مبيعات", company: "Fashion Hub", content: "أفضل شركة شحن تعاملت معها.", rating: 5 },
-  { name: "Mohamed Adel", role: "تاجر جملة", company: "Adel Trading", content: "شحن ثقيل واحترافية عالية.", rating: 5 },
+  { name: "Ahmed Mansour", nameAr: "أحمد منصور", role: "Store Owner", roleAr: "صاحب متجر", company: "TechStore", companyAr: "TechStore", content: "Excellent and fast service!", contentAr: "خدمة ممتازة وسريعة!", rating: 5 },
+  { name: "Sara El-Sayed", nameAr: "سارة السيد", role: "Sales Manager", roleAr: "مديرة مبيعات", company: "Fashion Hub", companyAr: "Fashion Hub", content: "The best shipping company I've dealt with.", contentAr: "أفضل شركة شحن تعاملت معها.", rating: 5 },
+  { name: "Mohamed Adel", nameAr: "محمد عادل", role: "Wholesale Trader", roleAr: "تاجر جملة", company: "Adel Trading", companyAr: "Adel Trading", content: "Heavy shipping and high professionalism.", contentAr: "شحن ثقيل واحترافية عالية.", rating: 5 },
 ];
 
+// Legacy English-only lookup (kept as a last-resort fallback for any DB rows
+// that pre-date the bilingual schema). New DB rows have proper EN/AR fields.
 const TEST_EN: Record<string, { role: string; content: string }> = {
   "Ahmed Mansour": { role: "Store Owner", content: "Excellent and fast service! Shipments reached my customers across all Egyptian governorates on time. Redline completely changed how I manage my shipments." },
   "Sara El-Sayed": { role: "Sales Manager", content: "The best shipping company I've dealt with. Competitive prices and professional service. The tracking system is excellent." },
@@ -46,10 +48,22 @@ export function Testimonials() {
   }, [auto, items.length, next]);
 
   if (items.length === 0) return null;
-  const current = items[index % items.length];
+  const current = items[index % items.length] as any;
 
-  const roleFor = () => isAr ? current.role : (TEST_EN[current.name]?.role || current.role);
-  const contentFor = () => isAr ? current.content : (TEST_EN[current.name]?.content || current.content);
+  // Strict fallback rule per the localization spec:
+  //   Arabic  → *Ar fields (|| fallback to the EN field, || legacy TEST_EN)
+  //   English → EN fields (|| legacy TEST_EN lookup)
+  const nameFor = () => isAr ? (current.nameAr || current.name) : current.name;
+  const roleFor = () =>
+    isAr
+      ? (current.roleAr || current.role)
+      : (TEST_EN[current.name]?.role || current.role);
+  const contentFor = () =>
+    isAr
+      ? (current.contentAr || current.content)
+      : (TEST_EN[current.name]?.content || current.content);
+  const companyFor = () =>
+    isAr ? (current.companyAr || current.company) : current.company;
 
   return (
     <section className="py-14 sm:py-24 lg:py-28">
@@ -113,14 +127,14 @@ export function Testimonials() {
                     {/* Avatar */}
                     <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-primary to-amber-600 p-[2px] shadow-soft shrink-0">
                       <div className="w-full h-full rounded-full bg-card flex items-center justify-center text-primary font-bold text-lg sm:text-xl">
-                        {current.name.charAt(0)}
+                        {nameFor().charAt(0)}
                       </div>
                     </div>
                     {/* Name + role */}
                     <div className="text-center">
-                      <div className="font-bold text-sm sm:text-base">{current.name}</div>
+                      <div className="font-bold text-sm sm:text-base">{nameFor()}</div>
                       <div className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                        {roleFor()}{current.company ? ` · ${current.company}` : ""}
+                        {roleFor()}{companyFor() ? ` · ${companyFor()}` : ""}
                       </div>
                     </div>
                   </div>

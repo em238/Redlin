@@ -37,9 +37,9 @@ export const MESSAGES: Record<Locale, Record<string, string>> = {
     "hero.feat3": "27 محافظة بتغطية كاملة",
 
     // Stats
-    "stats.shipments": "شحنة تم توصيلها",
-    "stats.governorates": "محافظة نغطّيها",
-    "stats.customers": "عميل سعيد",
+    "stats.shipments": "شحنة تم تسليمها",
+    "stats.governorates": "محافظة مغطاة",
+    "stats.customers": "عميل يثقون بنا",
     "stats.branches": "فرع ومستودع",
 
     // Services
@@ -76,8 +76,8 @@ export const MESSAGES: Record<Locale, Record<string, string>> = {
     "map.eyebrow": "الشبكة الإقليمية — أفريقيا والخليج",
     "map.title": "شبكة Redline على خريطة أفريقيا والخليج",
     "map.subtitle": "محافظة مصرية + مركز إقليمي — جرّب الضغط على أي نقطة",
-    "map.hud": "LIVE LOGISTICS GRID — AFRICA & MIDDLE EAST",
-    "map.nodes": "NODES ACTIVE",
+    "map.hud": "شبكة الربط اللوجستي المباشر — أفريقيا والشرق الأوسط",
+    "map.nodes": "نقطة لوجستية نشطة",
     "map.placeholder": "اضغط على أي محافظة",
     "map.active": "نقطة توصيل نشطة",
     "map.covered": "محافظة مغطاة",
@@ -575,7 +575,7 @@ export const MESSAGES: Record<Locale, Record<string, string>> = {
     "hero.feat3": "27 governorates fully covered",
 
     // Stats
-    "stats.shipments": "Delivered shipments",
+    "stats.shipments": "Shipments delivered",
     "stats.governorates": "Governorates covered",
     "stats.customers": "Happy customers",
     "stats.branches": "Branches & warehouses",
