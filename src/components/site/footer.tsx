@@ -141,7 +141,7 @@ export function Footer() {
             {t("footer.copyright").replace("© ", `© ${new Date().getFullYear()} `)}
           </p>
           <div className="flex items-center gap-4 text-xs text-zinc-500">
-            <span className="text-slate-400 text-xs sm:text-sm">
+            <span className="text-slate-400 text-[11px]">
               {t("footer.made")}{" "}
               <a
                 href="https://gloval.com"
