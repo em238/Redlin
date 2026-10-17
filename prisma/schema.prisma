@@ -28,11 +28,11 @@ model Role {
   id            String   @id @default(cuid())
   name          String   @unique
   nameAr        String   @default("")
-  description   String   @default("") @db.Text
-  descriptionAr String   @default("") @db.Text
-  descriptionEn String   @default("") @db.Text
+  description   String?  @db.Text
+  descriptionAr String?  @db.Text
+  descriptionEn String?  @db.Text
   isSystemRole  Boolean  @default(false)
-  permissions   String   @default("") @db.Text
+  permissions   String?  @db.Text
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   users         User[]
@@ -53,9 +53,9 @@ model Service {
   id            String   @id @default(cuid())
   name          String   @unique
   nameAr        String
-  description   String   @default("") @db.Text
-  descriptionAr String   @default("") @db.Text
-  descriptionEn String   @default("") @db.Text
+  description   String?  @db.Text
+  descriptionAr String?  @db.Text
+  descriptionEn String?  @db.Text
   ctaTextAr     String   @default("اطلب الخدمة")
   ctaTextEn     String   @default("Request Service")
   icon          String   @default("truck")
@@ -91,7 +91,7 @@ model Shipment {
   notes           String?   @db.Text
   price           Float
   status          String    @default("pending")
-  history         String    @default("") @db.Text
+  history         String?   @db.Text
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   customerId      String?
@@ -122,7 +122,7 @@ model Testimonial {
   company    String?
   companyAr  String?
   content    String   @db.Text
-  contentAr  String   @default("") @db.Text
+  contentAr  String?  @db.Text
   rating     Int      @default(5)
   avatar     String?  @db.Text
   active     Boolean  @default(true)
@@ -182,8 +182,8 @@ model HeroContent {
   badgeEn     String   @default("We Ship Across All Egypt — 27 Governorates with Equal Speed")
   titleAr     String   @default("شحن يصل لكل مصر بسرعة Redline")
   titleEn     String   @default("Shipping Across Egypt at Redline Speed")
-  subtitleAr  String   @default("شركة شحن احترافية تغطي جميع محافظات مصر بخدمات متنوعة — عادي، ممتاز، نفس اليوم، وشحن ثقيل — مع تتبع مباشر وأسعار منافسة وضمان التسليم.") @db.Text
-  subtitleEn  String   @default("A professional shipping company covering all Egyptian governorates with versatile services — Standard, Express, Same-Day, and Heavy Freight — with live tracking, competitive rates, and guaranteed delivery.") @db.Text
+  subtitleAr  String?  @db.Text
+  subtitleEn  String?  @db.Text
   cta1TextAr  String   @default("اطلب شحن الآن")
   cta1TextEn  String   @default("Order Shipment Now")
   cta1Link    String   @default("#contact")
@@ -214,18 +214,16 @@ model Partner {
   createdAt DateTime @default(now())
 }
 
-// === New models for dedicated content management ===
-
 model About {
   id            String   @id @default(cuid())
   titleAr       String   @default("من نحن")
   titleEn       String   @default("About Us")
   subtitleAr    String   @default("")
   subtitleEn    String   @default("")
-  descriptionAr String   @default("") @db.Text
-  descriptionEn String   @default("") @db.Text
+  descriptionAr String?  @db.Text
+  descriptionEn String?  @db.Text
   image         String?  @db.Text
-  features      String   @default("") @db.Text // JSON array of {ar, en}
+  features      String?  @db.Text
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
@@ -235,8 +233,8 @@ model HowItWorksStep {
   order     Int      @default(0)
   titleAr   String
   titleEn   String
-  descAr    String   @db.Text
-  descEn    String   @db.Text
+  descAr    String?  @db.Text
+  descEn    String?  @db.Text
   icon      String   @default("clipboard-list")
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
@@ -248,7 +246,7 @@ model ContactInfo {
   type      String   // "address" | "phone" | "email"
   labelAr   String
   labelEn   String
-  value     String   @db.Text
+  value     String?  @db.Text
   href      String?  @db.Text
   order     Int      @default(0)
   active    Boolean  @default(true)
@@ -258,20 +256,19 @@ model ContactInfo {
 model WhatsAppSetting {
   id               String   @id @default(cuid())
   phoneNumber      String   @default("201000000000")
-  defaultMessageAr String   @default("مرحباً، أريد الاستفسار عن خدمات الشحن") @db.Text
-  defaultMessageEn String   @default("Hello, I'd like to inquire about shipping services") @db.Text
+  defaultMessageAr String?  @db.Text
+  defaultMessageEn String?  @db.Text
   active           Boolean  @default(true)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }
 
-// Pre-Footer CTA Banner ("جاهز تبدأ شحن مع Redline؟") — single record, upsert semantics
 model CtaBanner {
   id         String   @id @default(cuid())
   headingAr  String   @default("جاهز تبدأ شحن مع Redline؟")
   headingEn  String   @default("Ready to Start Shipping with Redline?")
-  subAr      String   @default("انضم لأكثر من 12,000 عميل يثقون بنا يومياً. تواصل معنا الآن واحصل على عرض سعر مخصص لشحناتك.") @db.Text
-  subEn      String   @default("Join over 12,000 clients who trust us daily. Contact us now and get a custom quote for your shipments.") @db.Text
+  subAr      String?  @db.Text
+  subEn      String?  @db.Text
   btnTextAr  String   @default("اطلب عرض سعر")
   btnTextEn  String   @default("Request a Quote")
   btnLink    String   @default("#contact")
@@ -281,22 +278,20 @@ model CtaBanner {
   updatedAt  DateTime @updatedAt
 }
 
-// Section-level text (badge, title, description) for public site sections — DB-managed + bilingual
 model SectionContent {
   id            String   @id @default(cuid())
-  section       String   @unique // "services" | "how-it-works" | "videos" | "partners" | "testimonials" | "contact" | "map" | "footer"
+  section       String   @unique
   badgeAr       String   @default("")
   badgeEn       String   @default("")
   titleAr       String   @default("")
   titleEn       String   @default("")
-  descriptionAr String   @default("") @db.Text
-  descriptionEn String   @default("") @db.Text
+  descriptionAr String?  @db.Text
+  descriptionEn String?  @db.Text
   active        Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
 
-// Footer link lists (Company / Services / Support)
 model FooterLink {
   id        String   @id @default(cuid())
   category  String   // "company" | "services" | "support"
@@ -308,19 +303,18 @@ model FooterLink {
   createdAt DateTime @default(now())
 }
 
-// Footer-level content (bio, newsletter text, dashboard link text, address)
 model FooterContent {
   id                String   @id @default(cuid())
-  bioAr             String   @default("") @db.Text
-  bioEn             String   @default("") @db.Text
+  bioAr             String?  @db.Text
+  bioEn             String?  @db.Text
   newsletterTitleAr String   @default("")
   newsletterTitleEn String   @default("")
-  newsletterDescAr  String   @default("") @db.Text
-  newsletterDescEn  String   @default("") @db.Text
+  newsletterDescAr  String?  @db.Text
+  newsletterDescEn  String?  @db.Text
   dashboardLinkAr   String   @default("")
   dashboardLinkEn   String   @default("")
-  addressAr         String   @default("") @db.Text
-  addressEn         String   @default("") @db.Text
+  addressAr         String?  @db.Text
+  addressEn         String?  @db.Text
   facebookUrl       String   @default("https://facebook.com")
   instagramUrl      String   @default("https://instagram.com")
   twitterUrl        String   @default("https://x.com")
