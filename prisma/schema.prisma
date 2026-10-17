@@ -5,7 +5,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -18,7 +18,7 @@ model User {
   roleId      String?
   roleRef     Role?     @relation(fields: [roleId], references: [id])
   status      String    @default("active") // active | inactive | suspended
-  avatar      String?
+  avatar      String?   @db.Text
   lastLoginAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -28,11 +28,11 @@ model Role {
   id            String   @id @default(cuid())
   name          String   @unique
   nameAr        String   @default("")
-  description   String   @default("")
-  descriptionAr String   @default("")
-  descriptionEn String   @default("")
+  description   String   @default("") @db.Text
+  descriptionAr String   @default("") @db.Text
+  descriptionEn String   @default("") @db.Text
   isSystemRole  Boolean  @default(false)
-  permissions   String   @default("")
+  permissions   String   @default("") @db.Text
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   users         User[]
@@ -50,84 +50,84 @@ model Governorate {
 }
 
 model Service {
-  id             String  @id @default(cuid())
-  name           String  @unique
-  nameAr         String
-  description    String  @default("")
-  descriptionAr  String  @default("")
-  descriptionEn  String  @default("")
-  ctaTextAr      String  @default("اطلب الخدمة")
-  ctaTextEn      String  @default("Request Service")
-  icon           String  @default("truck")
-  multiplier     Float   @default(1.0)
-  active         Boolean @default(true)
-  createdAt      DateTime @default(now())
+  id            String   @id @default(cuid())
+  name          String   @unique
+  nameAr        String
+  description   String   @default("") @db.Text
+  descriptionAr String   @default("") @db.Text
+  descriptionEn String   @default("") @db.Text
+  ctaTextAr     String   @default("اطلب الخدمة")
+  ctaTextEn     String   @default("Request Service")
+  icon          String   @default("truck")
+  multiplier    Float    @default(1.0)
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
 }
 
 model Customer {
-  id        String   @id @default(cuid())
-  name      String
-  phone     String
-  email     String?
-  address   String?
-  city      String?
+  id          String     @id @default(cuid())
+  name        String
+  phone       String
+  email       String?
+  address     String?    @db.Text
+  city        String?
   governorate String?
-  createdAt DateTime @default(now())
-  shipments Shipment[]
+  createdAt   DateTime   @default(now())
+  shipments   Shipment[]
 }
 
 model Shipment {
-  id            String   @id @default(cuid())
-  trackingNo    String   @unique
-  senderName    String
-  senderPhone   String
-  senderAddress String
-  receiverName  String
-  receiverPhone String
-  receiverAddress String
-  governorate   String
-  service       String
-  weight        Float
-  notes         String?
-  price         Float
-  status        String   @default("pending")
-  history       String   @default("")
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  customerId    String?
-  customer     Customer? @relation(fields: [customerId], references: [id])
+  id              String    @id @default(cuid())
+  trackingNo      String    @unique
+  senderName      String
+  senderPhone     String
+  senderAddress   String    @db.Text
+  receiverName    String
+  receiverPhone   String
+  receiverAddress String    @db.Text
+  governorate     String
+  service         String
+  weight          Float
+  notes           String?   @db.Text
+  price           Float
+  status          String    @default("pending")
+  history         String    @default("") @db.Text
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  customerId      String?
+  customer        Customer? @relation(fields: [customerId], references: [id])
 }
 
 model Video {
-  id             String   @id @default(cuid())
-  title          String
-  titleAr        String   @default("")
-  description    String?
-  descriptionAr  String   @default("")
-  url            String
-  thumbnail      String?
-  category       String   @default("promo")
-  active         Boolean  @default(true)
-  featured       Boolean  @default(false)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id            String   @id @default(cuid())
+  title         String
+  titleAr       String   @default("")
+  description   String?  @db.Text
+  descriptionAr String?  @db.Text
+  url           String   @db.Text
+  thumbnail     String?  @db.Text
+  category      String   @default("promo")
+  active        Boolean  @default(true)
+  featured      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model Testimonial {
-  id        String   @id @default(cuid())
-  name      String
-  nameAr    String   @default("")
-  role      String
-  roleAr    String   @default("")
-  company   String?
-  companyAr String?
-  content   String
-  contentAr String   @default("")
-  rating    Int      @default(5)
-  avatar    String?
-  active    Boolean  @default(true)
-  status    String   @default("approved")
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  name       String
+  nameAr     String   @default("")
+  role       String
+  roleAr     String   @default("")
+  company    String?
+  companyAr  String?
+  content    String   @db.Text
+  contentAr  String   @default("") @db.Text
+  rating     Int      @default(5)
+  avatar     String?  @db.Text
+  active     Boolean  @default(true)
+  status     String   @default("approved")
+  createdAt  DateTime @default(now())
 }
 
 model ContactMessage {
@@ -136,24 +136,24 @@ model ContactMessage {
   email     String
   phone     String?
   subject   String?
-  message   String
+  message   String   @db.Text
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Order {
-  id          String   @id @default(cuid())
+  id           String   @id @default(cuid())
   customerName String
-  phone       String
-  governorate String
-  service     String
-  weight      Float
-  price       Float
-  status      String   @default("pending")
-  notes       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  phone        String
+  governorate  String
+  service      String
+  weight       Float
+  price        Float
+  status       String   @default("pending")
+  notes        String?  @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model SiteStat {
@@ -167,7 +167,7 @@ model SiteStat {
 
 model HeroImage {
   id        String   @id @default(cuid())
-  url       String
+  url       String   @db.Text
   title     String?
   titleAr   String   @default("")
   titleEn   String   @default("")
@@ -177,38 +177,38 @@ model HeroImage {
 }
 
 model HeroContent {
-  id              String   @id @default(cuid())
-  badgeAr         String   @default("نشحن لكل محافظات مصر — 27 محافظة بنفس السرعة")
-  badgeEn         String   @default("We Ship Across All Egypt — 27 Governorates with Equal Speed")
-  titleAr         String   @default("شحن يصل لكل مصر بسرعة Redline")
-  titleEn         String   @default("Shipping Across Egypt at Redline Speed")
-  subtitleAr      String   @default("شركة شحن احترافية تغطي جميع محافظات مصر بخدمات متنوعة — عادي، ممتاز، نفس اليوم، وشحن ثقيل — مع تتبع مباشر وأسعار منافسة وضمان التسليم.")
-  subtitleEn      String   @default("A professional shipping company covering all Egyptian governorates with versatile services — Standard, Express, Same-Day, and Heavy Freight — with live tracking, competitive rates, and guaranteed delivery.")
-  cta1TextAr      String   @default("اطلب شحن الآن")
-  cta1TextEn      String   @default("Order Shipment Now")
-  cta1Link        String   @default("#contact")
-  cta2TextAr      String   @default("خدماتنا")
-  cta2TextEn      String   @default("Our Services")
-  cta2Link        String   @default("#services")
-  feature1Ar      String   @default("توصيل نفس اليوم في القاهرة الكبرى")
-  feature1En      String   @default("Same-day delivery in Greater Cairo")
-  feature2Ar      String   @default("ضمان كامل على كل شحنة")
-  feature2En      String   @default("Full guarantee on every shipment")
-  feature3Ar      String   @default("27 محافظة بتغطية كاملة")
-  feature3En      String   @default("Full coverage across 27 governorates")
-  active          Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id          String   @id @default(cuid())
+  badgeAr     String   @default("نشحن لكل محافظات مصر — 27 محافظة بنفس السرعة")
+  badgeEn     String   @default("We Ship Across All Egypt — 27 Governorates with Equal Speed")
+  titleAr     String   @default("شحن يصل لكل مصر بسرعة Redline")
+  titleEn     String   @default("Shipping Across Egypt at Redline Speed")
+  subtitleAr  String   @default("شركة شحن احترافية تغطي جميع محافظات مصر بخدمات متنوعة — عادي، ممتاز، نفس اليوم، وشحن ثقيل — مع تتبع مباشر وأسعار منافسة وضمان التسليم.") @db.Text
+  subtitleEn  String   @default("A professional shipping company covering all Egyptian governorates with versatile services — Standard, Express, Same-Day, and Heavy Freight — with live tracking, competitive rates, and guaranteed delivery.") @db.Text
+  cta1TextAr  String   @default("اطلب شحن الآن")
+  cta1TextEn  String   @default("Order Shipment Now")
+  cta1Link    String   @default("#contact")
+  cta2TextAr  String   @default("خدماتنا")
+  cta2TextEn  String   @default("Our Services")
+  cta2Link    String   @default("#services")
+  feature1Ar  String   @default("توصيل نفس اليوم في القاهرة الكبرى")
+  feature1En  String   @default("Same-day delivery in Greater Cairo")
+  feature2Ar  String   @default("ضمان كامل على كل شحنة")
+  feature2En  String   @default("Full guarantee on every shipment")
+  feature3Ar  String   @default("27 محافظة بتغطية كاملة")
+  feature3En  String   @default("Full coverage across 27 governorates")
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Partner {
   id        String   @id @default(cuid())
   name      String
   nameAr    String   @default("")
-  logo      String?
+  logo      String?  @db.Text
   icon      String   @default("building")
   color     String   @default("#dc2626")
-  website   String?
+  website   String?  @db.Text
   order     Int      @default(0)
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
@@ -222,25 +222,25 @@ model About {
   titleEn       String   @default("About Us")
   subtitleAr    String   @default("")
   subtitleEn    String   @default("")
-  descriptionAr String   @default("")
-  descriptionEn String   @default("")
-  image         String?
-  features      String   @default("") // JSON array of {ar, en}
+  descriptionAr String   @default("") @db.Text
+  descriptionEn String   @default("") @db.Text
+  image         String?  @db.Text
+  features      String   @default("") @db.Text // JSON array of {ar, en}
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
 
 model HowItWorksStep {
-  id          String   @id @default(cuid())
-  order       Int      @default(0)
-  titleAr     String
-  titleEn     String
-  descAr      String
-  descEn      String
-  icon        String   @default("clipboard-list")
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  order     Int      @default(0)
+  titleAr   String
+  titleEn   String
+  descAr    String   @db.Text
+  descEn    String   @db.Text
+  icon      String   @default("clipboard-list")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model ContactInfo {
@@ -248,52 +248,52 @@ model ContactInfo {
   type      String   // "address" | "phone" | "email"
   labelAr   String
   labelEn   String
-  value     String
-  href      String?  // tel: or mailto: link
+  value     String   @db.Text
+  href      String?  @db.Text
   order     Int      @default(0)
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
 }
 
 model WhatsAppSetting {
-  id              String   @id @default(cuid())
-  phoneNumber     String   @default("201000000000")
-  defaultMessageAr String  @default("مرحباً، أريد الاستفسار عن خدمات الشحن")
-  defaultMessageEn String  @default("Hello, I'd like to inquire about shipping services")
-  active          Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id               String   @id @default(cuid())
+  phoneNumber      String   @default("201000000000")
+  defaultMessageAr String   @default("مرحباً، أريد الاستفسار عن خدمات الشحن") @db.Text
+  defaultMessageEn String   @default("Hello, I'd like to inquire about shipping services") @db.Text
+  active           Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 // Pre-Footer CTA Banner ("جاهز تبدأ شحن مع Redline؟") — single record, upsert semantics
 model CtaBanner {
-  id                 String   @id @default(cuid())
-  headingAr          String   @default("جاهز تبدأ شحن مع Redline؟")
-  headingEn          String   @default("Ready to Start Shipping with Redline?")
-  subAr              String   @default("انضم لأكثر من 12,000 عميل يثقون بنا يومياً. تواصل معنا الآن واحصل على عرض سعر مخصص لشحناتك.")
-  subEn              String   @default("Join over 12,000 clients who trust us daily. Contact us now and get a custom quote for your shipments.")
-  btnTextAr          String   @default("اطلب عرض سعر")
-  btnTextEn          String   @default("Request a Quote")
-  btnLink            String   @default("#contact")
-  phone              String   @default("19999")
-  active             Boolean  @default(true)
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id         String   @id @default(cuid())
+  headingAr  String   @default("جاهز تبدأ شحن مع Redline؟")
+  headingEn  String   @default("Ready to Start Shipping with Redline?")
+  subAr      String   @default("انضم لأكثر من 12,000 عميل يثقون بنا يومياً. تواصل معنا الآن واحصل على عرض سعر مخصص لشحناتك.") @db.Text
+  subEn      String   @default("Join over 12,000 clients who trust us daily. Contact us now and get a custom quote for your shipments.") @db.Text
+  btnTextAr  String   @default("اطلب عرض سعر")
+  btnTextEn  String   @default("Request a Quote")
+  btnLink    String   @default("#contact")
+  phone      String   @default("19999")
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 // Section-level text (badge, title, description) for public site sections — DB-managed + bilingual
 model SectionContent {
-  id             String   @id @default(cuid())
-  section        String   @unique // "services" | "how-it-works" | "videos" | "partners" | "testimonials" | "contact" | "map" | "footer"
-  badgeAr        String   @default("")
-  badgeEn        String   @default("")
-  titleAr        String   @default("")
-  titleEn        String   @default("")
-  descriptionAr  String   @default("")
-  descriptionEn  String   @default("")
-  active         Boolean  @default(true)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id            String   @id @default(cuid())
+  section       String   @unique // "services" | "how-it-works" | "videos" | "partners" | "testimonials" | "contact" | "map" | "footer"
+  badgeAr       String   @default("")
+  badgeEn       String   @default("")
+  titleAr       String   @default("")
+  titleEn       String   @default("")
+  descriptionAr String   @default("") @db.Text
+  descriptionEn String   @default("") @db.Text
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 // Footer link lists (Company / Services / Support)
@@ -310,26 +310,25 @@ model FooterLink {
 
 // Footer-level content (bio, newsletter text, dashboard link text, address)
 model FooterContent {
-  id                 String   @id @default(cuid())
-  bioAr              String   @default("")
-  bioEn              String   @default("")
-  newsletterTitleAr  String   @default("")
-  newsletterTitleEn  String   @default("")
-  newsletterDescAr   String   @default("")
-  newsletterDescEn   String   @default("")
-  dashboardLinkAr    String   @default("")
-  dashboardLinkEn    String   @default("")
-  addressAr          String   @default("")
-  addressEn          String   @default("")
-  // Social media channel URLs — managed from the dashboard
-  facebookUrl        String   @default("https://facebook.com")
-  instagramUrl       String   @default("https://instagram.com")
-  twitterUrl         String   @default("https://x.com")
-  linkedinUrl        String   @default("https://linkedin.com")
-  whatsappUrl        String   @default("https://wa.me/201000000000")
-  telegramUrl        String   @default("https://t.me/redline")
-  darkThemeVariant   String   @default("slate")
-  active             Boolean  @default(true)
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id                String   @id @default(cuid())
+  bioAr             String   @default("") @db.Text
+  bioEn             String   @default("") @db.Text
+  newsletterTitleAr String   @default("")
+  newsletterTitleEn String   @default("")
+  newsletterDescAr  String   @default("") @db.Text
+  newsletterDescEn  String   @default("") @db.Text
+  dashboardLinkAr   String   @default("")
+  dashboardLinkEn   String   @default("")
+  addressAr         String   @default("") @db.Text
+  addressEn         String   @default("") @db.Text
+  facebookUrl       String   @default("https://facebook.com")
+  instagramUrl      String   @default("https://instagram.com")
+  twitterUrl        String   @default("https://x.com")
+  linkedinUrl       String   @default("https://linkedin.com")
+  whatsappUrl       String   @default("https://wa.me/201000000000")
+  telegramUrl       String   @default("https://t.me/redline")
+  darkThemeVariant  String   @default("slate")
+  active            Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
