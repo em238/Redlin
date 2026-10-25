@@ -6,6 +6,8 @@ import { useRef } from "react";
 import { ShieldCheck, Zap, Headphones, Banknote, MapPinned, BarChart3 } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { StaggerGroup, StaggerItem } from "@/components/shared/section-reveal";
+import { useQuery } from "@tanstack/react-query";
+import { apiGet } from "@/lib/api";
 
 const FEATURES_AR = [
   { icon: Zap, title: "سرعة فائقة", desc: "توصيل في نفس اليوم داخل القاهرة الكبرى و48-96 ساعة لكل المحافظات" },
@@ -31,6 +33,11 @@ export function About() {
   const y1 = useTransform(scrollYProgress, [0, 1], [40, -40]);
   const y2 = useTransform(scrollYProgress, [0, 1], [-30, 30]);
   const FEATURES = isAr ? FEATURES_AR : FEATURES_EN;
+  const { data: aboutData } = useQuery({
+  queryKey: ["about-content"],
+  queryFn: () => apiGet<{ about: { image?: string | null } }>("/api/about"),
+});
+const aboutImage = aboutData?.about?.image || "/images/warehouse.png";
 
   return (
     <section id="about" className="py-14 sm:py-24 lg:py-28 overflow-hidden">
@@ -47,7 +54,14 @@ export function About() {
           >
             {/* Main warehouse image */}
             <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-xl w-full">
-              <Image src="/images/warehouse.png" alt="Redline warehouses" fill sizes="(max-width:1024px) 100vw, 540px" className="object-cover" />
+              <Image
+                    src={aboutImage}
+                    alt="Redline warehouses"
+                    fill
+                    sizes="(max-width:1024px) 100vw, 540px"
+                    className="object-cover"
+                    unoptimized
+                  />
             </div>
             {/* Overlapping operations image — hidden on mobile, safely anchored on desktop */}
             <motion.div
