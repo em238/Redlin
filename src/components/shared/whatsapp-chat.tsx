@@ -5,10 +5,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Send } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa6";
 import { useT } from "@/lib/i18n";
-
+import { useQuery } from "@tanstack/react-query";
+import { apiGet } from "@/lib/api";
 // WhatsApp business phone number (Egypt)
 // TODO: Replace with the actual Redline business number
-const WHATSAPP_PHONE = "201000000000";
+const DEFAULT_PHONE = "201000000000";
 
 /**
  * Floating WhatsApp Chat Widget
@@ -25,6 +26,17 @@ const WHATSAPP_PHONE = "201000000000";
  */
 export function WhatsAppChat() {
   const { t, isAr } = useT();
+  const { data: waData } = useQuery({
+  queryKey: ["whatsapp-settings"],
+  queryFn: () => apiGet<{ setting: { phoneNumber?: string; defaultMessageAr?: string | null; defaultMessageEn?: string | null; active?: boolean } }>("/api/whatsapp-settings"),
+});
+const setting = waData?.setting;
+// صيغة دولية بدون + أو صفر في الأول: 01006025540 -> 201006025540
+const normalize = (p: string) => {
+  const d = p.replace(/\D/g, "");
+  return d.startsWith("0") ? "20" + d.slice(1) : d;
+};
+const phone = setting?.phoneNumber ? normalize(setting.phoneNumber) : DEFAULT_PHONE;
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -48,8 +60,9 @@ export function WhatsAppChat() {
   }, [open]);
 
   const send = () => {
-    const text = message.trim() || t("wa.default");
-    const url = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(text)}`;
+    const customDefault = isAr ? setting?.defaultMessageAr : setting?.defaultMessageEn;
+    const text = message.trim() || customDefault || t("wa.default");
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
     window.open(url, "_blank", "noopener,noreferrer");
     setMessage("");
     setOpen(false);
