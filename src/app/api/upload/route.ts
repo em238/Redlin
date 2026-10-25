@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
+    const uploadDir = process.env.UPLOAD_DIR ?? path.join(process.cwd(), "public", "uploads");
     if (!existsSync(uploadDir)) {
       await mkdir(uploadDir, { recursive: true });
     }
