@@ -51,6 +51,41 @@ export function Contact() {
   const eyebrow = isAr ? (sc?.badgeAr || t("contact.eyebrow")) : (sc?.badgeEn || t("contact.eyebrow"));
   const title = isAr ? (sc?.titleAr || t("contact.title")) : (sc?.titleEn || t("contact.title"));
   const subtitle = isAr ? (sc?.descriptionAr || t("contact.subtitle")) : (sc?.descriptionEn || t("contact.subtitle"));
+    const { data: infoData } = useQuery({
+    queryKey: ["contact-info"],
+    queryFn: () => apiGet<{ items: any[] }>("/api/contact-info"),
+  });
+  const dbItems: any[] = infoData?.items ?? [];
+
+  const fromDb = (type: string, fallback: any[]) => {
+    const rows = dbItems.filter((i) => i.type === type);
+    if (rows.length === 0) return fallback;
+    return rows.map((r) => ({
+      label: isAr ? r.labelAr : r.labelEn,
+      value: r.value || "",
+      href:
+        r.href ||
+        (type === "phone"
+          ? `tel:${(r.value || "").replace(/\s/g, "")}`
+          : type === "email"
+          ? `mailto:${r.value}`
+          : undefined),
+    }));
+  };
+
+  const INFO = [
+    { icon: MapPin, titleKey: "contact.address", entries: fromDb("address", ADDRESSES), type: "address" as const },
+    { icon: Phone, titleKey: "contact.phoneLabel", entries: fromDb("phone", PHONES), type: "link" as const },
+    { icon: Mail, titleKey: "contact.emailLabel", entries: fromDb("email", EMAILS), type: "link" as const },
+  ];
+
+  const firstPhone = dbItems.find((i) => i.type === "phone");
+  const firstEmail = dbItems.find((i) => i.type === "email");
+  const callHref = firstPhone ? `tel:${(firstPhone.value || "").replace(/\s/g, "")}` : "tel:19999";
+  const waHref = firstPhone
+    ? `https://wa.me/${(firstPhone.value || "").replace(/\D/g, "").replace(/^0/, "20")}`
+    : "https://wa.me/201000000000";
+  const mailHref = firstEmail ? `mailto:${firstEmail.value}` : "mailto:info@redline.eg";
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -278,7 +313,7 @@ export function Contact() {
 
               {/* Info sections grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {INFO_SECTIONS.map((section, si) => {
+                {INFO.map((section, si) => {
                   const Icon = section.icon;
                   return (
                     <motion.div
@@ -298,13 +333,13 @@ export function Contact() {
                       <div className="space-y-3">
                         {section.entries.map((entry: any, i: number) => (
                           <div key={i}>
-                            <div className="text-[10px] uppercase tracking-wider text-white/40 font-medium mb-1">{t(entry.labelKey)}</div>
+                            <div className="text-[10px] uppercase tracking-wider text-white/40 font-medium mb-1">{entry.label ?? t(entry.labelKey)}</div>
                             {section.type === "link" ? (
                               <a href={entry.href} className="text-sm font-semibold text-white/90 hover:text-amber-300 transition-colors break-all font-mono" dir="ltr">
-                                {t(entry.valueKey)}
+                                {entry.value ?? t(entry.valueKey)}
                               </a>
                             ) : (
-                              <div className="text-sm font-semibold text-white/90 leading-snug">{t(entry.valueKey)}</div>
+                              <div className="text-sm font-semibold text-white/90 leading-snug">{entry.value ?? t(entry.valueKey)}</div>
                             )}
                           </div>
                         ))}
