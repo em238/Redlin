@@ -60,7 +60,7 @@ export function Partners() {
                     alt={p.name}
                     width={160}
                     height={96} 
-                    className="object-contain max-h-24 max-w-40 grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300"
+                    className="object-contain max-h-24 max-w-40 group-hover:scale-110 transition-transform duration-300"
                   />
                 </div>
                 <div className="text-sm font-semibold text-foreground/70 group-hover:text-foreground text-center transition-colors">{p.name}</div>
