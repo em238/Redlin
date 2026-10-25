@@ -51,16 +51,16 @@ export function Partners() {
                 href={p.website || "#"}
                 target={p.website ? "_blank" : undefined}
                 rel={p.website ? "noopener noreferrer" : undefined}
-                className="card-premium shine relative group block rounded-2xl bg-card border border-border/60 shadow-soft p-6 h-40 flex flex-col items-center justify-center gap-2 overflow-hidden"
+                className="card-premium shine relative group block rounded-2xl bg-card border border-border/60 shadow-soft p-6 h-28 flex flex-col items-center justify-center gap-2 overflow-hidden"
               >
                 {/* ONLY images — no icons */}
-                <div className="w-32 h-24 flex items-center justify-center">
+                <div className="w-40 h-24 flex items-center justify-center">
                   <Image
                     src={p.logo || "/images/partner-1.png"}
                     alt={p.name}
-                    width={64}
-                    height={64}
-                    className="object-contain max-h-24 max-w-32 grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300"
+                    width={160}
+                    height={96} 
+                    className="object-contain max-h-24 max-w-40 grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300"
                   />
                 </div>
                 <div className="text-sm font-semibold text-foreground/70 group-hover:text-foreground text-center transition-colors">{p.name}</div>
