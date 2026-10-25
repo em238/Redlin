@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import { db } from "@/lib/db";
 import { requireAdmin, jsonError } from "@/lib/auth";
