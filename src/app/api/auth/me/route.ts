@@ -7,3 +7,4 @@ export async function GET() {
   if (!user) return Response.json({ user: null }, { status: 200 });
   return Response.json({ user });
 }
+export const dynamic = "force-dynamic";

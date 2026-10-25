@@ -64,3 +64,4 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: e.message || "Failed to submit" }, { status: 500 });
   }
 }
+export const dynamic = "force-dynamic";

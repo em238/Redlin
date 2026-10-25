@@ -85,3 +85,4 @@ export async function POST(req: NextRequest) {
     return jsonError("فشل رفع الملف", 500);
   }
 }
+export const dynamic = "force-dynamic";

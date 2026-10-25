@@ -41,3 +41,4 @@ export async function GET(req: NextRequest) {
     history: history.map((h) => ({ ...h, label: statusLabels[h.status] || h.status })),
   });
 }
+export const dynamic = "force-dynamic";

@@ -35,3 +35,4 @@ export async function GET() {
     return jsonError("خطأ", 500);
   }
 }
+export const dynamic = "force-dynamic";

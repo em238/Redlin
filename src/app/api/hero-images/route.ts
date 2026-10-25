@@ -45,3 +45,4 @@ export async function POST(req: NextRequest) {
     return jsonError("خطأ", 500);
   }
 }
+export const dynamic = "force-dynamic";

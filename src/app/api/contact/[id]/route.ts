@@ -28,3 +28,4 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return jsonError("خطأ", 500);
   }
 }
+export const dynamic = "force-dynamic";

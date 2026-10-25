@@ -55,3 +55,4 @@ export async function POST(req: NextRequest) {
     return jsonError("خطأ في رفع الفيديو", 500);
   }
 }
+export const dynamic = "force-dynamic";

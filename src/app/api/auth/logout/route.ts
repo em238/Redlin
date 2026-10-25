@@ -9,3 +9,4 @@ export async function POST() {
   destroySession(undefined);
   return res;
 }
+export const dynamic = "force-dynamic";

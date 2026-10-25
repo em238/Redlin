@@ -25,3 +25,4 @@ export async function POST(req: NextRequest) {
     return jsonError("خطأ في تسجيل الدخول", 500);
   }
 }
+export const dynamic = "force-dynamic";

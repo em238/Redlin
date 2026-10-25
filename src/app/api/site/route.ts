@@ -36,3 +36,4 @@ export async function GET() {
     footerLinks,
   });
 }
+export const dynamic = "force-dynamic";

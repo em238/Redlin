@@ -53,3 +53,4 @@ export async function POST(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   return POST(req);
 }
+export const dynamic = "force-dynamic";

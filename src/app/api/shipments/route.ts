@@ -72,3 +72,4 @@ export async function POST(req: NextRequest) {
     return jsonError("خطأ في إنشاء الشحنة", 500);
   }
 }
+export const dynamic = "force-dynamic";

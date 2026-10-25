@@ -37,7 +37,7 @@ export function About() {
   queryKey: ["about-content"],
   queryFn: () => apiGet<{ about: { image?: string | null } }>("/api/about"),
 });
-const aboutImage = aboutData?.about?.image || "/images/warehouse.png";
+const aboutImage = aboutData ? (aboutData.about?.image || "/images/warehouse.png") : null;
 
   return (
     <section id="about" className="py-14 sm:py-24 lg:py-28 overflow-hidden">

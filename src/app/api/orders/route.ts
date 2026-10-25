@@ -36,3 +36,4 @@ export async function POST(req: NextRequest) {
     return jsonError("خطأ في إنشاء الطلب", 500);
   }
 }
+export const dynamic = "force-dynamic";

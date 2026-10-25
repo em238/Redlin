@@ -38,3 +38,4 @@ export async function GET(req: NextRequest) {
     return jsonError("خطأ في حساب السعر", 500);
   }
 }
+export const dynamic = "force-dynamic";

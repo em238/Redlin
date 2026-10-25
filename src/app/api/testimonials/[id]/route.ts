@@ -49,3 +49,4 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     return NextResponse.json({ error: e.message || "Failed to delete" }, { status: 500 });
   }
 }
+export const dynamic = "force-dynamic";

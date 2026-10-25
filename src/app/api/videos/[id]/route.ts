@@ -39,3 +39,4 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     return jsonError("خطأ", 500);
   }
 }
+export const dynamic = "force-dynamic";
