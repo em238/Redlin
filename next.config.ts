@@ -18,6 +18,25 @@ const nextConfig: NextConfig = {
   // Setting trailingSlash: true makes Next.js keep the trailing slash so
   // it agrees with the gateway — no more redirect loop.
   trailingSlash: true,
+
+  // منع أي كاش على ردود الـ API وصفحات الموقع حتى يظهر التحديث فورًا
+  async headers() {
+    return [
+      {
+        source: "/api/:path*",
+        headers: [
+          { key: "Cache-Control", value: "no-store, max-age=0, must-revalidate" },
+        ],
+      },
+      {
+        // الصفحات (مش ملفات _next الثابتة ولا الصور المرفوعة)
+        source: "/((?!_next/static|_next/image|uploads|images|favicon.ico).*)",
+        headers: [
+          { key: "Cache-Control", value: "no-store, max-age=0, must-revalidate" },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
