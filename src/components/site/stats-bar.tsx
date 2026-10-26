@@ -1,13 +1,17 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Package, Map, Users, Building2 } from "lucide-react";
+import { Package, Map, Users, Building2, Truck, MapPin, Boxes, ShieldCheck, Sparkles, Star, BarChart3 } from "lucide-react";
 import { apiGet } from "@/lib/api";
 import { useT } from "@/lib/i18n";
 import { AnimatedCounter } from "@/components/shared/animated-counter";
 import { StaggerGroup, StaggerItem } from "@/components/shared/section-reveal";
 
-const ICONS: Record<string, any> = { package: Package, map: Map, users: Users, building: Building2 };
+const ICONS: Record<string, any> = {
+  package: Package, map: Map, users: Users, building: Building2,
+  truck: Truck, "map-pin": MapPin, boxes: Boxes, "shield-check": ShieldCheck,
+  sparkles: Sparkles, star: Star, "bar-chart-3": BarChart3,
+};
 
 // Fallback shape mirrors the DB SiteStat model: `label` (English) + `labelAr` (Arabic).
 // Pre-2.4 the FALLBACK only had Arabic in the `label` field, which made the
@@ -37,7 +41,7 @@ export function StatsBar() {
     queryFn: () => apiGet<{ stats: StatItem[] }>("/api/site"),
   });
 
-  const stats = data?.stats ?? FALLBACK;
+  const stats = data?.stats ?? [];
 
   // Strict fallback rule per the localization spec:
   //   Arabic  → labelAr || label
@@ -45,12 +49,10 @@ export function StatsBar() {
   // The ticker-cities SiteStat (icon="ticker") is filtered out because it
   // stores a JSON payload in `value`, not a stat to render here.
   const visibleStats = stats.filter((s) => s.icon !== "ticker");
-  const labelFor = (s: StatItem) => {
-    if (isAr) return s.labelAr || s.label;
-    const key = STAT_KEY_BY_ICON[s.icon];
-    const translated = key ? t(key) : "";
-    return translated || s.label;
-  };
+
+  const labelFor = (s: StatItem) => (isAr ? s.labelAr || s.label : s.label || s.labelAr);
+
+  if (visibleStats.length === 0) return null;
 
   return (
     <section className="py-8 sm:py-12">
