@@ -29,8 +29,9 @@ type About = {
   subtitleAr: string;
   subtitleEn: string;
   descriptionAr: string;
-  descriptionEn: string;
+   descriptionEn: string;
   image?: string | null;
+  features?: string | null;
 };
 
 type SiteStat = {
@@ -73,6 +74,12 @@ const emptyExtra = {
   ],
 };
 
+const FEATURE_ICONS: Record<string, any> = {
+  zap: Zap, shield: ShieldCheck, chart: BarChart3, map: MapPinned,
+  cash: Banknote, headset: Headphones, truck: Truck, package: Package,
+  users: Users, star: Star, sparkles: Sparkles, boxes: Boxes, pin: MapPin,
+};
+
 export function DashboardAbout() {
   const { isAr } = useDashboardT();
   const qc = useQueryClient();
@@ -102,7 +109,7 @@ export function DashboardAbout() {
         subtitleEn: a.subtitleEn || "",
         descriptionAr: a.descriptionAr || "",
         descriptionEn: a.descriptionEn || "",
-              image: a.image || "",
+                image: a.image || "",
       });
       try {
         const parsed = a.features ? JSON.parse(a.features) : null;
@@ -135,8 +142,9 @@ export function DashboardAbout() {
         descriptionAr: about.descriptionAr || "",
         descriptionEn: about.descriptionEn || "",
                image: about.image || null,
-        features: JSON.stringify(extra),
+               features: JSON.stringify(extra),
       });
+      toast.success(L("تم حفظ محتوى قسم من نحن", "About content saved"));
       qc.invalidateQueries({ queryKey: ["about-content"] });
       qc.invalidateQueries({ queryKey: ["site-data"] });
     } catch (e: any) {
@@ -382,20 +390,30 @@ export function DashboardAbout() {
               </div>
             </div>
 
-            {/* Small overlay image */}
-            <FileUpload
-              label={L("الصورة الصغيرة (غرفة العمليات)", "Small overlay image")}
-              accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
-              currentUrl={extra.image2}
-              onUploaded={(url) => setExtra({ ...extra, image2: url })}
-              type="image"
-            />
+           
 
             {/* Features editor */}
             <div className="space-y-3 pt-2">
               <h5 className="font-bold text-sm">{L("المميزات", "Features")}</h5>
               {extra.items.map((it: any, i: number) => (
-                <div key={i} className="rounded-xl border border-border p-3">
+                                <div key={i} className="rounded-xl border border-border p-3">
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {Object.keys(FEATURE_ICONS).map((name) => {
+                      const Ic = FEATURE_ICONS[name];
+                      const active = it.icon === name;
+                      return (
+                        <button
+                          key={name}
+                          type="button"
+                          title={name}
+                          onClick={() => { const items = [...extra.items]; items[i] = { ...it, icon: name }; setExtra({ ...extra, items }); }}
+                          className={`w-9 h-9 rounded-lg border flex items-center justify-center transition-all ${active ? "border-primary bg-primary/10 ring-2 ring-primary/30" : "border-border hover:border-primary/40"}`}
+                        >
+                          <Ic className={`w-4 h-4 ${active ? "text-primary" : "text-muted-foreground"}`} />
+                        </button>
+                      );
+                    })}
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <Input value={it.titleAr} dir="rtl" className="h-9" placeholder={L("العنوان (عربي)", "Title (Arabic)")}
                       onChange={(e) => { const items = [...extra.items]; items[i] = { ...it, titleAr: e.target.value }; setExtra({ ...extra, items }); }} />
@@ -413,80 +431,7 @@ export function DashboardAbout() {
         )}
       </Card>
 
-      {/* Section 2: Metrics / Counters */}
-      <Card className="p-5 sm:p-6 space-y-5">
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center">
-              <BarChart3 className="w-4 h-4 text-amber-600" />
-            </div>
-            <div>
-              <h4 className="font-bold">{L("المؤشرات والإحصائيات", "Metrics / Counters")}</h4>
-              <p className="text-xs text-muted-foreground">{L("الأرقام المعروضة في شريط الإحصائيات بالموقع", "Numbers shown in the stats bar on the site")}</p>
-            </div>
-          </div>
-          <Button onClick={openCreateStat}
-            className="bg-gradient-to-r from-primary to-red-700 text-white gap-2">
-            <Plus className="w-4 h-4" /> {L("إضافة مؤشر", "Add metric")}
-          </Button>
-        </div>
-
-        {statsLoading ? (
-          <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
-        ) : stats.length === 0 ? (
-          <div className="p-10 text-center border-2 border-dashed border-border rounded-xl">
-            <BarChart3 className="w-10 h-10 mx-auto text-muted-foreground/40 mb-2" />
-            <p className="font-semibold text-sm">{L("لا توجد مؤشرات بعد", "No metrics yet")}</p>
-            <p className="text-xs text-muted-foreground mt-1">{L("اضغط \"إضافة مؤشر\" لإنشاء أول إحصائية", "Click \"Add metric\" to create the first stat")}</p>
-          </div>
-        ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <AnimatePresence>
-              {stats.map((s, i) => (
-                <motion.div
-                  key={s.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ delay: i * 0.04 }}
-                >
-                  <Card className="p-4 hover:shadow-md transition-all">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/15 to-amber-500/10 flex items-center justify-center shrink-0">
-                        {renderIcon(s.icon, "w-5 h-5 text-primary")}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-2xl font-black text-gradient-red tabular-nums leading-none">
-                          {s.value}
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-1 truncate" dir="rtl">
-                          {s.labelAr || s.label}
-                        </div>
-                        {s.labelAr && (
-                          <div className="text-[10px] text-muted-foreground/70 mt-0.5 flex items-center gap-1" dir="ltr">
-                            <span className="px-1 py-0 rounded bg-blue-500/10 text-blue-600 text-[9px] font-bold">EN</span>
-                            <span className="truncate">{s.label}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex gap-1.5 mt-3 pt-3 border-t border-border/40">
-                      <Button variant="outline" size="sm" className="h-8 flex-1 gap-1" onClick={() => openEditStat(s)}>
-                        <Pencil className="w-3.5 h-3.5" /> {L("تعديل", "Edit")}
-                      </Button>
-                      <Button variant="outline" size="icon" className="h-8 w-8 text-rose-600 hover:text-rose-700"
-                        onClick={() => removeStat(s.id)} title={L("حذف", "Delete")}>
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
-                    </div>
-                  </Card>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
-        )}
-      </Card>
+     
 
       {/* Add / Edit Stat Modal */}
       <Dialog open={statModalOpen} onOpenChange={setStatModalOpen}>
