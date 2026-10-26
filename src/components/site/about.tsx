@@ -35,9 +35,19 @@ export function About() {
   const FEATURES = isAr ? FEATURES_AR : FEATURES_EN;
   const { data: aboutData } = useQuery({
   queryKey: ["about-content"],
-  queryFn: () => apiGet<{ about: { image?: string | null } }>("/api/about"),
+  queryFn: () => apiGet<{ about: any }>("/api/about"),
 });
 const aboutImage = aboutData ? (aboutData.about?.image || "/images/warehouse.png") : null;
+const ab = aboutData?.about;
+const aboutBadge = (isAr ? ab?.titleAr : ab?.titleEn) || t("about.eyebrow");
+const aboutSubtitle =
+  (isAr ? ab?.subtitleAr : ab?.subtitleEn) ||
+  (isAr ? "عصب الشحن في مصر" : "Egypt's Shipping Backbone");
+const aboutDesc: string = (isAr ? ab?.descriptionAr : ab?.descriptionEn) || "";
+const descParts = aboutDesc.split(/\n+/).filter(Boolean);
+const p1 = descParts[0] || t("about.p1");
+const p2 = descParts.length > 0 ? (descParts[1] || "") : t("about.p2");
+
 
   return (
     <section id="about" className="py-14 sm:py-24 lg:py-28 overflow-hidden">
@@ -54,14 +64,16 @@ const aboutImage = aboutData ? (aboutData.about?.image || "/images/warehouse.png
           >
             {/* Main warehouse image */}
             <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-xl w-full">
-              <Image
-                    src={aboutImage}
-                    alt="Redline warehouses"
-                    fill
-                    sizes="(max-width:1024px) 100vw, 540px"
-                    className="object-cover"
-                    unoptimized
-                  />
+                            {aboutImage && (
+                <Image
+                  src={aboutImage}
+                  alt="Redline warehouses"
+                  fill
+                  sizes="(max-width:1024px) 100vw, 540px"
+                  className="object-cover"
+                  unoptimized
+                />
+              )}
             </div>
             {/* Overlapping operations image — hidden on mobile, safely anchored on desktop */}
             <motion.div
@@ -93,7 +105,7 @@ const aboutImage = aboutData ? (aboutData.about?.image || "/images/warehouse.png
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-l from-primary/10 via-primary/8 to-amber-500/10 text-primary text-xs font-semibold tracking-wide border border-primary/15 self-start"
             >
               <span className="w-1 h-1 rounded-full bg-gradient-to-r from-primary to-amber-500" />
-              {t("about.eyebrow")}
+              {aboutBadge}
             </motion.span>
 
             {/* 2. Main Heading — inline text flow (not flex), unified for both languages.
@@ -108,7 +120,7 @@ const aboutImage = aboutData ? (aboutData.about?.image || "/images/warehouse.png
             >
               <span className="text-red-600 font-extrabold"><bdi>Redline</bdi></span>
               <span className="mx-2 text-slate-400 font-normal">—</span>
-              <span>{isAr ? "عصب الشحن في مصر" : "Egypt's Shipping Backbone"}</span>
+              <span>{aboutSubtitle}</span>
             </motion.h2>
 
             {/* 3. Paragraphs — text-justify on mobile, text-start on sm+.
@@ -120,17 +132,19 @@ const aboutImage = aboutData ? (aboutData.about?.image || "/images/warehouse.png
               transition={{ duration: 0.5, delay: 0.1 }}
               className="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed text-justify sm:text-start"
             >
-              {t("about.p1")}
+            {p1}
             </motion.p>
-            <motion.p
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.15 }}
-              className="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed text-justify sm:text-start"
-            >
-              {t("about.p2")}
-            </motion.p>
+                        {p2 && (
+              <motion.p
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.15 }}
+                className="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed text-justify sm:text-start"
+              >
+                {p2}
+              </motion.p>
+            )}
 
             {/* 4. Features Grid */}
             <StaggerGroup className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 w-full" stagger={0.06}>
