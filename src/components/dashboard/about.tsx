@@ -149,6 +149,7 @@ export function DashboardAbout() {
       });
       toast.success(L("تم حفظ محتوى قسم من نحن", "About content saved"));
       qc.invalidateQueries({ queryKey: ["about-content"] });
+      qc.invalidateQueries({ queryKey: ["site-about"] });
       qc.invalidateQueries({ queryKey: ["site-data"] });
     } catch (e: any) {
       toast.error(e.message || L("خطأ", "Error"));
