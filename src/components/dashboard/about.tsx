@@ -19,6 +19,8 @@ import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 import { toast } from "sonner";
 import { FileUpload } from "@/components/shared/file-upload";
 import { useDashboardT } from "@/lib/i18n";
+import { Zap, Headphones, Banknote, MapPinned } from "lucide-react";
+
 
 type About = {
   id: string;
@@ -56,12 +58,28 @@ const emptyAbout = {
   image: "",
 };
 
+const emptyExtra = {
+  badgeValue: "+15",
+  badgeLabelAr: "سنة من الخبرة",
+  badgeLabelEn: "Years of experience",
+  image2: "",
+  items: [
+    { icon: "zap", titleAr: "سرعة فائقة", titleEn: "Ultra-fast", descAr: "توصيل في نفس اليوم داخل القاهرة الكبرى و48-96 ساعة لكل المحافظات", descEn: "Same-day delivery in Greater Cairo and 48-96 hours for all governorates" },
+    { icon: "shield", titleAr: "أمان مضمون", titleEn: "Guaranteed safety", descAr: "تأمين كامل على كل شحنة مع تعويض كامل عند أي طارئ", descEn: "Full insurance on every shipment with complete compensation in case of any incident" },
+    { icon: "chart", titleAr: "تتبع مباشر", titleEn: "Live tracking", descAr: "نظام تتبع لحظي يخبرك بمكان شحنتك في كل خطوة", descEn: "Real-time tracking system that tells you where your shipment is at every step" },
+    { icon: "map", titleAr: "تغطية شاملة", titleEn: "Comprehensive coverage", descAr: "27 محافظة و40+ فرع ومستودع في كل أنحاء مصر", descEn: "27 governorates and 40+ branches and warehouses across Egypt" },
+    { icon: "cash", titleAr: "أسعار منافسة", titleEn: "Competitive prices", descAr: "أفضل الأسعار في السوق مع خصومات للكميات والشركات", descEn: "Best market prices with volume and corporate discounts" },
+    { icon: "headset", titleAr: "دعم 24/7", titleEn: "24/7 support", descAr: "فريق دعم متكامل على مدار الساعة لخدمتك في أي وقت", descEn: "Integrated support team available around the clock to serve you anytime" },
+  ],
+};
+
 export function DashboardAbout() {
   const { isAr } = useDashboardT();
   const qc = useQueryClient();
   const L = (ar: string, en: string) => (isAr ? ar : en);
 
   const [about, setAbout] = useState<any>({ ...emptyAbout });
+  const [extra, setExtra] = useState<any>({ ...emptyExtra });
   const [savingAbout, setSavingAbout] = useState(false);
   const [statModalOpen, setStatModalOpen] = useState(false);
   const [editingStat, setEditingStat] = useState<SiteStat | null>(null);
@@ -84,8 +102,18 @@ export function DashboardAbout() {
         subtitleEn: a.subtitleEn || "",
         descriptionAr: a.descriptionAr || "",
         descriptionEn: a.descriptionEn || "",
-        image: a.image || "",
+              image: a.image || "",
       });
+      try {
+        const parsed = a.features ? JSON.parse(a.features) : null;
+        setExtra({
+          ...emptyExtra,
+          ...(parsed || {}),
+          items: parsed?.items?.length ? parsed.items : emptyExtra.items,
+        });
+      } catch {
+        setExtra({ ...emptyExtra });
+      }
     }
   }, [aboutData]);
 
@@ -106,9 +134,9 @@ export function DashboardAbout() {
         subtitleEn: about.subtitleEn || "",
         descriptionAr: about.descriptionAr || "",
         descriptionEn: about.descriptionEn || "",
-        image: about.image || null,
+               image: about.image || null,
+        features: JSON.stringify(extra),
       });
-      toast.success(L("تم حفظ محتوى قسم من نحن", "About content saved"));
       qc.invalidateQueries({ queryKey: ["about-content"] });
       qc.invalidateQueries({ queryKey: ["site-data"] });
     } catch (e: any) {
@@ -327,13 +355,60 @@ export function DashboardAbout() {
               </div>
             </div>
 
-            {about.image && (
+                       {about.image && (
               <div className="rounded-xl border border-border overflow-hidden">
                 <div className="relative aspect-[4/3] bg-muted max-h-64">
                   <img src={about.image} alt="about" className="w-full h-full object-cover" />
                 </div>
               </div>
             )}
+
+            {/* Years badge */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
+              <div className="space-y-1">
+                <Label className="text-xs">{L("رقم الشارة", "Badge value")}</Label>
+                <Input value={extra.badgeValue} dir="ltr" className="h-10" placeholder="+15"
+                  onChange={(e) => setExtra({ ...extra, badgeValue: e.target.value })} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">{L("نص الشارة (عربي)", "Badge label (Arabic)")}</Label>
+                <Input value={extra.badgeLabelAr} dir="rtl" className="h-10"
+                  onChange={(e) => setExtra({ ...extra, badgeLabelAr: e.target.value })} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">{L("نص الشارة (إنجليزي)", "Badge label (English)")}</Label>
+                <Input value={extra.badgeLabelEn} dir="ltr" className="h-10"
+                  onChange={(e) => setExtra({ ...extra, badgeLabelEn: e.target.value })} />
+              </div>
+            </div>
+
+            {/* Small overlay image */}
+            <FileUpload
+              label={L("الصورة الصغيرة (غرفة العمليات)", "Small overlay image")}
+              accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+              currentUrl={extra.image2}
+              onUploaded={(url) => setExtra({ ...extra, image2: url })}
+              type="image"
+            />
+
+            {/* Features editor */}
+            <div className="space-y-3 pt-2">
+              <h5 className="font-bold text-sm">{L("المميزات", "Features")}</h5>
+              {extra.items.map((it: any, i: number) => (
+                <div key={i} className="rounded-xl border border-border p-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <Input value={it.titleAr} dir="rtl" className="h-9" placeholder={L("العنوان (عربي)", "Title (Arabic)")}
+                      onChange={(e) => { const items = [...extra.items]; items[i] = { ...it, titleAr: e.target.value }; setExtra({ ...extra, items }); }} />
+                    <Input value={it.titleEn} dir="ltr" className="h-9" placeholder="Title (English)"
+                      onChange={(e) => { const items = [...extra.items]; items[i] = { ...it, titleEn: e.target.value }; setExtra({ ...extra, items }); }} />
+                    <Input value={it.descAr} dir="rtl" className="h-9" placeholder={L("الوصف (عربي)", "Description (Arabic)")}
+                      onChange={(e) => { const items = [...extra.items]; items[i] = { ...it, descAr: e.target.value }; setExtra({ ...extra, items }); }} />
+                    <Input value={it.descEn} dir="ltr" className="h-9" placeholder="Description (English)"
+                      onChange={(e) => { const items = [...extra.items]; items[i] = { ...it, descEn: e.target.value }; setExtra({ ...extra, items }); }} />
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </Card>
