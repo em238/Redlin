@@ -112,12 +112,15 @@ export function DashboardAbout() {
                 image: a.image || "",
       });
       try {
-        const parsed = a.features ? JSON.parse(a.features) : null;
-        setExtra({
-          ...emptyExtra,
-          ...(parsed || {}),
-          items: parsed?.items?.length ? parsed.items : emptyExtra.items,
-        });
+       let parsed: any = null;
+      try { parsed = a.features ? JSON.parse(a.features) : null; } catch { parsed = null; }
+      // لو المحفوظ مصفوفة قديمة (من الـ seed) نحوّلها لشكل الكائن
+      const obj = Array.isArray(parsed) ? { items: parsed } : (parsed || {});
+      setExtra({
+        ...emptyExtra,
+        ...obj,
+        items: Array.isArray(obj.items) && obj.items.length ? obj.items : emptyExtra.items,
+      });
       } catch {
         setExtra({ ...emptyExtra });
       }
@@ -440,7 +443,7 @@ export function DashboardAbout() {
             <DialogTitle className="flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-primary" />
               {editingStat ? L("تعديل المؤشر", "Edit metric") : L("إضافة مؤشر", "Add metric")}
-            </DialogTitle>
+          </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-1">

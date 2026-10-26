@@ -49,6 +49,7 @@ const p1 = descParts[0] || t("about.p1");
 const p2 = descParts.length > 0 ? (descParts[1] || "") : t("about.p2");
 let extra: any = null;
 try { extra = ab?.features ? JSON.parse(ab.features) : null; } catch { extra = null; }
+if (Array.isArray(extra)) extra = { items: extra };
 
 const ICON_MAP: Record<string, any> = {
   zap: Zap, shield: ShieldCheck, chart: BarChart3, map: MapPinned,
