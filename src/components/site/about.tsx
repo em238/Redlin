@@ -34,8 +34,11 @@ export function About() {
   const y2 = useTransform(scrollYProgress, [0, 1], [-30, 30]);
   const FEATURES = isAr ? FEATURES_AR : FEATURES_EN;
   const { data: aboutData } = useQuery({
-  queryKey: ["about-content"],
+  queryKey: ["site-about"],
   queryFn: () => apiGet<{ about: any }>("/api/about"),
+  staleTime: 0,
+  refetchOnMount: "always",
+  refetchOnWindowFocus: true,
 });
 const aboutImage = aboutData ? (aboutData.about?.image || "/images/warehouse.png") : null;
 const ab = aboutData?.about;
@@ -98,15 +101,15 @@ const badgeLabel = (isAr ? extra?.badgeLabelAr : extra?.badgeLabelEn) || t("abou
               style={{ y: y2 }}
               className="hidden sm:block absolute -bottom-8 left-8 w-1/2 max-w-[280px] aspect-video rounded-2xl overflow-hidden shadow-2xl ring-4 ring-background"
             >
-              <Image src="/images/operations.png" alt="Operations center" fill sizes="280px" className="object-cover" />
+              <Image src={extra?.image2 || "/images/operations.png"} alt="Operations center" fill sizes="280px" className="object-cover" unoptimized />
             </motion.div>
             {/* +15 Years badge — anchored top-right inside parent */}
             <motion.div
               style={{ y: y1 }}
               className="hidden sm:block absolute top-6 end-6 glass rounded-2xl border border-border/60 px-5 py-4 shadow-xl"
             >
-              <div className="text-3xl font-black text-gradient-red">+15</div>
-              <div className="text-xs text-muted-foreground font-medium">{t("about.exp")}</div>
+              <div className="text-3xl font-black text-gradient-red">{badgeValue}</div>
+              <div className="text-xs text-muted-foreground font-medium">{badgeLabel}</div>
             </motion.div>
           </motion.div>
 
@@ -143,6 +146,7 @@ const badgeLabel = (isAr ? extra?.badgeLabelAr : extra?.badgeLabelEn) || t("abou
 
             {/* 3. Paragraphs — text-justify on mobile, text-start on sm+.
                 Uses text-slate-600/dark:text-slate-300 for richer color than muted-foreground. */}
+                
             <motion.p
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -166,7 +170,7 @@ const badgeLabel = (isAr ? extra?.badgeLabelAr : extra?.badgeLabelEn) || t("abou
 
             {/* 4. Features Grid */}
             <StaggerGroup className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 w-full" stagger={0.06}>
-              {FEATURES.map((f, i) => (
+              {(dbFeatures ?? FEATURES).map((f: any, i: number) => (
                 <StaggerItem key={i}>
                   <div className="flex gap-3 p-3 rounded-xl hover:bg-muted/40 transition-colors">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center shrink-0 icon-gold-ring">

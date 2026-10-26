@@ -21,7 +21,8 @@ export function Partners() {
     queryKey: ["partners"],
     queryFn: () => apiGet<{ partners: typeof FALLBACK }>("/api/partners"),
   });
-  const partners = data?.partners ?? FALLBACK;
+  const partners = data?.partners;
+  if (!partners || partners.length === 0) return null;
 
   // Fetch section content from /api/site for DB-managed bilingual heading
   const { data: siteData } = useQuery({
