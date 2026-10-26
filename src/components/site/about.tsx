@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
-import { ShieldCheck, Zap, Headphones, Banknote, MapPinned, BarChart3 } from "lucide-react";
+import { ShieldCheck, Zap, Headphones, Banknote, MapPinned, BarChart3, Truck, Package, Users, Star, Sparkles, Boxes, MapPin } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { StaggerGroup, StaggerItem } from "@/components/shared/section-reveal";
 import { useQuery } from "@tanstack/react-query";
@@ -47,6 +47,23 @@ const aboutDesc: string = (isAr ? ab?.descriptionAr : ab?.descriptionEn) || "";
 const descParts = aboutDesc.split(/\n+/).filter(Boolean);
 const p1 = descParts[0] || t("about.p1");
 const p2 = descParts.length > 0 ? (descParts[1] || "") : t("about.p2");
+let extra: any = null;
+try { extra = ab?.features ? JSON.parse(ab.features) : null; } catch { extra = null; }
+
+const ICON_MAP: Record<string, any> = {
+  zap: Zap, shield: ShieldCheck, chart: BarChart3, map: MapPinned,
+  cash: Banknote, headset: Headphones, truck: Truck, package: Package,
+  users: Users, star: Star, sparkles: Sparkles, boxes: Boxes, pin: MapPin,
+};
+const dbFeatures: any[] | null = extra?.items?.length
+  ? extra.items.map((it: any, i: number) => ({
+      icon: ICON_MAP[it.icon] || FEATURES_EN[i]?.icon || Zap,
+      title: isAr ? it.titleAr : it.titleEn,
+      desc: isAr ? it.descAr : it.descEn,
+    }))
+  : null;
+const badgeValue = extra?.badgeValue || "+15";
+const badgeLabel = (isAr ? extra?.badgeLabelAr : extra?.badgeLabelEn) || t("about.exp");
 
 
   return (
