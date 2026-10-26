@@ -82,14 +82,12 @@ export function Hero() {
 
     const scrollTo = (id: string) => document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });
 
-      // لا تعرض الهيرو لحد ما الداتا توصل، عشان ما تظهرش صورة أو نص قديم
-      if (!data || !heroContent) {
-        return <div className="min-h-[100svh] bg-zinc-950" />;
+       const active = images[idx];
+
+       if (!data || !heroContent || !active) {
+       return <div className="min-h-[100svh] bg-zinc-950" />;
       }
-
-      const active = images[idx];
-
-      return (
+       return (
       <section
       id="home"
       className="relative min-h-[100svh] flex flex-col overflow-hidden pt-20 bg-zinc-950"
