@@ -39,7 +39,7 @@ export function Hero() {
     queryKey: ["hero-images"],
     queryFn: () => apiGet<{ images: typeof FALLBACK_IMAGES }>("/api/hero-images"),
   });
-  const images = data?.images ?? FALLBACK_IMAGES;
+  const images = data?.images ?? [];
 
   // Fetch hero content from DB (falls back to i18n if not available)
   const { data: heroContent } = useQuery({
@@ -80,12 +80,17 @@ export function Hero() {
   const yContent = useTransform(scrollY, [0, 600], [0, 60]);
   const opacity = useTransform(scrollY, [0, 400], [1, 0]);
 
-  const scrollTo = (id: string) => document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });
+    const scrollTo = (id: string) => document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });
 
-  const active = images[idx] || images[0] || FALLBACK_IMAGES[0];
+      // لا تعرض الهيرو لحد ما الداتا توصل، عشان ما تظهرش صورة أو نص قديم
+      if (!data || !heroContent) {
+        return <div className="min-h-[100svh] bg-zinc-950" />;
+      }
 
-  return (
-    <section
+      const active = images[idx];
+
+      return (
+      <section
       id="home"
       className="relative min-h-[100svh] flex flex-col overflow-hidden pt-20 bg-zinc-950"
       onMouseEnter={() => setHoverPaused(true)}
