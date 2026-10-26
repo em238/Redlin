@@ -33,7 +33,7 @@ export function Testimonials() {
     queryKey: ["site-testimonials"],
     queryFn: () => apiGet<{ testimonials: typeof FALLBACK; sectionContent?: any[] }>("/api/site"),
   });
-  const items = data?.testimonials ?? FALLBACK;
+  const items = data?.testimonials ?? [];
   const sc = data?.sectionContent?.find((s: any) => s.section === "testimonials");
   const eyebrow = isAr ? (sc?.badgeAr || t("test.eyebrow")) : (sc?.badgeEn || t("test.eyebrow"));
   const title = isAr ? (sc?.titleAr || t("test.title")) : (sc?.titleEn || t("test.title"));
@@ -51,8 +51,8 @@ export function Testimonials() {
     return () => clearInterval(interval);
   }, [auto, items.length, next]);
 
-  if (items.length === 0) return null;
-  const current = items[index % items.length] as any;
+  const hasItems = items.length > 0;
+const current = hasItems ? (items[index % items.length] as any) : null;
 
   // Strict fallback rule per the localization spec:
   //   Arabic  → *Ar fields (|| fallback to the EN field, || legacy TEST_EN)
@@ -91,6 +91,7 @@ export function Testimonials() {
 
         <ReviewModal open={reviewOpen} onClose={() => { setReviewOpen(false); queryClient.invalidateQueries({ queryKey: ["site-testimonials"] }); }} />
 
+        {hasItems && current && (
         <div className="max-w-4xl mx-auto" onMouseEnter={() => setAuto(false)} onMouseLeave={() => setAuto(true)}>
           <div className="relative">
             <AnimatePresence mode="wait">
@@ -179,8 +180,15 @@ export function Testimonials() {
             >
               {isAr ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
             </button>
-          </div>
+                   </div>
         </div>
+        )}
+
+        {!hasItems && data && (
+          <p className="text-center text-sm text-muted-foreground">
+            {isAr ? "كن أول من يضيف تقييمًا" : "Be the first to leave a review"}
+          </p>
+        )}
       </div>
     </section>
   );
