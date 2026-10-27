@@ -16,6 +16,7 @@ import { DashboardPartners } from "./partners";
 import { DashboardMapHubs } from "./map-hubs";
 import { DashboardContactInfo } from "./contact-info";
 import { DashboardMessages } from "./messages";
+import { DashboardSubscribers } from "./subscribers";
 import { DashboardReviews } from "./reviews";
 import { DashboardUsers } from "./users";
 import { DashboardRoles } from "./roles";
@@ -26,7 +27,7 @@ import { useT, useDashboardT, useI18n } from "@/lib/i18n";
 
 const VALID_TABS: DashboardSection[] = [
   "hero", "about", "services", "how-it-works", "videos", "partners",
-  "map", "contact", "reviews", "footer", "users", "roles", "settings",
+    "map", "contact", "reviews", "subscribers", "footer", "users", "roles", "settings",
 ];
 const TAB_STORAGE_KEY = "redline_dashboard_active_tab";
 
@@ -119,6 +120,7 @@ export function DashboardApp() {
   const sections: Record<string, React.ReactNode> = {
     hero: <DashboardHero />,
     about: <DashboardAbout />,
+    
     services: <DashboardServices />,
     "how-it-works": <DashboardHowItWorks />,
     videos: <DashboardVideos />,
@@ -126,6 +128,7 @@ export function DashboardApp() {
     map: <DashboardMapHubs />,
     contact: <DashboardContactInfo />,
     messages: <DashboardMessages />,
+    subscribers: <DashboardSubscribers />,
     reviews: <DashboardReviews />,
     footer: <DashboardFooterLinks />,
     users: <DashboardUsers />,
