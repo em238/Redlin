@@ -3,11 +3,24 @@
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
-import { ShieldCheck, Zap, Headphones, Banknote, MapPinned, BarChart3, Truck, Package, Users, Star, Sparkles, Boxes, MapPin } from "lucide-react";
+import {
+  ShieldCheck,
+  Zap,
+  Headphones,
+  Banknote,
+  MapPinned,
+  BarChart3,
+  Truck,
+  Package,
+  Users,
+  Star,
+  Sparkles,
+  Boxes,
+  MapPin,
+} from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { StaggerGroup, StaggerItem } from "@/components/shared/section-reveal";
 import { useQuery } from "@tanstack/react-query";
-import { apiGet } from "@/lib/api";
 
 const FEATURES_AR = [
   { icon: Zap, title: "سرعة فائقة", desc: "توصيل في نفس اليوم داخل القاهرة الكبرى و48-96 ساعة لكل المحافظات" },
@@ -17,6 +30,7 @@ const FEATURES_AR = [
   { icon: Banknote, title: "أسعار منافسة", desc: "أفضل الأسعار في السوق مع خصومات للكميات والشركات" },
   { icon: Headphones, title: "دعم 24/7", desc: "فريق دعم متكامل على مدار الساعة لخدمتك في أي وقت" },
 ];
+
 const FEATURES_EN = [
   { icon: Zap, title: "Ultra-fast", desc: "Same-day delivery in Greater Cairo and 48-96 hours for all governorates" },
   { icon: ShieldCheck, title: "Guaranteed safety", desc: "Full insurance on every shipment with complete compensation in case of any incident" },
@@ -26,49 +40,91 @@ const FEATURES_EN = [
   { icon: Headphones, title: "24/7 support", desc: "Integrated support team available around the clock to serve you anytime" },
 ];
 
+const ICON_MAP: Record<string, any> = {
+  zap: Zap,
+  shield: ShieldCheck,
+  chart: BarChart3,
+  map: MapPinned,
+  cash: Banknote,
+  headset: Headphones,
+  truck: Truck,
+  package: Package,
+  users: Users,
+  star: Star,
+  sparkles: Sparkles,
+  boxes: Boxes,
+  pin: MapPin,
+};
+
 export function About() {
   const { t, isAr } = useT();
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const y1 = useTransform(scrollYProgress, [0, 1], [40, -40]);
   const y2 = useTransform(scrollYProgress, [0, 1], [-30, 30]);
-  const FEATURES = isAr ? FEATURES_AR : FEATURES_EN;
+
+  const fallbackFeatures = isAr ? FEATURES_AR : FEATURES_EN;
+
+  // جلب مباشر لتجاوز كاش المتصفح وكاش السيرفر
   const { data: aboutData } = useQuery({
-  queryKey: ["site-about"],
-  queryFn: () => apiGet<{ about: any }>("/api/about"),
-  staleTime: 0,
-  refetchOnMount: "always",
-  refetchOnWindowFocus: true,
-});
-const aboutImage = aboutData ? (aboutData.about?.image || "/images/warehouse.png") : null;
-const ab = aboutData?.about;
-const aboutBadge = (isAr ? ab?.titleAr : ab?.titleEn) || t("about.eyebrow");
-const aboutSubtitle =
-  (isAr ? ab?.subtitleAr : ab?.subtitleEn) ||
-  (isAr ? "عصب الشحن في مصر" : "Egypt's Shipping Backbone");
-const aboutDesc: string = (isAr ? ab?.descriptionAr : ab?.descriptionEn) || "";
-const descParts = aboutDesc.split(/\n+/).filter(Boolean);
-const p1 = descParts[0] || t("about.p1");
-const p2 = descParts.length > 0 ? (descParts[1] || "") : t("about.p2");
-let extra: any = null;
-try { extra = ab?.features ? JSON.parse(ab.features) : null; } catch { extra = null; }
-if (Array.isArray(extra)) extra = { items: extra };
+    queryKey: ["site-about"],
+    queryFn: async () => {
+      const res = await fetch(`/api/about?t=${Date.now()}`, {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+        },
+      });
+      if (!res.ok) throw new Error("Failed to load about data");
+      return res.json();
+    },
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
+  });
 
-const ICON_MAP: Record<string, any> = {
-  zap: Zap, shield: ShieldCheck, chart: BarChart3, map: MapPinned,
-  cash: Banknote, headset: Headphones, truck: Truck, package: Package,
-  users: Users, star: Star, sparkles: Sparkles, boxes: Boxes, pin: MapPin,
-};
-const dbFeatures: any[] | null = extra?.items?.length
-  ? extra.items.map((it: any, i: number) => ({
-      icon: ICON_MAP[it.icon] || FEATURES_EN[i]?.icon || Zap,
-      title: isAr ? it.titleAr : it.titleEn,
-      desc: isAr ? it.descAr : it.descEn,
-    }))
-  : null;
-const badgeValue = extra?.badgeValue || "+15";
-const badgeLabel = (isAr ? extra?.badgeLabelAr : extra?.badgeLabelEn) || t("about.exp");
+  const ab = aboutData?.about;
+  const aboutImage = ab?.image || "/images/warehouse.png";
+  const aboutBadge = (isAr ? ab?.titleAr : ab?.titleEn) || t("about.eyebrow");
+  const aboutSubtitle =
+    (isAr ? ab?.subtitleAr : ab?.subtitleEn) ||
+    (isAr ? "عصب الشحن في مصر" : "Egypt's Shipping Backbone");
 
+  const aboutDesc: string = (isAr ? ab?.descriptionAr : ab?.descriptionEn) || "";
+  const descParts = typeof aboutDesc === "string" ? aboutDesc.split(/\n+/).filter(Boolean) : [];
+  const p1 = descParts[0] || t("about.p1");
+  const p2 = descParts.length > 1 ? descParts[1] : (descParts.length === 1 ? "" : t("about.p2"));
+
+  // معالجة آمنة لـ features لتجنب انهيار الصفحة
+  let extra: any = null;
+  try {
+    if (ab?.features) {
+      extra = typeof ab.features === "string" ? JSON.parse(ab.features) : ab.features;
+    }
+  } catch {
+    extra = null;
+  }
+
+  if (Array.isArray(extra)) {
+    extra = { items: extra };
+  }
+
+  const dbFeatures: any[] | null = Array.isArray(extra?.items) && extra.items.length > 0
+    ? extra.items.map((it: any, i: number) => {
+        const fallbackIcon = fallbackFeatures[i]?.icon || Zap;
+        const SelectedIcon = (it?.icon && ICON_MAP[it.icon]) ? ICON_MAP[it.icon] : fallbackIcon;
+        return {
+          icon: SelectedIcon || Zap,
+          title: (isAr ? it?.titleAr : it?.titleEn) || fallbackFeatures[i]?.title || "",
+          desc: (isAr ? it?.descAr : it?.descEn) || fallbackFeatures[i]?.desc || "",
+        };
+      })
+    : null;
+
+  const currentFeatures = dbFeatures ?? fallbackFeatures;
+  const badgeValue = extra?.badgeValue || "+15";
+  const badgeLabel = (isAr ? extra?.badgeLabelAr : extra?.badgeLabelEn) || t("about.exp");
 
   return (
     <section id="about" className="py-14 sm:py-24 lg:py-28 overflow-hidden">
@@ -83,9 +139,8 @@ const badgeLabel = (isAr ? extra?.badgeLabelAr : extra?.badgeLabelEn) || t("abou
             transition={{ duration: 0.6 }}
             className="relative w-full"
           >
-            {/* Main warehouse image */}
             <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-xl w-full">
-                            {aboutImage && (
+              {aboutImage && (
                 <Image
                   src={aboutImage}
                   alt="Redline warehouses"
@@ -96,14 +151,21 @@ const badgeLabel = (isAr ? extra?.badgeLabelAr : extra?.badgeLabelEn) || t("abou
                 />
               )}
             </div>
-            {/* Overlapping operations image — hidden on mobile, safely anchored on desktop */}
+
             <motion.div
               style={{ y: y2 }}
               className="hidden sm:block absolute -bottom-8 left-8 w-1/2 max-w-[280px] aspect-video rounded-2xl overflow-hidden shadow-2xl ring-4 ring-background"
             >
-              <Image src={extra?.image2 || "/images/operations.png"} alt="Operations center" fill sizes="280px" className="object-cover" unoptimized />
+              <Image
+                src={extra?.image2 || "/images/operations.png"}
+                alt="Operations center"
+                fill
+                sizes="280px"
+                className="object-cover"
+                unoptimized
+              />
             </motion.div>
-            {/* +15 Years badge — anchored top-right inside parent */}
+
             <motion.div
               style={{ y: y1 }}
               className="hidden sm:block absolute top-6 end-6 glass rounded-2xl border border-border/60 px-5 py-4 shadow-xl"
@@ -114,10 +176,7 @@ const badgeLabel = (isAr ? extra?.badgeLabelAr : extra?.badgeLabelEn) || t("abou
           </motion.div>
 
           {/* Right Column — Content */}
-          {/* gap-4 gives consistent vertical rhythm; items-start + text-start
-              make everything align to the start edge (left in LTR, right in RTL) */}
           <div className="flex flex-col items-start text-start gap-4">
-            {/* 1. Pill Badge — self-start snaps it flush with the start edge */}
             <motion.span
               initial={{ opacity: 0, y: 8 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -129,9 +188,6 @@ const badgeLabel = (isAr ? extra?.badgeLabelAr : extra?.badgeLabelEn) || t("abou
               {aboutBadge}
             </motion.span>
 
-            {/* 2. Main Heading — inline text flow (not flex), unified for both languages.
-                <bdi> protects "Redline" from BiDi reordering in RTL context.
-                Same order for AR and EN: Redline — subtitle. */}
             <motion.h2
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -144,9 +200,6 @@ const badgeLabel = (isAr ? extra?.badgeLabelAr : extra?.badgeLabelEn) || t("abou
               <span>{aboutSubtitle}</span>
             </motion.h2>
 
-            {/* 3. Paragraphs — text-justify on mobile, text-start on sm+.
-                Uses text-slate-600/dark:text-slate-300 for richer color than muted-foreground. */}
-                
             <motion.p
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -154,9 +207,10 @@ const badgeLabel = (isAr ? extra?.badgeLabelAr : extra?.badgeLabelEn) || t("abou
               transition={{ duration: 0.5, delay: 0.1 }}
               className="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed text-justify sm:text-start"
             >
-            {p1}
+              {p1}
             </motion.p>
-                        {p2 && (
+
+            {p2 && (
               <motion.p
                 initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -168,21 +222,23 @@ const badgeLabel = (isAr ? extra?.badgeLabelAr : extra?.badgeLabelEn) || t("abou
               </motion.p>
             )}
 
-            {/* 4. Features Grid */}
             <StaggerGroup className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 w-full" stagger={0.06}>
-              {(dbFeatures ?? FEATURES).map((f: any, i: number) => (
-                <StaggerItem key={i}>
-                  <div className="flex gap-3 p-3 rounded-xl hover:bg-muted/40 transition-colors">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center shrink-0 icon-gold-ring">
-                      <f.icon className="w-5 h-5 text-primary" />
+              {currentFeatures.map((f: any, i: number) => {
+                const IconComp = f.icon || Zap;
+                return (
+                  <StaggerItem key={i}>
+                    <div className="flex gap-3 p-3 rounded-xl hover:bg-muted/40 transition-colors">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center shrink-0 icon-gold-ring">
+                        <IconComp className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-bold text-sm">{f.title}</div>
+                        <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{f.desc}</div>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <div className="font-bold text-sm">{f.title}</div>
-                      <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{f.desc}</div>
-                    </div>
-                  </div>
-                </StaggerItem>
-              ))}
+                  </StaggerItem>
+                );
+              })}
             </StaggerGroup>
           </div>
         </div>
