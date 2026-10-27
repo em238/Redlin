@@ -155,7 +155,6 @@ export function Footer() {
             <p className="text-sm text-zinc-400 leading-relaxed max-w-sm">
               {bio}
             </p>
-            </div>
             <div className="mt-5 flex flex-wrap gap-2">
               {SOCIAL_CHANNELS.map((ch) => {
                 const url = (fc as any)?.[ch.field] as string | undefined;
