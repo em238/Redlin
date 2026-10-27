@@ -65,7 +65,6 @@ export function About() {
 
   const fallbackFeatures = isAr ? FEATURES_AR : FEATURES_EN;
 
-  // جلب مباشر لتجاوز كاش المتصفح وكاش السيرفر
   const { data: aboutData } = useQuery({
     queryKey: ["site-about"],
     queryFn: async () => {
@@ -96,7 +95,6 @@ export function About() {
   const p1 = descParts[0] || t("about.p1");
   const p2 = descParts.length > 1 ? descParts[1] : (descParts.length === 1 ? "" : t("about.p2"));
 
-  // معالجة آمنة لـ features لتجنب انهيار الصفحة
   let extra: any = null;
   try {
     if (ab?.features) {
@@ -188,15 +186,13 @@ export function About() {
               {aboutBadge}
             </motion.span>
 
-           <motion.h2
+            <motion.h2
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
               className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-tight mb-2"
             >
-              <span className="text-red-600 font-extrabold"><bdi>Redline</bdi></span>
-              <span className="mx-2 text-slate-400 font-normal">—</span>
               <span>{aboutSubtitle}</span>
             </motion.h2>
 
