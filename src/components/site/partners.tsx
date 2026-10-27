@@ -21,8 +21,7 @@ export function Partners() {
     queryKey: ["partners"],
     queryFn: () => apiGet<{ partners: typeof FALLBACK }>("/api/partners"),
   });
-  const partners = data?.partners;
-  if (!partners || partners.length === 0) return null;
+    const partners = data?.partners;
 
   // Fetch section content from /api/site for DB-managed bilingual heading
   const { data: siteData } = useQuery({
@@ -34,7 +33,7 @@ export function Partners() {
   const title = isAr ? (sc?.titleAr || t("partners.title")) : (sc?.titleEn || t("partners.title"));
   const subtitle = isAr ? (sc?.descriptionAr || t("partners.subtitle")) : (sc?.descriptionEn || t("partners.subtitle"));
 
-  if (partners.length === 0) return null;
+    if (!partners || partners.length === 0) return null;
 
   return (
     <section id="partners" className="py-14 sm:py-24 lg:py-28 bg-muted/30">
@@ -52,16 +51,16 @@ export function Partners() {
                 href={p.website || "#"}
                 target={p.website ? "_blank" : undefined}
                 rel={p.website ? "noopener noreferrer" : undefined}
-                className="card-premium shine relative group block rounded-2xl bg-card border border-border/60 shadow-soft p-6 h-28 flex flex-col items-center justify-center gap-2 overflow-hidden"
+                className="card-premium shine relative group block rounded-2xl bg-card border border-border/60 shadow-soft p-3 sm:p-6 h-36 sm:h-40 flex flex-col items-center justify-center gap-2 overflow-hidden"
               >
                 {/* ONLY images — no icons */}
-                <div className="w-40 h-24 flex items-center justify-center">
+              <div className="w-full sm:w-40 h-20 sm:h-24 flex items-center justify-center">
                   <Image
                     src={p.logo || "/images/partner-1.png"}
                     alt={p.name}
-                    width={160}
-                    height={96} 
-                    className="object-contain max-h-24 max-w-40 group-hover:scale-110 transition-transform duration-300"
+                                        width={160}
+                    height={96}
+                    className="object-contain w-auto h-auto max-h-16 sm:max-h-24 max-w-full sm:max-w-40 group-hover:scale-110 transition-transform duration-300"
                   />
                 </div>
                 <div className="text-sm font-semibold text-foreground/70 group-hover:text-foreground text-center transition-colors">{p.name}</div>
