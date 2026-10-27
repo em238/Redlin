@@ -298,19 +298,7 @@ export function Contact() {
                   <h3 className="text-xl sm:text-2xl font-black tracking-tight mb-1">{t("contact.direct")}</h3>
                   <p className="text-white/60 text-sm leading-relaxed max-w-md">{t("contact.directDesc")}</p>
                 </div>
-                               {/* Quick action buttons */}
-                <div className="flex gap-2">
-                  <a href={callHref} className="w-11 h-11 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-all hover:scale-110 border border-white/10" aria-label="Call">
-                    <Phone className="w-4.5 h-4.5" />
-                  </a>
-                  <a href={waHref} target="_blank" rel="noopener noreferrer" className="w-11 h-11 rounded-xl bg-white/10 hover:bg-emerald-400/25 backdrop-blur-sm flex items-center justify-center transition-all hover:scale-110 border border-white/10" aria-label="WhatsApp">
-                    <FaWhatsapp className="w-4.5 h-4.5" />
-                  </a>
-                  <a href={mailHref} className="w-11 h-11 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-all hover:scale-110 border border-white/10" aria-label="Email">
-                    <Mail className="w-4.5 h-4.5" />
-                  </a>
-                </div>
-              </div>
+               
 
               {/* Info sections grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
