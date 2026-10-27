@@ -7,9 +7,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
-import { apiGet } from "@/lib/api";
+import { apiGet, apiPost } from "@/lib/api";
 import { toast } from "sonner";
 import { useState } from "react";
+
 
 // Social media channel config — each entry maps a DB field to its Lucide icon + label.
 // The footer only renders icons whose URL is non-empty (admin can remove a channel
@@ -109,10 +110,20 @@ export function Footer() {
   // Match the help list item used to jump to the contact section (track shipment).
   const trackItem = isAr ? LINKS_AR.help[0] : LINKS_EN.help[0];
 
-  const subscribe = () => {
-    if (!email) { toast.error(isAr ? "أدخل بريدك الإلكتروني" : "Please enter your email"); return; }
-    toast.success(isAr ? "تم الاشتراك في النشرة البريدية!" : "Successfully subscribed to the newsletter!");
-    setEmail("");
+    const subscribe = async () => {
+    const value = email.trim();
+    if (!value) { toast.error(isAr ? "أدخل بريدك الإلكتروني" : "Please enter your email"); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      toast.error(isAr ? "بريد غير صحيح" : "Invalid email");
+      return;
+    }
+    try {
+      await apiPost("/api/subscribers", { email: value });
+      toast.success(isAr ? "تم الاشتراك في النشرة البريدية!" : "Successfully subscribed to the newsletter!");
+      setEmail("");
+    } catch (e: any) {
+      toast.error(e?.message || (isAr ? "حدث خطأ، حاول مرة أخرى" : "Something went wrong, please try again"));
+    }
   };
 
   const go = (id: string) => document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });

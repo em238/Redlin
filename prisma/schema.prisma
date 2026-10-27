@@ -335,3 +335,9 @@ model UploadedFile {
   data      Bytes    @db.LongBlob
   createdAt DateTime @default(now())
 }
+
+model Subscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique @db.VarChar(255)
+  createdAt DateTime @default(now())
+}
