@@ -33,9 +33,15 @@ export function Navbar() {
   const activeSection = useScrollSpy(NAV_KEYS.map((l) => l.href), 140);
 
   const go = (href: string) => {
-    setMobileOpen(false);
-    document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
-  };
+  setMobileOpen(false);
+  // استنى القائمة تتقفل وبعدين اسكرول
+  setTimeout(() => {
+    const el = document.querySelector(href);
+    if (!el) return;
+    const top = el.getBoundingClientRect().top + window.scrollY - 70; // 70 = ارتفاع الهيدر تقريبًا
+    window.scrollTo({ top: href === "#home" ? 0 : top, behavior: "smooth" });
+  }, 300);
+};
 
   return (
     <>
@@ -158,7 +164,7 @@ export function Navbar() {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="lg:hidden overflow-hidden bg-background/98 border-b border-border"
+              className="lg:hidden overflow-hidden bg-background border-b border-border shadow-xl"
             >
               <nav className="container mx-auto px-4 py-3 flex flex-col gap-0.5">
               {NAV_KEYS.map((link) => {
