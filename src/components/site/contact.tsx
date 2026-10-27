@@ -297,8 +297,8 @@ export function Contact() {
                   />
                   <h3 className="text-xl sm:text-2xl font-black tracking-tight mb-1">{t("contact.direct")}</h3>
                   <p className="text-white/60 text-sm leading-relaxed max-w-md">{t("contact.directDesc")}</p>
-                </div>
-               
+                                </div>
+              </div>
 
               {/* Info sections grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
