@@ -188,7 +188,7 @@ export function About() {
               {aboutBadge}
             </motion.span>
 
-            <motion.h2
+           <motion.h2
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
