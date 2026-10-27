@@ -129,7 +129,7 @@ export function Navbar() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setLocale(isAr ? "en" : "ar")}
-                className={`rounded-lg transition-colors ${scrolled ? "text-foreground hover:bg-muted" : "text-white hover:bg-white/10"}`}
+                className={`rounded-lg transition-colors ${solid ? "text-foreground hover:bg-muted" : "text-white hover:bg-white/10"}`}
                 aria-label="Language"
               >
                 <Globe className="w-[18px] h-[18px]" />
@@ -138,8 +138,8 @@ export function Navbar() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className={`rounded-lg transition-colors ${scrolled ? "text-foreground hover:bg-muted" : "text-white hover:bg-white/10"}`}
-                aria-label="تبديل السمة"
+                className={`rounded-lg transition-colors ${solid ? "text-foreground hover:bg-muted" : "text-white hover:bg-white/10"}`}
+                 aria-label="تبديل السمة"
               >
                 {theme === "dark" ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
               </Button>
@@ -148,7 +148,7 @@ export function Navbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className={`lg:hidden rounded-lg transition-colors ${scrolled ? "text-foreground hover:bg-muted" : "text-white hover:bg-white/10"}`}
+                className={`lg:hidden rounded-lg transition-colors ${solid ? "text-foreground hover:bg-muted" : "text-white hover:bg-white/10"}`}
                 onClick={() => setMobileOpen((v) => !v)}
                 aria-label="القائمة"
               >
