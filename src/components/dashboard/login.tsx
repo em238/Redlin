@@ -119,7 +119,7 @@ export function DashboardLogin() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="h-12 ps-10"
-                  placeholder="admin@redline.eg"
+                  placeholder="name@example.com"
                   dir="ltr"
                 />
               </div>
@@ -134,7 +134,7 @@ export function DashboardLogin() {
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && login()}
                   className="h-12 ps-10"
-                  placeholder="••••••••"
+                  placeholder=""
                   dir="ltr"
                 />
               </div>
