@@ -16,6 +16,7 @@ export function DashboardTopbar() {
   const TITLES: Record<DashboardSection, { title: string; subtitle: string }> = {
     hero: { title: t("d.nav.hero"), subtitle: t("d.topbar.heroSub") },
     about: { title: t("d.nav.about"), subtitle: t("d.topbar.aboutSub") },
+    subscribers: { title: t("d.nav.subscribers"), subtitle: t("d.topbar.subscribersSub") },
     services: { title: t("d.nav.services"), subtitle: t("d.topbar.servicesSub") },
     "how-it-works": { title: t("d.nav.howItWorks"), subtitle: t("d.topbar.howItWorksSub") },
     videos: { title: t("d.nav.videos"), subtitle: t("d.topbar.videosSub") },

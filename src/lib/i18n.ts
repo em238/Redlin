@@ -230,6 +230,8 @@ export const MESSAGES: Record<Locale, Record<string, string>> = {
     // Sidebar
     "d.nav.hero": "الهيرو وشريط التمرير",
     "d.nav.about": "من نحن والإحصائيات",
+    "d.nav.subscribers": "المشتركين",
+    "d.topbar.subscribersSub": "إيميلات الزوار المشتركين في النشرة البريدية",
     "d.nav.services": "خدماتنا",
     "d.nav.howItWorks": "كيف نعمل",
     "d.nav.videos": "معرض الفيديوهات",
@@ -771,6 +773,8 @@ export const MESSAGES: Record<Locale, Record<string, string>> = {
     // Sidebar
     "d.nav.hero": "Hero & Slider",
     "d.nav.about": "About Us & Metrics",
+    "d.nav.subscribers": "Subscribers",
+    "d.topbar.subscribersSub": "Emails of visitors subscribed to the newsletter",
     "d.nav.services": "Services",
     "d.nav.howItWorks": "How It Works",
     "d.nav.videos": "Video Gallery",
