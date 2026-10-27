@@ -134,7 +134,7 @@ export function DashboardLogin() {
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && login()}
                   className="h-12 ps-10"
-                  placeholder=""
+                  placeholder="•••••••••••"
                   dir="ltr"
                 />
               </div>
