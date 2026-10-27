@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Boxes, ListChecks, Video, DollarSign,
   MessageSquare, Settings, LogOut, X, Globe, ChevronLeft, ChevronRight,
   ImageIcon, Handshake, Users, ShieldCheck, PanelLeftClose, PanelLeftOpen,
-  Link as LinkIcon, Inbox,
+  Link as LinkIcon, Inbox, Mail,
 } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -38,6 +38,7 @@ export function DashboardSidebar() {
   const NAV: { id: DashboardSection; label: string; icon: any }[] = [
     { id: "hero", label: t("d.nav.hero"), icon: ImageIcon },
     { id: "about", label: t("d.nav.about"), icon: LayoutDashboard },
+    { id: "subscribers", label: t("d.nav.subscribers"), icon: Mail },
     { id: "services", label: t("d.nav.services"), icon: Boxes },
     { id: "how-it-works", label: t("d.nav.howItWorks"), icon: ListChecks },
     { id: "videos", label: t("d.nav.videos"), icon: Video },
