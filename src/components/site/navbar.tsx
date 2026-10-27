@@ -29,6 +29,7 @@ export function Navbar() {
   const { scrollY } = useScroll();
 
   useMotionValueEvent(scrollY, "change", (latest) => setScrolled(latest > 24));
+  const solid = scrolled || mobileOpen;
 
   const activeSection = useScrollSpy(NAV_KEYS.map((l) => l.href), 140);
 
@@ -48,7 +49,7 @@ export function Navbar() {
       <ScrollProgress />
       <header
         className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
-          scrolled ? "bg-background/95 border-b border-border/60 shadow-soft" : "bg-transparent"
+          solid ? "bg-background border-b border-border/60 shadow-soft" : "bg-transparent"
         }`}
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -62,7 +63,7 @@ export function Navbar() {
               className="flex items-center shrink-0 group focus:outline-none"
               aria-label="RedLine Transport"
             >
-              {!scrolled ? (
+              {!solid ? (
                 /* Not scrolled — always white logo (over dark hero image) */
                 <Image
                   src="/redline-transport-white.png"
