@@ -155,16 +155,6 @@ export function Footer() {
             <p className="text-sm text-zinc-400 leading-relaxed max-w-sm">
               {bio}
             </p>
-            <div className="mt-5 space-y-2 text-sm">
-              <div className="flex items-center gap-2 text-zinc-400">
-                <MapPin className="w-4 h-4 text-primary" /> {address}
-              </div>
-              <a href="tel:19999" className="flex items-center gap-2 text-zinc-400 hover:text-white">
-                <Phone className="w-4 h-4 text-primary" /> {isAr ? "19999 (موحد)" : "19999 (nationwide)"}
-              </a>
-              <a href="mailto:support@redline.eg" className="flex items-center gap-2 text-zinc-400 hover:text-white">
-                <Mail className="w-4 h-4 text-primary" /> support@redline.eg
-              </a>
             </div>
             <div className="mt-5 flex flex-wrap gap-2">
               {SOCIAL_CHANNELS.map((ch) => {
