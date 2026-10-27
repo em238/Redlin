@@ -60,17 +60,17 @@ export function Contact() {
   const fromDb = (type: string, fallback: any[]) => {
     const rows = dbItems.filter((i) => i.type === type);
     if (rows.length === 0) return fallback;
-    return rows.map((r) => ({
-      label: isAr ? r.labelAr : r.labelEn,
-      value: r.value || "",
-      href:
-        r.href ||
-        (type === "phone"
-          ? `tel:${(r.value || "").replace(/\s/g, "")}`
-          : type === "email"
-          ? `mailto:${r.value}`
-          : undefined),
-    }));
+        return rows.map((r) => {
+      const v = (r.value || "").trim();
+      let href: string | undefined;
+      if (type === "phone") href = `tel:${v.replace(/[^\d+]/g, "")}`;
+      else if (type === "email") href = `mailto:${v}`;
+      return {
+        label: isAr ? r.labelAr : r.labelEn,
+        value: v,
+        href,
+      };
+    });
   };
 
   const INFO = [
@@ -81,11 +81,12 @@ export function Contact() {
 
   const firstPhone = dbItems.find((i) => i.type === "phone");
   const firstEmail = dbItems.find((i) => i.type === "email");
-  const callHref = firstPhone ? `tel:${(firstPhone.value || "").replace(/\s/g, "")}` : "tel:19999";
+    const clean = (s: string) => (s || "").replace(/[^\d+]/g, "");
+  const callHref = firstPhone ? `tel:${clean(firstPhone.value)}` : "tel:19999";
   const waHref = firstPhone
-    ? `https://wa.me/${(firstPhone.value || "").replace(/\D/g, "").replace(/^0/, "20")}`
+    ? `https://wa.me/${clean(firstPhone.value).replace(/^\+/, "").replace(/^0/, "20")}`
     : "https://wa.me/201000000000";
-  const mailHref = firstEmail ? `mailto:${firstEmail.value}` : "mailto:info@redline.eg";
+  const mailHref = firstEmail ? `mailto:${(firstEmail.value || "").trim()}` : "mailto:info@redline.eg";
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -297,15 +298,15 @@ export function Contact() {
                   <h3 className="text-xl sm:text-2xl font-black tracking-tight mb-1">{t("contact.direct")}</h3>
                   <p className="text-white/60 text-sm leading-relaxed max-w-md">{t("contact.directDesc")}</p>
                 </div>
-                {/* Quick action buttons */}
+                               {/* Quick action buttons */}
                 <div className="flex gap-2">
-                  <a href="tel:19999" className="w-11 h-11 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-all hover:scale-110 border border-white/10" aria-label="Call">
+                  <a href={callHref} className="w-11 h-11 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-all hover:scale-110 border border-white/10" aria-label="Call">
                     <Phone className="w-4.5 h-4.5" />
                   </a>
-                  <a href="https://wa.me/201000000000" target="_blank" rel="noopener noreferrer" className="w-11 h-11 rounded-xl bg-white/10 hover:bg-emerald-400/25 backdrop-blur-sm flex items-center justify-center transition-all hover:scale-110 border border-white/10" aria-label="WhatsApp">
+                  <a href={waHref} target="_blank" rel="noopener noreferrer" className="w-11 h-11 rounded-xl bg-white/10 hover:bg-emerald-400/25 backdrop-blur-sm flex items-center justify-center transition-all hover:scale-110 border border-white/10" aria-label="WhatsApp">
                     <FaWhatsapp className="w-4.5 h-4.5" />
                   </a>
-                  <a href="mailto:info@redline.eg" className="w-11 h-11 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-all hover:scale-110 border border-white/10" aria-label="Email">
+                  <a href={mailHref} className="w-11 h-11 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-all hover:scale-110 border border-white/10" aria-label="Email">
                     <Mail className="w-4.5 h-4.5" />
                   </a>
                 </div>
@@ -335,7 +336,7 @@ export function Contact() {
                           <div key={i}>
                             <div className="text-[10px] uppercase tracking-wider text-white/40 font-medium mb-1">{entry.label ?? t(entry.labelKey)}</div>
                             {section.type === "link" ? (
-                              <a href={entry.href} className="text-sm font-semibold text-white/90 hover:text-amber-300 transition-colors break-all font-mono" dir="ltr">
+                              <a href={entry.href} className="text-xs sm:text-sm font-semibold text-white/90 hover:text-amber-300 transition-colors font-mono block max-w-full [overflow-wrap:anywhere]" dir="ltr">
                                 {entry.value ?? t(entry.valueKey)}
                               </a>
                             ) : (
