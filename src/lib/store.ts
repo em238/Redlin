@@ -11,6 +11,7 @@ export type DashboardSection =
   | "contact"
   | "messages"
   | "reviews"
+  | "subscribers"
   | "footer"
   | "users"
   | "roles"
